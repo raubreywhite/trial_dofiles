@@ -1713,6 +1713,6 @@ keep if duplicated_motheridno==1
 sort MotherIDNO bookdate dataextractorusername
 order bookevent MotherIDNO bookdate dataextractorusername andate* usdate* labdate*
 
-export excel using "data_clean/double_entered.xlsx", replace firstrow(var) encoding("UTF-8") clear
+export excel using "data_clean/double_entered.xlsx", replace firstrow(var)
 
 
