@@ -1,7 +1,9 @@
 capture set maxvar 30000
 //select 2017 data
 
-cd "X:\data processing\"
+capture cd "X:\data processing\"
+capture cd "Z:\data processing\"
+
 use "data_temp/IDENTIFIABLE CON.dta", clear
 
 capture drop dup
@@ -12,6 +14,9 @@ drop dup
 
 replace dataextractorusername="_NAJ" if dataextractorusername=="Najah"
 replace dataextractorusername="_KHA" if dataextractorusername=="khadejeh"
+replace dataextractorusername="_KHA" if dataextractorusername=="Khadejeh"
+replace dataextractorusername="_OMA" if dataextractorusername=="Omar"
+*************Added Omar as a data extractor 26/12/2017 and rplace Khadejeh with _KHA**************
 
 local longvariables=""
 foreach X of varlist * {
@@ -43,7 +48,7 @@ di "`longvariables'"
 
 //keep MotherIDNO dataextractorusername bookgestage age income
 
-reshape wide `longvariables', i(MotherIDNO) j(dataextractorusername) string
+capture drop reshape wide `longvariables', i(MotherIDNO) j(dataextractorusername) string
 
 foreach X of varlist * {
 	capture replace `X'=-9999 if missing(`X')
@@ -59,9 +64,10 @@ local index=1
 // TO MAKE IT RUN QUICKER. JUST REMEMBER,
 // THAT YOU ONLY NEED TO PUT IN THE _NAJ VARIABLE
 // e.g. 
-// foreach X of varlist agemarriagecat_NAJ agepregnancycat_NAJ educationcat_NAJ {
+// foreach X of varlist agemarriagecat_NAJ agepregnancycat_NAJ educationcat_NAJ 
+{
 foreach X of varlist *_NAJ {
-	local Y=subinstr("`X'","_NAJ","_KHA",.)
+	local Y=subinstr("`X'","_NAJ","_KHA","_OMA".)
 	capture kap `X' `Y'
 	if(_rc==0){
 		replace var="`X'" in `index'
@@ -92,4 +98,4 @@ drop if has_khadejeh==1 & dataextractorusername!="khadejeh"
 drop dup temp_khadejeh has_khadejeh
 
 keep if has_khadejeh==0 | (has_khadejeh==1 & dataextractorusernam=="khadejeh")
-*/
+*/ 

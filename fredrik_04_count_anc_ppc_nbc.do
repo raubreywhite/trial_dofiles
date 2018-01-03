@@ -1,7 +1,8 @@
 capture set maxvar 30000
 //select 2017 data
 
-cd "X:\data processing\"
+capture cd "X:\data processing\"
+capture cd "Z:\data processing\"
 
 import delimited "data_raw/e.reg-intervention/2017-12-03/Clinical Postpartum care.csv", varnames(1) encoding("UTF-8") clear
 capture ren v2 programstageinstance

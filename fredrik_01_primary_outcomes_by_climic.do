@@ -1,7 +1,8 @@
 capture set maxvar 30000
 //select 2017 data
 
-cd "X:\data processing\"
+capture cd "X:\data processing\"
+capture cd "Z:\data processing\"
 use "data_clean/with_indicators.dta", clear
 
 tab isTrial1Control isTrial1Intervention, mis
@@ -41,6 +42,7 @@ collapse ///
 	M*numerator* M*denominator* ///
 	(count) denom_screened_diab_hypt_anem=screened_diab_hypt_anem, ///
 	by( demoorgname) fast
+	
 	
 replace perc_screened_diab_hypt_anem=perc_screened_diab_hypt_anem*100
 

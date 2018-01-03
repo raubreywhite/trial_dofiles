@@ -6,7 +6,8 @@ di "$DATE"
 capture mkdir "~/Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/"
 
 
-cd "X:\data processing\"
+capture cd "X:\data processing\"
+capture cd "Z:\data processing\"
 use "data_clean/with_indicators.dta", clear
 
 capture log close

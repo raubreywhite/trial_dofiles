@@ -1,7 +1,9 @@
 capture set maxvar 30000
 //select 2017 data
 
-cd "X:\data processing\"
+capture cd "X:\data processing\"
+capture cd "Z:\data processing\"
+
 use "data_clean/with_indicators.dta", clear
 
 keep if isTrial1Intervention==1
@@ -11,7 +13,9 @@ gen randomNumber=runiform()
 sort randomNumber
 keep if _n<=10
 
-export excel using "results/fredrik/choose_10_cases_randomly.xlsx", firstrow(var) replace
+capture export excel using "results/fredrik/choose_10_cases_randomly.xlsx", firstrow(var) replace
+
+****added capture infront of line 16 because kept giving an error message that observations must be between 1-1048576, 26/12/2017******
 
 
 /*

@@ -1,5 +1,4 @@
 capture set maxvar 30000
-//select 2017 data
 
 cd "X:\data processing\"
 

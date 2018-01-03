@@ -26,7 +26,7 @@ capture set maxvar 30000
 //4. Merge files on uniqueid
 //5. Check if there are no identifable data left
 
-forvalues IS_CONTROL=0/1 {
+forvalues IS_CONTROL=1(-1)0 {
 	if(`IS_CONTROL'==0){
 		global DATA_DATE="$CLINIC_INTERVENTION_DATE"
 		global DATA_RAW="data_raw\e.reg-intervention/$DATA_DATE"
@@ -61,7 +61,7 @@ forvalues IS_CONTROL=0/1 {
 
 	// FOR CONTROL DATA
 	if(`IS_CONTROL'==1){
-		drop if created<"2017-10-02 01:00:00.000"
+		//drop if created<"2017-10-02 01:00:00.000"
 		gen streetname=""
 		gen camp=""
 		gen telephonenumber=""
@@ -226,6 +226,7 @@ forvalues IS_CONTROL=0/1 {
 	**************** 
 	****CLINICAL BOOKING VISIT
 	if(`IS_CONTROL'==1){
+	
 		/*
 			Read in ANC followup
 			Keep the first observation per pregnancy
@@ -253,6 +254,8 @@ forvalues IS_CONTROL=0/1 {
 		tab _merge
 		keep if _merge==1 | _merge==3
 		drop _merge
+		
+		
 		
 		
 		gen identificationdocumentnumber=""
@@ -313,16 +316,7 @@ forvalues IS_CONTROL=0/1 {
 	duplicates tag programstageinstance, gen("dup")
 	//bro programstageinstance eventdate anclmpdate if dup>0
 
-	// drop women whose 2nd, 3rd, etc pregnancies have LMPs before the first pregnancy's booking date
-	sort programstageinstance eventdate
-	bysort programstageinstance: gen min_event_date=eventdate if _n==1 // makes new variabe of woman's first event
-	replace min_event_date=min_event_date[_n-1] if missing(min_event_date) // fills down empty spaces
-	bysort programstageinstance: gen booking_number=_n
-	drop if anclmpdate < min_event_date & !missing(anclmpdate) & booking_number!=1
-	drop min_event_date
-
-
-
+	
 
 	*Rename variables
 	rename (event programstageinstance programstage eventdate longitude latitude ///
@@ -529,11 +523,38 @@ forvalues IS_CONTROL=0/1 {
 	joinby uniqueid using "data_temp/$TAG Clinical Demographics.dta", unm(b)
 	count // how many obs do we have after merging
 	 
+	 
 	tab _merge // see where the obs came from
 	tab _merge, nol
-	keep if _merge==3 // only keep the people that are in both datasets
+	//keep if _merge==3 // keep all people. people just in demographic file and not in green file are abortions
 	drop _merge
+	
+	/*
+		for the abortions, we now have "day of showing up and getting registered in demographic file"
+		as "day of booking" (ie bookdate)
+	*/
+	
+	gen is_demographic_not_greenfile=1 if missing(bookevent)
+	sort bookevent
+	gen temp=_n
+	tostring temp, replace force
+	replace bookdate=datecreated if missing(bookevent)
+	replace bookevent=temp if missing(bookevent)
+	drop temp
+	
+	// drop women whose 2nd, 3rd, etc pregnancies have LMPs before the first pregnancy's booking date
+	sort uniqueid bookdate
+	bysort uniqueid: gen min_event_date=bookdate if _n==1 // makes new variabe of woman's first event
+	replace min_event_date=min_event_date[_n-1] if missing(min_event_date) // fills down empty spaces	
+	
+	bysort uniqueid (bookdate): gen booking_number=_n
+	drop if booklmp < min_event_date & !missing(booklmp) & booking_number!=1
+	drop min_event_date
+	// TODO in the future, make it more general
+	// i.e. so that that the 3rd pregnacy cannot have an LMP before the 2nd pregnancy
+	
 
+	di 1
 	**Create a new variable for gestational age**
 
 	*Convert dates into days// Dates are already formatted right in these datasets//
@@ -551,11 +572,11 @@ forvalues IS_CONTROL=0/1 {
 		format new`X' %td
 		summarize new`X'
 	}
-
+di 2
 	ren newdob newdobcorrect
 	ren newbookdate newbookdatecorrect
 	ren newbooklmp newbooklmpcorrect
-
+di 
 	// create unique set of ids so tht we know if it is first booking or second booking
 	preserve
 	keep bookevent uniqueid newbookdate booking_number
@@ -1519,6 +1540,87 @@ display "MAYBE WRONG 4"
 	save "data_temp/wide_IDENTIFIABLE $TAG Clinical Previous pregnancies.dta", replace
 
 	*************************************
+	*********** HOSPITAL BIRTH OUTCOMES
+		
+	if(`IS_CONTROL'==1){
+		*Open ultrasound .dta file 
+		import delimited "$DATA_RAW/$CLINICAL_OR_CONTROL Hospital Birth Outcome.csv", varnames(1) encoding("UTF-8") clear
+
+		ren ancpreviouspregnancyoutcome pregnancyoutcome // TODO these names seem bad, and should probably be changed
+		drop if missing(pregnancyoutcome) & missing(con_woman_first_name) & missing(con_name_hosp_birth)
+		
+		capture ren v2 programstageinstance
+		rename event hboevent
+		rename programstageinstance uniqueid
+		
+		// fixing va names that are too long
+		capture rename ancpreviouspregnancybirthweightg ancprevpregbirthweightg
+		capture rename indicationforcsectionmentionedin indicforcsectionmentionedin
+		capture rename ancdiastolicbloodpressuremmhg ancdiastbloodpressuremmhg
+		
+		foreach X of varlist programstage-usrecommendationscomments {
+			ren `X' hbo`X'
+		}
+		
+		bro if uniqueid=="B9FWlWn5xrR"
+		
+		count
+		joinby uniqueid using "data_temp/bookevent_ids.dta", unm(b)
+		count
+
+		tab _merge
+		drop if _merge==2 // dropping ids
+		drop _merge
+
+		foreach X in "hbodate" {
+			display "`X'"
+
+			gen year=substr(`X',1,4) // extract first four characters
+			gen month=substr(`X',6,2) // extract 6-7 characters
+			gen day=substr(`X',9,2) // extract 9-10 characters
+			destring year, replace
+			destring month, replace
+			destring day, replace
+			gen new`X' = mdy(month, day, year)
+			drop year month day 
+			format new`X' %td
+			summarize new`X'
+		}
+		drop hbodate
+		ren newhbodate hbodate
+
+		count if hbodate < newbookdatecorrect1
+		count if hbodate < newbookdatecorrect1 & !missing(newbookdatecorrect1)
+
+		**
+		gen bookevent = bookevent1
+		foreach X of varlist bookevent* {
+			if("`X'"=="bookevent"){
+				continue
+			}
+			di "`X'"
+			local XVAL=subinstr("`X'","bookevent","",.)
+			replace bookevent = bookevent`XVAL' if hbodate >= newbookdatecorrect`XVAL'
+			drop bookevent`XVAL'
+		}
+
+		drop newbookdatecorrect*
+		
+		save "data_temp/IDENTIFIABLE $TAG Hospital Birth Outcome.dta", replace
+
+
+		sort uniqueid hbodate
+		duplicates drop uniqueid hbodate, force
+		bysort uniqueid: gen eventnumber=_n
+
+		codebook uniqueid
+		reshape wide hbo*, i(uniqueid) j(eventnumber)
+		codebook uniqueid
+
+		order bookevent
+		save "data_temp/wide_IDENTIFIABLE $TAG Hospital Birth Outcome.dta", replace
+	}
+	*************************************
 	*********** START MERGING TOGETHER IMPORTANT DATASETS
 
 	use "data_temp/IDENTIFIABLE $TAG ANC demographics and booking.dta", clear
@@ -1607,6 +1709,18 @@ display "MAYBE WRONG 4"
 	tab _merge
 
 	drop _merge
+	
+	if(`IS_CONTROL'==1){
+		count
+		joinby uniqueid bookevent using "data_temp/wide_IDENTIFIABLE $TAG Hospital Birth Outcome.dta", unm(b)
+		count
+
+		tab _merge
+		keep if _merge==1 | _merge==3
+		tab _merge
+
+		drop _merge
+	}
 
 	if(`IS_CONTROL'==0){
 		gen isTrial1Intervention=1
@@ -1664,6 +1778,13 @@ display "MAYBE WRONG 4"
 	drop if bookevent=="icfkS7FaDNg" // entered as a separte file even it exists in pretrial 
 	drop if bookevent=="B6sGTGIlvBP"
 	
+	******** added these on december 24, 2017. these are doubles in demogrphic data******
+	drop if uniqueid=="Hrt6pxBniy9"
+	drop if uniqueid=="UZ53c6fKhTy"
+	drop if uniqueid=="ye9fvoVSalO"
+	drop if uniqueid=="McathozJMdD"
+	
+
 	/* TAMARA STOP if bookevent=="HERE */
 	save "data_temp/IDENTIFIABLE $TAG.dta", replace
 
@@ -1678,9 +1799,11 @@ tab isTrial1Intervention
 //
 //PRIORITIZE khadejeh OVER ALL OTHER DATA EXTRACTORS
 
+/*
 capture drop dup
 duplicates tag MotherIDNO bookdate, gen("dup")
 keep if dup>0
+*/
 
 replace dataextractorusername=subinstr(lower(dataextractorusername)," ","",.)
 
@@ -1691,7 +1814,7 @@ replace temp_khadejeh=1 if dataextractorusername=="khadejeh"
 bysort MotherIDNO bookdate: egen has_khadejeh=max(temp_khadejeh)
 
 drop if has_khadejeh==1 & dataextractorusername!="khadejeh"
-drop dup temp_khadejeh has_khadejeh
+drop temp_khadejeh has_khadejeh
 
 //END OF PRIORITIZE khadejeh OVER ALL OTHER DATA EXTRACTORS
 //
@@ -1702,6 +1825,7 @@ duplicates drop MotherIDNO bookdate, force
 
 //keep if _n<=500 // <- RUN EVERYTHING WITH ONLY 500 PEOPLE
 save "data_temp/IDENTIFIABLE trial_1.dta", replace
+//use "data_temp/IDENTIFIABLE trial_1.dta", clear
 
 
 // CREATE AN EXCEL FILE FOR DOUBLE ENTRY
