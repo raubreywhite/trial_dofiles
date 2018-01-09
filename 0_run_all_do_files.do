@@ -1,8 +1,9 @@
 clear
 capture set maxvar 30000
 
-cd "X:\data processing\"
- 
+capture cd "X:\data processing\"
+capture cd "z:\data processing\"
+
 global CLINIC_INTERVENTION_DATE="2017-12-19"
 global CLINIC_CONTROL_DATE="2017-12-19"
 
