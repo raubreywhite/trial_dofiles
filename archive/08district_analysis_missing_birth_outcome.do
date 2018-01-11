@@ -30,6 +30,7 @@ drop if bookorgname=="( - Jenin Central clinic) عيادة جنين المركز
 tostring phone, replace
 
 replace mobile=phone  if missing(mobile)
+/*
 gen district=""
 replace district="Hebron" if bookorgname=="(- Al manshar ) المنشر"
 replace district="Jenin" if bookorgname=="( - Al-ramah) الرامه"
@@ -137,6 +138,7 @@ replace district="Tulkarm" if bookorgname=="(- Bal'a) بلعا"
 replace district="Bethlehem" if bookorgname=="( - Wadi foqeen) واد فوقين"
 replace district="Tulkarm" if bookorgname=="(- Seida) صيدا"
 replace district="Ramallah&Al-bireh" if bookorgname=="( - Emsafa) إم صفا"
+*/
 
 keep MotherIDNO ///
 district ///
