@@ -14,6 +14,9 @@ gen expected_due_delivery=newbooklmpcorrect+280
 format %td expected_due_delivery
 replace expected_due_delivery=us_expected_due_date if missing(expected_due_delivery)
 codebook expected_due_delivery
+gen isExpectedToHaveDelivered=0
+replace isExpectedToHaveDelivered=1 if expected_due_delivery<mdy($MAX_MONTH,1,$MAX_YEAR)
+replace isExpectedToHaveDelivered=. if missing(expected_due_delivery)
 
 ren demoidnumber MotherIDNO
 gen is_clinical_int=1

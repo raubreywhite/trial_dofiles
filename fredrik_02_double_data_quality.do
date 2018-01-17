@@ -1,11 +1,34 @@
 capture set maxvar 30000
-//select 2017 data
 
 capture cd "X:\data processing\"
 capture cd "Z:\data processing\"
 
-use "data_temp/IDENTIFIABLE CON.dta", clear
+use "~/My Documents/trial_temp_data/IDENTIFIABLE CON.dta", clear 
 
+/// this data base will be updated at the end of 01dofile///
+
+
+/* TAMARA IF YOU DECIDE THAT YOU WANT TO PERMANENTLY
+REMOVE A BOOKEVENT FROM THE DATASET, THEN PUT IT
+IN HERE */
+
+drop if bookevent=="HUxqueKIVVi"
+drop if bookevent=="Jcjl6LXjVHG" // <- this is the woman that entered in wrong clinic
+drop if bookevent=="GqRyqspR02f"
+drop if bookevent=="mXStZu67x12"   
+drop if bookevent=="aO6ZqOWIVY2"
+drop if bookevent=="icfkS7FaDNg" // entered as a separte file even it exists in pretrial 
+drop if bookevent=="B6sGTGIlvBP"
+
+******** added these on december 24, 2017. these are doubles in demogrphic data******
+drop if uniqueid=="Hrt6pxBniy9"
+drop if uniqueid=="UZ53c6fKhTy"
+drop if uniqueid=="ye9fvoVSalO"
+drop if uniqueid=="McathozJMdD"
+drop if uniqueid=="POisbVSl4J8"
+
+
+/* TAMARA STOP if bookevent=="HERE */
 capture drop dup
 duplicates tag MotherIDNO bookdate, gen("dup")
 tab dup
@@ -15,7 +38,12 @@ drop dup
 replace dataextractorusername="_NAJ" if dataextractorusername=="Najah"
 replace dataextractorusername="_KHA" if dataextractorusername=="khadejeh"
 replace dataextractorusername="_KHA" if dataextractorusername=="Khadejeh"
+replace dataextractorusername="_KHA" if dataextractorusername=="KHADEJEH"
 replace dataextractorusername="_OMA" if dataextractorusername=="Omar"
+
+drop if dataextractorusername=="Ibtesam"
+drop if dataextractorusername=="159711"
+
 *************Added Omar as a data extractor 26/12/2017 and rplace Khadejeh with _KHA**************
 
 local longvariables=""
@@ -46,9 +74,18 @@ foreach X of varlist * {
 }
 di "`longvariables'"
 
+tab dataextractorusername
+
 //keep MotherIDNO dataextractorusername bookgestage age income
 
-capture drop reshape wide `longvariables', i(MotherIDNO) j(dataextractorusername) string
+duplicates tag MotherIDNO dataextractorusername, gen("dup")
+tab dup
+order MotherIDNO dataextractorusername bookid unique
+//bro if dup==1
+drop if dup==1
+drop dup
+
+reshape wide `longvariables', i(MotherIDNO) j(dataextractorusername) string
 
 foreach X of varlist * {
 	capture replace `X'=-9999 if missing(`X')
@@ -56,7 +93,9 @@ foreach X of varlist * {
 
 set obs 10000
 gen var=""
-gen agreement=.
+gen agreement_NAJ_KHA=.
+gen agreement_NAJ_OMR=.
+gen agreement_KHA_OMR=.
 local index=1
 
 // MERVETT AND TAMARA YOU CAN CHANGE *_NAJ TO 
@@ -65,21 +104,35 @@ local index=1
 // THAT YOU ONLY NEED TO PUT IN THE _NAJ VARIABLE
 // e.g. 
 // foreach X of varlist agemarriagecat_NAJ agepregnancycat_NAJ educationcat_NAJ 
-{
+
 foreach X of varlist *_NAJ {
-	local Y=subinstr("`X'","_NAJ","_KHA","_OMA".)
+	local Y=subinstr("`X'","_NAJ","_KHA",.)
 	capture kap `X' `Y'
 	if(_rc==0){
 		replace var="`X'" in `index'
-		replace agreement=r(prop_o) in `index'
-		local index=`index'+1
+		replace agreement_NAJ_KHA=r(prop_o) in `index'
 	}
+	local Y=subinstr("`X'","_NAJ","_OMR",.)
+	capture kap `X' `Y'
+	if(_rc==0){
+		replace var="`X'" in `index'
+		replace agreement_NAJ_OMR=r(prop_o) in `index'
+	}
+	
+	local X1=subinstr("`X'","_NAJ","_KHA",.)
+	capture kap `X1' `Y'
+	if(_rc==0){
+		replace var="`X'" in `index'
+		replace agreement_KHA_OMR=r(prop_o) in `index'
+	}
+	
+	local index=`index'+1
 }
 
-keep var agreement
+keep var agreement*
 drop if missing(var)
 
-sort agreement
+sort agreement_NAJ_KHA
 
 export excel using "results/fredrik/double_data_quality_agreement_proportion.xlsx", firstrow(var) replace
 

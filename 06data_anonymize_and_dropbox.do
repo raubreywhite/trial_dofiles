@@ -7,8 +7,10 @@ forvalues year=2015/$MAX_YEAR {
 	di `year'
 	foreach month in "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {
 	
-		use "data_clean/with_indicators_`year'-`month'.dta", clear
-
+		capture use "data_clean/with_indicators_`year'-`month'.dta", clear
+		if(_rc!=0){
+			continue
+		}
 		
 		*Drop all identifier variables (except uniqueid)
 		drop trackedentity dummy idtype MotherID firstname datecreated ///

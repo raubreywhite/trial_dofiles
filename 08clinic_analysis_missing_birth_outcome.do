@@ -11,12 +11,15 @@ save "~/My Documents/trial_temp_data/bookorgnames.dta", replace
 forvalues year=2015/$MAX_YEAR {
 	di `year'
 	foreach month in "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {
-		use "data_clean/with_indicators_`year'-`month'.dta", clear
+		capture use "data_clean/with_indicators_`year'-`month'.dta", clear
+		if(_rc!=0){
+			continue
+		}
 
 		keep if isExpectedToHaveDelivered==1
 		//keep if newbookdatecorrect>mdy(1,1,2017)
 
-		keep if missing(is_aviccena)
+		keep if missing(is_aviccena) & missing(is_hospital_birth_outcome)
 
 		drop if bookorgname=="(HR - Bethlehem MCH )امومة بيت لحم حمل خطر"
 		drop if bookorgname=="(HR - Hewarah)عيادة حوارة حمل خطر"

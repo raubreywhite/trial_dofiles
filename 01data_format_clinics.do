@@ -15,6 +15,7 @@ capture cd "X:\data processing\"
 //Save all new datasets after cleaning under 'output'
 //Save all log files under 'output'
 
+
 //Name all intervention clinics datasets as 'intervention_filename'
 //Name all control clinics datasets as 'control_filename'
 //Name all avicenna datasets as 'avicenna_filename'
@@ -118,6 +119,7 @@ drop if uniqueid=="Hrt6pxBniy9"
 drop if uniqueid=="UZ53c6fKhTy"
 drop if uniqueid=="ye9fvoVSalO"
 drop if uniqueid=="McathozJMdD"
+drop if uniqueid=="POisbVSl4J8"
 
 
 /* TAMARA STOP if bookevent=="HERE */
@@ -202,7 +204,7 @@ forvalues year=2015/$MAX_YEAR {
 	foreach month in "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {
 		preserve
 		keep if bookdate_month_year=="`year'-`month'"
-		save "~/My Documents/trial_temp_data/IDENTIFIABLE trial_1_`year'-`month'.dta", replace
+		capture save "~/My Documents/trial_temp_data/IDENTIFIABLE trial_1_`year'-`month'.dta", replace
 		restore
 	}
 }

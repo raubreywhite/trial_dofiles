@@ -198,9 +198,6 @@ gen is_aviccena=1
 drop if missing(md_date)
 
 
-gen isExpectedToHaveDelivered=0
-replace isExpectedToHaveDelivered=1 if expected_due_delivery<mdy($MAX_MONTH,1,$MAX_YEAR)
-replace isExpectedToHaveDelivered=. if missing(expected_due_delivery)
 
 save "~/My Documents/trial_temp_data/aviccena.dta", replace
 
@@ -263,7 +260,10 @@ save "~/My Documents/trial_temp_data/merge_key_data_to_avicenna.dta", replace
 forvalues year=2015/$MAX_YEAR {
 	di `year'
 	foreach month in "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {		
-		use "~/My Documents/trial_temp_data/IDENTIFIABLE trial_1_`year'-`month'.dta", clear
+		capture use "~/My Documents/trial_temp_data/IDENTIFIABLE trial_1_`year'-`month'.dta", clear
+		if(_rc!=0){
+			continue
+		}
 		
 		di "***`month'"
 		count

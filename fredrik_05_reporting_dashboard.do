@@ -8,14 +8,14 @@ capture mkdir "~/Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DA
 
 capture cd "X:\data processing\"
 capture cd "Z:\data processing\"
-use "data_clean/with_indicators.dta", clear
+
 
 capture log close
 log using "~/Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/reporting_dashboard.txt", replace text
 
 
 ******US Routine ANC Final***************
-
+use "data_clean/with_indicators_us.dta", clear
 forvalues x=1/58 {
 tostring usdate`x', generate (usdate_string`x')
 }
@@ -98,7 +98,7 @@ count if bookseenby==3 & ///
 	newbookdatecorrect>=mdy(9,1,2017) & newbookdatecorrect<mdy(10,1,2017)
 
 	*********************
-	
+use "data_clean/with_indicators_us.dta", clear
 capture drop ancseenby_visit
 gen ancseenby_visit=0
 
@@ -143,7 +143,7 @@ forvalues x=1/21 {
 		  
           tab ancseenby_nurse
 		  ****************
-		  
+use "data_clean/with_indicators_man.dta", clear
 capture drop mantypeHR 
 gen mantypeHR=0
 forvalues x=1/100 {

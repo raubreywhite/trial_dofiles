@@ -6,7 +6,10 @@ capture cd "X:\data processing\"
 forvalues year=2015/$MAX_YEAR {
 	di `year'
 	foreach month in "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {	
-		use "~/My Documents/trial_temp_data/IDENT_aviccena_merged_clinical_`year'-`month'.dta", clear
+		capture use "~/My Documents/trial_temp_data/IDENT_aviccena_merged_clinical_`year'-`month'.dta", clear
+		if(_rc!=0){
+			continue
+		}
 
 
 		tab isExpectedToHaveDelivered
@@ -785,3 +788,35 @@ forvalues year=2015/$MAX_YEAR {
 	}
 }
 
+
+// creating a lab only dataset (with a few extra important variables, like booking)
+
+foreach X in "lab" "an" "us" "risk" "man" "prev" "bp" "Hb" "indicators" {
+	local index=1
+	forvalues year=2015/$MAX_YEAR {
+		di `year'
+		foreach month in "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {
+			use "data_clean/with_indicators_`year'-`month'.dta", clear
+			
+			// keep the kind of people that you want
+			if("`X'"=="indicators"){
+				keep book* MotherIDNO uniqueid is_high_risk_clinic is_phase* F* H* A* D* M*
+			}
+			else {
+				keep book* MotherIDNO uniqueid is_high_risk_clinic is_phase* `X'*
+			}
+			
+			if(`index'==1){ 
+				save "~/My Documents/trial_temp_data/temp_file.dta", replace
+			}
+			else{ 
+				// if the 2nd, 3rd, 4th, .... (month-year) dataset, then append then save
+				append using "~/My Documents/trial_temp_data/temp_file.dta"
+				save "~/My Documents/trial_temp_data/temp_file.dta", replace
+			}
+			local index=`index'+1
+		}
+	}
+
+	save "data_clean/with_indicators_`X'.dta", replace
+}

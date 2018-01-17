@@ -61,7 +61,7 @@ if($IS_CONTROL==1){
 	}
 
 	drop newbookdatecorrect*
-	
+	gen is_hospital_birth_outcome=1
 	save "~/My Documents/trial_temp_data/IDENTIFIABLE $TAG Hospital Birth Outcome.dta", replace
 
 
