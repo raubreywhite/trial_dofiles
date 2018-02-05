@@ -4,8 +4,10 @@ capture set maxvar 30000
 
 capture cd "Z:\data processing\"
 capture cd "X:\data processing\"
+run "trial_dofiles/00x_date.do"
 
 import excel using "data_raw/bookorgnames.xlsx", clear firstrow
+ren District district
 save "~/My Documents/trial_temp_data/bookorgnames.dta", replace
 
 forvalues year=2015/$MAX_YEAR {
@@ -19,7 +21,7 @@ forvalues year=2015/$MAX_YEAR {
 		keep if isExpectedToHaveDelivered==1
 		//keep if newbookdatecorrect>mdy(1,1,2017)
 
-		keep if missing(is_aviccena) & missing(is_hospital_birth_outcome)
+		keep if missing(is_aviccena) & missing(is_hospital_birth_outcome) & missing(is_hbo)
 
 		drop if bookorgname=="(HR - Bethlehem MCH )امومة بيت لحم حمل خطر"
 		drop if bookorgname=="(HR - Hewarah)عيادة حوارة حمل خطر"
@@ -304,7 +306,9 @@ forvalues year=2015/$MAX_YEAR {
 				continue
 			}
 			
-			capture export excel using "Results/mbo_clinic/$DATE/`year'-`month'/`x' clinics.xlsx", replace firstrow(varl)
+			// This fixes up clinic names with forward slashes in them (replaces them with underscores _)
+			local newFileName=subinstr("`x'","/","_",.)
+			capture export excel using "Results/mbo_clinic/$DATE/`year'-`month'/`newFileName' clinics.xlsx", replace firstrow(varl)
 			restore 
 		}
 	}

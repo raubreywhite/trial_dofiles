@@ -2,6 +2,7 @@ capture set maxvar 30000
 
 capture cd "Z:\data processing\"
 capture cd "X:\data processing\"
+run "trial_dofiles/00x_date.do"
 
 forvalues year=2015/$MAX_YEAR {
 	di `year'
@@ -28,7 +29,7 @@ forvalues year=2015/$MAX_YEAR {
 		 ren isTrial1Control is_trial_arm_a
 		 ren isTrial1Intervention is_trial_arm_b
 		 
-		save "~/Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_with_indicators_`year'-`month'.dta", replace
+		save "~/eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_with_indicators_`year'-`month'.dta", replace
 	}
 }
 

@@ -1,6 +1,7 @@
 
 capture cd "Z:\data processing\"
 capture cd "X:\data processing\"
+run "trial_dofiles/00x_date.do"
 
 ***************
 **************
@@ -143,6 +144,12 @@ foreach X of varlist md_date* {
 			replace `Q'_pregID`XVAL'=`YVAL' if abs(`Y'-`X')<temp & !missing(`X') & !missing(`Y')
 			replace temp=abs(`Y'-`X') if abs(`Y'-`X')<temp & !missing(`X') & !missing(`Y')
 		}
+		
+		// if multiple pregnancies match to one book date, only keep the latest
+		forvalues Y=1/300 {
+			local YNext=`Y'+1
+			capture replace `Q'_pregID`Y'=. if `Q'_pregID`Y'==`Q'_pregID`YNext'
+		}
 	}
 }
 
@@ -198,7 +205,7 @@ gen is_aviccena=1
 drop if missing(md_date)
 
 
-
+destring MotherIDNO, replace
 save "~/My Documents/trial_temp_data/aviccena.dta", replace
 
 *****************************
@@ -245,6 +252,12 @@ foreach X of varlist newbookdatecorrect* {
 			di "`YVAL'"
 			replace `Q'_pregID`XVAL'=`YVAL' if `Y'>`X' & (`Y'-`X')<temp & !missing(`X') & !missing(`Y')
 			replace temp=(`Y'-`X') if `Y'>`X' & (`Y'-`X')<temp & !missing(`X') & !missing(`Y')
+		}
+		
+		// if multiple pregnancies match to one book date, only keep the latest
+		forvalues Y=1/300 {
+			local YNext=`Y'+1
+			capture replace `Q'_pregID`Y'=. if `Q'_pregID`Y'==`Q'_pregID`YNext'
 		}
 	}
 }

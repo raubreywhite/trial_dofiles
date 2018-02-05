@@ -3,7 +3,7 @@
 
 global DATE : di %td_CY-N-D  date("$S_DATE", "DMY")
 di "$DATE"
-capture mkdir "~/Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/"
+capture mkdir "~/eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/"
 
 
 capture cd "X:\data processing\"
@@ -11,7 +11,7 @@ capture cd "Z:\data processing\"
 
 
 capture log close
-log using "~/Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/reporting_dashboard.txt", replace text
+log using "~/eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/reporting_dashboard.txt", replace text
 
 
 ******US Routine ANC Final***************

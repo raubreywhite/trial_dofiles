@@ -23,7 +23,7 @@ forvalues year=2015/$MAX_YEAR {
 		keep if isTrial1Intervention==1
 		
 		// keep the variables that you want
-		keep bookorgname
+		keep bookorgname is_avicenna
 		
 		if(`index'==1){ 
 			save "~/My Documents/trial_temp_data/temp_file.dta", replace

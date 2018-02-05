@@ -1,6 +1,7 @@
 
 capture cd "Z:\data processing\"
 capture cd "X:\data processing\"
+run "trial_dofiles/00x_date.do"
 
 // MOTHER ID
 import excel using "data_raw/avicenna/ramallah_data/Mother Details 2015.xlsx", clear firstrow
@@ -9,6 +10,7 @@ import excel using "data_raw/avicenna/ramallah_data/Mother Details 2016.xlsx", c
 append using "~/My Documents/trial_temp_data/ramallah_motherdetails.dta"
 codebook PATIENTID
 duplicates drop MotherIDNO PATIENTID, force
+
 save "~/My Documents/trial_temp_data/ramallah_motherdetails.dta", replace
 count
 keep MotherIDNO PATIENTID
@@ -147,6 +149,7 @@ order MotherIDNO ///
 	FATHERNAME ///
 	BabyRecordDateCreation
 
+	
 export excel using "data_raw/avicenna/2014-00/Mothers Details/ramallah.xlsx", firstrow(varl) replace
 
 // OBSERVATIONS/BLOOD PRESSURE
@@ -458,6 +461,67 @@ label var BabyRecordDateCreation "Baby Record date creation"
 label var BabyBirthResult "Baby Birth Result" 
 label var BabyBirthType "Baby Birth Type"
 label var NAME "NAME"
+
+//goal for dates, they should look like this: 29-SEP-17 23:57:16
+replace BabyRecordDateCreation=subinstr(BabyRecordDateCreation,"/","-",.)
+replace BabyRecordDateCreation=subinstr(BabyRecordDateCreation,"--","-",.)
+replace BabyRecordDateCreation=subinstr(BabyRecordDateCreation,"\","-",.)
+replace BabyRecordDateCreation=subinstr(BabyRecordDateCreation,".","-",.)
+replace BabyRecordDateCreation=subinstr(BabyRecordDateCreation,"+","",.)
+forvalues X=10/50 {
+	// regular expression
+	// changing -016 at the end to -2016
+	replace BabyRecordDateCreation=regexr(BabyRecordDateCreation,"-0`X'$","-20`X'")
+	replace BabyRecordDateCreation=regexr(BabyRecordDateCreation,"-`X'$","-20`X'")
+}
+tab BabyRecordDateCreation
+split BabyRecordDateCreation, p("-")
+destring BabyRecordDateCreation2, replace force // shuld be month
+destring BabyRecordDateCreation1, replace force // should be day
+destring BabyRecordDateCreation3, replace force // should be year
+
+// clean month
+replace BabyRecordDateCreation1=. if BabyRecordDateCreation2>12
+replace BabyRecordDateCreation3=. if BabyRecordDateCreation2>12
+replace BabyRecordDateCreation2=. if BabyRecordDateCreation2>12
+
+// clean day
+replace BabyRecordDateCreation3=. if BabyRecordDateCreation1>31
+replace BabyRecordDateCreation2=. if BabyRecordDateCreation1>31
+replace BabyRecordDateCreation1=. if BabyRecordDateCreation1>31
+
+// clean year
+replace BabyRecordDateCreation2=. if BabyRecordDateCreation3>$MAX_YEAR
+replace BabyRecordDateCreation1=. if BabyRecordDateCreation3>$MAX_YEAR
+replace BabyRecordDateCreation3=. if BabyRecordDateCreation3>$MAX_YEAR
+
+replace BabyRecordDateCreation2=. if BabyRecordDateCreation3<2010
+replace BabyRecordDateCreation1=. if BabyRecordDateCreation3<2010
+replace BabyRecordDateCreation3=. if BabyRecordDateCreation3<2010
+
+gen month=""
+replace month="JAN" if BabyRecordDateCreation2==1
+replace month="FEB" if BabyRecordDateCreation2==2
+replace month="MAR" if BabyRecordDateCreation2==3
+replace month="APR" if BabyRecordDateCreation2==4
+replace month="MAY" if BabyRecordDateCreation2==5
+replace month="JUN" if BabyRecordDateCreation2==6
+replace month="JUL" if BabyRecordDateCreation2==7
+replace month="AUG" if BabyRecordDateCreation2==8
+replace month="SEP" if BabyRecordDateCreation2==9
+replace month="OCT" if BabyRecordDateCreation2==10
+replace month="NOV" if BabyRecordDateCreation2==11
+replace month="DEC" if BabyRecordDateCreation2==12
+
+capture drop year
+gen year=BabyRecordDateCreation3-2000
+tostring year, replace
+
+gen str2 day = string(BabyRecordDateCreation1,"%02.0f") // makes it 2 characters wide, with leading zeros
+
+drop BabyRecordDateCreation*
+gen BabyRecordDateCreation=day+"-"+month+"-"+year
+replace BabyRecordDateCreation="" if BabyRecordDateCreation==".--."
 
 export excel using "data_raw/avicenna/2014-00/Baby Birth/ramallah.xlsx", firstrow(varl) replace
 

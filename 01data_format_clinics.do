@@ -4,6 +4,7 @@ capture set maxvar 30000
 *Open booking .dta file 
 capture cd "Z:\data processing\"
 capture cd "X:\data processing\"
+run "trial_dofiles/00x_date.do"
 
 **Intervention clinics data_comprehensive version
 
@@ -120,6 +121,7 @@ drop if uniqueid=="UZ53c6fKhTy"
 drop if uniqueid=="ye9fvoVSalO"
 drop if uniqueid=="McathozJMdD"
 drop if uniqueid=="POisbVSl4J8"
+drop if uniqueid=="S1e1Nf3AFMw"
 
 
 /* TAMARA STOP if bookevent=="HERE */
@@ -221,6 +223,8 @@ duplicates tag MotherIDNO, gen("duplicated_motheridno")
 keep if duplicated_motheridno==1
 sort MotherIDNO bookdate dataextractorusername
 order bookevent MotherIDNO bookdate dataextractorusername andate* usdate* labdate*
+
+*** drop if bookdate< (y.m, day) (2017-00-00 00:00:00.0) ***, 
 
 export excel using "data_clean/double_entered.xlsx", replace firstrow(var)
 

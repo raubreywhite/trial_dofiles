@@ -1,6 +1,6 @@
 local index=1
-forvalues year=2017/2030 {
-	foreach month in "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {
+forvalues year=2014/$MAX_YEAR {
+	foreach month in "00" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {
 		capture local allfiles : dir "data_raw\avicenna/`year'-`month'\Observations\" files "*.xlsx"
 		if(_rc!=0){
 			continue
@@ -8,6 +8,11 @@ forvalues year=2017/2030 {
 		foreach file in `allfiles' { 
 			display "`file'"
 			import excel using "data_raw\avicenna/`year'-`month'\Observations/`file'", clear firstrow
+			
+			tostring MotherFullName ///
+				NAME ///
+				, replace
+				
 			count
 			if(r(N)==0){
 				continue

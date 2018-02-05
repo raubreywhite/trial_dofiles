@@ -79,6 +79,19 @@ replace demoidnumber=-_n if missing(demoidnumber)
 *Describe data
 describe
 
+// Fix wrong bookorgnames
+replace demoorgname="(Al.Nasaria) النصارية" if demoorgname=="(Al-nsaryeh) النصاريه"
+replace demoorgname="(Barta'h) برطعه" if demoorgname=="Bartaá (برطعة)" 
+replace demoorgname="( - Abu Falah)ابو فلاح" if demoorgname=="(Abu Falah)ابو فلاح"
+replace demoorgname="( - AL-a'rakah)العرقه" if demoorgname=="(AL-a'rakah)العرقه"
+replace demoorgname="( - Al Ramma ) الرامة" if demoorgname=="(Al Ramma )الرامة" 
+replace demoorgname="( - Al-Bireh MCH)  أمومة البيرة" if demoorgname=="(Al.Biereh) أمومة البيرة"
+replace demoorgname="( - Al-Bireh MCH)  أمومة البيرة" if demoorgname=="(Al-Bireh MCH) عيادة البيرة"
+
+
+
+
+
 /*
 *Save dataset as "int_anc demographics_labelled"
 save "data_temp/int_ demographics_labelled.dta", replace

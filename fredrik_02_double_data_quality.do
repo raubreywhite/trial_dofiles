@@ -40,6 +40,8 @@ replace dataextractorusername="_KHA" if dataextractorusername=="khadejeh"
 replace dataextractorusername="_KHA" if dataextractorusername=="Khadejeh"
 replace dataextractorusername="_KHA" if dataextractorusername=="KHADEJEH"
 replace dataextractorusername="_OMA" if dataextractorusername=="Omar"
+replace dataextractorusername="_YUS" if dataextractorusername=="yusra"
+
 
 drop if dataextractorusername=="Ibtesam"
 drop if dataextractorusername=="159711"
@@ -96,6 +98,9 @@ gen var=""
 gen agreement_NAJ_KHA=.
 gen agreement_NAJ_OMR=.
 gen agreement_KHA_OMR=.
+gen agreement_YUS_OMR=.
+gen agreement_YUS_KHA=.
+gen agreement_YUS_NAJ=.
 local index=1
 
 // MERVETT AND TAMARA YOU CAN CHANGE *_NAJ TO 
@@ -119,13 +124,32 @@ foreach X of varlist *_NAJ {
 		replace agreement_NAJ_OMR=r(prop_o) in `index'
 	}
 	
-	local X1=subinstr("`X'","_NAJ","_KHA",.)
+	local X1=subinstr("`X'","_KHA","_OMR",.)
+	capture kap `X1' `Y'
+	if(_rc==0){
+		replace var="`X'" in `index'
+		replace agreement_KHA_OMR=r(prop_o) in `index'
+	}
+
+	local X1=subinstr("`X'","_YUS","_OMR",.)
 	capture kap `X1' `Y'
 	if(_rc==0){
 		replace var="`X'" in `index'
 		replace agreement_KHA_OMR=r(prop_o) in `index'
 	}
 	
+	local X1=subinstr("`X'","_YUS","_KHA",.)
+	capture kap `X1' `Y'
+	if(_rc==0){
+		replace var="`X'" in `index'
+		replace agreement_KHA_OMR=r(prop_o) in `index'
+	}
+	local X1=subinstr("`X'","_YUS","_NAJ",.)
+	capture kap `X1' `Y'
+	if(_rc==0){
+		replace var="`X'" in `index'
+		replace agreement_KHA_OMR=r(prop_o) in `index'
+	}
 	local index=`index'+1
 }
 

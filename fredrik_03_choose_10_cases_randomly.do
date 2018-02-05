@@ -2,6 +2,7 @@ capture set maxvar 30000
 
 capture cd "X:\data processing\"
 capture cd "Z:\data processing\"
+run "trial_dofiles/00x_date.do"
 
 // NOTE: YOU NEED TO DEFINE A $MAX_YEAR
 // YOU CAN DO THIS BY:
@@ -23,7 +24,7 @@ forvalues year=2015/$MAX_YEAR {
 		set seed 4
         gen randomNumber=runiform()
 		sort randomNumber
-		keep if _n=1
+		keep if _n==1
 
 		
 		if(`index'==1){ 

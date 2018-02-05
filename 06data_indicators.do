@@ -2,15 +2,15 @@ capture set maxvar 30000
 
 capture cd "Z:\data processing\"
 capture cd "X:\data processing\"
+run "trial_dofiles/00x_date.do"
 
 forvalues year=2015/$MAX_YEAR {
 	di `year'
 	foreach month in "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {	
-		capture use "~/My Documents/trial_temp_data/IDENT_aviccena_merged_clinical_`year'-`month'.dta", clear
+		capture use "~/My Documents/trial_temp_data/IDENT_aviccena_hbo_merged_clinical_`year'-`month'.dta", clear
 		if(_rc!=0){
 			continue
 		}
-
 
 		tab isExpectedToHaveDelivered
 		//keep if isExpectedToHaveDelivered==1

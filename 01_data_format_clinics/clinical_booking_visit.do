@@ -281,6 +281,9 @@ label variable bookseenby "Woman seen by- booking visit"
 label variable bookhomeorclinic "Home visit or clinic visit- booking visit"
 label variable bookbackupfile "Information first entered on paper and then into the eRegistry- booking visit"
 
+// Fix wrong bookorgnames
+replace bookorgname="(Al.Nasaria) النصارية" if bookorgname=="(Al-nsaryeh) النصاريه"
+
 /*
 *Create a small dataset with only uniqueid and date of booking visit
 keep uniqueid bookdate

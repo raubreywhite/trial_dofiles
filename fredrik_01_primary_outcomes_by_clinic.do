@@ -2,7 +2,7 @@ capture set maxvar 30000
 
 global DATE : di %td_CY-N-D  date("$S_DATE", "DMY")
 di "$DATE"
-capture mkdir "~/Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/"
+capture mkdir "~/eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/"
 
 capture cd "X:\data processing\"
 capture cd "Z:\data processing\"
@@ -101,7 +101,7 @@ foreach N of varlist *numerator* {
 display "`order_that_i_like'"
 order `order_that_i_like'
 	
-export excel using "~/Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/primary_outcomes_by_clinic_1.xlsx", firstrow(var) replace
+export excel using "~/eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Results/$DATE/primary_outcomes_by_clinic_1.xlsx", firstrow(var) replace
 
 
 /*
