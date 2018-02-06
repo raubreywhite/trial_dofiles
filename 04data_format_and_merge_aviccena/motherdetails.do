@@ -45,7 +45,7 @@ gen pregID=0
 bysort MotherIDNO: gen datedif=date-date[_n-1]
 replace datedif=0 if missing(datedif)
 
-* identify when new pregnancies start
+* identify when new pregnancis start
 replace pregID=1 if datedif>100
 * propogate increased pregID down throughout the women via cumulative sum
 bysort MotherIDNO (date): replace pregID=sum(pregID)
