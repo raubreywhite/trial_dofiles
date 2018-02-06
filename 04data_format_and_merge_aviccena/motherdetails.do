@@ -10,9 +10,10 @@ forvalues year=2014/$MAX_YEAR {
 		foreach file in `allfiles' { 
 			display "`file'"
 			import excel using "data_raw\avicenna/`year'-`month'\Mothers Details/`file'", clear firstrow
+			capture rename BabyRecordDateCreation BabyRecordDateCreation
 
 			//if(`month'==0 & `year'==2014){
-			tostring NAME MIDDLENAME SURNAME FATHERNAME BabyRecorddatecreation, replace
+			tostring NAME MIDDLENAME SURNAME FATHERNAME BabyRecordDateCreation, replace
 			//}
 			count
 			if(r(N)==0){
@@ -31,8 +32,8 @@ forvalues year=2014/$MAX_YEAR {
 
 count if missing(MotherIDNO)
 drop if missing(MotherIDNO)
-gen temp=substr(BabyRecorddatecreation,1,9)
-drop BabyRecorddatecreation
+gen temp=substr(BabyRecordDateCreation,1,9)
+drop BabyRecordDateCreation
 replace temp=lower(temp)
 gen date = date(temp, "DM20Y")
 drop if missing(date)

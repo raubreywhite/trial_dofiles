@@ -126,6 +126,7 @@ order hbo_dataextractorusername
 */
 
 gen s=1
+gen is_hbo=1
 
 save "~/My Documents/trial_temp_data/Hospital Birth Outcome_ready_to_merge.dta", replace
 

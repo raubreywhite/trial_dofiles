@@ -87,8 +87,30 @@ replace demoorgname="( - AL-a'rakah)العرقه" if demoorgname=="(AL-a'rakah)�
 replace demoorgname="( - Al Ramma ) الرامة" if demoorgname=="(Al Ramma )الرامة" 
 replace demoorgname="( - Al-Bireh MCH)  أمومة البيرة" if demoorgname=="(Al.Biereh) أمومة البيرة"
 replace demoorgname="( - Al-Bireh MCH)  أمومة البيرة" if demoorgname=="(Al-Bireh MCH) عيادة البيرة"
-
-
+replace demoorgname="( - Al-eabedieh) العبيديه " if demoorgname=="(Al-eabedieh) العبيديه"
+// replace demoorgname="(Al-haram)  ?????" if demoorgname=="(Al-Haram Al-Ibrahemi )  الحرم الابراهيمي"
+replace demoorgname="(- Al-Janobeyeh) الجنوبية" if demoorgname=="(Al-Janobeyeh) الجنوبية"
+replace demoorgname="( - Al-khader) الخضر" if demoorgname=="(Al-khader) الخضر"
+replace demoorgname="( - Al-ma'sarah) المعصره" if demoorgname=="(Al-ma'sarah) المعصره"
+replace demoorgname="( - Al-shwawreh) الشواوره" if demoorgname=="(Al-shwawreh) الشواوره"
+replace demoorgname="( - Beit Eba) بيت ايبا" if demoorgname=="(Beit Eba) بيت ايبا"
+replace demoorgname="( - Beiteen) بيتين" if demoorgname=="(Beiteen) بيتين"
+replace demoorgname="( - Beituniya) بيتونيا" if demoorgname=="(Beituniya) بيتونيا"
+replace demoorgname="( - Bieta) بيتا" if demoorgname=="(Bieta) بيتا"
+replace demoorgname="(  - Central Health Directorate Salfit) صحة سلفيت" if demoorgname=="(Central Heath Directorate Salfit) مديرية صحة سلفيت"
+replace demoorgname="( - Deir Al-sudan) دير السودان" if demoorgname=="(Deir Al-sudan) دير السودان"
+replace demoorgname="( - Jenin Central clinic) عيادة جنين المركزية" if demoorgname=="(Jenin Main Center) عيادة جنين المركزية"
+replace demoorgname="( - Kharbatha Al-mesbah) خربثا المصباح" if demoorgname=="(Kharbatha Al-mesbah) خربثا المصباح"
+replace demoorgname="( - Kufr Raa'e) كفر راعي" if demoorgname=="(Kufr Raa'e) كفر راعي"
+replace demoorgname="( - Meithalun) ميثلون" if demoorgname=="(Meithalun) ميثلون"
+replace demoorgname="( - Central MCH) الرعاية المركزية نابلس" if demoorgname=="(Nablus MCH) الرعاية المركزية نابلس"
+replace demoorgname="( - Nea'leen) نعلين" if demoorgname=="(Nea'leen) نعلين"
+replace demoorgname="( - Qarawah Bani Zeid) قراوه بني زيد" if demoorgname=="(Qarawah Bani Zeid) قراوه بني زيد"
+replace demoorgname="( - Ramallah New MCH) رام الله الجديدة" if demoorgname=="(Ramallah New MCH)  عيادة رام الله الجديدة"
+replace demoorgname="( - Rammun) رمون" if demoorgname=="(Rammun) رمون"
+replace demoorgname="( - Ras Al-een) راس العين" if demoorgname=="(Ras Al-een) راس العين"
+replace demoorgname="( - Rojeeb) روجيب" if demoorgname=="(Rojeeb) روجيب"
+replace demoorgname="( - Silat adh Dhahr)  سيلة الظهر" if demoorgname=="(Silat adh Dhahr)سيلة الظهر"
 
 
 
