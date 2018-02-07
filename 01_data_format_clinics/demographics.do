@@ -88,7 +88,6 @@ replace demoorgname="( - Al Ramma ) الرامة" if demoorgname=="(Al Ramma )ا
 replace demoorgname="( - Al-Bireh MCH)  أمومة البيرة" if demoorgname=="(Al.Biereh) أمومة البيرة"
 replace demoorgname="( - Al-Bireh MCH)  أمومة البيرة" if demoorgname=="(Al-Bireh MCH) عيادة البيرة"
 replace demoorgname="( - Al-eabedieh) العبيديه " if demoorgname=="(Al-eabedieh) العبيديه"
-// replace demoorgname="(Al-haram)  ?????" if demoorgname=="(Al-Haram Al-Ibrahemi )  الحرم الابراهيمي"
 replace demoorgname="(- Al-Janobeyeh) الجنوبية" if demoorgname=="(Al-Janobeyeh) الجنوبية"
 replace demoorgname="( - Al-khader) الخضر" if demoorgname=="(Al-khader) الخضر"
 replace demoorgname="( - Al-ma'sarah) المعصره" if demoorgname=="(Al-ma'sarah) المعصره"
@@ -112,6 +111,22 @@ replace demoorgname="( - Ras Al-een) راس العين" if demoorgname=="(Ras Al
 replace demoorgname="( - Rojeeb) روجيب" if demoorgname=="(Rojeeb) روجيب"
 replace demoorgname="( - Silat adh Dhahr)  سيلة الظهر" if demoorgname=="(Silat adh Dhahr)سيلة الظهر"
 
+//// (Ramallah & Al.Bierhe MCH) مديرية صحة رام الله و البيرة
+(Shuqba)  شقبا
+(Shuqba) عيادة شقبا
+ (Kafr ad Dik) كفر الديك
+Qarawat
+(Kufr Al-deek) كفر الديك
+(Roq'a) رقعة 
+ (HR - Fsayel)فصايل حمل خطر
+(Al-krantena) الكرنتينا
+/replace demoorgname="(Al-haram)" if demoorgname=="(Al-Haram Al-Ibrahemi )  الحرم الابراهيمي"//
+drop from demogra??? 
+Beit Jala Hospital
+Bethlehem
+Jenin Hospital
+Palestinian Medical Complex
+///
 
 
 /*

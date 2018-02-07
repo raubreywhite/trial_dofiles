@@ -33,6 +33,23 @@ forvalues year=2015/$MAX_YEAR {
 		drop if bookorgname=="(  - Central Health Directorate Salfit) صحة سلفيت"
 		drop if bookorgname=="( - Jenin Central clinic) عيادة جنين المركزية"
 
+		
+	******Added these on 2/7/2018 to remove the trial HR clinics*****
+		drop if bookorgname=="(HR - Al-krantena) الكرنتينا حمل خطر"
+		drop if bookorgname=="(HR- Al-Eizariya ) رعاية الامومة والطفولة حمل خطر"
+		drop if bookorgname=="(HR- Al-Janobeyeh) الجنوبية حمل خطر"
+		drop if bookorgname=="(HR- Al-haram)  الحرم"
+		drop if bookorgname=="(HR- Al-Haram Al-Ibrahemi)الحرم حمل خطر"
+		drop if bookorgname=="(HR- Al-Ram) الرام حمل خطر"
+		drop if bookorgname=="(HR- Halhul ) حلحول  حمل خطر"
+		drop if bookorgname=="( HR - Ithna ) اذنا حمل خطر"
+		drop if bookorgname=="(HR- Azzun) عزون حمل خطر"
+		drop if bookorgname=="(HR- Bani Na'im) بني نعيم حمل خطر"
+		drop if bookorgname=="(HR -Al manshar )  المنشر حمل خطر"
+		drop if bookorgname=="(HR- Yata Health Directorate) يطا  حمل خطر"
+		drop if bookorgname=="(HR- Sanniriya) سنيريا حمل خطر"
+		
+	
 		tostring phone, replace
 		replace mobile=phone  if missing(mobile)
 
