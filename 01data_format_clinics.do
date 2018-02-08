@@ -445,7 +445,7 @@ tab isTrial1Intervention
 //
 //PRIORITIZE khadejeh OVER ALL OTHER DATA EXTRACTORS
 
-replace dataextractorusername=subinstr((lower(dataextractorusername)," ","",.)
+replace dataextractorusername=subinstr(lower(dataextractorusername)," ","",.)
 
 sort MotherIDNO bookdate
 bro MotherIDNO bookdate dataextractorusername
