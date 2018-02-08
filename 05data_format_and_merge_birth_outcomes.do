@@ -53,24 +53,30 @@ drop year month day
 drop if hbo_event=="fLFx9EJt1cn"
 drop if hbo_event=="A4zR5e0HO34"
 
-drop if uniqueid=="eHGxNkh3abt"
-drop if uniqueid=="IforRFDYu7t"
-drop if uniqueid=="R22PVjZlAc9"
-drop if uniqueid=="XOOcU00Fwcg"
-drop if uniqueid=="Qi2rMUpRQXZ"	   
-drop if uniqueid=="RXmcm8wmjzC"	 
-drop if uniqueid=="BuJWXGBkTC3"
-drop if uniqueid=="M3IjRQbvZPW"
-drop if uniqueid=="GMuWsHZK0hu"
-drop if uniqueid=="kpTgA8fSo3M"
-drop if uniqueid=="LNcXFqo2dq2"
-drop if uniqueid=="moadsFT3ifQ"
-drop if uniqueid=="vA7GhwgG8ny"
-drop if uniqueid=="fSaVss6e5Mh"
-drop if uniqueid=="NvmgZxLsHu6"
-drop if uniqueid=="d3hiPFMbPLm"
-drop if uniqueid=="Jqr6Efi4ixR"
-drop if uniqueid=="JrrnXDq1PV8"
+*****Check these with the missing hbo lists and cross check with raw data from export. need to finish for the rest of them ******
+drop if hbo_event=="eHGxNkh3abt"
+drop if hbo_event=="IforRFDYu7t"
+drop if hbo_event=="R22PVjZlAc9"
+drop if hbo_event=="XOOcU00Fwcg"
+drop if hbo_event=="Qi2rMUpRQXZ"	   
+drop if hbo_event=="RXmcm8wmjzC"	 
+drop if hbo_event=="BuJWXGBkTC3"
+drop if hbo_event=="M3IjRQbvZPW"
+drop if hbo_event=="GMuWsHZK0hu"
+drop if hbo_event=="kpTgA8fSo3M"
+drop if hbo_event=="LNcXFqo2dq2"
+drop if hbo_event=="moadsFT3ifQ"
+drop if hbo_event=="vA7GhwgG8ny"
+drop if hbo_event=="fSaVss6e5Mh"
+drop if hbo_event=="NvmgZxLsHu6"
+drop if hbo_event=="d3hiPFMbPLm"
+drop if hbo_event=="Jqr6Efi4ixR"
+drop if hbo_event=="JrrnXDq1PV8"
+
+
+
+
+
 
 
 bysort uniqueid hbo_dateofdeliveryhospital: gen id = _n

@@ -406,7 +406,7 @@ replace is_phase_2_clinic=1 if bookorgunit=="????"
 //	(HR- Sanniriya) سنيريا حمل خطر
 
 gen is_high_risk_clinic=.
-replace is_high_risk_clinic=1 if bookorgunit=="(HR - Bethlehem MCH )امومة بيت لحم حمل خطر"
+replace is_high_risk_clinic=1 if bookorgunit=="(HR - Bethlehem MCH)امومة بيت لحم حمل خطر"
 replace is_high_risk_clinic=1 if bookorgunit=="(HR - Hewarah)عيادة حوارة حمل خطر"
 replace is_high_risk_clinic=1 if bookorgunit=="(HR - Al-Bireh MCH) عيادة البيرة حمل خطر"
 replace is_high_risk_clinic=1 if bookorgunit=="(HR - Bedia) بديا حمل خطر"
@@ -445,7 +445,7 @@ tab isTrial1Intervention
 //
 //PRIORITIZE khadejeh OVER ALL OTHER DATA EXTRACTORS
 
-replace dataextractorusername=subinstr(lower(dataextractorusername)," ","",.)
+replace dataextractorusername=subinstr((lower(dataextractorusername)," ","",.)
 
 sort MotherIDNO bookdate
 bro MotherIDNO bookdate dataextractorusername

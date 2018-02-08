@@ -111,22 +111,7 @@ replace demoorgname="( - Ras Al-een) راس العين" if demoorgname=="(Ras Al
 replace demoorgname="( - Rojeeb) روجيب" if demoorgname=="(Rojeeb) روجيب"
 replace demoorgname="( - Silat adh Dhahr)  سيلة الظهر" if demoorgname=="(Silat adh Dhahr)سيلة الظهر"
 
-//// (Ramallah & Al.Bierhe MCH) مديرية صحة رام الله و البيرة
-(Shuqba)  شقبا
-(Shuqba) عيادة شقبا
- (Kafr ad Dik) كفر الديك
-Qarawat
-(Kufr Al-deek) كفر الديك
-(Roq'a) رقعة 
- (HR - Fsayel)فصايل حمل خطر
-(Al-krantena) الكرنتينا
-/replace demoorgname="(Al-haram)" if demoorgname=="(Al-Haram Al-Ibrahemi )  الحرم الابراهيمي"//
-drop from demogra??? 
-Beit Jala Hospital
-Bethlehem
-Jenin Hospital
-Palestinian Medical Complex
-///
+
 
 
 /*
