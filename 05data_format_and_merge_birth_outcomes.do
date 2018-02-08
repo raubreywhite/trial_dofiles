@@ -50,57 +50,33 @@ order hbo_dateofdeliveryhospital
 drop year month day
 
 // DROP EMPTY/BAD HBOS HERE!!!!!!!!!!Mervett 
-drop if hbo_event=="fLFx9EJt1cn"
-drop if hbo_event=="A4zR5e0HO34"
-
-*****Check these with the missing hbo lists and cross check with raw data from export. need to finish for the rest of them ******
-drop if hbo_event=="eHGxNkh3abt"
-drop if hbo_event=="IforRFDYu7t"
-drop if hbo_event=="R22PVjZlAc9"
-drop if hbo_event=="XOOcU00Fwcg"
-drop if hbo_event=="Qi2rMUpRQXZ"	   
-drop if hbo_event=="RXmcm8wmjzC"	 
-drop if hbo_event=="BuJWXGBkTC3"
-drop if hbo_event=="M3IjRQbvZPW"
-drop if hbo_event=="GMuWsHZK0hu"
-drop if hbo_event=="kpTgA8fSo3M"
-drop if hbo_event=="LNcXFqo2dq2"
-drop if hbo_event=="moadsFT3ifQ"
-drop if hbo_event=="vA7GhwgG8ny"
-drop if hbo_event=="fSaVss6e5Mh"
-drop if hbo_event=="NvmgZxLsHu6"
-drop if hbo_event=="d3hiPFMbPLm"
-drop if hbo_event=="Jqr6Efi4ixR"
-drop if hbo_event=="JrrnXDq1PV8"
-
-NVmgZxLsHu6
-fSaVss6e5Mh
-GY4BJVPeB5T
-d3hiPFMbPLm
-Jqr6Efi4ixR
-m8RHo0dhCQb
+//fix these
+drop if hbo_event==" NVmgZxLsHu6"
+drop if hbo_event==" fSaVss6e5Mh"
+drop if hbo_event==" GY4BJVPeB5T"
+drop if hbo_event==" d3hiPFMbPLm"
+drop if hbo_event==" Jqr6Efi4ixR"
+drop if hbo_event==" m8RHo0dhCQb"
+drop if hbo_event==" IforRFDYu7t"
+drop if hbo_event==" R22PVjZlAc9"
+drop if hbo_event==" XOOcU00Fwcg"
+drop if hbo_event==" eC6FXll2qBh"
+drop if hbo_event==" kMrlIYZbNBl"
+drop if hbo_event==" JrrnXDq1PV8"
+drop if hbo_event==" Qi2rMUpRQXZ"
+drop if hbo_event==" RXmcm8wmjzC"
+drop if hbo_event==" BuJWXGBkTC3"
+drop if hbo_event==" GMuWsHZK0hu"
+drop if hbo_event==" kpTgA8fSo3M"
+drop if hbo_event==" LNcXFqo2dq2"
+drop if hbo_event==" U4Ad8EXyhHk"
+drop if hbo_event==" rHUm7L07uhO"
 
 
-IforRFDYu7t
-R22PVjZlAc9
-zoGH6QG0C6l
-XOOcU00Fwcg
-eC6FXll2qBh
-kMrlIYZbNBl
 
-JrrnXDq1PV8
 
-Qi2rMUpRQXZ
-RXmcm8wmjzC
-BuJWXGBkTC3
-M3IjRQbvZPW
-GMuWsHZK0hu
-kpTgA8fSo3M
-LNcXFqo2dq2
-moadsFT3ifQ
-U4Ad8EXyhHk
 
-rHUm7L07uhO
+
 
 
 
