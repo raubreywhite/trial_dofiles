@@ -10,6 +10,7 @@ forvalues year=2014/$MAX_YEAR {
 		foreach file in `allfiles' { 
 			display "`file'"
 			import excel using "data_raw\avicenna/`year'-`month'\Mothers Details/`file'", clear firstrow
+			gen avicenna_source="`year'-`month'"
 			capture rename BabyRecorddatecreation BabyRecordDateCreation
 
 			//if(`month'==0 & `year'==2014){
