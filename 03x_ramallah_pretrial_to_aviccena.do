@@ -149,8 +149,7 @@ order MotherIDNO ///
 	FATHERNAME ///
 	BabyRecordDateCreation
 
-	
-export excel using "data_raw/avicenna/2014-00/Mothers Details/ramallah.xlsx", firstrow(varl) replace
+save "~/My Documents/trial_temp_data/ramallah_motherdetails.dta", replace
 
 // OBSERVATIONS/BLOOD PRESSURE
 use "~/My Documents/trial_temp_data/ramallah_BP.dta", clear
@@ -523,12 +522,20 @@ drop BabyRecordDateCreation*
 gen BabyRecordDateCreation=day+"-"+month+"-"+year
 replace BabyRecordDateCreation="" if BabyRecordDateCreation==".--."
 
+
 export excel using "data_raw/avicenna/2014-00/Baby Birth/ramallah.xlsx", firstrow(varl) replace
+keep MotherIDNO BabyRecordDateCreation
+save "~/My Documents/trial_temp_data/ramallah_baby_birth_mode.dta", replace
 
+use "~/My Documents/trial_temp_data/ramallah_motherdetails.dta", clear
+drop BabyRecordDateCreation
+count
+joinby MotherIDNO using "~/My Documents/trial_temp_data/ramallah_baby_birth_mode.dta", unm(b)
+count
 
+tab _merge
+drop _merge
 
+label var BabyRecordDateCreation "Baby Record date creation"
 
-
-
-
-
+export excel using "data_raw/avicenna/2014-00/Mothers Details/ramallah.xlsx", firstrow(varl) replace
