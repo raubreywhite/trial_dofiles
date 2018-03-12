@@ -2,7 +2,7 @@ clear
 capture set maxvar 30000
 
 capture cd "X:\data processing\"
-capture cd "z:\data processing\"
+capture cd "Z:\data processing\"
 
 run "trial_dofiles/00x_date.do"
 

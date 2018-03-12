@@ -8,7 +8,7 @@ forvalues year=2014/$MAX_YEAR {
 		foreach file in `allfiles' { 
 			display "`file'"
 			import excel using "data_raw\avicenna/`year'-`month'\Cause of CS/`file'", clear firstrow
-
+			gen avicenna_source_cs="`year'-`month'"
 			count
 			if(r(N)==0){
 				continue

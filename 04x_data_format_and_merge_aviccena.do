@@ -96,7 +96,7 @@ save "~/My Documents/trial_temp_data/bb_key.dta", replace
 
 ******
 ** MERGING IN KEY VARIABLES
-use "~/My Documents/trial_temp_data/bb_key.dta", clear
+use "~/My Documents/trial_temp_data/motherdetails_key.dta", clear
 count
 joinby MotherIDNO using "~/My Documents/trial_temp_data/bp_key.dta", unm(b)
 count
@@ -122,17 +122,16 @@ tab _merge
 drop _merge
 
 count
-joinby MotherIDNO using "~/My Documents/trial_temp_data/motherdetails_key.dta", unm(b)
+joinby MotherIDNO using "~/My Documents/trial_temp_data/bb_key.dta", unm(b)
 count
 tab _merge
 drop _merge
 
 
-
 /// 
-foreach X of varlist bb_date* {
+foreach X of varlist md_date* {
 	di "`X'"
-	local XVAL=subinstr("`X'","bb_date","",.)
+	local XVAL=subinstr("`X'","md_date","",.)
 	foreach Q in "obs" "lab" "dn" "cs" "bb" {
 		capture drop `Q'_pregID`XVAL'
 		gen `Q'_pregID`XVAL'=.
@@ -200,10 +199,11 @@ count
 tab _merge
 drop _merge
 
-destring MotherIDNO, replace force
+destring MotherIDNO, replace
 
 gen is_aviccena=1
-drop if missing(bb_date)
+drop if missing(md_date)
+
 
 destring MotherIDNO, replace
 save "~/My Documents/trial_temp_data/aviccena.dta", replace
@@ -222,8 +222,8 @@ reshape wide newbookdatecorrect, i(MotherIDNO) j(booking_number)
 save "~/My Documents/trial_temp_data/clinic_key.dta", replace
 
 use "~/My Documents/trial_temp_data/aviccena.dta", clear
-keep MotherIDNO bb_date bb_pregID
-reshape wide bb_date, i(MotherIDNO) j(bb_pregID)
+keep MotherIDNO md_date md_pregID
+reshape wide md_date, i(MotherIDNO) j(md_pregID)
 save "~/My Documents/trial_temp_data/aviccena_key.dta", replace
 
 ** MERGING IN KEY VARIABLES
@@ -241,7 +241,7 @@ count
 foreach X of varlist newbookdatecorrect* {
 	di "`X'"
 	local XVAL=subinstr("`X'","newbookdatecorrect","",.)
-	foreach Q in "bb" {
+	foreach Q in "md" {
 		capture drop `Q'_pregID`XVAL'
 		gen `Q'_pregID`XVAL'=.
 		capture drop temp
@@ -263,7 +263,7 @@ foreach X of varlist newbookdatecorrect* {
 }
 
 keep MotherIDNO *pregID* newbookdatecorrect*
-reshape long bb_pregID newbookdatecorrect, i(MotherIDNO) j(booking_number)
+reshape long md_pregID newbookdatecorrect, i(MotherIDNO) j(booking_number)
 
 drop if missing(newbookdatecorrect)
 drop newbookdatecorrect
@@ -281,7 +281,7 @@ forvalues year=2015/$MAX_YEAR {
 		di "***`month'"
 		count
 		joinby MotherIDNO booking_number using "~/My Documents/trial_temp_data/merge_key_data_to_avicenna.dta", unm(none)
-		joinby MotherIDNO bb_pregID using "~/My Documents/trial_temp_data/aviccena.dta", unm(master)
+		joinby MotherIDNO md_pregID using "~/My Documents/trial_temp_data/aviccena.dta", unm(master)
 		count
 		
 		save "~/My Documents/trial_temp_data/IDENT_aviccena_merged_clinical_`year'-`month'.dta", replace

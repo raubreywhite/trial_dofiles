@@ -281,7 +281,7 @@ label variable bookseenby "Woman seen by- booking visit"
 label variable bookhomeorclinic "Home visit or clinic visit- booking visit"
 label variable bookbackupfile "Information first entered on paper and then into the eRegistry- booking visit"
 
-// Fix wrong bookorgnames
+// Fix wrong bookorgnames??? tamara ask
 replace bookorgname="(Al.Nasaria) النصارية" if bookorgname=="(Al-nsaryeh) النصاريه"
 
 /*

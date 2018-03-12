@@ -55,6 +55,7 @@ forvalues year=2015/$MAX_YEAR {
 
 		keep MotherIDNO ///
 			bookorgname ///
+			bookdate ///
 			firstname ///
 			fathername ///
 			middlename ///
@@ -87,6 +88,7 @@ joinby bookorgname using "~/My Documents/trial_temp_data/bookorgnames.dta", unm(
 tab _merge
 drop _merge
 
+gen MotherIDNO_in_AVICENNA=""
 gen place_of_delivery=""
 gen date_of_delivery=""
 gen baby_live_still_abortion=""

@@ -112,6 +112,97 @@ replace demoorgname="( - Rojeeb) روجيب" if demoorgname=="(Rojeeb) روجي�
 replace demoorgname="( - Silat adh Dhahr)  سيلة الظهر" if demoorgname=="(Silat adh Dhahr)سيلة الظهر"
 
 
+//
+*Replacing MotherID numbers from clinics to the correct ones from Avicenna so that*
+*we can possible match more to Avicenna //
+// this variable is numeric//
+
+replace demoidnumber=900466626 if demoidnumber==900466616
+replace demoidnumber=901083521 if demoidnumber==901083527
+replace demoidnumber=918567635 if demoidnumber==910567635
+replace demoidnumber=946457471 if demoidnumber==946457421
+replace demoidnumber=85367887	 if demoidnumber==853637882
+replace demoidnumber=411113470 if demoidnumber==411113970
+replace demoidnumber=850465480 if demoidnumber==850465485
+replace demoidnumber=850672078 if demoidnumber==850872078
+replace demoidnumber=853203562 if demoidnumber==853203560
+replace demoidnumber=414406916 if demoidnumber==414406918
+replace demoidnumber=950337778 if demoidnumber==950337378
+replace demoidnumber=850347997 if demoidnumber==850437997
+replace demoidnumber=860626250 if demoidnumber==850535360
+replace demoidnumber=854992138 if demoidnumber==700177637
+replace demoidnumber=852327122 if demoidnumber==852327022
+replace demoidnumber=85075736 if demoidnumber==850757634
+replace demoidnumber=402022209 if demoidnumber==402822209
+replace demoidnumber=833009645 if demoidnumber==853009645
+replace demoidnumber=8501170071 if demoidnumber==850470071
+replace demoidnumber=41085636 if demoidnumber==410852636
+replace demoidnumber=94659532 if demoidnumber==946595428
+replace demoidnumber=85049343 if demoidnumber==854049343
+replace demoidnumber=832760750 if demoidnumber==852760750
+replace demoidnumber=851478925 if demoidnumber==852467737
+replace demoidnumber=852637722 if demoidnumber==852637727
+replace demoidnumber=853672633 if demoidnumber==853672632
+replace demoidnumber=854682548 if demoidnumber==854692548
+replace demoidnumber=859503836 if demoidnumber==854503836
+replace demoidnumber=900386821 if demoidnumber==900386871
+replace demoidnumber=907612384 if demoidnumber==907612394
+replace demoidnumber=936248172 if demoidnumber==911666873
+replace demoidnumber=911703678 if demoidnumber==911783678
+replace demoidnumber=936118628 if demoidnumber==936118678
+replace demoidnumber=936248172 if demoidnumber==936748177
+replace demoidnumber=937217684 if demoidnumber==937717684
+replace demoidnumber=937218224 if demoidnumber==937718724
+replace demoidnumber=937219615 if demoidnumber==937719615
+replace demoidnumber=937220928 if demoidnumber==937720928
+replace demoidnumber=941282322 if demoidnumber==941287377
+replace demoidnumber=949487713 if demoidnumber==949987713
+replace demoidnumber=949996982 if demoidnumber==949996987
+replace demoidnumber=957623532 if demoidnumber==907623532
+replace demoidnumber=90719876 if demoidnumber==907149876
+replace demoidnumber=401941862 if demoidnumber==401949862
+replace demoidnumber=90636311 if demoidnumber==850695412
+replace demoidnumber=90517294 if demoidnumber==905171294
+replace demoidnumber=90719876 if demoidnumber==907149876
+replace demoidnumber=401941862 if demoidnumber==401949862
+replace demoidnumber=90636311 if demoidnumber==850695412
+replace demoidnumber=90517294 if demoidnumber==905171294
+replace demoidnumber=8540473687 if demoidnumber==850473687
+replace demoidnumber=118315274 if demoidnumber==415045400
+replace demoidnumber=9466413630 if demoidnumber==946641362
+replace demoidnumber=95679766 if demoidnumber==956792766
+replace demoidnumber=90027046 if demoidnumber==900027046
+replace demoidnumber=85364084 if demoidnumber==853640845
+replace demoidnumber=85343944 if demoidnumber==853193944
+replace demoidnumber=950232530 if demoidnumber==950232330
+replace demoidnumber=946641262 if demoidnumber==946641362
+replace demoidnumber=900270046 if demoidnumber==900027046
+replace demoidnumber=856781048 if demoidnumber==905611695
+replace demoidnumber=854909954 if demoidnumber==854909959
+replace demoidnumber=853686845 if demoidnumber==853686848
+replace demoidnumber=401466397 if demoidnumber==401466347
+replace demoidnumber=859023660 if demoidnumber==859023665
+replace demoidnumber=949296568 if demoidnumber==949296768
+replace demoidnumber=920574827 if demoidnumber==920674827
+replace demoidnumber=851937998 if demoidnumber==851937995
+replace demoidnumber=805234372 if demoidnumber==852343722
+replace demoidnumber=949559782 if demoidnumber==949559728
+replace demoidnumber=941121556 if demoidnumber==941121956
+replace demoidnumber=859894150 if demoidnumber==859894156
+replace demoidnumber=853929798 if demoidnumber==853629798
+replace demoidnumber=900433801 if demoidnumber==900435801
+replace demoidnumber=816198217 if demoidnumber==853690501
+replace demoidnumber=850695412 if demoidnumber==90636311
+
+
+
+			
+
+
+
+
+
+
 
 
 /*
