@@ -1,4 +1,4 @@
-
+capture set maxvar 30000
 capture cd "Z:\data processing\"
 capture cd "X:\data processing\"
 run "trial_dofiles/00x_date.do"

@@ -28,7 +28,7 @@ forvalues year=2014/$MAX_YEAR {
 	}
 }
 
-replace DATEPROCESS=subinstr(DATEPROCESS,"-16","-17",.)  if MotherIDNO=="403446479"
+replace DATEPROCESS=subinstr(DATEPROCESS,"MAY-16","MAY-17",.)  if MotherIDNO=="403446479"
 replace DATEPROCESS=subinstr(DATEPROCESS,"-16","-17",.)  if MotherIDNO=="851478529"
 
 count if missing(MotherIDNO)

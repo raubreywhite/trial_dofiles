@@ -506,6 +506,7 @@ save "~/My Documents/trial_temp_data/IDENTIFIABLE trial_1.dta", replace
 //use "data_temp/IDENTIFIABLE trial_1.dta", clear
 
 
+
 // CREATE AN EXCEL FILE FOR DOUBLE ENTRY
 use "~/My Documents/trial_temp_data/IDENTIFIABLE CON.dta", clear
 codebook bookevent
@@ -515,8 +516,21 @@ keep if duplicated_motheridno==1
 sort MotherIDNO bookdate dataextractorusername
 order bookevent MotherIDNO bookdate dataextractorusername andate* usdate* labdate*
 
-*** drop if bookdate< (y.m, day) (2017-00-00 00:00:00.0) ***, 
+count
+joinby bookevent using "data_clean/previously_double_entered.dta", unm(b)
+count
 
-export excel using "data_clean/double_entered.xlsx", replace firstrow(var)
+preserve
+keep bookevent
+save "data_clean/previously_double_entered.dta", replace
+restore
 
+tab _merge, nol
+keep if _merge==1 // only keep the new double entered
 
+count
+local N=r(N)
+if(`N'>0){
+	// if there are actually new cases, then save them
+	capture export excel using "data_clean/double_entered_$DATE.xlsx", firstrow(var)
+}

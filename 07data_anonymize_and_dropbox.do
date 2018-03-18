@@ -20,10 +20,12 @@ forvalues year=2015/$MAX_YEAR {
 		members age
 
 		*Drop all identifier variables
-		drop bookdate booklong booklat bookorgname bookorgcode bookorgunit bookidnumber
+		drop bookdate booklong booklat bookorgname bookorgcode bookorgunit bookidnumber///
+		demoorgname 
+		//get rid of demoorgunit too???
 
 		// drop some dates
-		drop booklmp bookdatelastbirth dateupdated newbookdatecorrect ///
+		drop booklmp bookdatelastbirth dateupdated newbookdatecorrect  ///
 		 expecteddateofdelivery newdobcorrect age1 avgincome newbooklmpcorrect
 		 
 		 ren isTrial1Control is_trial_arm_a

@@ -19,8 +19,6 @@ forvalues year=2015/$MAX_YEAR {
 		}
 
 		keep if isExpectedToHaveDelivered==1
-		//keep if newbookdatecorrect>mdy(1,1,2017)
-
 		keep if missing(is_aviccena) & missing(is_hospital_birth_outcome) & missing(is_hbo)
 
 		drop if bookorgname=="(HR - Bethlehem MCH )امومة بيت لحم حمل خطر"
@@ -69,6 +67,8 @@ forvalues year=2015/$MAX_YEAR {
 			bookintendbirth ///
 			bookrecobirth ///
 			expected_due_delivery
+			
+		generate book_ym = "`year'-`month'"
 			
 		if(`year'==2015 & `month'==1){ 
 			save "~/My Documents/trial_temp_data/MBO_CLINIC.dta", replace
@@ -247,39 +247,72 @@ di "$DATE"
 capture mkdir "Results/mbo_district/"
 capture mkdir "Results/mbo_district/$DATE/"
 
+capture mkdir "Results/mbo_district_by_bookingdate/"
+capture mkdir "Results/mbo_district_by_bookingdate/$DATE/"
+
 
 
 
 forvalues year=2015/$MAX_YEAR {
 	di `year'
 	foreach month in "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" {
+	
+		// by expected due date
 		count if expected_ym=="`year'-`month'"
 		local N=r(N)
 		
-		if(`N'==0){
+		if(`N'>0){
 			// if there is no one with an expected year_month due date, then skip to next loop cycle
-			continue
-		}
-		capture mkdir "Results/mbo_district/$DATE/`year'-`month'"
-		
-		levelsof district, local(levels) 
-		foreach x of local levels {
-			preserve
-			display "`x'"
-			keep if district== "`x'"
-			keep if expected_ym=="`year'-`month'"
+			capture mkdir "Results/mbo_district/$DATE/`year'-`month'"
 			
-			count
-			local N=r(N)
-			if(`N'==0){
-				restore
-				// if there is no one with an expected year_month due date, then skip to next loop cycle
-				continue
+			levelsof district, local(levels) 
+			foreach x of local levels {
+				preserve
+				display "`x'"
+				keep if district== "`x'"
+				keep if expected_ym=="`year'-`month'"
+				
+				count
+				local N=r(N)
+				if(`N'==0){
+					restore
+					// if there is no one with an expected year_month due date, then skip to next loop cycle
+					continue
+				}
+				
+				capture export excel using "Results/mbo_district/$DATE/`year'-`month'/`x' district.xlsx", replace firstrow(varl)
+				restore 
 			}
-			
-			capture export excel using "Results/mbo_district/$DATE/`year'-`month'/`x' district.xlsx", replace firstrow(varl)
-			restore 
 		}
+		
+		// by booking date
+		count if book_ym=="`year'-`month'"
+		local N=r(N)
+		
+		if(`N'>0){
+			capture mkdir "Results/mbo_district_by_bookingdate/$DATE/`year'-`month'"
+			
+			levelsof district, local(levels) 
+			foreach x of local levels {
+				preserve
+				display "`x'"
+				keep if district== "`x'"
+				keep if book_ym=="`year'-`month'"
+				
+				count
+				local N=r(N)
+				if(`N'==0){
+					restore
+					// if there is no one with an expected year_month due date, then skip to next loop cycle
+					continue
+				}
+				
+				capture export excel using "Results/mbo_district_by_bookingdate/$DATE/`year'-`month'/`x' district.xlsx", replace firstrow(varl)
+				restore 
+			}
+		}
+		
+		
 	}
 }
 
@@ -290,6 +323,9 @@ global DATE : di %td_CY-N-D  date("$S_DATE", "DMY")
 di "$DATE"
 capture mkdir "Results/mbo_clinic/"
 capture mkdir "Results/mbo_clinic/$DATE/"
+
+capture mkdir "Results/mbo_clinic_by_bookingdate/"
+capture mkdir "Results/mbo_clinic_by_bookingdate/$DATE/"
 
 
 
@@ -304,31 +340,59 @@ forvalues year=2015/$MAX_YEAR {
 		count if expected_ym=="`year'-`month'"
 		local N=r(N)
 		
-		if(`N'==0){
+		if(`N'>0){
 			// if there is no one with an expected year_month due date, then skip to next loop cycle
-			continue
-		}
-		capture mkdir "Results/mbo_clinic/$DATE/`year'-`month'"
-		
-		levelsof bookorgname, local(levels) 
-		foreach x of local levels {
-			preserve
-			display "`x'"
-			keep if bookorgname== "`x'"
-			keep if expected_ym=="`year'-`month'"
+				
+			capture mkdir "Results/mbo_clinic/$DATE/`year'-`month'"
 			
-			count
-			local N=r(N)
-			if(`N'==0){
-				restore
-				// if there is no one with an expected year_month due date, then skip to next loop cycle
-				continue
+			levelsof bookorgname, local(levels) 
+			foreach x of local levels {
+				preserve
+				display "`x'"
+				keep if bookorgname== "`x'"
+				keep if expected_ym=="`year'-`month'"
+				
+				count
+				local N=r(N)
+				if(`N'==0){
+					restore
+					// if there is no one with an expected year_month due date, then skip to next loop cycle
+					continue
+				}
+				
+				// This fixes up clinic names with forward slashes in them (replaces them with underscores _)
+				local newFileName=subinstr("`x'","/","_",.)
+				capture export excel using "Results/mbo_clinic/$DATE/`year'-`month'/`newFileName' clinics.xlsx", replace firstrow(varl)
+				restore 
 			}
+		}
+		
+		count if book_ym=="`year'-`month'"
+		local N=r(N)
+		
+		if(`N'>0){
+			capture mkdir "Results/mbo_clinic_by_bookingdate/$DATE/`year'-`month'"
 			
-			// This fixes up clinic names with forward slashes in them (replaces them with underscores _)
-			local newFileName=subinstr("`x'","/","_",.)
-			capture export excel using "Results/mbo_clinic/$DATE/`year'-`month'/`newFileName' clinics.xlsx", replace firstrow(varl)
-			restore 
+			levelsof bookorgname, local(levels) 
+			foreach x of local levels {
+				preserve
+				display "`x'"
+				keep if bookorgname== "`x'"
+				keep if book_ym=="`year'-`month'"
+				
+				count
+				local N=r(N)
+				if(`N'==0){
+					restore
+					// if there is no one with an expected year_month due date, then skip to next loop cycle
+					continue
+				}
+				
+				// This fixes up clinic names with forward slashes in them (replaces them with underscores _)
+				local newFileName=subinstr("`x'","/","_",.)
+				capture export excel using "Results/mbo_clinic_by_bookingdate/$DATE/`year'-`month'/`newFileName' clinics.xlsx", replace firstrow(varl)
+				restore 
+			}
 		}
 	}
 }
