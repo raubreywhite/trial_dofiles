@@ -298,6 +298,10 @@ replace is_mahima_clinics_trial_1=1 if demoorgunit=="aGnKVidwoMx"
 replace is_mahima_clinics_trial_1=1 if demoorgunit=="Yc2UiacRLEW"
 replace is_mahima_clinics_trial_1=1 if demoorgunit=="KSfVKx6VI3M"
 
+// Fixing our intervention variables for the correct numbers
+gen trial_1_clinics=0
+replace trial_1_clinics=1 if is_mahima_clinics_trial_1==1 & is_demof_not_greenf_or_bookf!=1
+
 
 
 // Fix wrong bookorgnames
@@ -567,8 +571,8 @@ generate educationcat = .
 summarize educationcat
 
 replace educationcat = 1 if (education <10)
-replace educationcat = 2 if (agepregnancy >=10) & (agepregnancy <=13)
-replace educationcat = 3 if (agepregnancy >13)
+replace educationcat = 2 if (education >=10) & (education <=13)
+replace educationcat = 3 if (education >13)
 
 summarize educationcat
 
@@ -577,14 +581,14 @@ summarize educationcat
 **Generate average monthly household income
 gen avgincome = income/members
 
-generate incomecat = .
-summarize incomecat
+generate avgincomecat = .
+summarize avgincome
 
-replace incomecat = 1 if (avgincome <=200)
-replace incomecat = 2 if (avgincome >=201) & (income <=900)
-replace incomecat = 3 if (avgincome >=901) & (income <=1824)
-replace incomecat = 4 if (avgincome >=1825) & (income <=3054)
-replace incomecat = 5 if (avgincome >3055)
+replace avgincomecat = 1 if (avgincome <=200)
+replace avgincomecat = 2 if (avgincome >=201) & (avgincome <=900)
+replace avgincomecat = 3 if (avgincome >=901) & (avgincome <=1824)
+replace avgincomecat = 4 if (avgincome >=1825) & (avgincome <=3054)
+replace avgincomecat = 5 if (avgincome >3055)
 
 summarize incomecat
 

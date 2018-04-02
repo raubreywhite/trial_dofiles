@@ -20,7 +20,7 @@ forvalues year=2015/$MAX_YEAR {
 		members age
 
 		*Drop all identifier variables
-		drop bookdate booklong booklat bookorgname bookorgcode bookorgunit bookidnumber///
+		drop bookdate booklong booklat bookorgname bookorgcode bookorgunit bookidnumber ///
 		demoorgname 
 		//get rid of demoorgunit too???
 
