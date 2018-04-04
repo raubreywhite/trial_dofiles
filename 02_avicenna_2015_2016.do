@@ -1,4 +1,4 @@
-capture set maxvar 30000
+
 capture cd "Z:\data processing\"
 capture cd "X:\data processing\"
 run "trial_dofiles/00x_date.do"
@@ -263,7 +263,7 @@ foreach X of varlist newbookdatecorrect* {
 }
 
 keep MotherIDNO *pregID* newbookdatecorrect*
-reshape long bb_pregID newbookdatecorrect, i(MotherIDNO) j(booking_number)
+reshape long md_pregID newbookdatecorrect, i(MotherIDNO) j(booking_number)
 
 drop if missing(newbookdatecorrect)
 drop newbookdatecorrect
@@ -281,7 +281,7 @@ forvalues year=2015/$MAX_YEAR {
 		di "***`month'"
 		count
 		joinby MotherIDNO booking_number using "~/My Documents/trial_temp_data/merge_key_data_to_avicenna.dta", unm(none)
-		joinby MotherIDNO bb_pregID using "~/My Documents/trial_temp_data/aviccena.dta", unm(master)
+		joinby MotherIDNO md_pregID using "~/My Documents/trial_temp_data/aviccena.dta", unm(master)
 		count
 		
 		save "~/My Documents/trial_temp_data/IDENT_aviccena_merged_clinical_`year'-`month'.dta", replace

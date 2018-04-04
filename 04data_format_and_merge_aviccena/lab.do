@@ -9,7 +9,6 @@ forvalues year=2014/$MAX_YEAR {
 		foreach file in `allfiles' { 
 			display "`file'"
 			import excel using "data_raw\avicenna/`year'-`month'\LAB/`file'", clear firstrow
-
 			
 			tostring MotherFullName ///
 				NAME ///

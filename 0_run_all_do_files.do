@@ -2,7 +2,7 @@ clear
 capture set maxvar 30000
 
 capture cd "X:\data processing\"
-capture cd "z:\data processing\"
+capture cd "Z:\data processing\"
 
 run "trial_dofiles/00x_date.do"
 
@@ -15,4 +15,5 @@ run "trial_dofiles/05data_format_and_merge_birth_outcomes.do"
 run "trial_dofiles/06data_indicators.do"
 run "trial_dofiles/07data_anonymize_and_dropbox.do"
 run "trial_dofiles/08clinic_analysis_missing_birth_outcome.do"
+run "trial_dofiles/09data_big_data_files_requested.do"
 

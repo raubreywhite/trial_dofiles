@@ -8,7 +8,7 @@ forvalues year=2014/$MAX_YEAR {
 		foreach file in `allfiles' { 
 			display "`file'"
 			import excel using "data_raw\avicenna/`year'-`month'\Observations/`file'", clear firstrow
-			
+			gen avicenna_source_bp="`year'-`month'"
 			tostring MotherFullName ///
 				NAME ///
 				, replace
@@ -28,7 +28,7 @@ forvalues year=2014/$MAX_YEAR {
 	}
 }
 
-replace DATEPROCESS=subinstr(DATEPROCESS,"-16","-17",.)  if MotherIDNO=="403446479"
+replace DATEPROCESS=subinstr(DATEPROCESS,"MAY-16","MAY-17",.)  if MotherIDNO=="403446479"
 replace DATEPROCESS=subinstr(DATEPROCESS,"-16","-17",.)  if MotherIDNO=="851478529"
 
 count if missing(MotherIDNO)
@@ -65,7 +65,7 @@ duplicates drop
 sort MotherIDNO pregID bp_date
 bysort MotherIDNO pregID: gen id = _n
 tab id
-reshape wide bp_date bp_sist_val bp_dias_val, i(MotherIDNO pregID date) j(id)
+reshape wide bp_date bp_sist_val bp_dias_val, i(MotherIDNO pregID date avicenna_source_bp) j(id)
 
 ren date obs_date
 ren pregID obs_pregID

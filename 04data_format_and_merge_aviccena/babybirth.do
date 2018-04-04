@@ -9,7 +9,6 @@ forvalues year=2014/$MAX_YEAR {
 			display "`file'"
 			import excel using "data_raw\avicenna/`year'-`month'\Baby Birth/`file'", clear firstrow
 			
-			
 			capture gen BabyGender=""
 			capture gen BabyAnusstatus=""
 			
