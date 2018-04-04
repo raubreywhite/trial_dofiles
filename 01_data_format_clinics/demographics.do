@@ -298,9 +298,7 @@ replace is_mahima_clinics_trial_1=1 if demoorgunit=="aGnKVidwoMx"
 replace is_mahima_clinics_trial_1=1 if demoorgunit=="Yc2UiacRLEW"
 replace is_mahima_clinics_trial_1=1 if demoorgunit=="KSfVKx6VI3M"
 
-// Fixing our intervention variables for the correct numbers
-gen trial_1_clinics=0
-replace trial_1_clinics=1 if is_mahima_clinics_trial_1==1 & is_demof_not_greenf_or_bookf!=1
+
 
 
 
