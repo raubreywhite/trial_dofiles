@@ -588,8 +588,6 @@ replace avgincomecat = 3 if (avgincome >=901) & (avgincome <=1824)
 replace avgincomecat = 4 if (avgincome >=1825) & (avgincome <=3054)
 replace avgincomecat = 5 if (avgincome >3055)
 
-summarize incomecat
-
 save "~/My Documents/trial_temp_data/$TAG Clinical Demographics.dta", replace
 
 
