@@ -32,7 +32,7 @@ forvalues year=2014/$MAX_YEAR {
 				continue
 			}
 			if(`index'>1){
-				append using "~/My Documents/trial_temp_data/bb.dta"
+				append using "~/My Documents/trial_temp_data/bb.dta", force
 			}
 			save "~/My Documents/trial_temp_data/bb.dta", replace
 			
