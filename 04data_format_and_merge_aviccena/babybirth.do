@@ -31,6 +31,9 @@ forvalues year=2014/$MAX_YEAR {
 			if(r(N)==0){
 				continue
 			}
+
+			drop BabyBirthdate BabyGender BabyAnusstatus BabyBirthComment BabyBirthMark MotherFullName NAME
+
 			if(`index'>1){
 				append using "~/My Documents/trial_temp_data/bb.dta", force
 			}
@@ -42,7 +45,6 @@ forvalues year=2014/$MAX_YEAR {
 	}
 }
 
-drop BabyBirthdate BabyGender BabyAnusstatus BabyBirthComment BabyBirthMark MotherFullName NAME
 
 count if missing(MotherIDNO)
 drop if missing(MotherIDNO)
