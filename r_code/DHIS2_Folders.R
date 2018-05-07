@@ -17,7 +17,9 @@ DHIS2_Folders <- function(isControl){
     "CLINICAL_OR_CONTROL"=CLINICAL_OR_CONTROL))
 }
 
-Get_DHIS2_Data <- function(controlName,clinicName,isControl,useFreadControl=F,useFreadClinic=F){
+Get_DHIS2_Data <- function(controlName,
+                           clinicName,
+                           isControl,useFreadControl=F,useFreadClinic=F, isHBO=F, setuniqueid=T){
   FOLDERS <- DHIS2_Folders(isControl = isControl)
   
   if(useFreadControl){
@@ -30,6 +32,10 @@ Get_DHIS2_Data <- function(controlName,clinicName,isControl,useFreadControl=F,us
     clinicRead <- fread
   } else {
     clinicRead <- read.csv
+  }
+  
+  if(isHBO){
+    FOLDERS$CLINICAL_OR_CONTROL <- "Hospital"
   }
   
   if(isControl){
@@ -70,7 +76,12 @@ Get_DHIS2_Data <- function(controlName,clinicName,isControl,useFreadControl=F,us
     }
   }
   
-  setnames(d, 2, "uniqueid")
+  ConvertAllFactorsToChar(d)
+  
+  if(!isHBO & setuniqueid){
+    setnames(d, 2, "uniqueid")
+    d[,uniqueid:=as.character(uniqueid)]
+  }
   
   return(d)
 }

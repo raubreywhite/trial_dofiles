@@ -1,85 +1,73 @@
 DHIS2_Demographics <- function(isControl){
   
-  if(isControl){
-    DATA_DATE <- CLINIC_CONTROL_DATE
-    FOLDER_DATA <- sprintf("%s/e.reg-control/%s",FOLDER_DATA_RAW,DATA_DATE)
-    TAG <- "CON"
-    CLINICAL_OR_CONTROL <- "Control"
-  } else {
-    DATA_DATE <- CLINIC_INTERVENTION_DATE
-    FOLDER_DATA <- sprintf("%s/e.reg-intervention/%s",FOLDER_DATA_RAW,DATA_DATE)
-    TAG <- "INT"
-    CLINICAL_OR_CONTROL <- "Clinical"
-  }
-  
-  d <- fread(sprintf(
-    "%s/%s Demographics.csv",
-    FOLDER_DATA,
-    CLINICAL_OR_CONTROL),
-    encoding="UTF-8")
+  d <- Get_DHIS2_Data(
+    controlName = "Demographics.csv",
+    clinicName = "Demographics.csv",
+    isControl=isControl,
+    setuniqueid=F)
   
   if(isControl){
-    setnames(d,"Instance","uniqueid")
-    setnames(d,"Created","datecreated")
-    setnames(d,"Last updated","dateupdated")
-    setnames(d,"Organisation unit","demoorgunit")
-    setnames(d,"Organisation unit name","demoorgname")
-    setnames(d,"Tracked entity","trackedentity")
-    setnames(d,"Inactive","dummy")
-    setnames(d,"Identification document type","idtype")
-    setnames(d,"Data extractor username","dataextractor")
-    setnames(d,"Identification document number - control data","demoidnumber")
-    setnames(d,"First name (الإسم الأول)","firstname")
-    setnames(d,"Father's Name (اسم الأب)","fathername")
-    setnames(d,"Husband's Family name (اسم عائلة الزوج)","familyname2")
-    setnames(d,"Husband's name (اسم الزوج )","husbandname")
-    setnames(d,"Middle Name (اسم الجد)","middlename")
-    setnames(d,"Woman family name (اسم عائلة المرأة)","familyname1")
-    setnames(d,"Village","village")
-    setnames(d,"City","city")
-    setnames(d,"Date of Birth","dob")
-    setnames(d,"Mobile number","mobile")
-    setnames(d,"Education in years","education")
-    setnames(d,"Age at marriage","agemarriage")
-    setnames(d,"Age at first pregnancy","agepregnancy")
-    setnames(d,"Monthly household income (ILS)","income")
-    setnames(d,"Number of members in household","members")
+    setnames(d,"instance","uniqueid")
+    setnames(d,"created","datecreated")
+    setnames(d,"lastupdated","dateupdated")
+    setnames(d,"organisationunit","demoorgunit")
+    setnames(d,"organisationunitname","demoorgname")
+    setnames(d,"trackedentity","trackedentity")
+    setnames(d,"inactive","dummy")
+    setnames(d,"identificationdocumenttype","idtype")
+    setnames(d,"dataextractorusername","dataextractor")
+    setnames(d,"identificationdocumentnumbercontroldata","demoidnumber")
+    setnames(d,"firstname","firstname")
+    setnames(d,"fathersname","fathername")
+    setnames(d,"husbandsfamilyname","familyname2")
+    setnames(d,"husbandsname","husbandname")
+    setnames(d,"middlename","middlename")
+    setnames(d,"womanfamilyname","familyname1")
+    setnames(d,"village","village")
+    setnames(d,"city","city")
+    setnames(d,"dateofbirth","dob")
+    setnames(d,"mobilenumber","mobile")
+    setnames(d,"educationinyears","education")
+    setnames(d,"ageatmarriage","agemarriage")
+    setnames(d,"ageatfirstpregnancy","agepregnancy")
+    setnames(d,"monthlyhouseholdincomeils","income")
+    setnames(d,"numberofmembersinhousehold","members")
     d[,street:=""]
     d[,camp:=""]
     d[,phone:=""]
     d[,cosang:=""]
     d[,email:=""]
   } else {
-    setnames(d,"Instance","uniqueid")
-    setnames(d,"Created","datecreated")
-    setnames(d,"Last updated","dateupdated")
-    setnames(d,"Organisation unit","demoorgunit")
-    setnames(d,"Organisation unit name","demoorgname")
-    setnames(d,"Tracked entity","trackedentity")
-    setnames(d,"Inactive","dummy")
-    setnames(d,"Identification document type","idtype")
-    setnames(d,"Identification document number","demoidnumber")
-    setnames(d,"First name (الإسم الأول)","firstname")
-    setnames(d,"Father's Name (اسم الأب)","fathername")
-    setnames(d,"Husband's Family name (اسم عائلة الزوج)","familyname2")
-    setnames(d,"Husband's name (اسم الزوج )","husbandname")
-    setnames(d,"Middle Name (اسم الجد)","middlename")
-    setnames(d,"Woman family name (اسم عائلة المرأة)","familyname1")
-    setnames(d,"Village","village")
-    setnames(d,"City","city")
-    setnames(d,"Date of Birth","dob")
-    setnames(d,"Mobile number","mobile")
-    setnames(d,"Education in years","education")
-    setnames(d,"Age at marriage","agemarriage")
-    setnames(d,"Age at first pregnancy","agepregnancy")
-    setnames(d,"Monthly household income (ILS)","income")
-    setnames(d,"Number of members in household","members")
+    setnames(d,"instance","uniqueid")
+    setnames(d,"created","datecreated")
+    setnames(d,"lastupdated","dateupdated")
+    setnames(d,"organisationunit","demoorgunit")
+    setnames(d,"organisationunitname","demoorgname")
+    setnames(d,"trackedentity","trackedentity")
+    setnames(d,"inactive","dummy")
+    setnames(d,"identificationdocumenttype","idtype")
+    setnames(d,"identificationdocumentnumber","demoidnumber")
+    setnames(d,"firstname","firstname")
+    setnames(d,"fathersname","fathername")
+    setnames(d,"husbandsfamilyname","familyname2")
+    setnames(d,"husbandsname","husbandname")
+    setnames(d,"middlename","middlename")
+    setnames(d,"womanfamilyname","familyname1")
+    setnames(d,"village","village")
+    setnames(d,"city","city")
+    setnames(d,"dateofbirth","dob")
+    setnames(d,"mobilenumber","mobile")
+    setnames(d,"educationinyears","education")
+    setnames(d,"ageatmarriage","agemarriage")
+    setnames(d,"ageatfirstpregnancy","agepregnancy")
+    setnames(d,"monthlyhouseholdincomeils","income")
+    setnames(d,"numberofmembersinhousehold","members")
     
-    setnames(d,"Street name","street")
-    setnames(d,"Camp","camp")
-    setnames(d,"Telephone number","phone")
-    setnames(d,"Consanguinity(درجة القرابه بين الزوجين)","cosang")
-    setnames(d,"Email address","email")
+    setnames(d,"streetname","street")
+    setnames(d,"camp","camp")
+    setnames(d,"telephonenumber","phone")
+    setnames(d,"consanguinity","cosang")
+    setnames(d,"emailaddress","email")
     
     d[,dataextractor:=""]
   }
@@ -167,6 +155,6 @@ DHIS2_Demographics <- function(isControl){
                                breaks=c(0,200,900,1824,3054,100000),
                                include.lowest=T))]
   
-  
+  ConvertAllFactorsToChar(d)
   return(d)
 }

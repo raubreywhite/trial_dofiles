@@ -75,7 +75,8 @@ DHIS2_Master <- function(){
     additional=data_DHIS2_Antenatal,
     valueVarsRegex="^an",
     dcastFormula="uniqueid+bookevent+booknum~eventnum",
-    mergeVars=c("uniqueid","bookevent","booknum")
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_an"
   )
   nrow(data_DHIS2_Booking)
   nrow(d)
@@ -87,7 +88,8 @@ DHIS2_Master <- function(){
     additional=data_DHIS2_Lab,
     valueVarsRegex="^lab",
     dcastFormula="uniqueid+bookevent+booknum~eventnum",
-    mergeVars=c("uniqueid","bookevent","booknum")
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_lab"
   )
   nrow(data_DHIS2_Booking)
   nrow(d)
@@ -99,7 +101,8 @@ DHIS2_Master <- function(){
     additional=data_DHIS2_Ultrasound,
     valueVarsRegex="^us",
     dcastFormula="uniqueid+bookevent+booknum~eventnum",
-    mergeVars=c("uniqueid","bookevent","booknum")
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_us"
   )
   nrow(data_DHIS2_Booking)
   nrow(d)
@@ -111,7 +114,8 @@ DHIS2_Master <- function(){
     additional=data_DHIS2_RiskFactors,
     valueVarsRegex="^risk",
     dcastFormula="uniqueid+bookevent+booknum~eventnum",
-    mergeVars=c("uniqueid","bookevent","booknum")
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_risk"
   )
   nrow(data_DHIS2_Booking)
   nrow(d)
@@ -123,7 +127,8 @@ DHIS2_Master <- function(){
     additional=data_DHIS2_Management,
     valueVarsRegex="^man",
     dcastFormula="uniqueid+bookevent+booknum~eventnum",
-    mergeVars=c("uniqueid","bookevent","booknum")
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_man"
   )
   nrow(data_DHIS2_Booking)
   nrow(d)
@@ -135,7 +140,8 @@ DHIS2_Master <- function(){
     additional=data_DHIS2_PreviousPregnancies,
     valueVarsRegex="^prev",
     dcastFormula="uniqueid~eventnum",
-    mergeVars=c("uniqueid")
+    mergeVars=c("uniqueid"),
+    identName="ident_dhis2_prev"
   )
   nrow(data_DHIS2_Booking)
   nrow(d)
@@ -145,9 +151,10 @@ DHIS2_Master <- function(){
   d <- ReshapeToWideAndMerge(
     base=d,
     additional=data_DHIS2_HospitalBirthOutcomes,
-    valueVarsRegex="^hbo",
+    valueVarsRegex="^dhis2hbo",
     dcastFormula="uniqueid+bookevent+booknum~eventnum",
-    mergeVars=c("uniqueid","bookevent","booknum")
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_dhis2hbo"
   )
   nrow(data_DHIS2_Booking)
   nrow(d)
@@ -158,6 +165,21 @@ DHIS2_Master <- function(){
     calc_expected_due_delivery:=usdate_1-usgestage_1*7+280]
   d[,isExpectedToHaveDelivered:=ifelse(calc_expected_due_delivery+14<as.Date(sprintf("%s-%s-01",MAX_YEAR,MAX_MONTH)),TRUE,FALSE)]
   xtabs(~d$isExpectedToHaveDelivered)
+  
+  setnames(d,"demoidnumber","motheridno")
+  
+  if(.Platform$OS.type=="unix"){
+    d[,motheridno:=as.character(rep(c(1:50000),length.out=.N,each=1000))]
+  }
+  
+  setorderv(d,cols=c("motheridno","bookdate"))
+  d[,motheridbooknum:=1:.N,by=.(motheridno)]
+  d[,motheridbook_earlyDate:=bookdate]
+  d[,motheridbook_lateDate:=bookdate+31*10]
+  # make sure that the "late date" doesnt overlap with a new pregnancy booking
+  d[,temp:=shift(motheridbook_earlyDate,type = "lead"),by=.(motheridno)]
+  d[motheridbook_lateDate>temp,motheridbook_lateDate:=temp-1]
+  d[,temp:=NULL]
   
   return(d)
 }

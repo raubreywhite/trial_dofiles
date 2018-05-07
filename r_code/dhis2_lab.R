@@ -1,24 +1,10 @@
 DHIS2_Lab <- function(isControl, earlyData, booklmp) {
   FOLDERS <- DHIS2_Folders(isControl = isControl)
   
-  d <- read.csv(
-    sprintf(
-      "%s/%s Lab results.csv",
-      FOLDERS$FOLDER_DATA,
-      FOLDERS$CLINICAL_OR_CONTROL
-    ),
-    encoding = "UTF-8"
-  )
-  setDT(d)
-  
-  for (i in names(d)) setnames(d, i, ExtractOnlyEnglishLettersAndNumbers(i)[[1]])
-  for (i in names(d)){
-    if(sum(names(d)==i)>1){
-      locs <- which(names(d)==i)[-1]
-      d[[locs]] <- NULL
-    }
-  }
- 
+  d <- Get_DHIS2_Data(
+    controlName = "Lab results.csv",
+    clinicName = "Lab results.csv",
+    isControl=isControl)
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   

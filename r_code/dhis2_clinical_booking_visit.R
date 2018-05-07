@@ -303,6 +303,11 @@ DHIS2_BookingVisit <- function(isControl) {
     setnames(d, "ppcwasthisinformationfirstcollectedonpaperandthenenteredintothesystem", "bookbackupfile")
   })
 
+  setnames(d,"confamilyhistoryofinbornerrorofmetabolism","bookfamhistinbornmetab")
+  setnames(d,"confamilyhistoryofdiabetesmellitus","bookfamhistdiab")
+  setnames(d,"confamilyhistoryofcongenitalanomaly","bookfamhistcongenanom")
+  setnames(d,"anchistoryofantepartumhemorrhageinpreviouspregnancy","bookhistantparthemprevpreg")
+  
   # delete people with duplicate eventdates (these are obvious duplicates)
   nrow(d)
   d <- unique(d, by = c("uniqueid", "bookdate"))
@@ -325,7 +330,11 @@ DHIS2_BookingVisit <- function(isControl) {
   # as "day of booking" (ie bookdate)
   #
 
-  d[, is_demof_not_greenf_or_bookf := ifelse(is.na(bookevent), 0, 1)]
+  d[, ident_dhis2_demof_no_greenf_or_bookf := ifelse(is.na(bookevent), 1, 0)]
+  xtabs(~d$ident_dhis2_demof_no_greenf_or_bookf)
+  d[, ident_dhis2_booking := ifelse(is.na(bookevent), 0, 1)]
+  xtabs(~d$ident_dhis2_booking)
+  
   setorder(d, bookevent)
   d[is.na(bookevent), bookdate := datecreated]
   d[is.na(bookevent), bookevent := sprintf("%s%s", ifelse(isControl,"CON","INT"), 1:.N)]
@@ -369,6 +378,8 @@ DHIS2_BookingVisit <- function(isControl) {
   # generating some important analysis variables
   d[,isTrial1ControlBookingPlace:=isControl]
   d[,isTrial1Pretrial:=ifelse(bookdate<as.Date("2017-01-15"),TRUE,FALSE)]
+  
+  ConvertAllFactorsToChar(d)
   
   return(d)
 }

@@ -1,19 +1,18 @@
 DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
   FOLDERS <- DHIS2_Folders(isControl = isControl)
   
+  d <- Get_DHIS2_Data(
+    controlName = "ANC Follow up sheet.csv",
+    clinicName = "Antenatal care visit.csv",
+    isControl=isControl)
+  d[,eventdate:=as.Date(eventdate)]
+  #setnames(d, 2, "uniqueid")
+  
   if (isControl) {
     # read in ANC followup, keep the first obs per pregnancy
-    d <- fread(
-      sprintf(
-        "%s/%s ANC Follow up sheet.csv",
-        FOLDERS$FOLDER_DATA,
-        FOLDERS$CLINICAL_OR_CONTROL
-      ),
-      encoding = "UTF-8"
-    )
-    setnames(d, 2, "programstageinstance")
-    setorder(d, programstageinstance, `Event date`)
-    d[, visitNum := 1:.N, by = .(programstageinstance)]
+    #setnames(d, 2, "programstageinstance")
+    setorder(d, uniqueid, eventdate)
+    d[, visitNum := 1:.N, by = .(uniqueid)]
     d <- d[visitNum != 1]
     d[, visitNum := NULL]
     
@@ -52,7 +51,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
     d[,anceclampticconvulsions:=as.numeric(NA)]
     d[,ancvaginalbleeding:=as.numeric(NA)]
     d[,anchypertensioncerebralorvisuals:=as.numeric(NA)]
-    d[,anc_gestationalageatvisitweeks:=as.numeric(NA)]
+    d[,ancgestationalageatvisitweeks:=as.numeric(NA)]
     d[,ancotheridentifiedconditions:=as.numeric(NA)]
     d[,anchistoryofdiabetesmellitusiori:=as.numeric(NA)]
     d[,anchistoryofrenaldisease:=as.numeric(NA)]
@@ -64,25 +63,11 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
     d[,v42:=as.numeric(NA)]
     d[,anchomevisitoratthehealthclinic:=as.numeric(NA)]
   } else {
-    d <- read.csv(sprintf(
-      "%s/%s Antenatal care visit.csv",
-      FOLDERS$FOLDER_DATA,
-      FOLDERS$CLINICAL_OR_CONTROL
-    ))
-    setDT(d)
-    setnames(d, 2, "programstageinstance")
-  }
-  
-  for (i in names(d)) setnames(d, i, ExtractOnlyEnglishLettersAndNumbers(i)[[1]])
-  for (i in names(d)){
-    if(sum(names(d)==i)>1){
-      locs <- which(names(d)==i)[-1]
-      d[[locs]] <- NULL
-    }
+   # nothing
   }
   
   setnames(d,"event","anevent")
-  setnames(d,"programstageinstance","uniqueid")
+  #setnames(d,"programstageinstance","uniqueid")
   setnames(d,"programstage","anprogstage")
   setnames(d,"eventdate","andate")
   setnames(d,"longitude","anlong")
@@ -205,6 +190,9 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
     d[,anchistoryofotherchronicconditionspecified:=NULL]
     d[,ancreferralneededforotherchronicconditions:=NULL]
   }
+  
+  setnames(d,"anccounselingaboutbreastfeeding","anccounselingaboutbf")
+  #setnames(d,"anchistoryofantepartumhemorrhageinpreviouspregnancy","anchistantparthemprevpreg")
   
   # give it a bookevent
   d <- GiveItABookEvent(
