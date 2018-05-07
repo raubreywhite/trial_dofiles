@@ -64,6 +64,8 @@ for(i in lists){
   d[,(n):=as.character(get(n))]
 }
 
+
+
 saveRDS(d,file.path(FOLDER_DATA_CLEAN,"full_data_from_r.rds"))
 haven::write_dta(d,file.path(FOLDER_DATA_CLEAN,"full_data_from_r.dta"))
 
@@ -81,11 +83,11 @@ tokeep <- d[
     "bookorgname",
     "bookdate",
     "firstname",
-    "fathername",
+    "fathersname",
     "middlename",
     "familyname1",
     "familyname2",
-    "husbandname",
+    "husbandsname",
     "dob",
     "mobile",
     "booklmp",

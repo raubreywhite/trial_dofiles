@@ -17,12 +17,21 @@ forvalues year=2015/$MAX_YEAR {
 		drop trackedentity dummy idtype MotherID firstname datecreated ///
 		fathername middlename familyname1 familyname2 husbandname street village city ///
 		camp mobile phone email consang dob income education agemarriage agepregnancy ///
-		members age
+		members age 
 
 		*Drop all identifier variables
 		drop bookdate booklong booklat bookorgname bookorgcode bookorgunit bookidnumber ///
 		demoorgname 
 		//get rid of demoorgunit too???
+		
+		*Drop hbo identifiable informaion
+		hbolatitude1 hboorganisationunit1 hbocon_woman_first_name1 hbocon_woman_family_name1 hbocon_husband_name1 ///
+		hbocon_woman_address1 hboorganisationunitname2 hbocon_woman_first_name2 hbocon_woman_family_name2 hbocon_husband_name2 ///
+		hboorganisationunitname3 hboorganisationunit3 hbocon_woman_first_name3 hbocon_woman_family_name3 hbocon_husband_name3 ///
+		hbo_organisationunitname hbo_dataextractorusername hbo_alternateidentificationnum hbo_firstname hbo_fathersname ///
+		hbo_husbandsfamilyname hbo_husbandsname hbo_middlename hbo_womanfamilyname hbo_village hbo_city hbo_dateofbirth ///
+		hbo_mobilenumber hbo_educationinyears hbo_ageatmarriage hbo_ageatfirstpregnancy hbo_monthlyhouseholdincomeils ///
+		hbo_numberofmembersinhousehold hbo_organisationunitname1 hbo_organisationunitname1 hbo_organisationunitname2
 
 		// drop some dates
 		drop booklmp bookdatelastbirth dateupdated newbookdatecorrect  ///

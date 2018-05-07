@@ -9,6 +9,17 @@ DHIS2_Master <- function(){
     con,
     int)
   
+  sData <- readxl::read_excel("../data_raw/structural_data/bookorgname.xlsx")
+  setDT(sData)
+  sData[is.na(NEW_bookorgname),NEW_bookorgname:=bookorgname]
+  
+  nrow(data_DHIS2_Booking)
+  data_DHIS2_Booking <- merge(data_DHIS2_Booking,sData,by=c("bookorgname"),all.x=T)
+  nrow(data_DHIS2_Booking)
+  
+  data_DHIS2_Booking[,bookorgname:=NEW_bookorgname]
+  data_DHIS2_Booking[,NEW_bookorgname:=NULL]
+  
   setorder(data_DHIS2_Booking,uniqueid,bookdate)
   data_DHIS2_Booking[,booknum:=1:.N,by=uniqueid]
   
@@ -180,6 +191,12 @@ DHIS2_Master <- function(){
   d[,temp:=shift(motheridbook_earlyDate,type = "lead"),by=.(motheridno)]
   d[motheridbook_lateDate>temp,motheridbook_lateDate:=temp-1]
   d[,temp:=NULL]
+  
+  #####################
+  #####################
+  #####################
+  
+  
   
   return(d)
 }

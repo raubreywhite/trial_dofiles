@@ -376,10 +376,99 @@ DHIS2_BookingVisit <- function(isControl) {
   d[,bookevent:=as.character(bookevent)]
   
   # generating some important analysis variables
-  d[,ident_dhis_control:=isControl]
-  d[,ident_dhis_b4_2017_01_15:= bookdate<as.Date("2017-01-15")]
+  d[,ident_dhis2_control:=isControl]
+  d[,ident_dhis2_b4_2017_01_15:= bookdate<as.Date("2017-01-15")]
+  
+  d[,bookorgname:=unlist(ExtractOnlyEnglishLetters(bookorgname))]
   
   ConvertAllFactorsToChar(d)
   
+  toremove <- readxl::read_excel("../data_raw/structural_data/remove_from_dhis2.xlsx")
+  setDT(toremove)
+  
+  d <- d[!(
+    bookevent %in% na.omit(toremove$bookevent) |
+      uniqueid %in% na.omit(toremove$uniqueid)
+  )]
+  
+  #### data extractor
+  d[,dataextractor:=unlist(ExtractOnlyEnglishLetters(dataextractor))]
+  xtabs(~d$dataextractor)
+  d[dataextractor %in% c(
+    "aiza",
+    "aziz",
+    "aziza",
+    "azizia",
+    "azza"
+  ),dataextractor:="aziza"]
+  
+  d[dataextractor %in% c(
+    "ibtesam"
+  ),dataextractor:="ibtesam"]
+  
+  d[dataextractor %in% c(
+    "kadejeh",
+    "khadejah",
+    "khadeje",
+    "khadejeh",
+    "khadejej",
+    "khaejeh",
+    "kjadejeh",
+    "khdejeh"
+  ),dataextractor:="khadejeh"]
+  
+  d[dataextractor %in% c(
+    "mervet",
+    "mervett",
+    "mevet"
+  ),dataextractor:="mervett"]
+  
+  d[dataextractor %in% c(
+    "naja",
+    "najah"
+  ),dataextractor:="najah"]
+  
+  d[dataextractor %in% c(
+    "omar",
+    "omr"
+  ),dataextractor:="omar"]
+  
+  d[dataextractor %in% c(
+    "tamara"
+  ),dataextractor:="tamara"]
+  
+  d[dataextractor %in% c(
+    "yusra"
+  ),dataextractor:="yusra"]
+  
+  d[dataextractor %in% c(
+    "",
+    "test",
+    "tttttttt"
+  ),dataextractor:="unknown"]
+  
+  xtabs(~d$dataextractor)
+  
+  # drop if there are multiple bookings for the same personid on the same date
+  d[,keep:=TRUE]
+  setorder(d,demoidnumber,bookdate)
+  d[,shiftdate:=shift(bookdate),by=demoidnumber]
+  d[shiftdate==bookdate,keep:=FALSE]
+  d <- d[keep==TRUE]
+  d[,shiftdate:=NULL]
+  d[,keep:=NULL]
+  
+  #####
+  # multiple bookings for same person
+  #d[ident_dhis2_booking==TRUE,c("demoidnumber","uniqueid","bookevent","bookdate")]
+  #setorder(d,demoidnumber,bookdate)
+  #d[ident_dhis2_booking==TRUE,booknumber:=1:.N,by=demoidnumber]
+  #xtabs(~d$booknumber)
+  
+  #d[demoidnumber==401404496,c("demoidnumber","uniqueid","bookevent","bookdate")]
+
   return(d)
 }
+
+
+

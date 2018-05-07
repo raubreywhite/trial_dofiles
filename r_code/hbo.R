@@ -45,12 +45,13 @@ HBO_Demographics <- function(isControl=T) {
     isHBO=T)
   
   setnames(d, 1, "uniqueid")
+  setnames(d, "alternateidentificationnumber","altidnum")
   d[,uniqueid:=as.character(uniqueid)]
   
-  #for(i in names(d)){
-  #  if(i %in% c("event","uniqueid","eventdate")) next
-  #  setnames(d,i,sprintf("hbo%s",i))
-  #}
+  for(i in names(d)){
+    if(i %in% c("event","uniqueid","eventdate")) next
+    setnames(d,i,sprintf("d%s",i))
+  }
   
   return(d)
 }
@@ -62,16 +63,16 @@ HBO_Master <- function(){
   hbo[,date:=dateofdeliveryhospital]
   
   d <- merge(demo,hbo,by="uniqueid") 
-  setnames(d,"identificationdocumentnumbercontroldata","motheridno")
+  setnames(d,"didentificationdocumentnumbercontroldata","motheridno")
   d <- d[!is.na(motheridno)]
   
   
-  setnames(d,which(stringr::str_detect(names(d),"^firstname")),"hbofirstname")
-  setnames(d,which(stringr::str_detect(names(d),"^fathersname")),"fathersname")
-  setnames(d,which(stringr::str_detect(names(d),"^husbandsfamilyname")),"husbandsfamilyname")
-  setnames(d,which(stringr::str_detect(names(d),"^husbandsname")),"husbandsname")
-  setnames(d,which(stringr::str_detect(names(d),"^middlename")),"middlename")
-  setnames(d,which(stringr::str_detect(names(d),"^womanfamilyname")),"womanfamilyname")
+  setnames(d,which(stringr::str_detect(names(d),"^dfirstname")),"dfirstname")
+  setnames(d,which(stringr::str_detect(names(d),"^dfathersname")),"dfathersname")
+  setnames(d,which(stringr::str_detect(names(d),"^dhusbandsfamilyname")),"dhusbandsfamilyname")
+  setnames(d,which(stringr::str_detect(names(d),"^dhusbandsname")),"dhusbandsname")
+  setnames(d,which(stringr::str_detect(names(d),"^dmiddlename")),"dmiddlename")
+  setnames(d,which(stringr::str_detect(names(d),"^dwomanfamilyname")),"dwomanfamilyname")
   
   d <- AVICENNACreatePregnancyIDAndMakeItWide(d,tag="hbo",nameofid="motheridno")
   
@@ -82,8 +83,6 @@ HBO_Master <- function(){
   setorderv(d,cols=c("motheridno","minDate"))
   d[,avicennanum:=1:.N,by=.(motheridno)]
   d[,maxDate:=NULL]
-  d[,uniqueid:=NULL]
-  
   
   d[,ident_hbo:=TRUE]
    
