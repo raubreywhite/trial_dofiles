@@ -68,6 +68,8 @@ if($IS_CONTROL==1){
 	sort uniqueid hbodate
 	duplicates drop uniqueid hbodate, force
 	bysort uniqueid: gen eventnumber=_n
+	
+	// for women birth twice in the same year //
 
 	codebook uniqueid
 	reshape wide hbo*, i(uniqueid) j(eventnumber)

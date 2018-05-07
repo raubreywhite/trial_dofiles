@@ -1,0 +1,61 @@
+
+***is_hbo govt hospitals***
+tab hbo_nncgestationalageatdelivery1 
+tab hbo_ancpreviouspregnancyoutcome1 
+tab hbo_ancpreviouspregbirthwg1 
+tab hbo_ancmodeofpreviousdelivery1 
+tab hbo_usfetalpresentation1 
+tab hbo_con_toxemia1 
+tab hbo_indicforcsectionmentionedin1 
+tab hbo_laburinestickprotein1 
+tab hbo_con_ancsystolicbpmmhg1 
+tab hbo_con_ancdiastolicbpmmh1 
+tab hbo_con_reason_for_cs1 
+tab hbo_con_labcbchemoglobin1 
+tab hbo_con_labcbchematocrit1 
+tab hbo_event2 
+tab hbo_nncgestationalageatdelivery2 
+tab hbo_ancpreviouspregnancyoutcome2 
+tab hbo_ancpreviouspregbirthwg2 
+tab hbo_ancmodeofpreviousdelivery2 
+tab hbo_usfetalpresentation2 
+tab hbo_con_toxemia2 
+tab hbo_indicforcsectionmentionedin2 
+tab hbo_laburinestickprotein2
+tab hbo_con_ancsystolicbpmmhg2 
+tab hbo_con_ancdiastolicbpmmh2 
+tab hbo_con_reason_for_cs2 
+tab hbo_con_labcbchemoglobin2 
+tab hbo_con_labcbchematocrit2
+
+***Aviccena Data Findings***
+tab BabyWeight1 
+tab BabyHeight1 
+tab BabyWeight1 
+tab BabyPregnancynoofweeks1 
+tab BabyBirthResult1 
+tab BabyBirthType1 
+tab BabyWeight2
+tab BabyBirthResult2 
+tab BabyBirthType2 
+tab BabyWeight3 
+tab BabyBirthResult3 
+tab BabyBirthType3 
+tab BabyWeight4 
+tab BabyBirthResult4 
+tab BabyBirthType4 
+tab BabyRecordDateCreationBabyWeight1 
+tab BabyHeight1 
+tab BabyPregnancynoofweeks1 
+tab BabyBirthResult1 
+tab BabyBirthType1 
+tab BabyWeight2 
+tab BabyBirthResult2 
+tab BabyBirthType2 
+tab BabyWeight3 
+tab BabyBirthResult3 
+tab BabyBirthType3 
+tab BabyWeight4 
+tab BabyBirthResult4 
+tab BabyBirthType4 
+
