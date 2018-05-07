@@ -8,6 +8,27 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
   d[,eventdate:=as.Date(eventdate)]
   #setnames(d, 2, "uniqueid")
   
+  
+  if (isControl) {
+    d[,conabortion:=NULL] 
+    d[,ancvaccinatedforttaccordingtoguidelines:=NULL] 
+    d[,ancbodyheightm:=NULL] 
+    d[,conancgestationaageatvisitweeks:=NULL] 
+    d[,conancgestationaageatvisitsize:=NULL] 
+    d[,usrecommendationscomments:=NULL] 
+    d[,consupplementsyesno:=NULL] 
+    d[,conancsupplementprescription:=NULL]
+  } else {
+    d[,ancsuspectedprematureruptureofmembranesprom:=NULL]
+    d[,ancsuspectedpretermprematureruptureofmembranesprom:=NULL]
+    d[,anchypertensioncerebralorvisualsymptoms:=NULL]
+    d[,anchistoryofdiabetesmellitusioriiinsulindependent:=NULL]
+    d[,anchistoryofdeepveinthrombosisdvtoutsidepreviouspregnancies:=NULL]
+    d[,anchistoryofotherchronicconditions:=NULL]
+    d[,anchistoryofotherchronicconditionspecified:=NULL]
+    d[,ancreferralneededforotherchronicconditions:=NULL]
+  }
+  
   if (isControl) {
     # read in ANC followup, keep the first obs per pregnancy
     #setnames(d, 2, "programstageinstance")
@@ -24,7 +45,6 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
     d[,anchistroyofothersevereallergy:=as.numeric(NA)]
     d[,ancothersevereallergyspecified:=as.numeric(NA)]
     d[,anchistoryofchronichypertension:=as.numeric(NA)]
-    d[,anchistoryofotherchronicconditio:=as.numeric(NA)]
     d[,anchistoryofblooddisorder:=as.numeric(NA)]
     d[,ancfetalmovement:=as.numeric(NA)]
     d[,anchypothyreoidism:=as.numeric(NA)]
@@ -32,7 +52,6 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
     d[,ancfundalheightmeasurement:=as.numeric(NA)]
     d[,ancedema:=as.numeric(NA)]
     d[,ancreferralneededforotherchronic:=as.numeric(NA)]
-    d[,anchistoryofdeepveinthrombosisdv:=as.numeric(NA)]
     d[,whichancvisitisthis:=as.numeric(NA)]
     d[,ancmedicineprescription:=as.numeric(NA)]
     d[,anchighriskdesignatedwoman:=as.numeric(NA)]
@@ -46,14 +65,10 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
     d[,anccounselingaboutpkuscreening:=as.numeric(NA)]
     d[,ancppcvisitundertakenbywhom:=as.numeric(NA)]
     d[,ppcwasthisinformationfirstcollec:=as.numeric(NA)]
-    d[,ancsuspectedprematureruptureofme:=as.numeric(NA)]
-    d[,ancsuspectedpretermprematurerupt:=as.numeric(NA)]
     d[,anceclampticconvulsions:=as.numeric(NA)]
     d[,ancvaginalbleeding:=as.numeric(NA)]
-    d[,anchypertensioncerebralorvisuals:=as.numeric(NA)]
     d[,ancgestationalageatvisitweeks:=as.numeric(NA)]
     d[,ancotheridentifiedconditions:=as.numeric(NA)]
-    d[,anchistoryofdiabetesmellitusiori:=as.numeric(NA)]
     d[,anchistoryofrenaldisease:=as.numeric(NA)]
     d[,anchistoryofbronchialasthma:=as.numeric(NA)]
     d[,anchistoryofepilepsy:=as.numeric(NA)]
@@ -76,8 +91,10 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
   setnames(d,"organisationunitcode","anorgcode")
   setnames(d,"organisationunit","anorgunit")
   setnames(d,"identificationdocumentnumber","anidnumber")
-  setnames(d,"ancsuspectedprematureruptureofme","anprom")
-  setnames(d,"ancsuspectedpretermprematurerupt","anpprom")
+  
+  #setnames(d,which(stringr::str_detect(names(d),"^ancsuspectedprematureruptureofme")),"anprom")
+  #setnames(d,which(stringr::str_detect(names(d),"^ancsuspectedpretermprematurerupt")),"anpprom")
+  
   setnames(d,"anceclampticconvulsions","aneclamp")
   setnames(d,"ancvaginalbleeding","anvagbleed")
   setnames(d,"ancfetalmovement","anfetalmove")
@@ -87,35 +104,37 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
   setnames(d,"ancedema","anexamedema")
   setnames(d,"ancfetalheartsoundfhs","anexamfh")
   setnames(d,"ancfundalheightmeasurement","anexamsfh")
-  setnames(d,"anchypertensioncerebralorvisuals","anhisthtnsymp")
-  setnames(d,"ancfetalpresentationcheckedbypalpation","anexampalp")
-  setnames(d,"whichancvisitisthis","anvisitweeks")
-  setnames(d,"ancmedicineprescription","anmedpres")
-  setnames(d,"ancgestationalageatvisitweeks","angestage")
-  setnames(d,"anchighriskdesignatedwoman","anhighrisk")
-  setnames(d,"ancotheridentifiedconditions","anothercond")
-  setnames(d,"anchistoryofchronichypertension","anhisthtn")
-  setnames(d,"anchistoryofdiabetesmellitusiori","anhistdm")
+  
+  #setnames(d,which(stringr::str_detect(names(d),"^anchypertensioncerebralorvisuals")),"anhisthtnsymp")
+  
+  setnames(d,which(stringr::str_detect(names(d),"^ancfetalpresentationcheckedbypalpation")),"anexampalp")
+  setnames(d,which(stringr::str_detect(names(d),"^whichancvisitisthis")),"anvisitweeks")
+  setnames(d,which(stringr::str_detect(names(d),"^ancmedicineprescription")),"anmedpres")
+  setnames(d,which(stringr::str_detect(names(d),"^ancgestationalageatvisitweeks")),"angestage")
+  setnames(d,which(stringr::str_detect(names(d),"^anchighriskdesignatedwoman")),"anhighrisk")
+  setnames(d,which(stringr::str_detect(names(d),"^ancotheridentifiedconditions")),"anothercond")
+  setnames(d,which(stringr::str_detect(names(d),"^anchistoryofchronichypertension")),"anhisthtn")
+  #setnames(d,which(stringr::str_detect(names(d),"^anchistoryofdiabetesmellitusiori")),"anhistdm")
+  
   setnames(d,"anchistoryofrenaldisease","anhistrd")
   setnames(d,"anchypothyreoidism","anhisthypothyr")
   setnames(d,"anchistoryofbronchialasthma","anhistasthma")
   setnames(d,"anchistoryofblooddisorder","anhistblood")
   
-  tryCatch({
-    setnames(d,"anchistoryofblooddisorderspecif","anhistbloodspec")
-  }, error = function(err) {
-    setnames(d,"anchistoryofblooddisorderspecifi","anhistbloodspec")
-    d[,anchistoryofblooddisorderspecified:=NULL]
-  })
-  
+  setnames(d,which(stringr::str_detect(names(d),"^anchistoryofblooddisorderspecif")),"anhistbloodspec")
+
   setnames(d,"anchistoryofepilepsy","anhistepi")
   setnames(d,"anchistoryofcardiacdisease","anhistcardiac")
   setnames(d,"anchistoryofmentaldisturbance","anhistpsy")
   setnames(d,"ancreproductivetractinfectionrti","anhistrti")
-  setnames(d,"anchistoryofdeepveinthrombosisdv","anhistdvt")
-  setnames(d,"anchistoryofotherchronicconditio","anhistchronic")
-  setnames(d,"v42","anhistchronicspec")
-  setnames(d,"ancreferralneededforotherchronic","anrefchronic")
+  
+  if(isControl){
+    setnames(d,"v42","anhistchronicspec")
+    setnames(d,"ancreferralneededforotherchronic","anrefchronic")
+  } else {
+    d[,anhistchronicspec:=as.character(NA)]
+    d[,anrefchronic:=as.character(NA)]
+  }
   
   tryCatch({
     setnames(d,"ancallergiesdrugsandorseverefood","anallerfood")
@@ -168,28 +187,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
   })
   
   setnames(d,"ancppcvisitundertakenbywhom","anseenby")
-  
-  if (isControl) {
-    d[,conabortion:=NULL] 
-    d[,ancvaccinatedforttaccordingtoguidelines:=NULL] 
-    d[,ancbodyheightm:=NULL] 
-    d[,conancgestationaageatvisitweeks:=NULL] 
-    d[,conancgestationaageatvisitsize:=NULL] 
-    d[,usrecommendationscomments:=NULL] 
-    d[,consupplementsyesno:=NULL] 
-    d[,conancsupplementprescription:=NULL] 
-  } else {
-    d[,ancfetalpresentationcheckedbypal:=NULL]
-    d[,ancallergiesdrugsanevent:=NULL]
-    d[,ancsuspectedprematureruptureofmembranesprom:=NULL]
-    d[,ancsuspectedpretermprematureruptureofmembranesprom:=NULL]
-    d[,anchypertensioncerebralorvisualsymptoms:=NULL]
-    d[,anchistoryofdiabetesmellitusioriiinsulindependent:=NULL]
-    d[,anchistoryofdeepveinthrombosisdvtoutsidepreviouspregnancies:=NULL]
-    d[,anchistoryofotherchronicconditions:=NULL]
-    d[,anchistoryofotherchronicconditionspecified:=NULL]
-    d[,ancreferralneededforotherchronicconditions:=NULL]
-  }
+
   
   setnames(d,"anccounselingaboutbreastfeeding","anccounselingaboutbf")
   #setnames(d,"anchistoryofantepartumhemorrhageinpreviouspregnancy","anchistantparthemprevpreg")

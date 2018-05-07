@@ -22,7 +22,8 @@ desiredPackages <- c("stringr",
                      "bit64",
                      "readxl",
                      "openxlsx",
-                     "bit64")
+                     "bit64",
+                     "haven")
 for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
 
 library(data.table)
@@ -36,9 +37,17 @@ MAX_MONTH <- substr(CLINIC_CONTROL_DATE,6,7)
 
 DATE <- lubridate::today()
 
+dhis=suppressWarnings(DHIS2_Master())
+dhis <- dhis[ident_dhis2_booking==1]
+keepMotherID <- unique(dhis$motheridno)
+avicenna=AVICENNA_Master(keepMotherID=keepMotherID, includeObs = FALSE)
+
+nrow(dhis)
 d <- MergeDHISToAVICENNA(
-  dhis=suppressWarnings(DHIS2_Master()),
-  avicenna=AVICENNA_Master())
+  dhis=dhis,
+  avicenna=avicenna)
+nrow(d)
+
 d[,avicennanum:=NULL]
 d[,minDate:=NULL]
 

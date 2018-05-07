@@ -1,5 +1,5 @@
-AVICENNA_Lab_Details <- function(){
-  d <- Get_AVICENNA_Data(folderName="LAB")
+AVICENNA_Lab_Details <- function(keepMotherID){
+  d <- Get_AVICENNA_Data(folderName="LAB")[motheridno %in% keepMotherID]
   
   d[,testdate:=Fix2DigitYear(Fix3LetterMonthToNumber(testdate))]
   d[,testdate:=as.Date(testdate)]

@@ -47,10 +47,10 @@ HBO_Demographics <- function(isControl=T) {
   setnames(d, 1, "uniqueid")
   d[,uniqueid:=as.character(uniqueid)]
   
-  for(i in names(d)){
-    if(i %in% c("event","uniqueid","eventdate")) next
-    setnames(d,i,sprintf("hbo%s",i))
-  }
+  #for(i in names(d)){
+  #  if(i %in% c("event","uniqueid","eventdate")) next
+  #  setnames(d,i,sprintf("hbo%s",i))
+  #}
   
   return(d)
 }
@@ -60,11 +60,20 @@ HBO_Master <- function(){
   demo <- HBO_Demographics(isControl=T)
   
   hbo[,date:=dateofdeliveryhospital]
-  hbo <- AVICENNACreatePregnancyIDAndMakeItWide(hbo,tag="hbo",nameofid="uniqueid")
   
   d <- merge(demo,hbo,by="uniqueid") 
-  setnames(d,"hboidentificationdocumentnumbercontroldata","motheridno")
+  setnames(d,"identificationdocumentnumbercontroldata","motheridno")
   d <- d[!is.na(motheridno)]
+  
+  
+  setnames(d,which(stringr::str_detect(names(d),"^firstname")),"hbofirstname")
+  setnames(d,which(stringr::str_detect(names(d),"^fathersname")),"fathersname")
+  setnames(d,which(stringr::str_detect(names(d),"^husbandsfamilyname")),"husbandsfamilyname")
+  setnames(d,which(stringr::str_detect(names(d),"^husbandsname")),"husbandsname")
+  setnames(d,which(stringr::str_detect(names(d),"^middlename")),"middlename")
+  setnames(d,which(stringr::str_detect(names(d),"^womanfamilyname")),"womanfamilyname")
+  
+  d <- AVICENNACreatePregnancyIDAndMakeItWide(d,tag="hbo",nameofid="motheridno")
   
   if(.Platform$OS.type=="unix"){
     d[,motheridno:=as.character(rep(c(1:50000),length.out=.N,each=10))]
@@ -74,6 +83,7 @@ HBO_Master <- function(){
   d[,avicennanum:=1:.N,by=.(motheridno)]
   d[,maxDate:=NULL]
   d[,uniqueid:=NULL]
+  
   
   d[,ident_hbo:=TRUE]
    

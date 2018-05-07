@@ -19,7 +19,8 @@ Fix2DigitYear <- function(var){
   var <- stringr::str_replace_all(var,"-([0-9][0-9])$","-20\\1")
   var <- stringr::str_replace_all(var,"-([0-9][0-9]) ","-20\\1 ")
   var <- stringr::str_replace_all(var,"^([0-9][0-9])-([0-9][0-9])-([0-9][0-9][0-9][0-9])","\\3-\\2-\\1")
-  var <- unlist(stringr::str_extract_all(var,"^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"))
+  var <- stringr::str_extract(var,"^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")
+  #var <- unlist(stringr::str_extract_all(var,"^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"))
   return(var)
 }
 

@@ -1,5 +1,5 @@
-AVICENNA_Observations <- function(){
-  d <- Get_AVICENNA_Data(folderName="Observations")
+AVICENNA_Observations <- function(keepMotherID){
+  d <- Get_AVICENNA_Data(folderName="Observations")[motheridno %in% keepMotherID]
   
   d[,dateprocess:=Fix2DigitYear(Fix3LetterMonthToNumber(dateprocess))]
   d[,dateprocess:=as.Date(dateprocess)]

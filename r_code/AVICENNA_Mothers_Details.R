@@ -1,7 +1,8 @@
-AVICENNA_Mothers_Details <- function(){
-  d <- Get_AVICENNA_Data(folderName="Mothers Details")
+AVICENNA_Mothers_Details <- function(keepMotherID){
+  d <- Get_AVICENNA_Data(folderName="Mothers Details")[motheridno %in% keepMotherID]
   
   d[,babyrecorddatecreation:=Fix2DigitYear(Fix3LetterMonthToNumber(babyrecorddatecreation))]
+  #d[,x:=Fix2DigitYear(babyrecorddatecreation)]
   d[,babyrecorddatecreation:=as.Date(babyrecorddatecreation)]
   d[,date:=babyrecorddatecreation]
   

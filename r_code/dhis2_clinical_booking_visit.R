@@ -330,8 +330,8 @@ DHIS2_BookingVisit <- function(isControl) {
   # as "day of booking" (ie bookdate)
   #
 
-  d[, ident_dhis2_demof_no_greenf_or_bookf := ifelse(is.na(bookevent), 1, 0)]
-  xtabs(~d$ident_dhis2_demof_no_greenf_or_bookf)
+  d[, ident_dhis2_df_no_gf_or_bf := ifelse(is.na(bookevent), 1, 0)]
+  xtabs(~d$ident_dhis2_df_no_gf_or_bf)
   d[, ident_dhis2_booking := ifelse(is.na(bookevent), 0, 1)]
   xtabs(~d$ident_dhis2_booking)
   
@@ -376,8 +376,8 @@ DHIS2_BookingVisit <- function(isControl) {
   d[,bookevent:=as.character(bookevent)]
   
   # generating some important analysis variables
-  d[,isTrial1ControlBookingPlace:=isControl]
-  d[,isTrial1Pretrial:=ifelse(bookdate<as.Date("2017-01-15"),TRUE,FALSE)]
+  d[,ident_dhis_control:=isControl]
+  d[,ident_dhis_b4_2017_01_15:= bookdate<as.Date("2017-01-15")]
   
   ConvertAllFactorsToChar(d)
   
