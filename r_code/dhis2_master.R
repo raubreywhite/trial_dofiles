@@ -13,6 +13,9 @@ DHIS2_Master <- function(){
   setDT(sData)
   sData[is.na(NEW_bookorgname),NEW_bookorgname:=bookorgname]
   
+  toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
+  for(i in toChangeToBool) sData[[i]] <- !is.na(sData[[i]])
+  
   nrow(data_DHIS2_Booking)
   data_DHIS2_Booking <- merge(data_DHIS2_Booking,sData,by=c("bookorgname"),all.x=T)
   nrow(data_DHIS2_Booking)
