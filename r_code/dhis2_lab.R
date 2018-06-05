@@ -8,6 +8,8 @@ DHIS2_Lab <- function(isControl, earlyData, booklmp) {
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
+  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl)
+  
   # give it a bookevent
   d <- GiveItABookEvent(
     d=d,

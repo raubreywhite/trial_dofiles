@@ -7,13 +7,18 @@ DHIS2_HospitalBirthOutcomes <- function(isControl, earlyData, booklmp) {
     isControl=isControl)
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
+  
+  d <- DHIS2_Remove_If_All_Cols_Empty(
+    d=d,
+    isControl=isControl,
+    continuousNumberLimit=0)
  
   setnames(d,"nncgestationalageatdelivery","gestagedeliv")
-  setnames(d,"ancpreviouspregnancyoutcome","prevpregoutcome")
-  setnames(d,"ancpreviouspregnancybirthweightgram","prevpregbweight")
+  setnames(d,"ancpreviouspregnancyoutcome","pregoutcome")
+  setnames(d,"ancpreviouspregnancybirthweightgram","pregbweight")
   setnames(d,"ancsystolicbloodpressuremmhg","systbp")
   setnames(d,"ancdiastolicbloodpressuremmhg","diastbp")
-  setnames(d,"ancmodeofpreviousdelivery","modeprevdeliv")
+  setnames(d,"ancmodeofpreviousdelivery","modedeliv")
   setnames(d,"indicationforcsectionmentionedinanycolumn","indicforcsec")
   setnames(d,"labcbcredbloodcellcount","redbloodcellcount")
   setnames(d,"usrecommendationscomments","usrecommendcomment")

@@ -1,4 +1,5 @@
 ReshapeToWideAndMerge <- function(base,additional,valueVarsRegex,dcastFormula,mergeVars,identName=NULL){
+  if(nrow(additional)==0) return(base)
   valueVars <- names(additional)
   valueVars <- valueVars[stringr::str_detect(valueVars,valueVarsRegex)]
   w <- dcast.data.table(data=additional[uniqueid %in% unique(base$uniqueid)],

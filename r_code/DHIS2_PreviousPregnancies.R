@@ -8,6 +8,7 @@ DHIS2_PreviousPregnancies <- function(isControl, earlyData, booklmp) {
     useFreadClinic = T)
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
+
   
   if(isControl){
     d[,identificationdocumentnumber:=as.character(NA)]

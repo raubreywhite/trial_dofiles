@@ -1,13 +1,16 @@
-DHIS2_Master <- function(){
-  
+DHIS2_Master <- function(keepDoubleBookings=FALSE){
   ####
   # DHIS2 BOOKING
   print("CLEANING DHIS2 BOOKING")
-  con <- DHIS2_BookingVisit(isControl=TRUE)
-  int <- DHIS2_BookingVisit(isControl=FALSE)
-  data_DHIS2_Booking <- rbind(
-    con,
-    int)
+  if(keepDoubleBookings){
+    data_DHIS2_Booking <-  DHIS2_BookingVisit(isControl=TRUE,keepDoubleBookings=TRUE)
+  } else {
+    con <- DHIS2_BookingVisit(isControl=TRUE)
+    int <- DHIS2_BookingVisit(isControl=FALSE)
+    data_DHIS2_Booking <- rbind(
+      con,
+      int)
+  }
   
   sData <- readxl::read_excel("../data_raw/structural_data/bookorgname.xlsx")
   setDT(sData)
@@ -79,6 +82,19 @@ DHIS2_Master <- function(){
   # HOSPITAL BIRTH OUTCOMES
   print("CLEANING DHIS2 HOSPITAL BIRTH OUTCOMES")
   data_DHIS2_HospitalBirthOutcomes <- DHIS2_HospitalBirthOutcomes(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
+  
+  ####
+  #
+  print("CLINICAL CURRENT PREG OUTCOMES")
+  data_DHSI2_CurrentPregnancyOutcomes <- DHIS2_CurrentPregnancyOutcomes(isControl=F,
+                                                                        earlyData = earlyData,
+                                                                        booklmp = booklmp)
+  ####
+  #
+  print("CLINICAL CURRENT PREG OUTCOMES")
+  data_DHIS2_PregnancyClosingNotes <- DHIS2_PregnancyClosingNotes(isControl=F,
+                                                                        earlyData = earlyData,
+                                                                        booklmp = booklmp)
   
   ### 
   # start reshaping to wide
@@ -169,6 +185,32 @@ DHIS2_Master <- function(){
     dcastFormula="uniqueid+bookevent+booknum~eventnum",
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_dhis2hbo"
+  )
+  nrow(data_DHIS2_Booking)
+  nrow(d)
+  ncol(d)
+  
+  print("RESHAPE TO WIDE AND MERGE data_DHSI2_CurrentPregnancyOutcomes")
+  d <- ReshapeToWideAndMerge(
+    base=d,
+    additional=data_DHSI2_CurrentPregnancyOutcomes,
+    valueVarsRegex="^cpo",
+    dcastFormula="uniqueid+bookevent+booknum~eventnum",
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_cpo"
+  )
+  nrow(data_DHIS2_Booking)
+  nrow(d)
+  ncol(d)
+  
+  print("RESHAPE TO WIDE AND MERGE data_DHIS2_PregnancyClosingNotes")
+  d <- ReshapeToWideAndMerge(
+    base=d,
+    additional=data_DHIS2_PregnancyClosingNotes,
+    valueVarsRegex="^pcn",
+    dcastFormula="uniqueid+bookevent+booknum~eventnum",
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_pcn"
   )
   nrow(data_DHIS2_Booking)
   nrow(d)

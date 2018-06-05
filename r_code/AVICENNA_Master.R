@@ -1,25 +1,25 @@
 AVICENNA_Master <- function(keepMotherID, includeObs=FALSE){
   print("AVICENNA MOTHERS DETAILS")
   data_AVICENNA_Mothers_Details <- AVICENNA_Mothers_Details(keepMotherID=keepMotherID)
-  data_AVICENNA_Mothers_Details[,ident_avic_amd:=FALSE]
+  data_AVICENNA_Mothers_Details[,ident_avic_amd:=TRUE]
   
   print("AVICENNA CAUSE OF CS")
   data_AVICENNA_Cause_Of_CS <- AVICENNA_Cause_Of_CS(keepMotherID=keepMotherID)
-  data_AVICENNA_Cause_Of_CS[,ident_avic_acs:=FALSE]
+  data_AVICENNA_Cause_Of_CS[,ident_avic_acs:=TRUE]
   
   print("AVICENNA LAB DETAILS")
   data_AVICENNA_Lab_Details <- AVICENNA_Lab_Details(keepMotherID=keepMotherID)
-  data_AVICENNA_Lab_Details[,ident_avic_alab:=FALSE]
+  data_AVICENNA_Lab_Details[,ident_avic_alab:=TRUE]
   
   if(includeObs){
     print("AVICENNA OBSERVATIONS")
     data_AVICENNA_Observations <- AVICENNA_Observations(keepMotherID=keepMotherID)
-    data_AVICENNA_Observations[,ident_avic_aobs:=FALSE]
+    data_AVICENNA_Observations[,ident_avic_aobs:=TRUE]
   }
   
   print("AVICENNA BABY BIRTH")
   data_AVICENNA_BabyBirth <- AVICENNA_BabyBirth(keepMotherID=keepMotherID)
-  data_AVICENNA_BabyBirth[,ident_avic_abb:=FALSE]
+  data_AVICENNA_BabyBirth[,ident_avic_abb:=TRUE]
   
   d <- MergeAvicennaFiles(
     earlyData=data_AVICENNA_Mothers_Details,

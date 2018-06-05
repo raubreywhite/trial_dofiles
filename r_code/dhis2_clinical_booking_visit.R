@@ -1,4 +1,4 @@
-DHIS2_BookingVisit <- function(isControl) {
+DHIS2_BookingVisit <- function(isControl, keepDoubleBookings=FALSE) {
   FOLDERS <- DHIS2_Folders(isControl = isControl)
 
   if (isControl) {
@@ -386,6 +386,7 @@ DHIS2_BookingVisit <- function(isControl) {
   toremove <- readxl::read_excel("../data_raw/structural_data/remove_from_dhis2.xlsx")
   setDT(toremove)
   
+  warning("make sure this actually works")
   d <- d[!(
     bookevent %in% na.omit(toremove$bookevent) |
       uniqueid %in% na.omit(toremove$uniqueid)
@@ -449,14 +450,21 @@ DHIS2_BookingVisit <- function(isControl) {
   
   xtabs(~d$dataextractor)
   
-  # drop if there are multiple bookings for the same personid on the same date
-  d[,keep:=TRUE]
-  setorder(d,demoidnumber,bookdate)
-  d[,shiftdate:=shift(bookdate),by=demoidnumber]
-  d[shiftdate==bookdate,keep:=FALSE]
-  d <- d[keep==TRUE]
-  d[,shiftdate:=NULL]
-  d[,keep:=NULL]
+  if(!keepDoubleBookings){
+    # drop if there are multiple bookings for the same personid on the same date
+    d[,keep:=TRUE]
+    setorder(d,demoidnumber,bookdate)
+    d[,shiftdate:=shift(bookdate),by=demoidnumber]
+    d[shiftdate==bookdate,keep:=FALSE]
+    d <- d[keep==TRUE]
+    d[,shiftdate:=NULL]
+    d[,keep:=NULL]
+  } else {
+    setorder(d,demoidnumber,bookdate)
+    d[,numberbookings:=.N,by=.(demoidnumber,bookdate)]
+    xtabs(~d$numberbookings)
+    d <- d[numberbookings>1]
+  }
   
   #####
   # multiple bookings for same person
@@ -467,6 +475,8 @@ DHIS2_BookingVisit <- function(isControl) {
   
   #d[demoidnumber==401404496,c("demoidnumber","uniqueid","bookevent","bookdate")]
 
+  
+  
   return(d)
 }
 
