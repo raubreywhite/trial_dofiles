@@ -6,6 +6,7 @@ DHIS2_Demographics <- function(isControl){
     isControl=isControl,
     setuniqueid=F)
   
+  
   if(isControl){
     setnames(d,"instance","uniqueid")
     setnames(d,"created","datecreated")
@@ -158,6 +159,7 @@ DHIS2_Demographics <- function(isControl){
   d[,incomecat:=as.numeric(cut(income,
                                breaks=c(0,200,900,1824,3054,100000),
                                include.lowest=T))]
+  
   
   ConvertAllFactorsToChar(d)
   return(d)

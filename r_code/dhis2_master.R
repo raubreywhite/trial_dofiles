@@ -12,6 +12,8 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
       int)
   }
   
+  # here we load in "bookorgname" and give a bunch of indicators
+  # i.e. trial 1 indicators
   sData <- readxl::read_excel("../data_raw/structural_data/bookorgname.xlsx")
   setDT(sData)
   sData[is.na(NEW_bookorgname),NEW_bookorgname:=bookorgname]
@@ -19,9 +21,27 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
   for(i in toChangeToBool) sData[[i]] <- !is.na(sData[[i]])
   
+  # identify new bookorgnames!!
+  unique(data_DHIS2_Booking$bookorgname)
+  
+  missingNames <- data.table("bookorgname"=unique(data_DHIS2_Booking$bookorgname)[!unique(data_DHIS2_Booking$bookorgname) %in% sData$bookorgname])
+  openxlsx::write.xlsx(missingNames,"../data_raw/structural_data/to_be_processed_bookorgname.xlsx")
+  
+  #
+  
   nrow(data_DHIS2_Booking)
   data_DHIS2_Booking <- merge(data_DHIS2_Booking,sData,by=c("bookorgname"),all.x=T)
   nrow(data_DHIS2_Booking)
+  
+  # changing the structural indicators to include additional data
+  # e.g. trial 1 needs to also include dates
+  
+  # ident_TRIAL_1 is only for 2017-01-15 to 2017-01-15
+  data_DHIS2_Booking[
+    (bookdate<as.Date("2017-01-15") | bookdate>as.Date("2018-01-15")) &
+      !is.na(ident_TRIAL_1),ident_TRIAL_1:=FALSE]
+  
+  ## structural indicators end
   
   data_DHIS2_Booking[,bookorgname:=NEW_bookorgname]
   data_DHIS2_Booking[,NEW_bookorgname:=NULL]

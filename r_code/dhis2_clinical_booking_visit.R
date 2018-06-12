@@ -324,7 +324,14 @@ DHIS2_BookingVisit <- function(isControl, keepDoubleBookings=FALSE) {
   nrow(d)
   d <- merge(d, data_DHIS2_Demographics, by = c("uniqueid"), all = T)
   nrow(d)
-
+  
+  # if control and dont have booking, then delete
+  if(isControl){
+    d <- d[!is.na(bookorgname)]
+  } else {
+    #if intervention and dont have booking, then bookorgname="ppconly"
+    d[is.na(bookorgname),bookorgname:="ppconly"]
+  }
   #
   # for the abortions, we now have "day of showing up and getting registered in demographic file"
   # as "day of booking" (ie bookdate)
