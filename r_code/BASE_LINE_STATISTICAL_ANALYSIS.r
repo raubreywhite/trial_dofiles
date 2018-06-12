@@ -1,6 +1,6 @@
 BASE_LINE_STATISTICAL_ANALYSIS <- function(d){
 
-  bookings <- d[,
+  bookings <- d[bookdate>=as.Date("2017-01-15") & bookdate<=as.Date("2017-09-15"),
                 .(
                   numWomen=.N
                 ),

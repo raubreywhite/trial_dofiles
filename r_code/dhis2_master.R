@@ -36,9 +36,9 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   # changing the structural indicators to include additional data
   # e.g. trial 1 needs to also include dates
   
-  # ident_TRIAL_1 is only for 2017-01-15 to 2017-01-15
+  # ident_TRIAL_1 is only for 2017-01-15 to 2017-09-15
   data_DHIS2_Booking[
-    (bookdate<as.Date("2017-01-15") | bookdate>as.Date("2018-01-15")) &
+    (bookdate<as.Date("2017-01-15") | bookdate>as.Date("2017-09-15")) &
       !is.na(ident_TRIAL_1),ident_TRIAL_1:=FALSE]
   
   ## structural indicators end
