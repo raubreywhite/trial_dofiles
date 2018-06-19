@@ -115,6 +115,14 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   data_DHIS2_PregnancyClosingNotes <- DHIS2_PregnancyClosingNotes(isControl=F,
                                                                         earlyData = earlyData,
                                                                         booklmp = booklmp)
+  ####
+  #
+  print("POSTPARTUM CARE")
+  data_DHIS2_PostPartumCare <- DHIS2_DHIS2_PostPartumCare(isControl=F,
+                                                                  earlyData = earlyData,
+                                                                  booklmp = booklmp)
+  
+  
   
   ### 
   # start reshaping to wide
@@ -235,6 +243,23 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
+  
+  print("RESHAPE TO WIDE AND MERGE data_DHIS2_PostPartumCare")
+  d <- ReshapeToWideAndMerge(
+    base=d,
+    additional=data_DHIS2_PostPartumCare,
+    valueVarsRegex="^ppc",
+    dcastFormula="uniqueid+bookevent+booknum~eventnum",
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_ppc"
+  )
+  nrow(data_DHIS2_Booking)
+  nrow(d)
+  ncol(d)
+  
+  
+  
+  
   
   d[,calc_expected_due_delivery:=booklmp+280]
   d[is.na(calc_expected_due_delivery),

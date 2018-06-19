@@ -113,9 +113,18 @@ print(sprintf("Total time: %s min",round(as.numeric(difftime(timeEndTotal,timeSt
 ##################
 ##################
 
+####
+# PLACE OF DELIVERY INFORMATION CHECKING
+# LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPORT
+xtabs(~d$cpoplaceofbirth_1+d$ppcplaceofdelivery_1,addNA=T)
+####
+
+
 SaveWomenWithAbortionsIn2017(d)
 
 abortions <- readRDS(file.path(FOLDER_DATA_MBO,"abortions.RDS"))$bookevent
+
+ppcplaceofdelivery
 
 tokeep <- d[
   isExpectedToHaveDelivered==TRUE &
@@ -140,7 +149,15 @@ tokeep <- d[
     "village",
     "bookintendbirth",
     "bookrecobirth",
-    "calc_expected_due_delivery"
+    "calc_expected_due_delivery",
+    "ppcplaceofdelivery_1",
+    "ppcplaceofdelivery_2",
+    "ppcplaceofdelivery_3",
+    "ppcplaceofdelivery_4",
+    "cpoplaceofbirth_1",
+    "cpoplaceofbirth_2",
+    "cpoplaceofbirth_3",
+    "cpoplaceofbirth_4"
     )]
 
 #gen IS_ABORTION="ABORTION" if bookevent==0492304932
