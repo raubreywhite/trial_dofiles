@@ -16,6 +16,7 @@ if(.Platform$OS.type=="unix"){
   })
   FOLDER_DATA_RAW <- file.path(getwd(),"../data_raw")
   FOLDER_DATA_CLEAN <- file.path(getwd(),"../data_clean")
+  FOLDER_DATA_RESULTS <- file.path(getwd(),"../results/")
   FOLDER_DATA_MBO <- file.path(getwd(),"../results/mbo_r/")
   FOLDER_DROPBOX_RESULTS <- "~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Results/"
 }
@@ -202,6 +203,9 @@ if(nrow(womenNew)>0) openxlsx::write.xlsx(womenNew,
                                           file.path(FOLDER_DATA_MBO,"new",sprintf("%s.xlsx",yearmonth)))
 
 saveRDS(rbind(previouslyIdentifiedWomen,newWomen),file.path(FOLDER_DATA_CLEAN,"identified_women.RDS"))
+
+# mervett HBO_Completeness
+HBO_Completeness(d)
 
 # tamara kappa/percent agreement values
 KappaValues(d)
