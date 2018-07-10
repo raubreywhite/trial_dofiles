@@ -94,6 +94,9 @@ d <- MergeDHISToAVICENNA(
   avicenna=HBO_Master())
 nrow(d)
 
+# CALC INDICATORS OLSO
+IndicatorsOsloGenerate(d)
+
 timeEndAnalysis <- Sys.time()
 
 # this file saves the dataset to the network drive
@@ -211,6 +214,7 @@ HBO_Completeness(d)
 KappaValues(d)
 
 BASE_LINE_STATISTICAL_ANALYSIS(d)
+IndicatorsOsloAnalyse(d)
 
 # to make graphs
 d[,bookmonth:=lubridate::month(bookdate)]

@@ -10,18 +10,23 @@ MatchEarlyToLate <- function(earlyData,lateData,id,earlyDate,earlyNum,lateDate,l
   # 
   earlyData[,startDate:=get(earlyDate)]
   earlyData[,endDate:=shift(startDate,n=1L,type="lead"),by=get(id)]
+  # those two lines describe if the enddate will be not available or more than 42 weeks (that means the next pregnancy)
   earlyData[is.na(endDate),endDate:=startDate+lengthAfterEarlyEvent]
   earlyData[endDate>startDate+lengthAfterEarlyEvent,endDate:=startDate+lengthAfterEarlyEvent]
   
+  # the "late stuff" e.g. ultrasound, bp, birth happens in 1 day
   lateData[,startDate:=get(lateDate)]
   lateData[,endDate:=startDate+1]
   
   earlyData[,id:=as.character(get(id))]
   lateData[,id:=as.character(get(id))]
   
+  # tell R what the id is, the start date, and the end date
   setkey(lateData, id, startDate, endDate)
   setkey(earlyData, id, startDate, endDate)
   
+  # do the merging
+  # this is the same as "merge", except it lets us merge on date ranges
   m <- foverlaps(lateData, earlyData, by.x=c("id", "startDate", "endDate"),type="within")
   m <- na.omit(m[,c(id,earlyNum,lateNum),with=F])
  

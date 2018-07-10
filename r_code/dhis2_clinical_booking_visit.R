@@ -375,6 +375,7 @@ DHIS2_BookingVisit <- function(isControl, keepDoubleBookings=FALSE) {
 
   # Calculate EDD based on LMP
   d[, expecteddateofdelivery := booklmp + 280]
+  d[, ident_expected_delivered:= expecteddateofdelivery < min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)]
 
   # Create a new variable for gestational age
   d[, age := floor(as.numeric(difftime(bookdate, dob, units = "days")) / 365)]

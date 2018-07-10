@@ -1,3 +1,24 @@
+ChiSqTestForMonthlyAvicennaMatching <- function(
+  trialArmA,
+  trialArmB,
+  is_Avicenna_abb_amd_A,
+  is_Avicenna_abb_amd_B
+){
+  
+  x <- matrix(c(
+    sum(trialArmA)-sum(is_Avicenna_abb_amd_A),
+    sum(trialArmB)-sum(is_Avicenna_abb_amd_B),
+    sum(is_Avicenna_abb_amd_A),
+    sum(is_Avicenna_abb_amd_B)
+  ),ncol=2)
+  
+  returnValue <- 99
+  try(returnValue <- chisq.test(x)$p.value, TRUE)
+  
+  return(returnValue)
+  
+}
+
 BASE_LINE_STATISTICAL_ANALYSIS <- function(d){
 
   bookings <- d[bookdate>=as.Date("2017-01-15") & bookdate<=as.Date("2017-09-15"),
@@ -89,6 +110,91 @@ ggsave(filename=file.path(FOLDER_DROPBOX_RESULTS,"baselinecohort.png"),
        units="mm")
   
   
+  ######## 
+
+####Denominators
+
+d[,bookyearmonth:=sprintf("%s-%s",lubridate::year(bookdate),formatC(lubridate::month(bookdate),width=2,flag="0"))]
+
+res <- d[,.(
+  total=.N,
+  mahimasClinics=sum(ident_TRIAL_1,na.rm=T),
+  trialArmA=sum(ident_TRIAL_1==T &ident_dhis2_control==T, na.rm=T),
+  trialArmB=sum(ident_TRIAL_1==T &ident_dhis2_control==F, na.rm=T),
+  is_Avicenna_abb_amd=sum(
+    ident_TRIAL_1==T & 
+    ident_avic_abb==T & 
+    ident_avic_amd==T, na.rm=T),
+  
+  is_Avicenna_abb=sum( 
+    ident_TRIAL_1==T &
+    ident_avic_abb==T, na.rm=T),
+  
+  is_Avicenna_amd=sum( 
+    ident_TRIAL_1==T &
+    ident_avic_amd==T, na.rm=T),
+  
+  is_Avicenna_abb_amd_A=sum(
+    ident_TRIAL_1==T & 
+      ident_dhis2_control==T &
+      ident_avic_abb==T & 
+      ident_avic_amd==T, na.rm=T),
+  
+  is_Avicenna_abb_amd_B=sum(
+    ident_TRIAL_1==T & 
+      ident_dhis2_control==F &
+      ident_avic_abb==T & 
+      ident_avic_amd==T, na.rm=T)
   
   
+  ),by=.(
+  bookyearmonth
+)]
+setorder(res,bookyearmonth)
+print(res)
+
+
+res[,propAvicenna:=is_Avicenna_abb_amd/mahimasClinics]
+res[,propAvicennaA:=is_Avicenna_abb_amd_A/trialArmA]
+res[,propAvicennaB:=is_Avicenna_abb_amd_B/trialArmB]
+
+res[,monthlyAviccenaPvalue:=
+      ChiSqTestForMonthlyAvicennaMatching(
+        trialArmA=trialArmA,
+        trialArmB=trialArmB,
+        is_Avicenna_abb_amd_A=is_Avicenna_abb_amd_A,
+        is_Avicenna_abb_amd_B=is_Avicenna_abb_amd_B),
+    by=bookyearmonth]
+
+#### OVERALL PVALUE
+
+# number control
+sum(res$trialArmA)
+
+# number intervention
+sum(res$trialArmB)
+
+# number control matched
+sum(res$is_Avicenna_abb_amd_A)
+
+# number intervention
+sum(res$is_Avicenna_abb_amd_B)
+
+x <- matrix(c(
+  sum(res$trialArmA)-sum(res$is_Avicenna_abb_amd_A),
+  sum(res$trialArmB)-sum(res$is_Avicenna_abb_amd_B),
+  sum(res$is_Avicenna_abb_amd_A),
+  sum(res$is_Avicenna_abb_amd_B)
+),ncol=2)
+
+(overallPvalue <- chisq.test(x)$p.value)
+res[,totalAviccenaPvalue:=overallPvalue]
+
+
+openxlsx::write.xlsx(res, file.path(FOLDER_DROPBOX_RESULTS,"DENOMINATORS.xlsx"))
+
+
+
 }
+
+

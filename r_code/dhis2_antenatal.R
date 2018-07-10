@@ -202,7 +202,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
     earlyDate="bookdate",
     earlyNum="booknum",
     lateDate="andate",
-    lengthAfterEarlyEvent=40*7,
+    lengthAfterEarlyEvent=42*7,
     keepbooklmp=FALSE
   )
   

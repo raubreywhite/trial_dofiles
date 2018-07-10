@@ -19,7 +19,7 @@ DHIS2_Management <- function(isControl, earlyData, booklmp) {
     earlyDate="bookdate",
     earlyNum="booknum",
     lateDate="eventdate",
-    lengthAfterEarlyEvent=40*7,
+    lengthAfterEarlyEvent=42*7,
     keepbooklmp=FALSE
   )
   

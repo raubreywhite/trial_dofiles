@@ -1,12 +1,10 @@
-
-
-DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp) {
+DHIS2_NewbornCare <- function(isControl, earlyData, booklmp) {
   # if it is a conrol, then throw an error
-  if(isControl) stop("control code not written for risk factors")
+  if(isControl) stop("control code not written for controls")
   
   d <- Get_DHIS2_Data(
-    controlName = "Postpartum care.csv",
-    clinicName = "Postpartum care.csv",
+    controlName = "Newborn care.csv",
+    clinicName = "Newborn care.csv",
     isControl=isControl)
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
@@ -17,7 +15,7 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp) {
   nrow(d)
   
   nrow(d)
-  d <- RemoveEventByFile(d=d, filename="remove_from_dhis2_ppc.xlsx")
+  d <- RemoveEventByFile(d=d, filename="remove_from_dhis2_nbc.xlsx")
   nrow(d)
   
   # give it a bookevent
@@ -29,10 +27,11 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp) {
     earlyDate="bookdate",
     earlyNum="booknum",
     lateDate="eventdate",
-    lengthAfterEarlyEvent=42*7,
+    lengthAfterEarlyEvent=40*7,
     keepbooklmp=FALSE
   )
   xtabs(~d$eventnum)
+  d$uniqueid[d$eventnum==4]
   
   setnames(d,"event","ppcevent")
   setnames(d,"ancppcvisitundertakenbywhom","ppcvisitundertakenbywhom")
