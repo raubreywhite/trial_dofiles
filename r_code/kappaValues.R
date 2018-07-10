@@ -1,4 +1,4 @@
-KappaValues <- function(d){
+KappaValues <- function(){
   dk <- DHIS2_Master(keepDoubleBookings = TRUE) 
   
   nam <- names(dk)

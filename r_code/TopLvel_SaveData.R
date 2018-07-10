@@ -1,20 +1,13 @@
-SaveAllDataFiles <- function(d){
-  
-  # this is a bit weird, ignore it for the moment
-  lists <- c()
-  for(i in 1:ncol(d)) if(is.list(d[[i]])) lists <- c(lists,i)
-  for(i in lists){
-    n <- names(d)[i]
-    d[,(n):=as.character(get(n))]
-  }
-  
+SaveFullFileToNetwork <- function(d){
   # this saves the file to the network
   print("SAVING FILES TO NETWORK")
   saveRDS(d,file.path(FOLDER_DATA_CLEAN,"full_data_from_r.rds"))
   fwrite(d,file.path(FOLDER_DATA_CLEAN,"full_data_from_r.csv"))
   #openxlsx::write.xlsx(d,file.path(FOLDER_DATA_CLEAN,"full_data_from_r.xlsx"))
   print("FINISHED SAVING FILES TO NETWORK")
-  
+}
+
+SaveAnonymousOslo <- function(d){
   
   ## here we delete the sensitive variables
   d[,trackedentity:=NULL]
@@ -97,14 +90,32 @@ SaveAllDataFiles <- function(d){
   fwrite(d,"~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_data_from_r.csv")
   print("FINISHED SAVING FILES TO DROPBOX")
   
+  print("REMOVING D FROM MEMORY AS IT IS NOW DESTROYED BY ANONYMIZING")
   # delete the dataset "d" to make space in the memory
   rm("d", envir=.GlobalEnv)
-  
+}
+
+LoadDataFileFromNetwork <- function(d){
   print("RELOADING DATASET FROM NETWORK DRIVE")
   d <- readRDS(file.path(FOLDER_DATA_CLEAN,"full_data_from_r.rds"))
   print("FINISHED RELOADING DATASET FROM NETWORK DRIVE")
   
-  for(i in 1:10) print("FINISHED!!")
-  
   return(d)
+}
+
+SaveAllDataFiles <- function(d){
+  
+  # this is a bit weird, ignore it for the moment
+  lists <- c()
+  for(i in 1:ncol(d)) if(is.list(d[[i]])) lists <- c(lists,i)
+  for(i in lists){
+    n <- names(d)[i]
+    d[,(n):=as.character(get(n))]
+  }
+  
+  # start saving our files
+  SaveFullFileToNetwork(d)
+  SaveAnonymousOslo(d)
+  
+
 }
