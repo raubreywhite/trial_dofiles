@@ -173,7 +173,7 @@ IndicatorsOsloGenerate <- function(d=NULL){
 # this one makes nice excel tables containing
 # the summary indicators (e.g. proportions)
 IndicatorsOsloAnalyse <- function(d=NULL){
-  if(!exists("d")) d <- LoadDataFileFromNetwork()
+  #if(!exists("d")) d <- LoadDataFileFromNetwork()[ident_dhis2_booking==1]
   resPalestine <- d[ident_expected_delivered==TRUE,.(
     numerator=sum(custo_anvisit_timely_by_bookgestage,na.rm=T),
     denominator=sum(!is.na(custo_anvisit_timely_by_bookgestage)),

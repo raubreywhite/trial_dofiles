@@ -1,6 +1,6 @@
 
 
-DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp) {
+DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_ident_dhis2_booking) {
   # if it is a conrol, then throw an error
   if(isControl) stop("control code not written for risk factors")
   
@@ -18,7 +18,18 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp) {
   d <- RemoveEventByFile(d=d, filename="remove_from_dhis2_cpo.xlsx")
   nrow(d)
   
+  nrow(d)
+  d <- merge(d,data_ident_dhis2_booking,by="uniqueid")
+  nrow(d)
   
+  nrow(d)
+  # for women with no booking, their "book date" is
+  # date of demographic creation.
+  # this AWLAYS happens after the baby has been born
+  # we therefore need to make the "baby birth event"
+  # 60 days later, for purposes of matching
+  # we then correct this afterwards
+  d[ident_dhis2_booking==0,eventdate:=eventdate+60]
   # give it a bookevent
   d <- GiveItABookEvent(
     d=d,
@@ -31,6 +42,9 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp) {
     lengthAfterEarlyEvent=42*7,
     keepbooklmp=FALSE
   )
+  nrow(d)
+  d[ident_dhis2_booking==0,eventdate:=eventdate-60]
+  d[,ident_dhis2_booking:=NULL]
   
   setnames(d,"event","cpoevent")
   #setnames(d,"programstageinstance","uniqueid")
@@ -59,6 +73,7 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp) {
   setnames(d,"anchistoryofdvtinpreviouspregnancy","cpodvt")
   setnames(d,"previouscomplicationsnone","cpocomplicationsnone")
   
+  d <- CleanOrgName(data=d,nameToReplace="cpoorgname")
   
   return(d)
 }

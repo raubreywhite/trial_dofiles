@@ -86,13 +86,16 @@ SaveAnonymousOslo <- function(d){
   
   # this saves the file to the dropbox
   print("SAVING FILES TO DROPBOX")
-  saveRDS(d,"~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_data_from_r.rds")
-  fwrite(d,"~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_data_from_r.csv")
+  saveRDS(d[ident_dhis2_booking==1],"~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_data_from_r.rds")
+  fwrite(d[ident_dhis2_booking==1],"~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_data_from_r.csv")
   print("FINISHED SAVING FILES TO DROPBOX")
   
   print("REMOVING D FROM MEMORY AS IT IS NOW DESTROYED BY ANONYMIZING")
   # delete the dataset "d" to make space in the memory
   rm("d", envir=.GlobalEnv)
+  
+  # garbage cleaning
+  gc()
 }
 
 LoadDataFileFromNetwork <- function(d){

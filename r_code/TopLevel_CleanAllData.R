@@ -3,7 +3,7 @@ CleanAllData <- function(){
   
   # CLEAN DHIS
   dhis=suppressWarnings(DHIS2_Master())
-  dhis <- dhis[ident_dhis2_booking==1]
+  #dhis <- dhis[ident_dhis2_booking==1]
   keepMotherID <- unique(dhis$motheridno)
   
   # CLEAN AVICENNA
@@ -34,6 +34,9 @@ CleanAllData <- function(){
   IndicatorsOsloGenerate(d)
   
   timeEndAnalysis <- Sys.time()
+  
+  # garbage cleaning
+  gc()
   
   return(d)
 }

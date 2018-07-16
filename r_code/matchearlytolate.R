@@ -70,6 +70,12 @@ GiveItABookEvent <- function(
     lateNum="eventnum",
     lengthAfterEarlyEvent=lengthAfterEarlyEvent)
   
+  #temp <- merge(d,m,by=c(id,"eventnum"),all.x=T)
+  #temp[is.na(booknum)]$uniqueid[1]
+  #d[uniqueid=="A04QuXDWMfh"]
+  #earlyData[uniqueid=="A04QuXDWMfh"]
+  
+  nrow(m)
   nrow(d)
   d <- merge(d,m,by=c(id,"eventnum"))
   nrow(d)

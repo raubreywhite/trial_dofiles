@@ -1,3 +1,8 @@
+###### SETUP STARTS
+###################
+###################
+###################
+
 # define our dates
 CLINIC_INTERVENTION_DATE <- "2018-04-30"
 CLINIC_CONTROL_DATE <- "2018-04-30"
@@ -38,6 +43,8 @@ library(ggplot2)
 # this is the same as going "library(r_code)" (except we cant do that
 # because r_code isn't a package)
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
+# make sure that all of the file sources go DIRECTLY
+# into the **global** environment
 sapply(fileSources, source, .GlobalEnv)
 
 # date stuff
@@ -50,6 +57,15 @@ weekyear <- sprintf("%s-%s",lubridate::isoyear(lubridate::today()),lubridate::is
 yearmonth <- sprintf("%s-%s",
         lubridate::year(lubridate::today()),
         lubridate::month(lubridate::today()))
+
+
+###################
+###################
+###################
+###### SETUP ENDS
+###################
+###################
+###################
 
 ####################
 ####################
@@ -71,8 +87,7 @@ Analyses(d)
 ##################
 ##################
 
-
-MissingHBO(d)
+MissingHBO(d[ident_dhis2_booking==1])
 
 
 ####

@@ -1,3 +1,35 @@
+CleanOrgName <- function(data,nameToReplace="bookorgname"){
+  oldName <- nameToReplace
+  newName <- sprintf("NEW_%s",nameToReplace)
+  
+  sData <- readxl::read_excel("../data_raw/structural_data/bookorgname.xlsx")
+  setDT(sData)
+  setnames(sData,"bookorgname",oldName)
+  setnames(sData,"NEW_bookorgname",newName)
+  sData[is.na(get(newName)),(newName):=get(oldName)]
+  
+  toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
+  for(i in toChangeToBool) sData[[i]] <- !is.na(sData[[i]])
+  
+  missingNames <- data.table("bookorgname"=unique(data[[oldName]])[!unique(data[[oldName]]) %in% sData[[oldName]]])
+  openxlsx::write.xlsx(missingNames,
+                       sprintf("../data_raw/structural_data/to_be_processed_%s.xlsx",nameToReplace))
+  
+  
+  sData <- sData[,c(oldName,newName),with=F]
+  
+  data[,(oldName):=unlist(ExtractOnlyEnglishLetters(get(oldName)))]
+  
+  nrow(data)
+  data <- merge(data,sData,by=c(oldName),all.x=T)
+  nrow(data)
+  
+  data[,(oldName):=get(newName)]
+  data[,(newName):=NULL]
+  
+  return(data)
+}
+
 DHIS2_Master <- function(keepDoubleBookings=FALSE){
   ####
   # DHIS2 BOOKING
@@ -51,6 +83,7 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   
   earlyData <- unique(data_DHIS2_Booking[,c("uniqueid","bookdate","booknum")])
   booklmp <- unique(data_DHIS2_Booking[,c("uniqueid","bookevent","booknum","booklmp")])
+  data_ident_dhis2_booking <- unique(data_DHIS2_Booking[,c("uniqueid","ident_dhis2_booking")])
   
   ####
   # DHIS2 ANTENATAL
@@ -108,7 +141,8 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   print("CLINICAL CURRENT PREG OUTCOMES")
   data_DHSI2_CurrentPregnancyOutcomes <- DHIS2_CurrentPregnancyOutcomes(isControl=F,
                                                                         earlyData = earlyData,
-                                                                        booklmp = booklmp)
+                                                                        booklmp = booklmp,
+                                                                        data_ident_dhis2_booking = data_ident_dhis2_booking)
   ####
   #
   print("CLINICAL CURRENT PREG OUTCOMES")

@@ -1,5 +1,5 @@
 MissingHBO <- function(d=NULL){
-  if(is.null(d)) d <- LoadDataFileFromNetwork()
+  if(is.null(d)) d <- LoadDataFileFromNetwork()[ident_dhis2_booking==1]
   
   SaveWomenWithAbortionsIn2017(d)
   

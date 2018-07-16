@@ -346,6 +346,10 @@ DHIS2_BookingVisit <- function(isControl, keepDoubleBookings=FALSE) {
   d[is.na(bookevent), bookdate := datecreated]
   d[is.na(bookevent), bookevent := sprintf("%s%s", ifelse(isControl,"CON","INT"), 1:.N)]
 
+  #d[demoidnumber==852188531]
+  #d[uniqueid=="AqJL4IiVSJv"]
+  #2017-09-10
+  
   #
   d[, bookdate := as.Date(bookdate)]
   d[, booklmp := as.Date(booklmp)]

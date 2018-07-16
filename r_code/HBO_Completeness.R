@@ -3,6 +3,7 @@
 HBO_Completeness <-function(d){
   
     tokeep <- d[
+      ident_dhis2_booking==1 &
       isExpectedToHaveDelivered==TRUE &
       ident_TRIAL_1==TRUE,]
     
