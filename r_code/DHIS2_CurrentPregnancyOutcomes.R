@@ -19,7 +19,7 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   nrow(d)
   
   nrow(d)
-  d <- merge(d,data_ident_dhis2_booking,by="uniqueid")
+  d <- merge(d,data_ident_dhis2_booking,by="uniqueid", all.x=TRUE)
   nrow(d)
   
   nrow(d)
