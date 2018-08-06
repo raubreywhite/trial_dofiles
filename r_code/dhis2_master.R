@@ -316,6 +316,8 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   d[motheridbook_lateDate>temp,motheridbook_lateDate:=temp-1]
   d[,temp:=NULL]
   
+  d[,bookyearmonth:=YearMonth(bookdate)]
+  
   #####################
   #####################
   #####################

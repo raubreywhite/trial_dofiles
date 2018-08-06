@@ -4,8 +4,8 @@
 ###################
 
 # define our dates
-CLINIC_INTERVENTION_DATE <- "2018-04-30"
-CLINIC_CONTROL_DATE <- "2018-04-30"
+CLINIC_INTERVENTION_DATE <- "2018-07-26"
+CLINIC_CONTROL_DATE <- "2018-07-26"
 
 # define the folders
 tryCatch({
@@ -52,6 +52,7 @@ MAX_YEAR <- stringr::str_sub(CLINIC_CONTROL_DATE,1,4)
 MAX_MONTH <- substr(CLINIC_CONTROL_DATE,6,7)
 
 DATE <- lubridate::today()
+DATA_DATE <- min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)
 
 weekyear <- sprintf("%s-%s",lubridate::isoyear(lubridate::today()),lubridate::isoweek(lubridate::today()))
 yearmonth <- sprintf("%s-%s",
@@ -73,13 +74,15 @@ yearmonth <- sprintf("%s-%s",
 ####################
 ####################
 
-d <- CleanAllData()
+# make this TRUE if you want to include the PPC
+d <- CleanAllData(includePPC=FALSE)
+
+####################
+#NOW run HBO stuff##
 
 SaveAllDataFiles(d)
 
-d <- LoadDataFileFromNetwork()
-
-Analyses(d)
+Analyses(d=LoadDataFileFromNetwork())
 
 ##################
 ##################
@@ -87,11 +90,12 @@ Analyses(d)
 ##################
 ##################
 
-MissingHBO(d[ident_dhis2_booking==1])
+MissingHBO()
 
 
 ####
 # PLACE OF DELIVERY INFORMATION CHECKING
 # LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPORT
-xtabs(~d$cpoplaceofbirth_1+d$ppcplaceofdelivery_1,addNA=T)
+d <- LoadDataFileFromNetwork()
+#xtabs(~d$cpoplaceofbirth_1+d$ppcplaceofdelivery_1,addNA=T)
 ####

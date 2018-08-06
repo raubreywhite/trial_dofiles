@@ -1,6 +1,7 @@
 
 
 HBO_Completeness <-function(d){
+    warning("THIS ONLY TAKES INTO ACCOUNT THE FIRST BIRTH (i.e. IGNORES THE SECOND BABY WITH A TWIN")
   
     tokeep <- d[
       ident_dhis2_booking==1 &
@@ -9,163 +10,102 @@ HBO_Completeness <-function(d){
     
    setorder(tokeep,bookorgname,bookdate)
 
-    tokeep[,matching:=as.character(NA)]
-    xtabs(~tokeep$matching)
-    tokeep[ident_avic_any==TRUE & is.na(matching),matching:="Avicenna"]
-    xtabs(~tokeep$matching)
-    tokeep[ident_hbo==TRUE & is.na(matching),matching:="Governmental"]
-    xtabs(~tokeep$matching)
-    tokeep[ident_dhis2_dhis2hbo==TRUE & is.na(matching),matching:="Private"]
-    xtabs(~tokeep$matching)
-    tokeep[is.na(matching),matching:="Not"]
-    xtabs(~tokeep$matching)
-    
     # name of hospital
     # -dhis2hboconnamehospbirth_1,
+    tokeep[matching=="Avicenna",merged_namehospbirth:=abbname_1]
+    tokeep[matching=="Governmental",merged_namehospbirth:=hboorganisationunitname_1]
+    tokeep[matching=="Private",merged_namehospbirth:=dhis2hboconnamehospbirth_1]
     
     # denominator (number sent)
     
-    # abortion
-    # - dhis2hbopregoutcome_1
-    
     # outcome
     # - dhis2hbopregoutcome_1
+    tokeep[matching=="Avicenna",merged_pregoutcome:=abbbabybirthresult_1]
+    tokeep[matching=="Governmental",merged_pregoutcome:=hboprevpregoutcome_1]
+    tokeep[matching=="Private",merged_pregoutcome:=dhis2hbopregoutcome_1]
+    xtabs(~tokeep$merged_pregoutcome+tokeep$matching)
+    
+    # abortion
+    # - dhis2hbopregoutcome_1
+    tokeep[!is.na(merged_pregoutcome),merged_abortion:=merged_pregoutcome %in% c("ABO")]
+    xtabs(~tokeep$merged_abortion+tokeep$matching)
     
     # gestational age
     # - dhis2hbogestagedeliv_1
+    tokeep[matching=="Avicenna",merged_gestagedeliv:=as.numeric(stringr::str_extract(abbbabypregnancynoofweeks_1,"^[0-9][0-9]"))]
+    tokeep[matching=="Governmental",merged_gestagedeliv:=hbogestagedeliv_1]
+    tokeep[matching=="Private",merged_gestagedeliv:=dhis2hbogestagedeliv_1]
     
     # weight
     # - dhis2hbopregbweight_1
+    tokeep[matching=="Avicenna",merged_pregbweight:=as.numeric(abbbabyweight_1)]
+    tokeep[matching=="Governmental",merged_pregbweight:=hboprevpregbweight_1]
+    tokeep[matching=="Private",merged_pregbweight:=dhis2hbopregbweight_1]
     
     # date of delivery
     # - dhis2hbodateofdeliveryhospital_1
+    tokeep[matching=="Avicenna",merged_datedeliv:=abbbabybirthdate_1]
+    tokeep[matching=="Governmental",merged_datedeliv:=as.character(hbodateofdeliveryhospital_1)]
+    tokeep[matching=="Private",merged_datedeliv:=dhis2hbodateofdeliveryhospital_1]
+    xtabs(~tokeep$matching+tokeep$merged_datedeliv)
     
     # hemo
     # - dhis2hbolabcbchemoglobin_1
+    tokeep[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
+    tokeep[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
+    tokeep[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
     
     # blood p
     # - dhis2hbosystbp_1
     # - dhis2hbodiastbp_1
+    warning("need to fix blood pressure")
+    #tokeep[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
+    #tokeep[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
+    #tokeep[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
     
     # mode of deliv
     # - dhis2hbomodedeliv_1
+    tokeep[matching=="Avicenna",merged_modedeliv:=abbbabybirthtype_1]
+    tokeep[matching=="Governmental",merged_modedeliv:=hbomodeprevdeliv_1]
+    tokeep[matching=="Private",merged_modedeliv:=dhis2hbomodedeliv_1]
     
     # presentation at deliv
     # - dhis2hbousfetalpresentation_1
+    tokeep[matching=="Avicenna",merged_presentationdeliv:=abbbabybirthtype_1]
+    tokeep[matching=="Governmental",merged_presentationdeliv:=hbousfetalpresentation_1]
+    tokeep[matching=="Private",merged_presentationdeliv:=dhis2hbousfetalpresentation_1]
     
     # indic for csection
     # - dhis2hboindicforcsec_1
+    warning("merged_indic_csection:=abbbabybirthtype_1")
+    tokeep[matching=="Avicenna",merged_indic_csection:=abbbabybirthtype_1]
+    tokeep[matching=="Governmental",merged_indic_csection:=hboindiccsectioninanycol_1]
+    tokeep[matching=="Private",merged_indic_csection:=dhis2hboindicforcsec_1]
     
-    tokeep[matching=="Private"]$dhis2hbopregoutcome_1
-    tokeep[,bookyearmonth:=sprintf("%s-%s",lubridate::year(bookdate),lubridate::month(bookdate))]
-    #### PRIVATE
-    xtabs(~tokeep$dhis2hbogestagedeliv_1,addNA = T)
     
-    ##### NOTE, THIS IS NOT CORRECT
-    ## NEED TO CHANGE IT TO
-    ## dhis2hbogestagedeliv_1[!is.na(dhis2hbogestagedeliv_1)]!=0
-    # FOR WHEN 0 IS MISSING
+    results <- tokeep[,.(
+      denominator=.N,
+      merged_namehospbirth_notmiss=sum(!is.na(merged_namehospbirth)),
+      merged_pregoutcome_notmiss=sum(!is.na(merged_pregoutcome)),
+      merged_abortion_numerator=sum(merged_abortion,na.rm=T),
+      merged_gestagedeliv_notmiss=sum(!is.na(merged_gestagedeliv)),
+      merged_pregbweight_notmiss=sum(!is.na(merged_pregbweight)),
+      merged_datedeliv_notmiss=sum(!is.na(merged_datedeliv)),
+      merged_birthhemo_notmiss=sum(!is.na(merged_birthhemo)),
+      merged_modedeliv_notmiss=sum(!is.na(merged_modedeliv)),
+      merged_presentationdeliv_notmiss=sum(!is.na(merged_presentationdeliv)),
+      merged_indic_csection_notmiss=sum(!is.na(merged_indic_csection))
+    ),by=.(bookyearmonth,matching)]
     
-    results <- tokeep[matching=="Private",.(
-      denom=.N,
-      abortions=
-        sum(dhis2hbopregoutcome_1=="ABO",na.rm=T) +
-        sum(dhis2hbopregoutcome_2=="ABO",na.rm=T) +
-        sum(cpopregoutcome_1=="ABO",na.rm=T) +
-        sum(cpopregoutcome_2=="ABO",na.rm=T) +
-        sum(cpopregoutcome_3=="ABO",na.rm=T) +
-        sum(cpopregoutcome_4=="ABO",na.rm=T),
-      dhis2hboconnamehospbirth_1=sum(!is.na(dhis2hboconnamehospbirth_1)),
-      dhis2hbopregoutcome_1=sum(!is.na(dhis2hbopregoutcome_1)),
-      dhis2hbogestagedeliv_1=sum(!is.na(dhis2hbogestagedeliv_1)),
-      dhis2hbopregbweight_1=sum(!is.na(dhis2hbopregbweight_1)),
-      dhis2hbodateofdeliveryhospital_1=sum(!is.na(dhis2hbodateofdeliveryhospital_1)),
-      dhis2hbolabcbchemoglobin_1=sum(!is.na(dhis2hbolabcbchemoglobin_1)),
-      dhis2hbosystbp_1=sum(!is.na(dhis2hbosystbp_1)),
-      dhis2hbodiastbp_1=sum(!is.na(dhis2hbodiastbp_1)),
-      dhis2hbomodedeliv_1=sum(!is.na(dhis2hbomodedeliv_1)),
-      dhis2hbousfetalpresentation_1=sum(!is.na(dhis2hbousfetalpresentation_1)),
-      dhis2hboindicforcsec_1=sum(!is.na(dhis2hboindicforcsec_1))
-    ),by=.(bookyearmonth)]
-    
-    setorder(results,bookyearmonth)
+    setorder(results,bookyearmonth,matching)
     
     openxlsx::write.xlsx(x=results,file=file.path(
       FOLDER_DATA_RESULTS,
       "hbo_completeness",
-      sprintf("%s_PRIVATE_HBO_Completeness.xlsx",lubridate::today())))
-    
-    #### GOVERNMENTAL
-    results <- tokeep[matching=="Governmental",.(
-      denom=.N,
-      abortions=
-        sum(dhis2hbopregoutcome_1=="ABO",na.rm=T) +
-        sum(dhis2hbopregoutcome_2=="ABO",na.rm=T) +
-        sum(cpopregoutcome_1=="ABO",na.rm=T) +
-        sum(cpopregoutcome_2=="ABO",na.rm=T) +
-        sum(cpopregoutcome_3=="ABO",na.rm=T) +
-        sum(cpopregoutcome_4=="ABO",na.rm=T),
-      dhis2hboconnamehospbirth_1=sum(!is.na(dhis2hboconnamehospbirth_1)),
-      dhis2hbopregoutcome_1=sum(!is.na(dhis2hbopregoutcome_1)),
-      dhis2hbogestagedeliv_1=sum(!is.na(dhis2hbogestagedeliv_1)),
-      dhis2hbopregbweight_1=sum(!is.na(dhis2hbopregbweight_1)),
-      dhis2hbodateofdeliveryhospital_1=sum(!is.na(dhis2hbodateofdeliveryhospital_1)),
-      dhis2hbolabcbchemoglobin_1=sum(!is.na(dhis2hbolabcbchemoglobin_1)),
-      dhis2hbosystbp_1=sum(!is.na(dhis2hbosystbp_1)),
-      dhis2hbodiastbp_1=sum(!is.na(dhis2hbodiastbp_1)),
-      dhis2hbomodedeliv_1=sum(!is.na(dhis2hbomodedeliv_1)),
-      dhis2hbousfetalpresentation_1=sum(!is.na(dhis2hbousfetalpresentation_1)),
-      dhis2hboindicforcsec_1=sum(!is.na(dhis2hboindicforcsec_1))
-    ),by=.(bookyearmonth)]
-    
-    setorder(results,bookyearmonth)
+      sprintf("%s_HBO_Completeness.xlsx",DATA_DATE)))
     
     openxlsx::write.xlsx(x=results,file=file.path(
-      FOLDER_DATA_RESULTS,
+      FOLDER_DROPBOX_RESULTS,
       "hbo_completeness",
-      sprintf("%s_GOVERNMENTAL_HBO_Completeness.xlsx",lubridate::today())))
-    
-    #### AVICENNA
-    results <- tokeep[matching=="Avicenna",.(
-      denom=.N,
-      abortions=
-        sum(dhis2hbopregoutcome_1=="ABO",na.rm=T) +
-        sum(dhis2hbopregoutcome_2=="ABO",na.rm=T) +
-        sum(cpopregoutcome_1=="ABO",na.rm=T) +
-        sum(cpopregoutcome_2=="ABO",na.rm=T) +
-        sum(cpopregoutcome_3=="ABO",na.rm=T) +
-        sum(cpopregoutcome_4=="ABO",na.rm=T),
-      dhis2hboconnamehospbirth_1=sum(!is.na(dhis2hboconnamehospbirth_1)),
-      dhis2hbopregoutcome_1=sum(!is.na(dhis2hbopregoutcome_1)),
-      dhis2hbogestagedeliv_1=sum(!is.na(dhis2hbogestagedeliv_1)),
-      dhis2hbopregbweight_1=sum(!is.na(dhis2hbopregbweight_1)),
-      dhis2hbodateofdeliveryhospital_1=sum(!is.na(dhis2hbodateofdeliveryhospital_1)),
-      dhis2hbolabcbchemoglobin_1=sum(!is.na(dhis2hbolabcbchemoglobin_1)),
-      dhis2hbosystbp_1=sum(!is.na(dhis2hbosystbp_1)),
-      dhis2hbodiastbp_1=sum(!is.na(dhis2hbodiastbp_1)),
-      dhis2hbomodedeliv_1=sum(!is.na(dhis2hbomodedeliv_1)),
-      dhis2hbousfetalpresentation_1=sum(!is.na(dhis2hbousfetalpresentation_1)),
-      dhis2hboindicforcsec_1=sum(!is.na(dhis2hboindicforcsec_1))
-    ),by=.(bookyearmonth)]
-    
-    setorder(results,bookyearmonth)
-    
-    openxlsx::write.xlsx(x=results,file=file.path(
-      FOLDER_DATA_RESULTS,
-      "hbo_completeness",
-      sprintf("%s_AVICENNAL_HBO_Completeness.xlsx",lubridate::today())))
-    
-    #### NOT
-    results <- tokeep[matching=="Not",.(
-      denom=.N
-      ),by=.(bookyearmonth)]
-    
-    setorder(results,bookyearmonth)
-    
-    openxlsx::write.xlsx(x=results,file=file.path(
-      FOLDER_DATA_RESULTS,
-      "hbo_completeness",
-      sprintf("%s_NOTL_HBO_Completeness.xlsx",lubridate::today())))
-  
-
+      sprintf("%s_HBO_Completeness.xlsx",DATA_DATE)))
 }

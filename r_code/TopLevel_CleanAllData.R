@@ -1,9 +1,11 @@
-CleanAllData <- function(){
+CleanAllData <- function(includePPC=TRUE){
   timeStart <- Sys.time()
   
   # CLEAN DHIS
   dhis=suppressWarnings(DHIS2_Master())
-  #dhis <- dhis[ident_dhis2_booking==1]
+  if(!includePPC){
+    dhis <- dhis[ident_dhis2_booking==1]
+  }
   keepMotherID <- unique(dhis$motheridno)
   
   # CLEAN AVICENNA
@@ -29,6 +31,16 @@ CleanAllData <- function(){
     dhis=d,
     avicenna=HBO_Master())
   nrow(d)
+  
+  # this variable says where the baby info gets matched from
+  d[,matching:=as.character(NA)]
+  d[ident_avic_any==TRUE & is.na(matching),matching:="Avicenna"]
+  d[ident_hbo==TRUE & is.na(matching),matching:="Governmental"]
+  d[ident_dhis2_dhis2hbo==TRUE & is.na(matching),matching:="Private"]
+  d[is.na(matching),matching:="Not"]
+  
+  # CLEAN DIFFERENT FILES CONSISTENTLY (e.g. gestational age)
+  CleaningDifferentFilesConsistently(d)
   
   # CALC INDICATORS OLSO
   IndicatorsOsloGenerate(d)

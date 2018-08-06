@@ -11,9 +11,12 @@ IndicatorsPNIPHDashboard <- function(d=NULL){
   #turn the date into year-month format
   d[,cpoyearmonth_1:=YearMonth(cpodate_1)]
   
+  #here we say how many live births did each pregnancy have
   listOfcpopregvars <- names(d)[stringr::str_detect(names(d),"^cpopregoutcome_")]
+  #create number of observations per pregnancy
   d[,temp_cpolivebirths:=0]
-  for(i in listOfcpopregvars){
+ #start loop through all bp variables
+   for(i in listOfcpopregvars){
     d[get(i)=="LIVE",temp_cpolivebirths:=temp_cpolivebirths+1]
   }
   xtabs(~d$temp_cpolivebirths)
@@ -41,6 +44,7 @@ IndicatorsPNIPHDashboard <- function(d=NULL){
   # bookorgname, cpoyearmonth_1
   #)]
   
+  ###here we will sum the live births per pregnancy 
   resLiveBirths <- d[,.(
     numberoflivebirths=sum(temp_cpolivebirths,na.rm=T)
   ),by=.(

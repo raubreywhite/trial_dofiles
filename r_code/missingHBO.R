@@ -1,13 +1,10 @@
-MissingHBO <- function(d=NULL){
-  if(is.null(d)) d <- LoadDataFileFromNetwork()[ident_dhis2_booking==1]
-  
+MissingHBOInternal <- function(d){
   SaveWomenWithAbortionsIn2017(d)
   
   abortions <- readRDS(file.path(FOLDER_DATA_MBO,"abortions.RDS"))$bookevent
-  
-  ppcplaceofdelivery
-  
+
   tokeep <- d[
+    ident_dhis2_booking==1 & 
     isExpectedToHaveDelivered==TRUE &
       ident_TRIAL_1==TRUE &
       is.na(d$ident_avic_any) &
@@ -43,32 +40,66 @@ MissingHBO <- function(d=NULL){
   
   #gen IS_ABORTION="ABORTION" if bookevent==0492304932
   tokeep[bookevent %in% abortions, IS_ABORTION:="ABORTION"]
-  tokeep[,bookevent:=NULL] # delete bookevent column
   sum(tokeep$IS_ABORTION=="ABORTION",na.rm=T)/nrow(tokeep)
   
-  #count if IS_ABORTION=="ABORTION" <- STATA
-  #sum(tokeep$IS_ABORTION=="ABORTION",na.rm=T) <- R
+  return(tokeep)
+}
+
+MissingHBO <- function(){
+  print("REMOVING D FROM MEMORY AS IT TAKES UP TOO MUCH SPACE")
+  # delete the dataset "d" to make space in the memory
+  rm("d", envir=.GlobalEnv)
   
-  identifiedWomen <- tokeep[,c("motheridno","bookdate")]
-  identifiedWomen[,identifiedMonth:=yearmonth]
+  # garbage cleaning
+  gc()
   
-  previouslyIdentifiedWomen <- readRDS(file.path(FOLDER_DATA_CLEAN,"identified_women.RDS"))
+  # identify the two datafiles we need
+  data_files <- IdentifyArchivedData()
   
-  temp <- merge(identifiedWomen,previouslyIdentifiedWomen,all.x=T,by=c("motheridno","bookdate"))
-  newWomen <- temp[is.na(identifiedMonth.y) | identifiedMonth.x==identifiedMonth.y]
-  newWomen[,identifiedMonth.x:=NULL] 
-  newWomen[,identifiedMonth.y:=NULL] 
-  newWomen[,identifiedMonth:=yearmonth]
+  ## BAD CODE (bad for memory!!)
+  # d1 <- readRDS(data_files[1])
+  # d2 <- readRDS(data_files[2])
+  # tokeep_new <- MissingHBOInternal(d=d1)
+  # tokeep_old <- MissingHBOInternal(d=d2)
   
-  tokeep <- merge(tokeep,newWomen,by=c("motheridno","bookdate"),all.x=T)
+  # GOOD CODE
+  # get missing HBO from this export
+  tokeep_new <- MissingHBOInternal(d=readRDS(data_files[1]))
+  # get missing HBO from previous export
+  tokeep_old <- MissingHBOInternal(d=readRDS(data_files[2]))
   
-  womenNew <- tokeep[!is.na(identifiedMonth)]
-  womenOld <- tokeep[is.na(identifiedMonth)]
+  # identify the new people
+  tokeep_new[,is_new:=FALSE]
+  tokeep_new[!bookevent %in% tokeep_old$bookevent,is_new:=TRUE]
+  
+  # here, we can see that the number of missing HBO is not consistent between the three
+  # i.e. nrow(tokeep_new)-nrow(tokeep_old) is not equal to sum(tokeep_new$is_new)
+  # this is because we "lose" people from tokeep_old because we fill in their HBOs
+  # (i.e. the entire purpose of this exercise)
+  #nrow(tokeep_old)
+  #nrow(tokeep_new)
+  #xtabs(~tokeep_new$is_new)
+  
+  #tokeep_old[!bookevent %in% tokeep_new$bookevent,is_lost:=TRUE]
+  #xtabs(~tokeep_old$is_lost)
+  #tokeep_old[is_lost==TRUE]$bookevent
+  #tokeep[,bookevent:=NULL] # delete bookevent column
+  
+  womenNew <- tokeep_new[is_new==TRUE]
+  womenOld <- tokeep_new[is_new==FALSE]
   
   womenNew[,bookyearmonth:=sprintf("%s-%s",lubridate::year(bookdate),lubridate::month(bookdate))]
   womenOld[,bookyearmonth:=sprintf("%s-%s",lubridate::year(bookdate),lubridate::month(bookdate))]
   
-  for(i in unique(womenOld$bookyearmonth)){
+  unlink(FOLDER_DATA_MBO,force=T,recursive = T)
+  Sys.sleep(5) # we need to make the computer "sleep" (i.e. pause)
+  #because otherwise the server wont respond, and these folders wont get created
+  dir.create(FOLDER_DATA_MBO)
+  Sys.sleep(5)
+  dir.create(file.path(FOLDER_DATA_MBO,"new"))
+  Sys.sleep(5)
+  for(i in sort(unique(womenOld$bookyearmonth))){
+    Sys.sleep(5)
     dir.create(file.path(FOLDER_DATA_MBO,i))
     dataTemp <- womenOld[bookyearmonth==i]
     openxlsx::write.xlsx(dataTemp,
@@ -79,9 +110,8 @@ MissingHBO <- function(d=NULL){
     }
   }
   
+  setorder(womenNew,bookyearmonth)
   if(nrow(womenNew)>0) openxlsx::write.xlsx(womenNew,
                                             file.path(FOLDER_DATA_MBO,"new",sprintf("%s.xlsx",yearmonth)))
-  
-  saveRDS(rbind(previouslyIdentifiedWomen,newWomen),file.path(FOLDER_DATA_CLEAN,"identified_women.RDS"))
-  
+
 }

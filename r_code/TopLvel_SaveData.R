@@ -2,6 +2,7 @@ SaveFullFileToNetwork <- function(d){
   # this saves the file to the network
   print("SAVING FILES TO NETWORK")
   saveRDS(d,file.path(FOLDER_DATA_CLEAN,"full_data_from_r.rds"))
+  saveRDS(d,file.path(FOLDER_DATA_CLEAN,sprintf("archive_%s.rds",CLINIC_INTERVENTION_DATE)))
   fwrite(d,file.path(FOLDER_DATA_CLEAN,"full_data_from_r.csv"))
   #openxlsx::write.xlsx(d,file.path(FOLDER_DATA_CLEAN,"full_data_from_r.xlsx"))
   print("FINISHED SAVING FILES TO NETWORK")

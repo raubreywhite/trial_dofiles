@@ -152,5 +152,42 @@ for(i in 1:5){
 openxlsx::saveWorkbook(wbMissing, "results/not_received_filesperclinic.xlsx", overwrite=T)
 
 
+########### 2018-08-06
+### CON ANC File Number
+
+d <- tryCatch({
+  fread("X:/data processing/data_raw/e.reg-control/2018-07-26/Control ANC Green File.csv")
+}, error=function(err){
+  read("Z:/data processing/data_raw/e.reg-control/2018-07-26/Control ANC Green File.csv")
+})
+
+d <- tryCatch({
+fread("X:/data processing/data_raw/e.reg-control/2018-07-26/Control Demographics.csv")
+}, error=function(err){
+  read("Z:/data processing/data_raw/e.reg-control/2018-07-26/Control Demographics.csv")
+})
+
+
+d <- MakeDataTableNamesLikeStata(d)
+d[,eventdate:=as.Date(eventdate)]
+d <- d[eventdate>="2017-01-01" & eventdate<="2018-01-15"]
+d[,c("eventdate","conancfilenumber")]
+
+recNum[,fromReceivedFile:=TRUE]
+d[,fromDHIS2:=TRUE]
+dx <- merge(d,recNum,all.x=T,all.y=T,by.x="conancfilenumber",by.y="received")
+
+dx[,c("conancfilenumber","fromReceivedFile","fromDHIS2")]
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -73,7 +73,12 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   setnames(d,"anchistoryofdvtinpreviouspregnancy","cpodvt")
   setnames(d,"previouscomplicationsnone","cpocomplicationsnone")
   
+  #if d doesnt have any data, tells R to not run it
+  warning("WE NEED TO FIX THIS")
+  
+  if(nrow(d)>0){
   d <- CleanOrgName(data=d,nameToReplace="cpoorgname")
+  }
   
   return(d)
 }
