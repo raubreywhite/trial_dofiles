@@ -203,8 +203,11 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
     earlyNum="booknum",
     lateDate="andate",
     lengthAfterEarlyEvent=42*7,
-    keepbooklmp=FALSE
+    keepbooklmp=FALSE,
+    numberOfEventsIfAbnormal=15,
+    fileNameForPotentialDuplicates=sprintf("dhis2_anc_%s",isControl)
   )
+  xtabs(~d$eventnum)
   
   return(d)
 }

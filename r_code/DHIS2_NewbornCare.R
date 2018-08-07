@@ -28,9 +28,14 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp) {
     earlyNum="booknum",
     lateDate="eventdate",
     lengthAfterEarlyEvent=40*7,
-    keepbooklmp=FALSE
+    keepbooklmp=FALSE,
+    numberOfEventsIfAbnormal=3,
+    fileNameForPotentialDuplicates=sprintf("dhis2_nbc_%s",isControl)
   )
   xtabs(~d$eventnum)
+  
+  
+  d$uniqueid[d$eventnum==5]
   d$uniqueid[d$eventnum==4]
   
   setnames(d,"event","ppcevent")

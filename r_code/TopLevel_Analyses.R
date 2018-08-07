@@ -9,7 +9,7 @@ Analyses <- function(d=NULL){
   BASE_LINE_STATISTICAL_ANALYSIS(d[ident_dhis2_booking==1])
   IndicatorsOsloAnalyse(d[ident_dhis2_booking==1])
   
-  Analyse_BookingsByMonth(d[ident_dhis2_booking==1])
+  Analyse_BookingDescriptives(d[ident_dhis2_booking==1])
   
   
   # tamara kappa/percent agreement values

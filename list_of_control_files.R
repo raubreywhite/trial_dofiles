@@ -1,4 +1,18 @@
 tryCatch({
+  setwd("X:/data processing/trial_dofiles")
+}, error=function(err){
+  setwd("Z:/data processing/trial_dofiles")
+})
+FOLDER_DATA_RAW <- file.path(getwd(),"../data_raw")
+FOLDER_DATA_CLEAN <- file.path(getwd(),"../data_clean")
+FOLDER_DATA_RESULTS <- file.path(getwd(),"../results/")
+FOLDER_DATA_MBO <- file.path(getwd(),"../results/mbo_r/")
+FOLDER_DROPBOX_RESULTS <- "~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Results/"
+
+fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
+sapply(fileSources, source, .GlobalEnv)
+
+tryCatch({
   setwd("X:/data processing/a research hRHR/trial 1/used/list of control files")
 }, error=function(err){
   setwd("Z:/data processing/a research hRHR/trial 1/used/list of control files")
@@ -154,30 +168,88 @@ openxlsx::saveWorkbook(wbMissing, "results/not_received_filesperclinic.xlsx", ov
 
 ########### 2018-08-06
 ### CON ANC File Number
-
-d <- tryCatch({
-  fread("X:/data processing/data_raw/e.reg-control/2018-07-26/Control ANC Green File.csv")
-}, error=function(err){
-  read("Z:/data processing/data_raw/e.reg-control/2018-07-26/Control ANC Green File.csv")
-})
-
-d <- tryCatch({
-fread("X:/data processing/data_raw/e.reg-control/2018-07-26/Control Demographics.csv")
-}, error=function(err){
-  read("Z:/data processing/data_raw/e.reg-control/2018-07-26/Control Demographics.csv")
-})
-
-
-d <- MakeDataTableNamesLikeStata(d)
-d[,eventdate:=as.Date(eventdate)]
-d <- d[eventdate>="2017-01-01" & eventdate<="2018-01-15"]
-d[,c("eventdate","conancfilenumber")]
+d <- LoadDataFileFromNetwork()
+d <- d[bookdate>="2017-01-01" & bookdate<="2018-01-15"]
+d <- d[ident_dhis2_control==1]
+locationOfTheFirstIdentVariable <- min(which(stringr::str_detect(names(d),"^ident_")))
+d <- d[,1:locationOfTheFirstIdentVariable]
 
 recNum[,fromReceivedFile:=TRUE]
 d[,fromDHIS2:=TRUE]
 dx <- merge(d,recNum,all.x=T,all.y=T,by.x="conancfilenumber",by.y="received")
 
-dx[,c("conancfilenumber","fromReceivedFile","fromDHIS2")]
+nrow(d)
+nrow(dx)
+
+xtabs(~dx$fromReceivedFile+dx$fromDHIS2,addNA=T)
+
+# get all the names from dx
+# (this doesn't "do" anything, it just gets the names)
+# we will use this later
+n <- names(dx)
+# put the four names we care about at the front
+# (but now we have duplicates!)
+n <- c("conancfilenumber",
+       "fromDHIS2",
+       "fromReceivedFile",
+       "numOfTimesObserved",
+       n)
+# get rid of the duplicates
+n <- unique(n)
+
+# tells dx "PUT THE COLUMNS IN THIS ORDER ('n')
+# (here we actually "do something")
+# this is pass by reference
+setcolorder(dx,n)
+# this is the same as this: (pass by value)
+# this will temporarily use double the amount of memory
+# (with=F says "n is not a column in dx, look inside it")
+# dx <- dx[,n,with=F]
+
+# lets sort the rows of the dataset (pass by reference)
+setorder(dx,conancfilenumber,fromDHIS2,fromReceivedFile)
+# pass by value
+# dx <- dx[order(conancfilenumber,fromDHIS2,fromReceivedFile)]
+
+openxlsx::write.xlsx(dx, "results/matched_received_with_filled_dhis2.xlsx")
+
+
+# 
+# d1 <- tryCatch({
+#   fread("X:/data processing/data_raw/e.reg-control/2018-07-26/Control ANC Green File.csv")
+# }, error=function(err){
+#   fread("Z:/data processing/data_raw/e.reg-control/2018-07-26/Control ANC Green File.csv")
+# })
+# setnames(d1,2,"programstage")
+# 
+# d2 <- tryCatch({
+#   fread("X:/data processing/data_raw/e.reg-control/2018-07-26/Control Demographics.csv")
+# }, error=function(err){
+#   fread("Z:/data processing/data_raw/e.reg-control/2018-07-26/Control Demographics.csv")
+# })
+# 
+# d1 <- MakeDataTableNamesLikeStata(d1)
+# d2 <- MakeDataTableNamesLikeStata(d2)
+# 
+# d2[,numRecords:=.N,by=.(instance)]
+# xtabs(~d2$numRecords)
+# d2[,numRecords:=NULL]
+# 
+# d1[,eventdate:=as.Date(eventdate)]
+# d1 <- d1[eventdate>="2017-01-01" & eventdate<="2018-01-15"]
+# 
+# x <- merge(d1,d2,by.x="programstage",by.y="instance")
+# nrow(x)
+# nrow(d1)
+# nrow(d2)
+# 
+# setorder(x,identificationdocumentnumbercontroldata,eventdate)
+# 
+# x[,numRecords:=.N,by=.(identificationdocumentnumbercontroldata,eventdate)]
+# xtabs(~x$numRecords)
+# x[numRecords>2][,1:10]
+# 
+# d1[,c("eventdate","conancfilenumber")]
 
 
 

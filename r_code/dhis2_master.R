@@ -317,6 +317,9 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   d[,temp:=NULL]
   
   d[,bookyearmonth:=YearMonth(bookdate)]
+  d[,bookyear:=lubridate::year(bookdate)]
+  d[,bookmonth:=lubridate::month(bookdate)]
+  d[,bookmonth:=formatC(bookmonth,flag="0",width=2)]
   
   #####################
   #####################

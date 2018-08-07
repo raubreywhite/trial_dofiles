@@ -30,7 +30,9 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp) {
     earlyNum="booknum",
     lateDate="eventdate",
     lengthAfterEarlyEvent=42*7,
-    keepbooklmp=FALSE
+    keepbooklmp=FALSE,
+    numberOfEventsIfAbnormal=3,
+    fileNameForPotentialDuplicates=sprintf("dhis2_ppc_%s",isControl)
   )
   xtabs(~d$eventnum)
   

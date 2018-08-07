@@ -33,7 +33,8 @@ desiredPackages <- c("stringr",
                      "lubridate",
                      "ggplot2",
                      "irr",
-                     "rel")
+                     "rel",
+                     "gridExtra")
 for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
 
 library(data.table)

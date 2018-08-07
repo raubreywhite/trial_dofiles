@@ -40,9 +40,13 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
     earlyNum="booknum",
     lateDate="eventdate",
     lengthAfterEarlyEvent=42*7,
-    keepbooklmp=FALSE
+    keepbooklmp=FALSE,
+    numberOfEventsIfAbnormal=3,
+    fileNameForPotentialDuplicates=sprintf("dhis2_cpo_%s",isControl)
   )
   nrow(d)
+  xtabs(~d$eventnum)
+  
   d[ident_dhis2_booking==0,eventdate:=eventdate-60]
   d[,ident_dhis2_booking:=NULL]
   
