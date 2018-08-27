@@ -1,3 +1,23 @@
+Save2CasesPerMonthToNetwork <- function(d){
+  dir.create(file.path(FOLDER_DATA_RESULTS,"quality_control"))
+  # this saves the file to the network
+  print("SAVING 4 CASES PER MONTH TO NETWORK")
+  
+  #hopefully lets us keep the same random sample
+  set.seed(4)
+  d[ident_TRIAL_1==TRUE & ident_dhis2_control==FALSE,
+    randomNum:=order(runif(.N)),by=bookyearmonth]
+  setorder(d,bookyearmonth)
+  
+  desiredFile <- file.path(
+    FOLDER_DATA_RESULTS,"quality_control",
+    sprintf("%s_random_quality_control_from_intervention.xlsx",DATA_DATE))
+  
+  if(!file.exists(desiredFile)) openxlsx::write.xlsx(d[randomNum<=4],desiredFile)
+  print("FINISHED SAVING 4 CASES PER MONTH TO NETWORK")
+  d[,randomNum:=NULL]
+}
+
 SaveFullFileToNetwork <- function(d){
   # this saves the file to the network
   print("SAVING FILES TO NETWORK")
@@ -86,10 +106,16 @@ SaveAnonymousOslo <- function(d){
   d[,avgincome:=NULL]
   
   # this saves the file to the dropbox
-  print("SAVING FILES TO DROPBOX")
-  saveRDS(d[ident_dhis2_booking==1],"~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_data_from_r.rds")
-  fwrite(d[ident_dhis2_booking==1],"~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_data_from_r.csv")
+  # print("SAVING FILES TO DROPBOX")
+  #saveRDS(d[ident_dhis2_booking==1],"~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_data_from_r.rds")
+  # fwrite(d[ident_dhis2_booking==1],"~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Data/anon_data_from_r.csv")
   print("FINISHED SAVING FILES TO DROPBOX")
+  
+  # this saves the file to the server
+  print("SAVING ANON FILES TO server")
+  saveRDS(d[ident_dhis2_booking==1],file.path(FOLDER_DATA_CLEAN,"oslo_anon_data_from_r.rds"))
+  fwrite(d[ident_dhis2_booking==1],file.path(FOLDER_DATA_CLEAN,"oslo_anon_data_from_r.csv"))
+  print("FINISHED SAVING ANON FILES TO server")
   
   print("REMOVING D FROM MEMORY AS IT IS NOW DESTROYED BY ANONYMIZING")
   # delete the dataset "d" to make space in the memory
@@ -119,6 +145,7 @@ SaveAllDataFiles <- function(d){
   
   # start saving our files
   SaveFullFileToNetwork(d)
+  Save2CasesPerMonthToNetwork(d)
   SaveAnonymousOslo(d)
   
 

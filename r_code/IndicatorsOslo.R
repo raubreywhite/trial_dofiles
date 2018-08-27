@@ -170,10 +170,7 @@ IndicatorsOsloGenerate <- function(d=NULL){
   
 }
 
-# this one makes nice excel tables containing
-# the summary indicators (e.g. proportions)
-IndicatorsOsloAnalyse <- function(d=NULL){
-  #if(!exists("d")) d <- LoadDataFileFromNetwork()[ident_dhis2_booking==1]
+IndicatorsOsloRandom <- function(d){
   resPalestine <- d[ident_expected_delivered==TRUE,.(
     numerator=sum(custo_anvisit_timely_by_bookgestage,na.rm=T),
     denominator=sum(!is.na(custo_anvisit_timely_by_bookgestage)),
@@ -192,52 +189,53 @@ IndicatorsOsloAnalyse <- function(d=NULL){
   ),by=.(
     custo_bookgestagecat, bookorgdistrict
   )]
-
+  
   # row bind (put the two data sets on top of each other)
   res <- rbind(resPalestine,resDistrict)
   
   
-
+  
   setcolorder(res, c("bookorgdistrict",
                      "custo_bookgestagecat",
                      "numerator" ,
                      "denominator",
                      "TOTALNUMOFPEOPLEINCAT"))
   
-    
+  
   setorder(res,bookorgdistrict,custo_bookgestagecat)
   res <- res[!is.na(bookorgdistrict)]
   
   openxlsx::write.xlsx(res, 
                        file.path(FOLDER_DROPBOX_RESULTS,
-                                 "indicators_for_mahima",
+                                 "trial_1",
+                                 "random_indicators",
                                  sprintf("%s_anvisit_timely_by_bookgestage.xlsx",CLINIC_INTERVENTION_DATE)))
   
   
   #####
-
+  
   resPalestine <- d[ident_expected_delivered==TRUE,
-    .(
-      numerator=sum(ident_dhis2_ppc,na.rm=T),
-      denominator=sum(ident_dhis2_booking,na.rm=T)
-    ),by=
-  .(
-    
-  )]
+                    .(
+                      numerator=sum(ident_dhis2_ppc,na.rm=T),
+                      denominator=sum(ident_dhis2_booking,na.rm=T)
+                    ),by=
+                      .(
+                        
+                      )]
   
   resPalestine
   
   
   resDistrict<- d[ident_expected_delivered==TRUE,
+                  .(
+                    numerator=sum(ident_dhis2_ppc,na.rm=T),
+                    denominator=sum(ident_dhis2_booking,na.rm=T)
+                    
+                  ),by=
                     .(
-                      numerator=sum(ident_dhis2_ppc,na.rm=T),
-                      denominator=sum(ident_dhis2_booking,na.rm=T)
-                      
-                    ),by=
-                      .(
-                        bookorgdistrict                        
-  )]
- 
+                      bookorgdistrict                        
+                    )]
+  
   resDistrict
   resPalestine[,bookorgdistrict:="0Palestine"]
   res <- rbind(resPalestine,resDistrict)
@@ -247,42 +245,21 @@ IndicatorsOsloAnalyse <- function(d=NULL){
                        file.path(FOLDER_DROPBOX_RESULTS,
                                  "indicators_for_mahima",
                                  sprintf("%s_ANC_with_PPC.xlsx",CLINIC_INTERVENTION_DATE)))
-
-    openxlsx::write.xlsx(d[is.na(bookorgdistrict)], 
-                       file.path(FOLDER_DATA_CLEAN,
-                                sprintf("%s_missing_bookorgdis.xlsx",CLINIC_INTERVENTION_DATE)))
-
-    
-    
-    
-    
-    names(d)[stringr::str_detect(names(d),"^cust")]
-    
-    
-    #### BPand ANC
-    
-  resPalestine <- d[ident_expected_delivered==TRUE,
-    .(
-      numerator_15_17=sum(custo_anvisit_with_bp_15_17,na.rm=T),
-      denominator_15_17=sum(!is.na(custo_anvisit_with_bp_15_17)),
-      
-      numerator_18_22=sum(custo_anvisit_with_bp_18_22,na.rm=T),
-      denominator_18_22=sum(!is.na(custo_anvisit_with_bp_18_22)),
-      
-      numerator_24_28=sum(custo_anvisit_with_bp_24_28,na.rm=T),
-      denominator_24_28=sum(!is.na(custo_anvisit_with_bp_24_28)),
-      
-      numerator_31_33=sum(custo_anvisit_with_bp_31_33,na.rm=T),
-      denominator_15_17=sum(!is.na(custo_anvisit_with_bp_31_33)),
-      
-      numerator_34_38=sum(custo_anvisit_with_bp_34_38,na.rm=T),
-      denominator_34_38=sum(!is.na(custo_anvisit_with_bp_34_38))
-    ),by=
-    .(
-    
-    )]
   
-  resDistrict <- d[ident_expected_delivered==TRUE,
+  openxlsx::write.xlsx(d[is.na(bookorgdistrict)], 
+                       file.path(FOLDER_DATA_CLEAN,
+                                 sprintf("%s_missing_bookorgdis.xlsx",CLINIC_INTERVENTION_DATE)))
+  
+  
+  
+  
+  
+  names(d)[stringr::str_detect(names(d),"^cust")]
+  
+  
+  #### BPand ANC
+  
+  resPalestine <- d[ident_expected_delivered==TRUE,
                     .(
                       numerator_15_17=sum(custo_anvisit_with_bp_15_17,na.rm=T),
                       denominator_15_17=sum(!is.na(custo_anvisit_with_bp_15_17)),
@@ -298,12 +275,33 @@ IndicatorsOsloAnalyse <- function(d=NULL){
                       
                       numerator_34_38=sum(custo_anvisit_with_bp_34_38,na.rm=T),
                       denominator_34_38=sum(!is.na(custo_anvisit_with_bp_34_38))
-      
                     ),by=
                       .(
-                        bookorgdistrict
+                        
                       )]
-    
+  
+  resDistrict <- d[ident_expected_delivered==TRUE,
+                   .(
+                     numerator_15_17=sum(custo_anvisit_with_bp_15_17,na.rm=T),
+                     denominator_15_17=sum(!is.na(custo_anvisit_with_bp_15_17)),
+                     
+                     numerator_18_22=sum(custo_anvisit_with_bp_18_22,na.rm=T),
+                     denominator_18_22=sum(!is.na(custo_anvisit_with_bp_18_22)),
+                     
+                     numerator_24_28=sum(custo_anvisit_with_bp_24_28,na.rm=T),
+                     denominator_24_28=sum(!is.na(custo_anvisit_with_bp_24_28)),
+                     
+                     numerator_31_33=sum(custo_anvisit_with_bp_31_33,na.rm=T),
+                     denominator_15_17=sum(!is.na(custo_anvisit_with_bp_31_33)),
+                     
+                     numerator_34_38=sum(custo_anvisit_with_bp_34_38,na.rm=T),
+                     denominator_34_38=sum(!is.na(custo_anvisit_with_bp_34_38))
+                     
+                   ),by=
+                     .(
+                       bookorgdistrict
+                     )]
+  
   resDistrict
   resPalestine[,bookorgdistrict:="0Palestine"]
   res <- rbind(resPalestine,resDistrict)
@@ -311,10 +309,180 @@ IndicatorsOsloAnalyse <- function(d=NULL){
   
   openxlsx::write.xlsx(res, 
                        file.path(FOLDER_DROPBOX_RESULTS,
-                                 "indicators_for_mahima",
+                                 "trial_1",
+                                 "random_indicators",
                                  sprintf("%s_ANC_with_BP.xlsx",CLINIC_INTERVENTION_DATE)))
   
-    
+  
+}
+
+IndicatorsOsloDemographics <- function(d){
+  
+  
+  toAnalyse <- copy(d[ident_TRIAL_1==TRUE])
+  toAnalyse[,bookorgdistrict:="Palestine"]
+  toAnalyse[,bookorgdistricthashed:="Palestine"]
+  toAnalyse <- rbind(toAnalyse,d[ident_TRIAL_1==TRUE])
+  
+  # we will just switch this one over
+  toAnalyse[,aggregationVariable:=bookorgdistricthashed]
+  # this is how to run a t-test
+  # t.test(OUTCOME ~ GROUPINGVARIABLE, data=DATA)
+  # res <- t.test(education~ident_dhis2_control,data=toAnalyse)
+  
+  ### YEARS OF EDUCATION
+  pvalueInfo <- toAnalyse[,.(
+    pvalue=t.test(education~ident_dhis2_control)$p.value
+  ),
+  by=aggregationVariable
+  ]
+  pvalueInfo[,pvalue:=sprintf("p=%s",formatC(pvalue,digits=2,format="f"))]
+  
+  p <- ggplot(toAnalyse,aes(x=aggregationVariable))
+  p <- p + geom_boxplot(mapping=aes(y=education,fill=ident_dhis2_control))
+  p <- p + geom_text(data=pvalueInfo,mapping=aes(y=0,label=pvalue))
+  p <- p + scale_fill_brewer("Trial Arm",palette="Dark2")
+  p <- p+scale_x_discrete("District")
+  p <- p + labs(title="Education differences in control vs intervention")
+  p <- p + labs(caption=GraphCaption())
+  
+  ggsave(filename=file.path(
+    FOLDER_DROPBOX_RESULTS,
+    "trial_1",
+    "demographics",
+    "education_years.png"),
+    plot=p)
+  
+  ### AGE
+  pvalueInfo <- toAnalyse[,.(
+    pvalue=t.test(age~ident_dhis2_control)$p.value
+  ),
+  by=aggregationVariable]
+  
+  pvalueInfo[,pvalue:=sprintf("p=%s", formatC(pvalue,digits = 2,format = "f"))]
+  
+  
+  p <- ggplot(toAnalyse,aes(x=aggregationVariable, y=age))
+  p <- p+ geom_boxplot(mapping = aes(y=age, fill=ident_dhis2_control))
+  p <- p+ geom_text(data=pvalueInfo, mapping=aes(y=10,label=pvalue))
+  p <- p+ scale_fill_brewer('Trial arm',palette = "Dark2")
+  p <- p+scale_x_discrete("District")
+  p <- p + labs(title="Age differences in control vs intervention")
+  p <- p + labs(caption=GraphCaption())
+  
+  p
+  
+  ggsave(filename=file.path(
+    FOLDER_DROPBOX_RESULTS,
+    "trial_1",
+    "demographics",
+    "age_years.png"),
+    plot=p)
+  
+  
+  ### AGE at marrige
+  pvalueInfo <- toAnalyse[,.(
+    pvalue=t.test(agemarriage~ident_dhis2_control)$p.value
+  ),
+  by=aggregationVariable]
+  
+  pvalueInfo[,pvalue:=sprintf("p=%s", formatC(pvalue,digits = 2,format = "f"))]
+  
+  
+  p <- ggplot(toAnalyse,aes(x=aggregationVariable, y=agemarriage))
+  p <- p+ geom_boxplot(mapping = aes(y=agemarriage, fill=ident_dhis2_control))
+  p <- p+ geom_text(data=pvalueInfo, mapping=aes(y=10,label=pvalue))
+  p <- p+ scale_fill_brewer('Trial arm',palette = "Dark2")
+  p <- p+scale_x_discrete("District")
+  p <- p + labs(title="Age at marriage differences in control vs intervention")
+  p <- p + labs(caption=GraphCaption())
+  
+  p
+  
+  ggsave(filename=file.path(
+    FOLDER_DROPBOX_RESULTS,
+    "trial_1",
+    "demographics",
+    "agemarriage_years.png"),
+    plot=p)
+  
+  
+  ### AGE at first pregnancy
+  pvalueInfo <- toAnalyse[,.(
+    pvalue=t.test(agepregnancy~ident_dhis2_control)$p.value
+  ),
+  by=aggregationVariable]
+  
+  pvalueInfo[,pvalue:=sprintf("p=%s", formatC(pvalue,digits = 2,format = "f"))]
+  
+  
+  p <- ggplot(toAnalyse,aes(x=aggregationVariable, y=agepregnancy))
+  p <- p+ geom_boxplot(mapping = aes(y=agepregnancy, fill=ident_dhis2_control))
+  p <- p+ geom_text(data=pvalueInfo, mapping=aes(y=10,label=pvalue))
+  p <- p+ scale_fill_brewer('Trial arm',palette = "Dark2")
+  p <- p+scale_x_discrete("District")
+  p <- p + labs(title="Age at first pregnancy differences in control vs intervention")
+  p <- p + labs(caption=GraphCaption())
+  
+  p
+  
+  ggsave(filename=file.path(
+    FOLDER_DROPBOX_RESULTS,
+    "trial_1",
+    "demographics",
+    "agepregnancy_years.png"),
+    plot=p)
+  
+  #income
+  pvalueInfo <- toAnalyse[,.(
+    pvalue=t.test(income~ident_dhis2_control)$p.value
+  ),
+  by=aggregationVariable]
+  
+  pvalueInfo[,pvalue:=sprintf("p=%s", formatC(pvalue,digits = 2,format = "f"))]
+  
+  
+  p <- ggplot(toAnalyse,aes(x=aggregationVariable, y=income))
+  p <- p+ geom_boxplot(mapping = aes(y=income, fill=ident_dhis2_control))
+  p <- p+ geom_text(data=pvalueInfo, mapping=aes(y=-7000,label=pvalue))
+  p <- p+ scale_fill_brewer('Trial arm',palette = "Dark2")
+  p <- p+scale_x_discrete("District")
+  p <- p+scale_y_continuous("Income")
+  p <- p + labs(title="Income differences in control vs intervention")
+  p <- p + labs(caption=GraphCaption())
+  
+  p
+  
+  ggsave(filename=file.path(
+    FOLDER_DROPBOX_RESULTS,
+    "trial_1",
+    "demographics",
+    "income_continuous.png"),
+    plot=p)
+  
+  
+  
+  
+  #d$agemarriage
+  #d$age
+  #d$agecat
+  #d$agepregnancy
+  #d$agepregnancycat
+  #d$income
+  #d$incomecat
+  
+  #plot(d$age~d$agepregnancy)
+  
+  
+}
+
+# this one makes nice excel tables containing
+# the summary indicators (e.g. proportions)
+IndicatorsOsloAnalyse <- function(d=NULL){
+  #if(!exists("d")) d <- LoadDataFileFromNetwork()[ident_dhis2_booking==1]
+  
+  IndicatorsOsloRandom(d)
+  IndicatorsOsloDemographics(d)
 }
 
 

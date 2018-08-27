@@ -149,6 +149,32 @@ CleaningDifferentFilesConsistently <- function(d){
                          upperUnacceptable = 50)
   }
   #vars <- names(d)[stringr::str_detect(names(d),"gest")]
+  
+  SetVariableToMissing(d=d,
+                       pattern="^age$",
+                       lowerUnacceptable = 10,
+                       upperUnacceptable = 60)
+  
+  SetVariableToMissing(d=d,
+                       pattern="^agepregnancy$",
+                       lowerUnacceptable = 10,
+                       upperUnacceptable = 60)
+  
+  SetVariableToMissing(d=d,
+                       pattern="^agemarriage$",
+                       lowerUnacceptable = 10,
+                       upperUnacceptable = 99)
+  
+  SetVariableToMissing(d=d,
+                       pattern="^education$",
+                       lowerUnacceptable = -1,
+                       upperUnacceptable = 30)
+  
+  SetVariableToMissing(d=d,
+                       pattern="^income$",
+                       lowerUnacceptable = -1,
+                       upperUnacceptable = 99999999)
+  
 }
 
 

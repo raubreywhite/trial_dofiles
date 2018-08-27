@@ -39,6 +39,7 @@ SaveWomenWithAbortionsIn2017 <- function(d){
   returnValue <- rbind(interventionWomen2017x,controlWomen2017x)
   returnValue <- returnValue[,
     c(
+      "ident_TRIAL_1_clinics",
       "bookevent",
       "motheridno",
       "bookorgdistrict",
@@ -60,8 +61,7 @@ SaveWomenWithAbortionsIn2017 <- function(d){
   
   warning("CONTROLS SEEM TO HAVE 5% ABO WHILE INTERVENTION ONLY HAVE 1.6% SO SOMETHING MIGHT BE WRONG?")
   
-  openxlsx::write.xlsx(returnValue,
-                       file.path(FOLDER_DATA_MBO,"abortions.xlsx"))
+  
   saveRDS(returnValue,
                        file.path(FOLDER_DATA_MBO,"abortions.RDS"))
   

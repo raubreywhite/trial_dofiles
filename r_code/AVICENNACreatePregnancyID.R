@@ -1,8 +1,15 @@
-AVICENNACreatePregnancyIDAndMakeItWide <- function(d,tag,nameofid="motheridno"){
+AVICENNACreatePregnancyIDAndMakeItWide <- function(
+  d,
+  tag,
+  nameofid="motheridno"){
+  
+  # drop if missing date
+  d <- d[!is.na(date)]
+  
   setorderv(d,c(nameofid,"date"))
   d[,lastday:=shift(date,type = "lag"),by=get(nameofid)]
   d[is.na(lastday),lastday:=date]
-  d[,timeToLast:=as.numeric(difftime(lastday,date,units="days"))]
+  d[,timeToLast:=as.numeric(difftime(date,lastday,units="days"))]
   d[,increment:=ifelse(timeToLast>100,1,0)]
   d[,eventnum:=cumsum(increment)+1,by=get(nameofid)]
   d[,timeToLast:=NULL]
@@ -21,6 +28,7 @@ AVICENNACreatePregnancyIDAndMakeItWide <- function(d,tag,nameofid="motheridno"){
   for(i in dates){
     w[!is.na(get(i)),maxDate:=get(i)]  
   }
+  
   
   return(w)
 }

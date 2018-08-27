@@ -51,6 +51,7 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp) {
   setnames(d,"organisationunitcode","ppcorgcode")
   setnames(d,"organisationunit","ppcorgunit")
   setnames(d,"identificationdocumentnumber","ppcidnumber")
+  setnames(d,"cpobirthoutcome","ppcbirthoutcome")
   
   return(d)
 }

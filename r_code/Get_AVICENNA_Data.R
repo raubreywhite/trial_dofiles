@@ -4,7 +4,7 @@ Get_AVICENNA_Data <- function(folderName, ignoreAttributes=F){
   i <- 1
   
   attributeList <- NULL
-  for(yearMonth in list.files(file.path(FOLDER_DATA_RAW,"avicenna"))){
+  for(yearMonth in list.files(file.path(FOLDER_DATA_RAW,"avicenna"),"^[0-9][0-9][0-9][0-9]-[0-9][0-9]")){
     for(f in list.files(path=file.path(FOLDER_DATA_RAW,"avicenna",yearMonth,folderName))){
       if(!(stringr::str_detect(f,"xlsx$") | stringr::str_detect(f,"xls$"))) next
       d[[i]] <- readxl::read_excel(
@@ -23,7 +23,7 @@ Get_AVICENNA_Data <- function(folderName, ignoreAttributes=F){
     attributeList[attributeList=="character"] <- "text"
     
     i <- 1
-    for(yearMonth in list.files(file.path(FOLDER_DATA_RAW,"avicenna"))){
+    for(yearMonth in list.files(file.path(FOLDER_DATA_RAW,"avicenna"),"^[0-9][0-9][0-9][0-9]-[0-9][0-9]")){
       for(f in list.files(file.path(FOLDER_DATA_RAW,"avicenna",yearMonth,folderName))){
         if(!(stringr::str_detect(f,"xlsx$") | stringr::str_detect(f,"xls$"))) next
         d[[i]] <- readxl::read_excel(
@@ -34,7 +34,14 @@ Get_AVICENNA_Data <- function(folderName, ignoreAttributes=F){
       }
     }
   }
-  d <- MakeDataTableNamesLikeStata(rbindlist(d,fill=T))[!is.na(motheridno)]
+  
+  for(i in 1:length(d)){
+    if(!is.null(d[[i]])) d[[i]] <- MakeDataTableNamesLikeStata(d[[i]])
+  }
+  d <- rbindlist(d,fill=T)[!is.na(motheridno)]
+  
+  #d <- MakeDataTableNamesLikeStata(rbindlist(d,fill=T))[!is.na(motheridno)]
+  
   ConvertAllFactorsToChar(d)
   d[,motheridno:=as.numeric(motheridno)]
   return(d)

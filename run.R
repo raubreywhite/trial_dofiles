@@ -1,3 +1,4 @@
+#RColorBrewer::display.brewer.all() 
 ###### SETUP STARTS
 ###################
 ###################
@@ -17,7 +18,14 @@ FOLDER_DATA_RAW <- file.path(getwd(),"../data_raw")
 FOLDER_DATA_CLEAN <- file.path(getwd(),"../data_clean")
 FOLDER_DATA_RESULTS <- file.path(getwd(),"../results/")
 FOLDER_DATA_MBO <- file.path(getwd(),"../results/mbo_r/")
-FOLDER_DROPBOX_RESULTS <- "~/../eRegistry CRCT Dropbox/Data management eRegQual/Results_From_PNIPH/Results/"
+FOLDER_DROPBOX_RESULTS <- file.path(
+  "~",
+  "..",
+  "eRegistry CRCT Dropbox",
+  "Data management eRegQual",
+  "Results_From_PNIPH",
+  "Results",
+  lubridate::today())
 
 
 # say which packages we want, and install if neccessary
@@ -34,7 +42,9 @@ desiredPackages <- c("stringr",
                      "ggplot2",
                      "irr",
                      "rel",
-                     "gridExtra")
+                     "gridExtra",
+                     "openssl"
+                     )
 for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
 
 library(data.table)

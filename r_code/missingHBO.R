@@ -27,15 +27,7 @@ MissingHBOInternal <- function(d){
       "village",
       "bookintendbirth",
       "bookrecobirth",
-      "calc_expected_due_delivery",
-      "ppcplaceofdelivery_1",
-      "ppcplaceofdelivery_2",
-      "ppcplaceofdelivery_3",
-      "ppcplaceofdelivery_4",
-      "cpoplaceofbirth_1",
-      "cpoplaceofbirth_2",
-      "cpoplaceofbirth_3",
-      "cpoplaceofbirth_4"
+      "calc_expected_due_delivery"
     )]
   
   #gen IS_ABORTION="ABORTION" if bookevent==0492304932
@@ -63,14 +55,20 @@ MissingHBO <- function(){
   # tokeep_old <- MissingHBOInternal(d=d2)
   
   # GOOD CODE
-  # get missing HBO from this export
-  tokeep_new <- MissingHBOInternal(d=readRDS(data_files[1]))
   # get missing HBO from previous export
   tokeep_old <- MissingHBOInternal(d=readRDS(data_files[2]))
+  abortions_old <- SaveWomenWithAbortionsIn2017(d=readRDS(data_files[2]))
+  # get missing HBO from this export
+  tokeep_new <- MissingHBOInternal(d=readRDS(data_files[1]))
+  abortions_new <- SaveWomenWithAbortionsIn2017(d=readRDS(data_files[1]))
   
   # identify the new people
   tokeep_new[,is_new:=FALSE]
   tokeep_new[!bookevent %in% tokeep_old$bookevent,is_new:=TRUE]
+  
+  # identify the new people
+  abortions_new[,is_new:=FALSE]
+  abortions_new[!bookevent %in% abortions_old$bookevent,is_new:=TRUE]
   
   # here, we can see that the number of missing HBO is not consistent between the three
   # i.e. nrow(tokeep_new)-nrow(tokeep_old) is not equal to sum(tokeep_new$is_new)
@@ -87,9 +85,15 @@ MissingHBO <- function(){
   
   womenNew <- tokeep_new[is_new==TRUE]
   womenOld <- tokeep_new[is_new==FALSE]
+  womenNew[,bookyearmonth:=YearMonth(bookdate)]
+  womenOld[,bookyearmonth:=YearMonth(bookdate)]
   
-  womenNew[,bookyearmonth:=sprintf("%s-%s",lubridate::year(bookdate),lubridate::month(bookdate))]
-  womenOld[,bookyearmonth:=sprintf("%s-%s",lubridate::year(bookdate),lubridate::month(bookdate))]
+  
+  abortionsNew <- abortions_new[is_new==TRUE]
+  abortionsOld <- abortions_new[is_new==FALSE]
+  abortionsNew[,bookyearmonth:=YearMonth(bookdate)]
+  abortionsOld[,bookyearmonth:=YearMonth(bookdate)]
+  
   
   unlink(FOLDER_DATA_MBO,force=T,recursive = T)
   Sys.sleep(5) # we need to make the computer "sleep" (i.e. pause)
@@ -113,5 +117,18 @@ MissingHBO <- function(){
   setorder(womenNew,bookyearmonth)
   if(nrow(womenNew)>0) openxlsx::write.xlsx(womenNew,
                                             file.path(FOLDER_DATA_MBO,"new",sprintf("%s.xlsx",yearmonth)))
+  setorder(abortionsOld,ident_TRIAL_1_clinics,bookyearmonth)
+  openxlsx::write.xlsx(abortionsOld,
+                       file.path(FOLDER_DATA_MBO,"abortions_old.xlsx"))
+  
+  setorder(abortionsNew,ident_TRIAL_1_clinics,bookyearmonth)
+  openxlsx::write.xlsx(abortionsNew,
+                       file.path(FOLDER_DATA_MBO,"abortions_new.xlsx"))
 
+  
 }
+
+
+
+
+

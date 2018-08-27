@@ -80,6 +80,7 @@ DHIS2_Lab <- function(isControl, earlyData, booklmp) {
   setnames(d,"anclabresultofotherlabtest2","labotherres2")
   setnames(d,"ancotherlabtest3","labother3")
   setnames(d,"anclabresultofotherlabtest3","labotherres3")
-   
+  setnames(d,"usrecommendationscomments","labrecommendationscomments")
+  
   return(d)
 }

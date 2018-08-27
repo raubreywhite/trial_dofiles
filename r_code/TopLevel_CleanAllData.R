@@ -42,6 +42,10 @@ CleanAllData <- function(includePPC=TRUE){
   # CLEAN DIFFERENT FILES CONSISTENTLY (e.g. gestational age)
   CleaningDifferentFilesConsistently(d)
   
+  # CREATING FURTHER VARIABLES
+  CreatingFurtherVariablesNormal(d)
+  CreatingFurtherVariablesMahima(d)
+  
   # CALC INDICATORS OLSO
   IndicatorsOsloGenerate(d)
   

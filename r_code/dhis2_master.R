@@ -67,6 +67,7 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   
   # changing the structural indicators to include additional data
   # e.g. trial 1 needs to also include dates
+  data_DHIS2_Booking[,ident_TRIAL_1_clinics:=ident_TRIAL_1]
   
   # ident_TRIAL_1 is only for 2017-01-15 to 2017-09-15
   data_DHIS2_Booking[
@@ -153,8 +154,15 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   #
   print("POSTPARTUM CARE")
   data_DHIS2_PostPartumCare <- DHIS2_DHIS2_PostPartumCare(isControl=F,
-                                                                  earlyData = earlyData,
-                                                                  booklmp = booklmp)
+                                                          earlyData = earlyData,
+                                                          booklmp = booklmp)
+  
+  ####
+  #
+  print("NBC CARE")
+  data_DHIS2_NewbornCare <- DHIS2_NewbornCare(isControl=F,
+                                                          earlyData = earlyData,
+                                                          booklmp = booklmp)
   
   
   
@@ -291,6 +299,19 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   nrow(d)
   ncol(d)
   
+  print("RESHAPE TO WIDE AND MERGE data_DHIS2_NewbornCare")
+  d <- ReshapeToWideAndMerge(
+    base=d,
+    additional=data_DHIS2_NewbornCare,
+    valueVarsRegex="^nbc",
+    dcastFormula="uniqueid+bookevent+booknum~eventnum",
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_nbc"
+  )
+  nrow(data_DHIS2_Booking)
+  nrow(d)
+  ncol(d)
+  
   
   
   
@@ -302,10 +323,6 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   xtabs(~d$isExpectedToHaveDelivered)
   
   setnames(d,"demoidnumber","motheridno")
-  
-  if(.Platform$OS.type=="unix"){
-    d[,motheridno:=as.character(rep(c(1:50000),length.out=.N,each=1000))]
-  }
   
   setorderv(d,cols=c("motheridno","bookdate"))
   d[,motheridbooknum:=1:.N,by=.(motheridno)]
@@ -320,6 +337,9 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   d[,bookyear:=lubridate::year(bookdate)]
   d[,bookmonth:=lubridate::month(bookdate)]
   d[,bookmonth:=formatC(bookmonth,flag="0",width=2)]
+
+  d[,bookorgdistricthashed:=openssl::md5(bookorgdistrict)]
+  d[,bookorgdistricthashed:=stringr::str_sub(bookorgdistricthashed,1,6)]
   
   #####################
   #####################

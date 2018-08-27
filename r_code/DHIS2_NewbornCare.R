@@ -38,21 +38,20 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp) {
   d$uniqueid[d$eventnum==5]
   d$uniqueid[d$eventnum==4]
   
-  setnames(d,"event","ppcevent")
-  setnames(d,"ancppcvisitundertakenbywhom","ppcvisitundertakenbywhom")
-  setnames(d,"fundalmeasurementcm","ppcfundalmeasurementcm")
+  setnames(d,"event","nbcevent")
+  setnames(d,"programstage","nbcprogstage")
+  setnames(d,"eventdate","nbcdate")
+  setnames(d,"longitude","nbclong")
+  setnames(d,"latitude","nbclat")
+  setnames(d,"organisationunitname","nbcorgname")
+  setnames(d,"organisationunitcode","nbcorgcode")
+  setnames(d,"organisationunit","nbcorgunit")
+  setnames(d,"identificationdocumentnumber","nbcidnumber")
   
+  nncNames <- names(d)[stringr::str_detect(names(d),"^nnc")]
+  nbcNames <- stringr::str_replace_all(nncNames,"^nnc","nbc")
   
-  #setnames(d,"programstageinstance","uniqueid")
-  setnames(d,"programstage","ppcprogstage")
-  setnames(d,"eventdate","ppcdate")
-  
-  setnames(d,"longitude","ppclong")
-  setnames(d,"latitude","ppclat")
-  setnames(d,"organisationunitname","ppcorgname")
-  setnames(d,"organisationunitcode","ppcorgcode")
-  setnames(d,"organisationunit","ppcorgunit")
-  setnames(d,"identificationdocumentnumber","ppcidnumber")
+  setnames(d,nncNames,nbcNames)
   
   return(d)
 }

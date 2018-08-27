@@ -137,30 +137,6 @@ DHIS2_Demographics <- function(isControl){
     d[,aviccena:=NULL]
   }
   
-  d[,agemarriagecat:=as.numeric(cut(agemarriage,
-                                    breaks=c(0,20,25,30,35,40,100),
-                                    include.lowest=T))]
-  d[,agepregnancycat:=as.numeric(cut(agepregnancy,
-                                     breaks=c(0,20,25,30,35,40,100),
-                                     include.lowest=T))]
-  
-  d[,educationcat:=as.numeric(cut(education,
-                                  breaks=c(0,9,13,100),
-                                  include.lowest=T))]
-  xtabs(~d$agemarriagecat)
-  xtabs(~d$agepregnancycat)
-  xtabs(~d$educationcat)
-  
-  d[,avgincome := income/members]
-  
-  d[,avgincomecat:=as.numeric(cut(avgincome,
-                                  breaks=c(0,200,900,1824,3054,100000),
-                                  include.lowest=T))]
-  d[,incomecat:=as.numeric(cut(income,
-                               breaks=c(0,200,900,1824,3054,100000),
-                               include.lowest=T))]
-  
-  
   ConvertAllFactorsToChar(d)
   return(d)
 }
