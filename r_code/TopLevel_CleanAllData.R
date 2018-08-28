@@ -40,7 +40,7 @@ CleanAllData <- function(includePPC=TRUE){
   d[is.na(matching),matching:="Not"]
   
   # CLEAN DIFFERENT FILES CONSISTENTLY (e.g. gestational age)
-  CleaningDifferentFilesConsistently(d)
+  #CleaningDifferentFilesConsistently(d)
   
   # CREATING FURTHER VARIABLES
   CreatingFurtherVariablesNormal(d)

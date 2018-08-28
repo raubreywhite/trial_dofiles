@@ -6,6 +6,8 @@ Analyses <- function(d=NULL){
   dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1","random_indicators"))
   dir.create(file.path(FOLDER_DROPBOX_RESULTS,"booking_descriptives"))
   dir.create(file.path(FOLDER_DROPBOX_RESULTS,"indicators_for_mahima"))
+  dir.create(file.path(FOLDER_DROPBOX_RESULTS,"data_cleaning"))
+
   
   IndicatorsPNIPHDashboard(d)
   
@@ -16,7 +18,7 @@ Analyses <- function(d=NULL){
   IndicatorsOsloAnalyse(d[ident_dhis2_booking==1])
   
   Analyse_BookingDescriptives(d[ident_dhis2_booking==1])
-  
+  Analyze_Datacleaning(d)
   
   # tamara kappa/percent agreement values
   KappaValues()

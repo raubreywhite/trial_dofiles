@@ -72,7 +72,7 @@ CreatingFurtherVariablesMahima <- function(d){
     d[ident_hbo==TRUE & !is.na(get(sprintf("hbodate_%s",i))),
       (sprintf("mahima_dateofbirth_%s",i)):=get(sprintf("hbodate_%s",i))]
   }
-  
+
   #xtabs(~d$mahima_dateofbirth_1)
   
   # calculating gestational age at birth
@@ -90,12 +90,55 @@ CreatingFurtherVariablesMahima <- function(d){
       get(sprintf("mahima_dateofbirth_%s", i)),
       booklmp,
       units="weeks")),digits=1)]
-      
   }
   
-  #plot(mahima_gestageatbirthwk_1~mahima_gestageatbirthwk_2,data=d[mahima_gestageatbirthwk_1<100])
-
-  #d[round(mahima_gestageatbirthwk_1)==40 & mahima_gestageatbirthwk_2>100]$motheridno
+  #creating a new variable with all of the hospital entered gestational ages
+ 
+  # Avicenna entered gest ages
+  
+  #d[ident_avic_abb==TRUE & !is.na(abbbabypregnancynoofweeks_1),
+  #  mahima_hospenteredgestage_1:=abbbabypregnancynoofweeks_1]
+  
+  nam <-names(d)[stringr::str_detect(names(d),"^abbbabypregnancynoofweeks_[0-9]*$")]
+  num <- stringr::str_replace(nam, "abbbabypregnancynoofweeks_", "")
+  #here we are replacing abb with get("abb")
+  for (i in num){
+    print(i)
+    d[ident_avic_abb==TRUE & !is.na(get(sprintf("abbbabypregnancynoofweeks_%s",i))),
+      (sprintf("mahima_hospenteredgestage_%s", i)):=get(sprintf("abbbabypregnancynoofweeks_%s", i))]
+  }
+  
+  
+  #private/clinics  hbo entered gest ages
+ 
+  nam <-names(d)[stringr::str_detect(names(d),"^dhis2hbogestagedeliv_[0-9]*$")]
+  num <- stringr::str_replace(nam, "dhis2hbogestagedeliv_", "")
+  nam
+  num
+  #here we are replacing abb with get("abb")
+  for (i in num){
+    print(i)
+    d[ident_dhis2_dhis2hbo==TRUE & !is.na(get(sprintf("dhis2hbogestagedeliv_%s",i))),
+      (sprintf("mahima_hospenteredgestage_%s", i)):=get(sprintf("dhis2hbogestagedeliv_%s", i))]
+  }
+  
+  #Govt
+ 
+  nam <-names(d)[stringr::str_detect(names(d),"^hbogestagedeliv_[0-9]*$")]
+  num <- stringr::str_replace(nam, "hbogestagedeliv_", "")
+  nam
+  num
+  #here we are replacing abb with get("abb")
+  for (i in num){
+    print(i)
+    d[ident_hbo==TRUE & !is.na(get(sprintf("hbogestagedeliv_%s",i))),
+      (sprintf("mahima_hospenteredgestage_%s", i)):=get(sprintf("hbogestagedeliv_%s", i))]
+  }
+  
+  # to detect some women with wrong gestational age
+  
+  d[mahima_gestageatbirthwk_1>250]$motheridno
+  d[motheridno==854006681,c("booklmp","bookdate","abbdate_1","dhis2hbodate_1","hbodate_1")]
   
   # "a cross tab" - "tab" command in stata
   #xtabs(~d$mahima_gestageatbirthwk_1)

@@ -212,7 +212,7 @@ IndicatorsOsloRandom <- function(d){
                                  sprintf("%s_anvisit_timely_by_bookgestage.xlsx",CLINIC_INTERVENTION_DATE)))
   
   
-  #####
+
   
   resPalestine <- d[ident_expected_delivered==TRUE,
                     .(
@@ -313,6 +313,27 @@ IndicatorsOsloRandom <- function(d){
                                  "random_indicators",
                                  sprintf("%s_ANC_with_BP.xlsx",CLINIC_INTERVENTION_DATE)))
   
+  
+  ## comparing mahima gestational age calculated vs entered
+
+  #dev.off() try to run this code if get weird graphic errors
+  p <- ggplot(d[ident_TRIAL_1==TRUE], aes(x=mahima_gestageatbirthwk_1, y=mahima_hospenteredgestage_1))
+  p <- p + geom_abline(intercept = 0, slope = 1, colour="red")
+  p <- p + geom_point()
+  p <- p + labs(title="Entered and Calculated Gestational Ages")
+  p <- p + scale_x_continuous("Calculated Gestational Ages")
+  p <- p + theme_grey (base_size = 16)
+  p <- p + labs(caption=GraphCaption())
+  
+  
+  ggsave(filename = file.path(
+    FOLDER_DROPBOX_RESULTS,
+    "indicators_for_mahima",
+    "entered_and_calculated_gest_ages.png"),
+    height=210,
+    width=297,
+    units="mm",
+    plot=p)
   
 }
 

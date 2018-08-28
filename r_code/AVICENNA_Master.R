@@ -56,5 +56,22 @@ AVICENNA_Master <- function(keepMotherID, includeObs=FALSE){
   
   d[,ident_avic_any:=TRUE]
   
+  nam <- rev(names(d)[stringr::str_detect(names(d),"^alabdate_[0-9]*$")])
+  num <- stringr::str_remove(nam,"alabdate_")
+  
+  d[,mahima_alab_hb_closest_to_delivery_1:=as.character(NA)]
+  for(i in num){
+    print(i)
+    d[is.na(mahima_alab_hb_closest_to_delivery_1) & 
+        get(sprintf("alabdate_%s",i))<=abbdate_1 & 
+        !is.na(abbdate_1) & 
+        !is.na(get(sprintf("alabdate_%s",i))),
+      mahima_alab_hb_closest_to_delivery_1:=get(sprintf("alabtestresult_%s",i))]
+    
+  }
+  sum(is.na(d$alabtestresult_1))
+  nrow(d[alabdate_1<=abbdate_1])
+  sum(!is.na(d$mahima_alab_hb_closest_to_delivery_1))
+  
   return(d)
 }

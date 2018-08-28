@@ -79,8 +79,12 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   data_DHIS2_Booking[,bookorgname:=NEW_bookorgname]
   data_DHIS2_Booking[,NEW_bookorgname:=NULL]
   
-  setorder(data_DHIS2_Booking,uniqueid,bookdate)
-  data_DHIS2_Booking[,booknum:=1:.N,by=uniqueid]
+  # we create booknum based on motherIDNO, because women can have multiple uniqueIDs
+  #setorder(data_DHIS2_Booking,uniqueid,bookdate)
+  #data_DHIS2_Booking[,booknum:=1:.N,by=uniqueid]
+  setorder(data_DHIS2_Booking,demoidnumber,bookdate)
+  data_DHIS2_Booking[,booknum:=1:.N,by=demoidnumber]
+  xtabs(~data_DHIS2_Booking$booknum)
   
   earlyData <- unique(data_DHIS2_Booking[,c("uniqueid","bookdate","booknum")])
   booklmp <- unique(data_DHIS2_Booking[,c("uniqueid","bookevent","booknum","booklmp")])
@@ -326,7 +330,9 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   
   setorderv(d,cols=c("motheridno","bookdate"))
   d[,motheridbooknum:=1:.N,by=.(motheridno)]
+  # the start date of matching with avicenna
   d[,motheridbook_earlyDate:=bookdate]
+  # the end date of matching with avicenna
   d[,motheridbook_lateDate:=bookdate+31*10]
   # make sure that the "late date" doesnt overlap with a new pregnancy booking
   d[,temp:=shift(motheridbook_earlyDate,type = "lead"),by=.(motheridno)]
