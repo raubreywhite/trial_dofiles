@@ -32,6 +32,8 @@ KappaValues <- function(){
   res <- na.omit(res)
   res
   
-  openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,"kappa.xlsx"))
+  openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,
+                                     "data_quality",
+                                      "kappa.xlsx"))
   
 }

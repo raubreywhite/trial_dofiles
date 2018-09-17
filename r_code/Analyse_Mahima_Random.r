@@ -103,7 +103,11 @@ p <- p + scale_y_continuous("Number of women in 2017")
 p <- p + labs(title="Trial 1")
 p <- p + labs(caption=sprintf("Date of data extraction: %s",CLINIC_CONTROL_DATE))
 p
-ggsave(filename=file.path(FOLDER_DROPBOX_RESULTS,"baselinecohort.png"),
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "random",
+  "baselinecohort.png"),
        plot=p,
        height=210,
        width=297,
@@ -191,10 +195,15 @@ x <- matrix(c(
 res[,totalAviccenaPvalue:=overallPvalue]
 
 
-openxlsx::write.xlsx(res, file.path(FOLDER_DROPBOX_RESULTS,"DENOMINATORS.xlsx"))
+openxlsx::write.xlsx(res, file.path(FOLDER_DROPBOX_RESULTS,
+                                    "mahima",
+                                    "random",
+                                    "DENOMINATORS.xlsx"))
 
 
 
 }
 
-
+Analyse_Mahima_Random <- function(d){
+  BASE_LINE_STATISTICAL_ANALYSIS(d)
+}

@@ -207,12 +207,12 @@ IndicatorsOsloRandom <- function(d){
   
   openxlsx::write.xlsx(res, 
                        file.path(FOLDER_DROPBOX_RESULTS,
-                                 "trial_1",
-                                 "random_indicators",
+                                 "mahima",
+                                 "random",
                                  sprintf("%s_anvisit_timely_by_bookgestage.xlsx",CLINIC_INTERVENTION_DATE)))
   
   
-
+# women who did booking anc and making ppc
   
   resPalestine <- d[ident_expected_delivered==TRUE,
                     .(
@@ -243,7 +243,8 @@ IndicatorsOsloRandom <- function(d){
   
   openxlsx::write.xlsx(res, 
                        file.path(FOLDER_DROPBOX_RESULTS,
-                                 "indicators_for_mahima",
+                                 "mahima",
+                                 "random"
                                  sprintf("%s_ANC_with_PPC.xlsx",CLINIC_INTERVENTION_DATE)))
   
   openxlsx::write.xlsx(d[is.na(bookorgdistrict)], 
@@ -257,7 +258,7 @@ IndicatorsOsloRandom <- function(d){
   names(d)[stringr::str_detect(names(d),"^cust")]
   
   
-  #### BPand ANC
+  #### Blood Pressure and ANC
   
   resPalestine <- d[ident_expected_delivered==TRUE,
                     .(
@@ -309,8 +310,8 @@ IndicatorsOsloRandom <- function(d){
   
   openxlsx::write.xlsx(res, 
                        file.path(FOLDER_DROPBOX_RESULTS,
-                                 "trial_1",
-                                 "random_indicators",
+                                 "mahima",
+                                 "random",
                                  sprintf("%s_ANC_with_BP.xlsx",CLINIC_INTERVENTION_DATE)))
   
   
@@ -328,7 +329,8 @@ IndicatorsOsloRandom <- function(d){
   
   ggsave(filename = file.path(
     FOLDER_DROPBOX_RESULTS,
-    "indicators_for_mahima",
+    "mahima",
+    "random",
     "entered_and_calculated_gest_ages.png"),
     height=210,
     width=297,
@@ -369,8 +371,8 @@ IndicatorsOsloDemographics <- function(d){
   
   ggsave(filename=file.path(
     FOLDER_DROPBOX_RESULTS,
-    "trial_1",
-    "demographics",
+    "mahima",
+    "random",
     "education_years.png"),
     plot=p)
   
@@ -395,8 +397,8 @@ IndicatorsOsloDemographics <- function(d){
   
   ggsave(filename=file.path(
     FOLDER_DROPBOX_RESULTS,
-    "trial_1",
-    "demographics",
+    "mahima",
+    "random",
     "age_years.png"),
     plot=p)
   
@@ -422,8 +424,8 @@ IndicatorsOsloDemographics <- function(d){
   
   ggsave(filename=file.path(
     FOLDER_DROPBOX_RESULTS,
-    "trial_1",
-    "demographics",
+    "mahima",
+    "random",
     "agemarriage_years.png"),
     plot=p)
   
@@ -449,8 +451,8 @@ IndicatorsOsloDemographics <- function(d){
   
   ggsave(filename=file.path(
     FOLDER_DROPBOX_RESULTS,
-    "trial_1",
-    "demographics",
+    "mahima",
+    "random",
     "agepregnancy_years.png"),
     plot=p)
   
@@ -476,8 +478,8 @@ IndicatorsOsloDemographics <- function(d){
   
   ggsave(filename=file.path(
     FOLDER_DROPBOX_RESULTS,
-    "trial_1",
-    "demographics",
+    "mahima",
+    "random",
     "income_continuous.png"),
     plot=p)
   

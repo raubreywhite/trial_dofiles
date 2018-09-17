@@ -56,7 +56,7 @@ HBO_Demographics <- function(isControl=T) {
   return(d)
 }
 
-HBO_Master <- function(){
+HBO_Master <- function(deleteMissingMotherIDNO=TRUE){
   hbo <- HBO_HBO(isControl=T)
   demo <- HBO_Demographics(isControl=T)
   
@@ -64,8 +64,13 @@ HBO_Master <- function(){
   
   d <- merge(demo,hbo,by="uniqueid") 
   setnames(d,"didentificationdocumentnumbercontroldata","motheridno")
-  d <- d[!is.na(motheridno)]
-  
+  if(deleteMissingMotherIDNO==TRUE){
+    d <- d[!is.na(motheridno)]
+  } else {
+    # if missing motheridno
+    # set motheridno to -99
+    d[is.na(motheridno), motheridno:=-99]
+  }
   
   setnames(d,which(stringr::str_detect(names(d),"^dfirstname")),"dfirstname")
   setnames(d,which(stringr::str_detect(names(d),"^dfathersname")),"dfathersname")

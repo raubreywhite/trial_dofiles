@@ -1,5 +1,5 @@
 
-Analyze_Datacleaning <- function(d){
+Analyse_DataQuality <- function(d){
   print("something happens")
   #analyze dates of birth for twins to know if the data is cleaned enuogh or not 
   
@@ -10,7 +10,7 @@ Analyze_Datacleaning <- function(d){
   
   ggsave(filename=file.path(
     FOLDER_DROPBOX_RESULTS,
-    "data_cleaning",
+    "data_quality",
     "date_birth_twins.png"),
     height=210,
     width=297,
@@ -39,7 +39,7 @@ Analyze_Datacleaning <- function(d){
   
   ggsave(filename = file.path(
     FOLDER_DROPBOX_RESULTS,
-    "data_cleaning",
+    "data_quality",
     "bookdate_multiple_pregnancies.png"),
     height=210,
     width=297,
@@ -58,7 +58,7 @@ Analyze_Datacleaning <- function(d){
   
   ggsave(filename = file.path(
     FOLDER_DROPBOX_RESULTS,
-    "data_cleaning",
+    "data_quality",
     "bookdate_multiple_pregnancies_intervention.png"),
     height=210,
     width=297,
@@ -84,7 +84,7 @@ Analyze_Datacleaning <- function(d){
   
   ggsave(filename = file.path(
     FOLDER_DROPBOX_RESULTS,
-    "data_cleaning",
+    "data_quality",
     "avicenna_multiple_birth.png"),
     height=210,
     width=297,

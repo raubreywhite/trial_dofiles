@@ -1,6 +1,6 @@
 
 
-HBO_Completeness <-function(d){
+Analyse_HBO_Completeness <-function(d){
     warning("THIS ONLY TAKES INTO ACCOUNT THE FIRST BIRTH (i.e. IGNORES THE SECOND BABY WITH A TWIN")
   
     tokeep <- d[
@@ -82,7 +82,6 @@ HBO_Completeness <-function(d){
     tokeep[matching=="Governmental",merged_indic_csection:=hboindiccsectioninanycol_1]
     tokeep[matching=="Private",merged_indic_csection:=dhis2hboindicforcsec_1]
     
-    
     results <- tokeep[,.(
       denominator=.N,
       merged_namehospbirth_notmiss=sum(!is.na(merged_namehospbirth)),
@@ -108,4 +107,28 @@ HBO_Completeness <-function(d){
       FOLDER_DROPBOX_RESULTS,
       "hbo_completeness",
       sprintf("%s_HBO_Completeness.xlsx",DATA_DATE)))
+    
+    # unmatched govt hospital cases from hbo sheet
+    
+     #makes a HBO with women who had a missing id
+    h <-HBO_Master(deleteMissingMotherIDNO = FALSE)
+    
+    # list of the motherid nos that are in HBO but did not match
+    h$motheridno[!h$motheridno %in% tokeep$motheridno]
+    
+    # this is the same as above, but the real dataset
+    h[!motheridno %in% tokeep$motheridno & hboeventdate_1>="2017-01-15"]
+    
+    nrow(h)
+    nrow(h[hboeventdate_1>="2017-01-15"])
+    nrow(h[!motheridno %in% tokeep$motheridno & hboeventdate_1>="2017-01-15"])
+    
+    hboeventdate_1
+    
+    openxlsx::write.xlsx(x=h[!motheridno %in% tokeep$motheridno & hboeventdate_1>="2017-01-15"],file=file.path(
+      FOLDER_DATA_RESULTS,
+      "hbo_completeness",
+      sprintf("%s_HBO_Completeness_unmatched_cases.xlsx",DATA_DATE)))
+    
+    
 }

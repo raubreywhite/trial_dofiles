@@ -70,6 +70,23 @@ yearmonth <- sprintf("%s-%s",
         lubridate::year(lubridate::today()),
         lubridate::month(lubridate::today()))
 
+# CREATE FOLDERS
+
+dir.create(FOLDER_DROPBOX_RESULTS)
+dir.create(file.path(FOLDER_DROPBOX_RESULTS,"hbo_completeness"))
+dir.create(file.path(FOLDER_DROPBOX_RESULTS,"booking_descriptives"))
+dir.create(file.path(FOLDER_DROPBOX_RESULTS,"data_quality"))
+dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima"))
+
+dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima","random"))
+dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima","trial_1"))
+
+
+#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1"))
+#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1","demographics"))
+#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1","random_indicators"))
+#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"indicators_for_mahima"))
+
 
 ###################
 ###################
