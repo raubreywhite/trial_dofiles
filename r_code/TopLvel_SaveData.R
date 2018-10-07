@@ -68,6 +68,7 @@ SaveAnonymousOslo <- function(d){
   d[,bookidnumber:=NULL]
   d[,demoorgname:=NULL]
   d[,demoorgunit:=NULL]
+  d[,bookorgdistrict:=NULL]
   
   # this is what i do if i know part of the variable name
   d[,names(d)[stringr::str_detect(names(d),"latitude")]:=NULL]
@@ -104,6 +105,8 @@ SaveAnonymousOslo <- function(d){
   d[,expecteddateofdelivery:=NULL]
   d[,calc_expected_due_delivery:=NULL]
   d[,avgincome:=NULL]
+ 
+  
   
   # this saves the file to the dropbox
   # print("SAVING FILES TO DROPBOX")
@@ -125,12 +128,73 @@ SaveAnonymousOslo <- function(d){
   gc()
 }
 
-LoadDataFileFromNetwork <- function(d){
+LoadDataFileFromNetwork <- function(){
   print("RELOADING DATASET FROM NETWORK DRIVE")
   d <- readRDS(file.path(FOLDER_DATA_CLEAN,"full_data_from_r.rds"))
   print("FINISHED RELOADING DATASET FROM NETWORK DRIVE")
   
   return(d)
+}
+
+LoadAnonDataFileFromNetwork<- function(){
+  print("RELOADING ANON DATASET FROM NETWORK DRIVE")
+  d <- readRDS(file.path(FOLDER_DATA_CLEAN,"oslo_anon_data_from_r.rds"))
+  print("FINISHED RELOADING ANON DATASET FROM NETWORK DRIVE")
+  
+  return(d)
+}
+
+SaveCISMACDataBase<- function(){
+  rm("d", envir=.GlobalEnv)
+  d=LoadAnonDataFileFromNetwork()
+  
+  varsKeep <- names(d)
+  d <-d[ident_TRIAL_1==T,varsKeep,with=F]
+  
+  A <-d[ident_dhis2_control==T]
+  B <-d[ident_dhis2_control==F]
+  
+  A[,ident_dhis2_control:=NULL]
+  B[,ident_dhis2_control:=NULL]
+  
+  n <- unique(d$bookyearmonth)
+  n
+  
+  
+  for(i in 1:length(n)){
+    ym <-n[i]
+    print(i)
+   
+    #sampling from this vector, takes two observations from the vector
+    #randomly gives you 0 or 1
+    
+   randomoffset<- sample(x=c(0,1),size=2, replace=F)
+   temp <-A[bookyearmonth==ym]
+    
+   saveRDS(temp,
+           file.path(FOLDER_DATA_CLEAN,
+                     "CISMACdataset",
+                     sprintf("%s_CISMAC_%s.rds", 10*i+randomoffset[1],ym)))
+   
+   openxlsx::write.xlsx(temp,file.path(FOLDER_DATA_CLEAN,
+                                       "CISMACdataset",
+                                       sprintf("%s_CISMAC_%s.xlsx", 10*i+randomoffset[1], ym))) 
+  
+    print(i)
+    
+    temp <-B[bookyearmonth==ym]
+    
+    saveRDS(temp,
+            file.path(FOLDER_DATA_CLEAN,
+                      "CISMACdataset",
+                      sprintf("%s_CISMAC_%s.rds", 10*i+randomoffset[2], ym)))
+    
+    openxlsx::write.xlsx(temp,file.path(FOLDER_DATA_CLEAN,
+                                        "CISMACdataset",
+                                        sprintf("%s_CISMAC_%s.xlsx", 10*i+randomoffset[2], ym))) 
+  }
+  
+ 
 }
 
 SaveAllDataFiles <- function(d){
@@ -147,6 +211,7 @@ SaveAllDataFiles <- function(d){
   SaveFullFileToNetwork(d)
   Save2CasesPerMonthToNetwork(d)
   SaveAnonymousOslo(d)
+  SaveCISMACDataBase()
   
 
 }

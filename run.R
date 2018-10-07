@@ -5,8 +5,8 @@
 ###################
 
 # define our dates
-CLINIC_INTERVENTION_DATE <- "2018-07-26"
-CLINIC_CONTROL_DATE <- "2018-07-26"
+CLINIC_INTERVENTION_DATE <- "2018-09-27"
+CLINIC_CONTROL_DATE <- "2018-09-27"
 
 # define the folders
 tryCatch({
@@ -47,12 +47,16 @@ desiredPackages <- c("stringr",
                      )
 for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
 
+
+# from net but the above already in R
+
 library(data.table)
 library(ggplot2)
 
 # this loads in all the code in the "r_code" folder
 # this is the same as going "library(r_code)" (except we cant do that
-# because r_code isn't a package)
+# because r_code isn't a package)...WE CAN deal it as library but it doesnot
+
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 # make sure that all of the file sources go DIRECTLY
 # into the **global** environment
@@ -74,7 +78,6 @@ yearmonth <- sprintf("%s-%s",
 
 dir.create(FOLDER_DROPBOX_RESULTS)
 dir.create(file.path(FOLDER_DROPBOX_RESULTS,"hbo_completeness"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"booking_descriptives"))
 dir.create(file.path(FOLDER_DROPBOX_RESULTS,"data_quality"))
 dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima"))
 
@@ -125,5 +128,7 @@ MissingHBO()
 # PLACE OF DELIVERY INFORMATION CHECKING
 # LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPORT
 d <- LoadDataFileFromNetwork()
-#xtabs(~d$cpoplaceofbirth_1+d$ppcplaceofdelivery_1,addNA=T)
-####
+#### bookvisitspec shouldnt be known  pcnidnumber_1  amdmotherbirthdate_1
+###previdnumber_1   manidnumber  riskidnumberd$hbodaltidnum_1   hbodaltidnum_1
+###anidnumber_1     labid     usid      
+

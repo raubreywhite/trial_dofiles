@@ -8,6 +8,8 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
   d[,eventdate:=as.Date(eventdate)]
   #setnames(d, 2, "uniqueid")
   
+  d<- Removeduplicate(d=d,tag="anc",isControl=isControl)
+  
   d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl)
   
   if (isControl) {

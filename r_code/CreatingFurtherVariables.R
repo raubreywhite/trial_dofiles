@@ -1,29 +1,32 @@
 CreatingFurtherVariablesNormal <- function(d){
-  d[,agecat:=as.numeric(cut(age,
-                            breaks=c(0,20,25,30,35,40,100),
-                            include.lowest=T))]
-  d[,agemarriagecat:=as.numeric(cut(agemarriage,
+  d[,agecat:=cut(age,
+                  breaks=c(0,20,25,30,35,40,45,50,100),
+                  include.lowest=T)]
+  d[,agemarriagecat:=cut(agemarriage,
                                     breaks=c(0,20,25,30,35,40,100),
-                                    include.lowest=T))]
-  d[,agepregnancycat:=as.numeric(cut(agepregnancy,
+                                    include.lowest=T)]
+  d[,agepregnancycat:=cut(agepregnancy,
                                      breaks=c(0,20,25,30,35,40,100),
-                                     include.lowest=T))]
+                                     include.lowest=T)]
   
-  d[,educationcat:=as.numeric(cut(education,
+  d[,educationcat:=cut(education,
                                   breaks=c(0,9,13,100),
-                                  include.lowest=T))]
+                                  include.lowest=T)]
+  xtabs(~d$agecat)
   xtabs(~d$agemarriagecat)
   xtabs(~d$agepregnancycat)
   xtabs(~d$educationcat)
   
   d[,avgincome := income/members]
   
-  d[,avgincomecat:=as.numeric(cut(avgincome,
+  d[,avgincomecat:=cut(avgincome,
                                   breaks=c(0,200,900,1824,3054,100000),
-                                  include.lowest=T))]
-  d[,incomecat:=as.numeric(cut(income,
+                                  include.lowest=T)]
+  d[,incomecat:=cut(income,
                                breaks=c(0,200,900,1824,3054,100000),
-                               include.lowest=T))]
+                               include.lowest=T)]
+  
+  xtabs(~d$avgincomecat)
   
   
 }
@@ -147,6 +150,11 @@ CreatingFurtherVariablesMahima <- function(d){
   #sum(!is.na(d$mahima_dateofbirth_1))
   #sum(!is.na(d$mahima_gestageatbirthwk))
   #hist(d$mahima_gestageatbirthwk)
+  
+  
+  #Diabetes indicators
+  xtabs(~d$bookhistgdm,addNA=T)
+  xtabs(~d$ident_dhis2_booking+ d$bookhistgdm,addNA=T)
 }
 
 

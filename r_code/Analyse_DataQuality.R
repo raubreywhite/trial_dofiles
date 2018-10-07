@@ -1,5 +1,44 @@
+KappaValues <- function(){
+  dk <- DHIS2_Master(keepDoubleBookings = TRUE) 
+  
+  nam <- names(dk)
+  res <- vector("list",length=length(nam))
+  for(i in 1:length(nam)){
+    cat(sprintf("%s/%s\n",i,length(nam)))
+    try({
+      var <- nam[i]
+      newData <- dk[,c(var,"dataextractor","motheridno","bookdate"),with=F]
+      setnames(newData,var,"value")
+      setorder(newData,motheridno,bookdate)
+      newData[,obs:=1:.N,by=.(motheridno,bookdate)]
+      newData[,dataextractor:=NULL]
+      newData <- dcast.data.table(newData[obs %in% 1:2],motheridno+bookdate~obs)
+      newData[,motheridno:=NULL]
+      newData[,bookdate:=NULL]
+      k <- rel::spi(na.omit(newData))
+      
+      p <- irr::agree(na.omit(newData))
+      
+      res[[i]] <- data.frame(var=var,perc_agreement=p$value,kap_est=k$est,kap_se=k$se,n=k$sample)
+    },TRUE)
+  }
+  
+  res <- rbindlist(res)
+  res <- res[is.finite(kap_est)]
+  res <- res[is.finite(kap_se)]
+  setorder(res,-perc_agreement)
+  res[perc_agreement>100,perc_agreement:=NA]
+  res[perc_agreement<0,perc_agreement:=NA]
+  res <- na.omit(res)
+  res
+  
+  openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,
+                                     "data_quality",
+                                     "kappa.xlsx"))
+  
+}
 
-Analyse_DataQuality <- function(d){
+Analyse_DataQualityVars <- function(d){
   print("something happens")
   #analyze dates of birth for twins to know if the data is cleaned enuogh or not 
   
@@ -97,3 +136,33 @@ Analyse_DataQuality <- function(d){
   
 }
 
+Analyse_AutoDuplications <- function(){
+  files <- list.files(
+    file.path(
+      FOLDER_DATA_RAW,
+      "possible_duplicates"), 
+    "^autodup_"
+    )
+  
+  res <- vector("list",length=length(files))
+  for(i in 1:length(res)){
+    res[[i]] <- readRDS(file.path(
+      FOLDER_DATA_RAW,
+      "possible_duplicates",
+      files[i]
+      ))
+  }
+  res <- rbindlist(res)
+  res[,perc:=duplicatednum/totalnum*100]
+  openxlsx::write.xlsx(res,
+                       file=file.path(
+                         FOLDER_DROPBOX_RESULTS,
+                         "data_quality",
+                         "autoduplications.xlsx"))
+}
+
+Analyse_DataQuality <- function(d){
+  Analyse_DataQualityVars(d)
+  Analyse_AutoDuplications()
+  KappaValues()
+}

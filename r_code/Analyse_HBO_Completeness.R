@@ -2,7 +2,10 @@
 
 Analyse_HBO_Completeness <-function(d){
     warning("THIS ONLY TAKES INTO ACCOUNT THE FIRST BIRTH (i.e. IGNORES THE SECOND BABY WITH A TWIN")
-  
+    tokeepeveryone <- d[
+      ident_dhis2_booking==1 &
+      isExpectedToHaveDelivered==TRUE]
+      
     tokeep <- d[
       ident_dhis2_booking==1 &
       isExpectedToHaveDelivered==TRUE &
@@ -123,9 +126,9 @@ Analyse_HBO_Completeness <-function(d){
     nrow(h[hboeventdate_1>="2017-01-15"])
     nrow(h[!motheridno %in% tokeep$motheridno & hboeventdate_1>="2017-01-15"])
     
-    hboeventdate_1
-    
-    openxlsx::write.xlsx(x=h[!motheridno %in% tokeep$motheridno & hboeventdate_1>="2017-01-15"],file=file.path(
+    openxlsx::write.xlsx(x=h[!motheridno %in% tokeepeveryone$motheridno & 
+                               hboeventdate_1>="2017-01-15"],
+      file=file.path(
       FOLDER_DATA_RESULTS,
       "hbo_completeness",
       sprintf("%s_HBO_Completeness_unmatched_cases.xlsx",DATA_DATE)))

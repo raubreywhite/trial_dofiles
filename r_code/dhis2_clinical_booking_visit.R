@@ -487,6 +487,7 @@ DHIS2_BookingVisit <- function(isControl, keepDoubleBookings=FALSE) {
   
   #d[demoidnumber==401404496,c("demoidnumber","uniqueid","bookevent","bookdate")]
 
+  d<- Removeduplicate(d=d,tag="demobook",isControl=isControl)
   
   
   return(d)

@@ -10,6 +10,7 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp) {
     isControl=isControl)
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
+  d<- Removeduplicate(d=d,tag="ppc",isControl=isControl)
   
   ####
   nrow(d)

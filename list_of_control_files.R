@@ -24,10 +24,12 @@ library(ggplot2)
 # import excel using "stamping_number.xlsx", clear firstrow
 allNum <- readxl::read_excel("data_raw/stamping_number.xlsx")
 recNum <- readxl::read_excel("data_raw/Control rec F.xlsx", sheet="Received files")
-
+fillNum <- readxl::read_excel("data_raw/Control rec F.xlsx", sheet="filled")
+ 
 # turn into data tables
 setDT(allNum)
 setDT(recNum)
+setDT(fillNum)
 
 setnames(allNum,c(
   "clinic",
@@ -174,44 +176,27 @@ d <- d[ident_dhis2_control==1]
 locationOfTheFirstIdentVariable <- min(which(stringr::str_detect(names(d),"^ident_")))
 d <- d[,1:locationOfTheFirstIdentVariable]
 
-recNum[,fromReceivedFile:=TRUE]
+fillNum[,fromFilledFile:=TRUE]
 d[,fromDHIS2:=TRUE]
-dx <- merge(d,recNum,all.x=T,all.y=T,by.x="conancfilenumber",by.y="received")
+dx <- merge(d,fillNum,all.x=T,all.y=T,by.x="conancfilenumber",by.y="filled")
 
 nrow(d)
 nrow(dx)
 
-xtabs(~dx$fromReceivedFile+dx$fromDHIS2,addNA=T)
+xtabs(~dx$fromFilledFile+dx$fromDHIS2,addNA=T)
 
-# get all the names from dx
-# (this doesn't "do" anything, it just gets the names)
-# we will use this later
-n <- names(dx)
-# put the four names we care about at the front
-# (but now we have duplicates!)
-n <- c("conancfilenumber",
-       "fromDHIS2",
-       "fromReceivedFile",
-       "numOfTimesObserved",
-       n)
-# get rid of the duplicates
-n <- unique(n)
+setcolorder2(dx=dx,var=c("conancfilenumber",
+                         "fromDHIS2",
+                         "fromFilledFile"
+))
 
-# tells dx "PUT THE COLUMNS IN THIS ORDER ('n')
-# (here we actually "do something")
-# this is pass by reference
-setcolorder(dx,n)
-# this is the same as this: (pass by value)
-# this will temporarily use double the amount of memory
-# (with=F says "n is not a column in dx, look inside it")
-# dx <- dx[,n,with=F]
 
 # lets sort the rows of the dataset (pass by reference)
-setorder(dx,conancfilenumber,fromDHIS2,fromReceivedFile)
+setorder(dx,conancfilenumber,fromDHIS2,fromFilledFile)
 # pass by value
 # dx <- dx[order(conancfilenumber,fromDHIS2,fromReceivedFile)]
 
-openxlsx::write.xlsx(dx, "results/matched_received_with_filled_dhis2.xlsx")
+openxlsx::write.xlsx(dx, "results/matched_filled_with_dhis2.xlsx")
 
 
 # 
