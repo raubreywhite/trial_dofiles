@@ -80,9 +80,11 @@ dir.create(FOLDER_DROPBOX_RESULTS)
 dir.create(file.path(FOLDER_DROPBOX_RESULTS,"hbo_completeness"))
 dir.create(file.path(FOLDER_DROPBOX_RESULTS,"data_quality"))
 dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima"))
+dir.create(file.path(FOLDER_DROPBOX_RESULTS,"pniph"))
 
 dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima","random"))
 dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima","trial_1"))
+dir.create(file.path(FOLDER_DROPBOX_RESULTS,"pniph","abstracts_2018"))
 
 
 #dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1"))

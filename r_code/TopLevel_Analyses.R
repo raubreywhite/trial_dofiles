@@ -8,5 +8,6 @@ Analyses <- function(d=NULL){
   
   Analyse_Mahima_Random(d)
   Analyse_Mahima_Trial_1(d)
+  #Analyse_Medical_History_Trial_1(d)
 
 }
