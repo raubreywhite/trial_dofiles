@@ -1,11 +1,17 @@
-CleanAllData <- function(includePPC=TRUE){
+CleanAllData <- function(
+  includePPC=TRUE,
+  minBookDate="2001-01-01",
+  maxBookDate="2100-01-01"
+  ){
   timeStart <- Sys.time()
   
   # CLEAN DHIS
-  dhis=suppressWarnings(DHIS2_Master())
-  if(!includePPC){
-    dhis <- dhis[ident_dhis2_booking==1]
-  }
+  dhis=suppressWarnings(DHIS2_Master(
+    includePPC=includePPC,
+    minBookDate=minBookDate,
+    maxBookDate=maxBookDate
+    ))
+
   keepMotherID <- unique(dhis$motheridno)
   
   # CLEAN AVICENNA

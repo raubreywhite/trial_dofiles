@@ -30,7 +30,12 @@ CleanOrgName <- function(data,nameToReplace="bookorgname"){
   return(data)
 }
 
-DHIS2_Master <- function(keepDoubleBookings=FALSE){
+DHIS2_Master <- function(
+  keepDoubleBookings=FALSE,
+  includePPC=TRUE,
+  minBookDate="2001-01-01",
+  maxBookDate="2100-01-01"
+  ){
   ####
   # DHIS2 BOOKING
   print("CLEANING DHIS2 BOOKING")
@@ -43,6 +48,8 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
       con,
       int)
   }
+  # restrict bookdate
+  data_DHIS2_Booking <- data_DHIS2_Booking[bookdate>=minBookDate & bookdate<=maxBookDate]
   
   # here we load in "bookorgname" and give a bunch of indicators
   # i.e. trial 1 indicators
@@ -73,6 +80,8 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   data_DHIS2_Booking[
     (bookdate<as.Date("2017-01-15") | bookdate>as.Date("2017-09-15")) &
       !is.na(ident_TRIAL_1),ident_TRIAL_1:=FALSE]
+  
+  data_DHIS2_Booking <- data_DHIS2_Booking[is.na(bookorgdistrict) | bookorgdistrict!="TEST"]
   
   ## structural indicators end
   
@@ -351,7 +360,9 @@ DHIS2_Master <- function(keepDoubleBookings=FALSE){
   #####################
   #####################
   
-  
+  if(!includePPC){
+    d <- d[ident_dhis2_booking==1]
+  }
   
   return(d)
 }

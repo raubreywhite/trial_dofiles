@@ -44,7 +44,7 @@ desiredPackages <- c("stringr",
                      "rel",
                      "gridExtra",
                      "openssl"
-                     )
+)
 for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
 
 
@@ -71,66 +71,24 @@ DATA_DATE <- min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)
 
 weekyear <- sprintf("%s-%s",lubridate::isoyear(lubridate::today()),lubridate::isoweek(lubridate::today()))
 yearmonth <- sprintf("%s-%s",
-        lubridate::year(lubridate::today()),
-        lubridate::month(lubridate::today()))
+                     lubridate::year(lubridate::today()),
+                     lubridate::month(lubridate::today()))
+### SETUP ENDS
 
-# CREATE FOLDERS
+# Load in datafile
 
-dir.create(FOLDER_DROPBOX_RESULTS)
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"hbo_completeness"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"data_quality"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"pniph"))
-
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima","random"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima","trial_1"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"pniph","abstracts_2018"))
-
-
-#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1"))
-#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1","demographics"))
-#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1","random_indicators"))
-#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"indicators_for_mahima"))
-
-
-###################
-###################
-###################
-###### SETUP ENDS
-###################
-###################
-###################
-
-####################
-####################
-# CODE STARTS HERE #
-####################
-####################
-
-# make this TRUE if you want to include the PPC
-d <- CleanAllData(includePPC=FALSE)
-
-####################
-#NOW run HBO stuff##
-
-SaveAllDataFiles(d)
-
-Analyses(d=LoadDataFileFromNetwork())
-
-##################
-##################
-# CODE ENDS HERE #
-##################
-##################
-
-MissingHBO()
-
-
-####
-# PLACE OF DELIVERY INFORMATION CHECKING
-# LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPORT
 d <- LoadDataFileFromNetwork()
-#### bookvisitspec shouldnt be known  pcnidnumber_1  amdmotherbirthdate_1
-###previdnumber_1   manidnumber  riskidnumber   d$hbodaltidnum_1   hbodaltidnum_1
-###anidnumber_1     labid     usid      
 
+smalldataset <- d[ident_dhis2_control==F &
+                  ident_dhis2_an==T &
+                  ident_dhis2_ppc==T &
+                  ident_dhis2_cpo==T &
+                  bookdate>="2017-09-01" & bookdate<="2018-09-01",
+              c("cpocomplicationsnone_1",
+                "cpopregoutcome_1",
+                "cpopuerpalsepsis_2"
+               )
+                  
+          ]
+
+nrow(smalldataset)
