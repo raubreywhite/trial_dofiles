@@ -184,17 +184,19 @@ DHIS2_Master <- function(
   data_DHIS2_PostPartumCare <- DHIS2_DHIS2_PostPartumCare(isControl=F,
                                                           earlyData = earlyData,
                                                           booklmp = booklmp)
-  nrow(data_DHIS2_PostPartumCare)
-  data_DHIS2_PostPartumCare <- merge(x=data_DHIS2_PostPartumCare,y=pData,
-                                     by="ppcorgname",all.x=T)
-  nrow(data_DHIS2_PostPartumCare)
-  sum(is.na(data_DHIS2_PostPartumCare$ppcorgdistrict))
-  sum(is.na(data_DHIS2_PostPartumCare$ppcorgname))
-  # print the ppcorgnames for people who are missing ppcorgdistrict
-  # give me a vector
-  unique(data_DHIS2_PostPartumCare[is.na(ppcorgdistrict)]$ppcorgname)
-  # give it to me in 'data.table' form
-  data_DHIS2_PostPartumCare[is.na(ppcorgdistrict),"ppcorgname"]
+  if(!keepDoubleBookings){
+    nrow(data_DHIS2_PostPartumCare)
+    data_DHIS2_PostPartumCare <- merge(x=data_DHIS2_PostPartumCare,y=pData,
+                                       by="ppcorgname",all.x=T)
+    nrow(data_DHIS2_PostPartumCare)
+    sum(is.na(data_DHIS2_PostPartumCare$ppcorgdistrict))
+    sum(is.na(data_DHIS2_PostPartumCare$ppcorgname))
+    # print the ppcorgnames for people who are missing ppcorgdistrict
+    # give me a vector
+    unique(data_DHIS2_PostPartumCare[is.na(ppcorgdistrict)]$ppcorgname)
+    # give it to me in 'data.table' form
+    data_DHIS2_PostPartumCare[is.na(ppcorgdistrict),"ppcorgname"]
+  }
   
   ####
   #
