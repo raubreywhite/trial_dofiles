@@ -51,6 +51,7 @@ CleanAllData <- function(
   # CREATING FURTHER VARIABLES
   CreatingFurtherVariablesNormal(d)
   CreatingFurtherVariablesMahima(d)
+  CreatingFurtherVariablesPNIPH(d)
   
   # CALC INDICATORS OLSO
   IndicatorsOsloGenerate(d)

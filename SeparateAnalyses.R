@@ -91,4 +91,59 @@ smalldataset <- d[ident_dhis2_control==F &
                   
           ]
 
+vars_cpodvt <- names(d)[stringr::str_detect(names(d),"^cpodvt_")]
+vars_cpoeclampsia <-names(d)[stringr::str_detect(names(d),"^cpoeclampsia_")]
+vars_cpopreeclampsia <- names(d)[stringr::str_detect(names(d),"^cpopreeclampsia_")]
+vars_cpocomplicationsnone <- names(d)[stringr::str_detect(names(d),"^cpocomplicationsnone_")]
+vars_cpoantepartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpoantepartumhemorrhage_")]
+vars_cpopostpartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpopostpartumhemorrhage_")]
+vars_cpopuerpalsepsis <- names(d)[stringr::str_detect(names(d),"^cpopuerpalsepsis_")]
+
+#vars_cpopregoutcome <-names(d)[stringr::str_detect(names(d),"^cpopregoutcome_")]
+
+smallD <- d[ident_dhis2_control==F &
+              bookdate>="2017-09-01" & bookdate<="2018-09-01" &
+              ident_dhis2_booking==TRUE & 
+              ident_dhis2_an==TRUE & 
+              ident_dhis2_cpo==TRUE & 
+              ident_dhis2_ppc==TRUE,
+            c(
+              "bookevent",
+              vars_cpodvt,
+              vars_cpoeclampsia,
+              vars_cpopreeclampsia,
+              vars_cpocomplicationsnone,
+              vars_cpoantepartumhemorrhage,
+              vars_cpopostpartumhemorrhage,
+              vars_cpopuerpalsepsis
+            ),with=F]
+
+
+
+smallD[,id:=1:.N]
+long <- melt.data.table(smallD, id.vars=c("id"),variable.factor = F, value.factor = F)
+
+uglytable <- long[,
+                  .(
+                    denominator=.N,
+                    is_NA=sum(is.na(value)),
+                    not_NA=sum(!is.na(value)),
+                    value0=sum(value==0,na.rm=T),
+                    value1=sum(value==1,na.rm=T),
+                    value2=sum(value==2,na.rm=T),
+                    value3=sum(value==3,na.rm=T)
+                  ),
+                  keyby=.(variable)
+                  ]
+
+openxlsx::write.xlsx(uglytable, 
+                     file.path(
+                       FOLDER_DROPBOX_RESULTS,
+                       "pniph",
+                       "abstracts_2018",
+                       "cpo.xlsx"))
+
+# 
+#   
+
 nrow(smalldataset)

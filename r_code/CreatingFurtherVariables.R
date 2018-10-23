@@ -1,4 +1,6 @@
 CreatingFurtherVariablesNormal <- function(d){
+  d[,nbcdateofdelivery_1:=as.Date(nbcdateofdelivery_1)]
+  
   d[,agecat:=cut(age,
                   breaks=c(0,20,25,30,35,40,45,50,100),
                   include.lowest=T)]
@@ -158,4 +160,53 @@ CreatingFurtherVariablesMahima <- function(d){
 }
 
 
+CreatingFurtherVariablesPNIPH <-function(d){
+  # abstract 2018
+  d[,pniph_agecat:=cut(age,
+                       breaks=c(0,20,25,30,35,40,45,50,100),
+                       include.lowest=T)]
+  d[,pniph_agecat2:=cut(age,
+                        breaks=c(0,20,30,40,100),
+                        include.lowest=T)]
+  d[,pniph_agemarriagecat:=cut(agemarriage,
+                               breaks=c(0,20,25,30,35,40,100),
+                               include.lowest=T)]
+  d[,pniph_agemarriagecat2:=cut(agemarriage,
+                                breaks=c(0,20,30,40,100),
+                                include.lowest=T)]
+  d[,pniph_agepregnancycat:=cut(agepregnancy,
+                                breaks=c(0,20,25,30,35,40,100),
+                                include.lowest=T)]
+  d[,pniph_agepregnancycat2:=cut(agepregnancy,
+                                 breaks=c(0,20,30,40,100),
+                                 include.lowest=T)]
+  
+  d[,pniph_educationcat:=cut(education,
+                             breaks=c(0,9,13,100),
+                             include.lowest=T)]
+  
+  d[,pniph_educationcat2:=cut(education,
+                              breaks=c(0,11,12,16,100),
+                              include.lowest=T)]
+  levels(d$pniph_educationcat2)
+  
+  d[,pniph_avgincome := income/members]
+  
+  d[,pniph_avgincomecat:=cut(pniph_avgincome,
+                             breaks=c(0,200,900,1824,3054,100000),
+                             include.lowest=T)]
+  d[,pniph_incomecat:=cut(income,
+                          breaks=c(0,200,900,1824,3054,100000),
+                          include.lowest=T)]
+  d[,pniph_incomecat2:=cut(income,
+                           breaks=c(0,1500,3000,5000,100000),
+                           include.lowest=T)]
+  
+  d[,pniph_householdcat:=cut(members,
+                             breaks=c(0,3,5,30),
+                             include.lowest=T)]
+
+  d[,pniph_nbcdaysatvisit:=as.numeric(nbcdate_1-nbcdateofdelivery_1)]
+  
+}
 

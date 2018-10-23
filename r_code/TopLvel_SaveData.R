@@ -3492,7 +3492,7 @@ SaveAllDataFiles <- function(d){
   SaveFullFileToNetwork(d)
   Save2CasesPerMonthToNetwork(d)
   SaveAnonymousOslo(d)
-  SaveCISMACDataBase()
-  
+  #SaveCISMACDataBase()
+  for(i in 1:50) message("FIX SaveCISMACDataBase")
 
 }

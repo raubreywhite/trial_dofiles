@@ -60,6 +60,11 @@ DHIS2_Master <- function(
   toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
   for(i in toChangeToBool) sData[[i]] <- !is.na(sData[[i]])
   
+  # create a new sdata just for PPC
+  # so that we can get ppcorgdistrict
+  pData <- sData[,c("bookorgname","bookorgdistrict")]
+  setnames(pData,c("ppcorgname","ppcorgdistrict"))
+  
   # identify new bookorgnames!!
   unique(data_DHIS2_Booking$bookorgname)
   
@@ -137,6 +142,16 @@ DHIS2_Master <- function(
   data_DHIS2_Management <- DHIS2_Management(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
   
   ####
+  # DHIS2 RISK
+  print("CLEANING DHIS2 NNCRISK")
+  data_DHIS2_NNCRiskFactors <- DHIS2_NNCRiskFactors(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
+  
+  ####
+  # DHIS2 MANAGEMENTS
+  print("CLEANING DHIS2 NBMANAGEMENT")
+  data_DHIS2_NBManagement <- DHIS2_NBManagement(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
+  
+  ####
   # PREVIOUS PREGNANCIES
   print("CLEANING DHIS2 PREVIOUS PREGNANCY")
   con <- DHIS2_PreviousPregnancies(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
@@ -169,6 +184,17 @@ DHIS2_Master <- function(
   data_DHIS2_PostPartumCare <- DHIS2_DHIS2_PostPartumCare(isControl=F,
                                                           earlyData = earlyData,
                                                           booklmp = booklmp)
+  nrow(data_DHIS2_PostPartumCare)
+  data_DHIS2_PostPartumCare <- merge(x=data_DHIS2_PostPartumCare,y=pData,
+                                     by="ppcorgname",all.x=T)
+  nrow(data_DHIS2_PostPartumCare)
+  sum(is.na(data_DHIS2_PostPartumCare$ppcorgdistrict))
+  sum(is.na(data_DHIS2_PostPartumCare$ppcorgname))
+  # print the ppcorgnames for people who are missing ppcorgdistrict
+  # give me a vector
+  unique(data_DHIS2_PostPartumCare[is.na(ppcorgdistrict)]$ppcorgname)
+  # give it to me in 'data.table' form
+  data_DHIS2_PostPartumCare[is.na(ppcorgdistrict),"ppcorgname"]
   
   ####
   #
@@ -246,6 +272,34 @@ DHIS2_Master <- function(
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
+  
+  print("RESHAPE TO WIDE AND MERGE DHIS2 NNCRISKFACTORS")
+  d <- ReshapeToWideAndMerge(
+    base=d,
+    additional=data_DHIS2_NNCRiskFactors,
+    valueVarsRegex="^nncrisk",
+    dcastFormula="uniqueid+bookevent+booknum~eventnum",
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_nncrisk"
+  )
+  nrow(data_DHIS2_Booking)
+  nrow(d)
+  ncol(d)
+  
+  print("RESHAPE TO WIDE AND MERGE DHIS2 MANAGEMENT")
+  d <- ReshapeToWideAndMerge(
+    base=d,
+    additional=data_DHIS2_NBManagement,
+    valueVarsRegex="^nbman",
+    dcastFormula="uniqueid+bookevent+booknum~eventnum",
+    mergeVars=c("uniqueid","bookevent","booknum"),
+    identName="ident_dhis2_nbman"
+  )
+  nrow(data_DHIS2_Booking)
+  nrow(d)
+  ncol(d)
+  
+  
   
   print("RESHAPE TO WIDE AND MERGE DHIS2 PREVIOUS PREGNANCIES")
   d <- ReshapeToWideAndMerge(
