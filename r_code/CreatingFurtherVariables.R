@@ -140,6 +140,29 @@ CreatingFurtherVariablesMahima <- function(d){
       (sprintf("mahima_hospenteredgestage_%s", i)):=get(sprintf("hbogestagedeliv_%s", i))]
   }
   
+  ######Creating new variables for gestational age prevalences
+  ###making two variables: preterm and postterm gestational ages####
+  ####use mahima gest ages to determine post or preterm births
+  ####use calculated to see how many low or high gest ages
+  #### preterm: <38 weeks, postterm: >=41 weeks
+  
+  d[,mahima_gestageatbirthwk_1_cats:=cut(mahima_gestageatbirthwk_1,
+                                 breaks=c(-30,0,37,40.85,9999),
+                                 include.lowest=T)]
+  d[,mahima_hospenteredgestage_1_cats:=cut(mahima_hospenteredgestage_1,
+                                    breaks=c(-30,0,37,40.85,9999),
+                                    include.lowest=T)]
+  xtabs(~d$mahima_gestageatbirthwk_1_cats)
+  xtabs(~d$mahima_hospenteredgestage_1_cats)
+ 
+  #calculate prevalences: from my data set that i want
+  # we can just do d[rows that i want, c("gestagecats", "gestageenteredcats")]
+  #sum each source alone for each of these two variables
+  #then can calculate the prevalence
+  
+  
+  
+  
   # to detect some women with wrong gestational age
   
   d[mahima_gestageatbirthwk_1>250]$motheridno
@@ -208,5 +231,12 @@ CreatingFurtherVariablesPNIPH <-function(d){
 
   d[,pniph_nbcdaysatvisit:=as.numeric(nbcdate_1-nbcdateofdelivery_1)]
   
+  # number of ppc visits
+  d[,pniph_num_ppc_visits:=0]
+  vars <- names(d)[stringr::str_detect(names(d),"ppcevent")]
+  for(i in vars){
+    d[!is.na(get(i)),pniph_num_ppc_visits:=pniph_num_ppc_visits+1]
+  }
+  xtabs(~d$pniph_num_ppc_visits, addNA=T)
 }
 

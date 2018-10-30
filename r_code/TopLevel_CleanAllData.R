@@ -1,7 +1,8 @@
 CleanAllData <- function(
   includePPC=TRUE,
   minBookDate="2001-01-01",
-  maxBookDate="2100-01-01"
+  maxBookDate="2100-01-01",
+  delete=c()
   ){
   timeStart <- Sys.time()
   
@@ -11,6 +12,16 @@ CleanAllData <- function(
     minBookDate=minBookDate,
     maxBookDate=maxBookDate
     ))
+  
+  if(length(delete)>0){
+    for(i in delete){
+      print(sprintf("Before deleting %s: %s rows",i,nrow(dhis)))
+      # delete all the variables named in 'delete' from dhis2
+      vars <- names(dhis)[stringr::str_detect(names(dhis),i)]
+      dhis[,(vars):=NULL]
+      print(sprintf("After deleting %s: %s rows",i,nrow(dhis)))
+    }
+  }
 
   keepMotherID <- unique(dhis$motheridno)
   
@@ -31,12 +42,16 @@ CleanAllData <- function(
   rm("dhis", envir=.GlobalEnv)
   rm("avicenna", envir=.GlobalEnv)
   
+  print("****A")
+  
   # MERGE DATAFILE WITH HBO
   nrow(d)
   d <- MergeDHISToAVICENNA(
     dhis=d,
     avicenna=HBO_Master())
   nrow(d)
+  
+  print("****0")
   
   # this variable says where the baby info gets matched from
   d[,matching:=as.character(NA)]
@@ -49,9 +64,13 @@ CleanAllData <- function(
   #CleaningDifferentFilesConsistently(d)
   
   # CREATING FURTHER VARIABLES
+  print("****1")
   CreatingFurtherVariablesNormal(d)
+  print("****2")
   CreatingFurtherVariablesMahima(d)
+  print("****3")
   CreatingFurtherVariablesPNIPH(d)
+  print("****4")
   
   # CALC INDICATORS OLSO
   IndicatorsOsloGenerate(d)

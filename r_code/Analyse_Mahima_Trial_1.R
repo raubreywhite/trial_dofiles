@@ -146,6 +146,11 @@ Analyse_EnteredVsCalculated <- function(d){
   res[[length(res)+1]] <- data.frame("label"="wilcoxon.test inter gestage diff",
                                      "pvalue"=f$p.value)
   
+  f <- wilcox.test(d[bookyearmonth<="2017-03" & 
+                       ident_TRIAL_1==TRUE]$difference,
+                   mu = 0, alternative = "two.sided")
+  res[[length(res)+1]] <- data.frame("label"="wilcoxon.test control&inter gestage diff",
+                                     "pvalue"=f$p.value)
 ##removing outlier and comparing significance in intervention and control gestages
  f <- t.test(difference ~ ident_dhis2_control, 
                       data = d[bookyearmonth<="2017-03" & 
@@ -165,13 +170,13 @@ Analyse_EnteredVsCalculated <- function(d){
   res <- rbindlist(res)
   
   
+  
   #unique(d$bookyearmonth)
   openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,
                                       "mahima",
                                       "trial_1",
                                       "entered_and_calculated_gest_ages_statisticaltests.xlsx"))
  
-
   p<-ggplot(d[bookyearmonth<="2017-03" & ident_TRIAL_1==TRUE],aes(x=difference, colour = ident_dhis2_control)) 
   p <- p+ geom_density()
   p <-p + xlim(-25, 25)
@@ -199,6 +204,62 @@ Analyse_EnteredVsCalculated <- function(d){
     width=297,
     units="mm",
     plot=p)
+  
+  
+  
+  
+###printing out prevalences for the hospital birth gest age stuff
+###sink() is like capture in STATA
+  sink()
+  sink(file.path(FOLDER_DROPBOX_RESULTS,
+                                     "mahima",
+                                     "trial_1",
+                                     "hospital gA calculated and entered.txt"))
+ #Control Alone
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE & 
+             ident_dhis2_control==T,
+           c(mahima_gestageatbirthwk_1_cats)])
+  #Intervention Alone
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE & 
+             ident_dhis2_control==F,
+           c(mahima_gestageatbirthwk_1_cats)])
+  #Both
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE,
+           c(mahima_gestageatbirthwk_1_cats)])
+  
+ #Control 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE & 
+             ident_dhis2_control==T,
+           c(mahima_hospenteredgestage_1_cats)])
+  #Intervention 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE & 
+             ident_dhis2_control==F,
+           c(mahima_hospenteredgestage_1_cats)])
+  #Both 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE, 
+          c(mahima_hospenteredgestage_1_cats)])
+ cat("\n\n Denonimator in the dataset that have both variables\n\n") 
+ cat("\n\n") 
+ print(nrow(d[bookyearmonth<="2017-03" & 
+                 ident_TRIAL_1==TRUE & 
+                 !is.na(mahima_hospenteredgestage_1) & 
+                 !is.na(mahima_gestageatbirthwk_1)]))
+  
+  xtabs(~d$mahima_gestageatbirthwk_1_cats)
+  
+  xtabs(~d$mahima_hospenteredgestage_1_cats)
+  xtabs(~d$mahima_hospenteredgestage_1_cats + d$mahima_gestageatbirthwk_1_cats)
+  
+
+  sink()
+  
+  
 }
 
 

@@ -18,14 +18,17 @@ MergeDHISToAVICENNA_Internal <- function(idvar="motheridno",dhis,avicenna){
 
 
 MergeDHISToAVICENNA <- function(dhis,avicenna){
+  print("****MergeDHISToAVICENNA 1")
   # merging by motheridno
   m1 <- MergeDHISToAVICENNA_Internal(idvar="motheridno",dhis=dhis,avicenna=avicenna)
   nrow(m1)
   
+  print("****MergeDHISToAVICENNA 2")
   nrow(dhis)
   dhis <- merge(dhis,m1,by=c("motheridno","motheridbooknum"),all.x=T)
   nrow(dhis)
 
+  print("****MergeDHISToAVICENNA 3")
   d <- merge(dhis,avicenna,by=c("motheridno","avicennanum"),all.x=T)
   nrow(d)  
   

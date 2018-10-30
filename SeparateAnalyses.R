@@ -43,7 +43,8 @@ desiredPackages <- c("stringr",
                      "irr",
                      "rel",
                      "gridExtra",
-                     "openssl"
+                     "openssl",
+                     "fmsb"
 )
 for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
 
@@ -147,3 +148,255 @@ openxlsx::write.xlsx(uglytable,
 #   
 
 nrow(smalldataset)
+
+
+
+
+##Creating differences between the calculated and entered gest ages
+d[,difference:= mahima_gestageatbirthwk_1-mahima_hospenteredgestage_1]
+#difference<- d$mahima_gestageatbirthwk_1-d$mahima_hospenteredgestage_1
+#creates variable outside of d, the first one created the variable inside d
+
+res <- list()
+
+
+f <- t.test(d[bookyearmonth<="2017-03" & 
+                ident_TRIAL_1==TRUE & 
+                ident_dhis2_control==T]$difference)
+res[[length(res)+1]] <- data.frame("label"="t.test control gestage diff",
+                                   "pvalue"=f$p.value)
+
+f <- t.test(d[ bookyearmonth<="2017-03" & 
+                 ident_TRIAL_1==TRUE & 
+                 ident_dhis2_control==F]$difference)
+res[[length(res)+1]] <- data.frame("label"="t.test inter gestage diff",
+                                   "pvalue"=f$p.value)
+
+##is the calculated different than the entered. non parametric testing
+f <- wilcox.test(d[bookyearmonth<="2017-03" & 
+                     ident_TRIAL_1==TRUE & 
+                     ident_dhis2_control==T]$difference,
+                 mu = 0, alternative = "two.sided")
+res[[length(res)+1]] <- data.frame("label"="wilcoxon.test control gestage diff",
+                                   "pvalue"=f$p.value)
+
+f <- wilcox.test(d[bookyearmonth<="2017-03" & 
+                     ident_TRIAL_1==TRUE & 
+                     ident_dhis2_control==F]$difference,
+                 mu = 0, alternative = "two.sided")
+res[[length(res)+1]] <- data.frame("label"="wilcoxon.test inter gestage diff",
+                                   "pvalue"=f$p.value)
+
+f <- wilcox.test(d[bookyearmonth<="2017-03" & 
+                     ident_TRIAL_1==TRUE]$difference,
+                 mu = 0, alternative = "two.sided")
+res[[length(res)+1]] <- data.frame("label"="wilcoxon.test control&inter gestage diff",
+                                   "pvalue"=f$p.value)
+##removing outlier and comparing significance in intervention and control gestages
+f <- t.test(difference ~ ident_dhis2_control, 
+            data = d[bookyearmonth<="2017-03" & 
+                       difference<400 &
+                       ident_TRIAL_1==TRUE ])
+res[[length(res)+1]] <- data.frame("label"="t.test (no outlier) btwn gestage diff in two groups",
+                                   "pvalue"=f$p.value)
+
+
+f<- wilcox.test(difference ~ ident_dhis2_control, 
+                data = d[bookyearmonth<="2017-03" & 
+                           ident_TRIAL_1==TRUE ])
+res[[length(res)+1]] <- data.frame("label"="t.test (w/outlier) btwn gestage diff in two groups",
+                                   "pvalue"=f$p.value)
+#if want to add df from wilcoxon, set it equal to 99 because it doesnt exist here
+
+res <- rbindlist(res)
+
+
+
+#unique(d$bookyearmonth)
+openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,
+                                   "mahima",
+                                   "trial_1",
+                                   "entered_and_calculated_gest_ages_statisticaltests.xlsx"))
+
+p<-ggplot(d[bookyearmonth<="2017-03" & ident_TRIAL_1==TRUE],aes(x=difference, colour = ident_dhis2_control)) 
+p <- p+ geom_density()
+p <-p + xlim(-25, 25)
+
+
+
+## comparing mahima gestational age calculated vs entered
+
+#dev.off() try to run this code if get weird graphic errors
+p <- ggplot(d[ident_TRIAL_1==TRUE], aes(x=mahima_gestageatbirthwk_1, y=mahima_hospenteredgestage_1))
+p <- p + geom_abline(intercept = 0, slope = 1, colour="red")
+p <- p + geom_point()
+p <- p + labs(title="Entered and Calculated Gestational Ages")
+p <- p + scale_x_continuous("Calculated Gestational Ages")
+p <- p + theme_grey (base_size = 16)
+p <- p + labs(caption=GraphCaption())
+
+
+ggsave(filename = file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "entered_and_calculated_gest_ages.png"),
+  height=210,
+  width=297,
+  units="mm",
+  plot=p)
+
+
+
+
+###printing out prevalences for the hospital birth gest age stuff
+###sink() is like capture in STATA
+sink()
+sink(file.path(FOLDER_DROPBOX_RESULTS,
+               "mahima",
+               "trial_1",
+               "hospital gA calculated and entered.txt"))
+cat("Control Alone \n")
+xtabs(~d[bookyearmonth<="2017-03" & 
+           ident_TRIAL_1==TRUE & 
+           ident_dhis2_control==T &
+           !is.na(mahima_hospenteredgestage_1)]$mahima_gestageatbirthwk_1_cats)
+print("Intervention Alone")
+xtabs(~d[bookyearmonth<="2017-03" & 
+           ident_TRIAL_1==TRUE & 
+           ident_dhis2_control==F &
+           !is.na(mahima_hospenteredgestage_1)]$mahima_gestageatbirthwk_1_cats)
+print("both")
+xtabs(~d[bookyearmonth<="2017-03" & 
+           ident_TRIAL_1==TRUE &
+           !is.na(mahima_hospenteredgestage_1)]$mahima_gestageatbirthwk_1_cats)
+
+###below command makes spaces between this and before it
+cat("\n\n")
+print("Control") 
+xtabs(~d[bookyearmonth<="2017-03" & 
+           ident_TRIAL_1==TRUE & 
+           ident_dhis2_control==T &
+           !is.na(mahima_gestageatbirthwk_1)]$mahima_hospenteredgestage_1_cats)
+print("Intervention") 
+xtabs(~d[bookyearmonth<="2017-03" & 
+           ident_TRIAL_1==TRUE & 
+           ident_dhis2_control==F &
+           !is.na(mahima_gestageatbirthwk_1)]$mahima_hospenteredgestage_1_cats)
+print("Both") 
+xtabs(~d[bookyearmonth<="2017-03" & 
+           ident_TRIAL_1==TRUE &
+           !is.na(mahima_gestageatbirthwk_1)]$mahima_hospenteredgestage_1_cats)
+cat("\n\n Denonimator in the dataset that have both variables\n\n") 
+cat("\n\n") 
+print(nrow(d[bookyearmonth<="2017-03" & 
+               ident_TRIAL_1==TRUE & 
+               !is.na(mahima_hospenteredgestage_1) & 
+               !is.na(mahima_gestageatbirthwk_1)]))
+
+
+cat('\n\n')       
+print("general tabs")
+xtabs(~d$mahima_gestageatbirthwk_1_cats) 
+xtabs(~d$mahima_hospenteredgestage_1_cats)
+xtabs(~d$mahima_hospenteredgestage_1_cats + d$mahima_gestageatbirthwk_1_cats)
+
+print("creating a smaller dataset just for this purpose")
+analysisDataset <- d[bookyearmonth<="2017-03"&
+                       ident_TRIAL_1==TRUE &
+                       !is.na(mahima_gestageatbirthwk_1) &
+                       !is.na(mahima_hospenteredgestage_1),
+                     c("bookevent",
+                       "mahima_hospenteredgestage_1",
+                       "mahima_gestageatbirthwk_1")]
+
+cat('\n\n')
+print("IQRs for these variables")
+quantile(x=analysisDataset$mahima_gestageatbirthwk_1, 
+         probs = seq(0, 1, 0.25), 
+         na.rm = TRUE)
+
+quantile(x=analysisDataset$mahima_hospenteredgestage_1, 
+         probs = seq(0, 1, 0.25), 
+         na.rm = TRUE)
+
+
+
+
+sink()
+
+###Kappa test for reliability
+###Using intraclass correlation here because these are continuous variables
+str(d$mahima_hospenteredgestage_1)
+str(d$mahima_gestageatbirthwk_1)
+#want kappa for continuous variables, normal kappa wont work
+# this one needs long format so want wide to long
+#creating a smaller dataset just for this purpose
+analysisDataset <- d[bookyearmonth<="2017-03"&
+                       ident_TRIAL_1==TRUE &
+                       !is.na(mahima_gestageatbirthwk_1) &
+                       !is.na(mahima_hospenteredgestage_1),
+                     c("bookevent",
+                       "mahima_hospenteredgestage_1",
+                       "mahima_gestageatbirthwk_1")]
+
+long <-melt.data.table(analysisDataset,
+                          id.vars = "bookevent")
+
+###if any ones have an empty value, should check them this way
+d[bookevent=="----", c("motheridno", 
+                              "bookyearmonth", 
+                              "mahima_hospenteredgestage_1",
+                              "mahima_hospenteredgestage_1")]
+
+f <- ICC::ICCest("bookevent", value, data = long, 
+                              alpha = 0.05, 
+                              CI.type = c("THD", "Smith"))
+
+res<-list()
+
+res[[length(res)+1]] <- data.frame("label"="intraclass correlation test btwn gestage entered and calculated",
+                                   "denominator"=f$N,
+                                   "correlationcoefficient"=f$ICC,
+                                   "lowerCI"=f$LowerCI,
+                                   "upperCI"=f$UpperCI,
+                                   "kappa"=f$k,
+                                   "w/inGroupOrIndivVar"=f$varw,
+                                   "amongIndivOrGroup"=f$vara)
+
+###covariance--this is bounded unlike variance and covariance
+###in the analysis dataset we have bookevent
+###so choose only the variables you want to compare or else it will break it
+###this one will only give you a pearsons value because its "pairwise.complete.obs"
+f <- cor(x=analysisDataset$mahima_hospenteredgestage_1, 
+         analysisDataset$mahima_gestageatbirthwk_1, 
+         use = "pairwise.complete.obs",
+    method = c("pearson"))
+
+res[[length(res)+1]] <- data.frame("label"=" pearson correlation coeff btwn gestage entered and calculated",
+                                    "correlationcoefficient"=f)
+
+###here we want spearman coefficient
+f <- cor(x=analysisDataset$mahima_hospenteredgestage_1, 
+         analysisDataset$mahima_gestageatbirthwk_1, 
+         use = "pairwise.complete.obs",
+         method = c("spearman"))
+res[[length(res)+1]] <- data.frame("label"="spearman correlation coeff btwn gestage entered and calculated",
+                                   "correlationcoefficient"=f)
+res <- rbindlist(res, fill=T)
+
+openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,
+                                   "mahima",
+                                   "trial_1",
+                                   "entered_and_calculated_gest_ages_ICC.xlsx"))
+
+
+
+
+
+
+
+
+
+
+

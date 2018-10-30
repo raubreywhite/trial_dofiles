@@ -43,7 +43,9 @@ desiredPackages <- c("stringr",
                      "irr",
                      "rel",
                      "gridExtra",
-                     "openssl"
+                     "openssl",
+                     "fmsb",
+                     "ICC"
                      )
 for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
 

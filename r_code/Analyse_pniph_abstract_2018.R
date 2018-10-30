@@ -1,11 +1,40 @@
 Analyse_pniph_abstract_2018_ppc<- function(){
   # remove d from the global env as it is too big
   rm("d", envir=.GlobalEnv)
+
   d <- CleanAllData(includePPC=T,
-                    minBookDate="2017-09-01",
-                    maxBookDate="2018-09-01")
+                    minBookDate="2017-01-01",
+                    maxBookDate="2018-09-01",
+                    delete=c("^lab",
+                              "^us"
+                             ))
   
-  d <- d[ident_dhis2_ppc==1 & ident_dhis2_an==1]
+  d <- d[
+    ident_dhis2_ppc==1 & 
+      ident_dhis2_an==1 & 
+      ident_dhis2_control==F]
+  
+  tryCatch({
+    # number of visits
+    tab <- d[,.(
+      NWomen=.N,
+      numVisit1=sum(!is.na(ppcevent_1)),
+      numVisit2=sum(!is.na(ppcevent_2)),
+      numVisit3=sum(!is.na(ppcevent_3)),
+      numVisit4=sum(!is.na(ppcevent_4))
+    ),keyby=.(
+      ppcorgname_1
+    )]
+    
+    openxlsx::write.xlsx(tab, 
+                         file.path(
+                           FOLDER_DROPBOX_RESULTS,
+                           "pniph",
+                           "abstracts_2018",
+                           "ppc_list_of_clinics.xlsx"))
+  },error = function(e){
+    print("*****Analyse_pniph_abstract_2018_ppc() NOT WORKING ppc_list_of_clinics.xlsx")  
+  })
   
   xtabs(~d$ident_dhis2_ppc)
   xtabs(~d$ident_dhis2_booking)
@@ -83,6 +112,14 @@ Analyse_pniph_abstract_2018_ppc<- function(){
     "pniph_educationcat"
   )
   
+  ###fix these for what she wants
+  vars_demo2 <- c(
+      "age",
+      "avgincome",
+      "agemarriage",
+      "agepregnancy"
+  )
+  
   #categories for breast problems
   #numbers and percents
   #Avg days after delivery
@@ -99,8 +136,10 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   vars_ppcbreastinspectionredness	<- names(d)[stringr::str_detect(names(d),"^ppcbreastinspectionredness_")]
   vars_ppcbreastinspectiontenderness	<- names(d)[stringr::str_detect(names(d),"^ppcbreastinspectiontenderness_")]
   vars_ppcbreastnoproblems <- names(d)[stringr::str_detect(names(d),"^ppcbreastnoproblems_")]
-
-  
+  vars_ppcdaysafterdelivery <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
+  vars_cpoantepartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpoantepartumhemorrhage_")]
+  vars_cpoevent <- names(d)[stringr::str_detect(names(d),"^cpoevent_")]
+  vars_ppclochiaamount <- names(d)[stringr::str_detect(names(d),"^ppclochiaamount_")]
   
 #d$ppcincisiontearinspectionbleeding_1
 #d$ppcincisiontearcondition_1
@@ -185,9 +224,9 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   vars_ppcwhichppcvisit <- names(d)[stringr::str_detect(names(d),"^ppcwhichppcvisit_")]
   vars_ppcmodeofdelivery	<- names(d)[stringr::str_detect(names(d),"^ppcmodeofdelivery_")]
   vars_ppcplaceofdelivery	<- names(d)[stringr::str_detect(names(d),"^ppcplaceofdelivery_")]
+  vars_ppcevent<- names(d)[stringr::str_detect(names(d),"^ppcevent_")]
   
-  smallD <- d[ident_dhis2_control==F &
-                bookdate>="2017-09-01" & bookdate<="2018-09-01"
+  smallD <- d[
               ,
               c(
                 "ppcorgdistrict_1",
@@ -260,15 +299,16 @@ Analyse_pniph_abstract_2018_ppc<- function(){
                 vars_ppcwhichppcvisit,
                 vars_ppcmodeofdelivery,
                 vars_ppcplaceofdelivery,
-                vars_demo
+                vars_ppcdaysafterdelivery,
+                vars_ppclochiaamount,
+                vars_ppcevent,
+                vars_cpoevent,
+                vars_cpoantepartumhemorrhage,
+                vars_demo,
+                vars_demo2,
+                "pniph_num_ppc_visits"
               ), with=F]
-  
-  # duplicate the dataset
-  # make one of them have a district of palestine
-  # then put them on top of each other
-  smallDPalestine <- copy(smallD)
-  smallDPalestine[,ppcorgdistrict_1:="0PALESTINE"]
-  smallD <- rbind(smallD,smallDPalestine)
+
   
   # please create me a 7 unit long list
   res <- vector("list",length=length(vars_demo))
@@ -305,7 +345,7 @@ Analyse_pniph_abstract_2018_ppc<- function(){
                       value1=sum(value==1,na.rm=T),
                       value2=sum(value==2,na.rm=T),
                       value3=sum(value==3,na.rm=T),
-                      valueMean=mean(value,na.rm=T),
+                      valueMean=mean(as.numeric(value),na.rm=T),
                       valueSpontaneousVaginal=sum(value=="Spontaneous vaginal",na.rm=T),
                       valueCaesarianSection=sum(value=="Caesarian section",na.rm=T),
                       valueAssistedVaginal=sum(value=="Assisted vaginal",na.rm=T),
@@ -318,7 +358,7 @@ Analyse_pniph_abstract_2018_ppc<- function(){
                       valueTRANS=sum(value=="TRANS",na.rm=T),
                       valueHOME=sum(value=="HOME",na.rm=T)
                     ),
-                    keyby=.(ppcorgdistrict_1,
+                    keyby=.(
                             DEMO,
                             variable)
                     ]
@@ -390,6 +430,7 @@ Analyse_pniph_abstract_2018_nbc<- function(d){
   vars_nbcweightgrams	<- names(d)[stringr::str_detect(names(d),"^nbcweightgrams_")]
   vars_nbcbirthweightgrams	<- names(d)[stringr::str_detect(names(d),"^nbcbirthweightgrams_")]
   vars_nbcgestationalageatdelivery	<- names(d)[stringr::str_detect(names(d),"^nbcgestationalageatdelivery_")]
+  vars_nbcevent	<- names(d)[stringr::str_detect(names(d),"^nbcevent_")]
   
   # 1 = risk+management
   # 2 = risk+appropriate management
@@ -430,7 +471,7 @@ Analyse_pniph_abstract_2018_nbc<- function(d){
   )
   
   smallD <-d[ident_dhis2_control==F &
-               bookdate>="2017-09-01" & bookdate<="2018-09-01" &
+               bookdate>="2017-01-01" & bookdate<="2018-09-01" &
                ident_dhis2_nbc==T
              ,
               c(
@@ -454,7 +495,7 @@ Analyse_pniph_abstract_2018_nbc<- function(d){
                 vars_nbcbreastfeedingposition,
                 vars_nbcmodeofdelivery,
                 vars_nbcplaceofdelivery,
-                
+                vars_nbcevent,
                 vars_nbcheadcircumferencecm,
                 vars_nbcheightcm,
                 vars_nbcrespiratoryratebreathmin,
@@ -550,476 +591,43 @@ Analyse_pniph_abstract_2018_nbc<- function(d){
   
 }
 
-Analyse_pniph_abstract_2018_cpo<- function(d){
-  
-  vars_cpopostpartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpopostpartumhemorrhage_")]
-  vars_cpopuerpalsepsis <- names(d)[stringr::str_detect(names(d),"^cpopuerpalsepsis_")]
-  
-  # everyone starts off as false
-  d[,exposure_postpartumhemorrhage:=FALSE]
-  # go through all the visits. if any visit=1
-  # then the variable = TRUE
-  for(i in vars_cpopostpartumhemorrhage){
-    d[get(i)==1,exposure_postpartumhemorrhage:=TRUE]
-  }
-  
-  # everyone starts off as false
-  d[,exposure_puerpalsepsis:=FALSE]
-  # go through all the visits. if any visit=1
-  # then the variable = TRUE
-  for(i in vars_cpopuerpalsepsis){
-    d[get(i)==1,exposure_puerpalsepsis:=TRUE]
-  }
-  
-  d[exposure_postpartumhemorrhage==F & exposure_puerpalsepsis==F,
-    exposure_postpartumhemorrhage_and_puerpalsepsis:="NoHemorr/NoSepsis"]
-  d[exposure_postpartumhemorrhage==F & exposure_puerpalsepsis==T,
-    exposure_postpartumhemorrhage_and_puerpalsepsis:="NoHemorr/YESSepsis"]
-  d[exposure_postpartumhemorrhage==T & exposure_puerpalsepsis==F,
-    exposure_postpartumhemorrhage_and_puerpalsepsis:="YESHemorr/NoSepsis"]
-  d[exposure_postpartumhemorrhage==T & exposure_puerpalsepsis==T,
-    exposure_postpartumhemorrhage_and_puerpalsepsis:="YESHemorr/YESSepsis"]
-  
-  
-  d[,pniph_000EVERYONE:=1]
-  vars_demo <- c(
-    "pniph_000EVERYONE",
-    "pniph_agecat2",
-    "pniph_avgincomecat",
-    "pniph_incomecat2",
-    "pniph_agemarriagecat2",
-    "pniph_agepregnancycat2",
-    "pniph_educationcat2",
-    names(d)[stringr::str_detect(names(d),"^ancounsdanger_")],
-    names(d)[stringr::str_detect(names(d),"^ancounslabor_")],
-    names(d)[stringr::str_detect(names(d),"^ancounsnut_")]
-  )
-  
-  smallD <- d[ident_dhis2_control==F &
-                bookdate>="2017-09-01" & bookdate<="2018-09-01" &
-                ident_dhis2_booking==TRUE & 
-                ident_dhis2_an==TRUE & 
-                ident_dhis2_cpo==TRUE & 
-                ident_dhis2_ppc==TRUE,
-              c(
-                "bookorgdistrict",
-                "exposure_postpartumhemorrhage_and_puerpalsepsis",
-                vars_demo
-              ),with=F]
-  
-  # duplicate the dataset
-  # make one of them have a district of palestine
-  # then put them on top of each other
-  smallDPalestine <- copy(smallD)
-  smallDPalestine[,bookorgdistrict:="0PALESTINE"]
-  
-  smallD <- rbind(smallD,smallDPalestine)
-  smallD[,id:=1:.N]
-  
-  long <- melt.data.table(smallD, id.vars=c(
-    "id",
-    "exposure_postpartumhemorrhage_and_puerpalsepsis",
-    "bookorgdistrict"
-  ),variable.factor = F, value.factor = F)
-  
-  long[,variable:=sprintf("%s=%s",variable,value)]
-  
-  uglytable <- long[,
-                    .(
-                      N=.N
-                    ),
-                    keyby=.(
-                      bookorgdistrict,
-                      exposure_postpartumhemorrhage_and_puerpalsepsis,
-                      variable
-                    )
-                    ]
-  uglytable <- dcast.data.table(uglytable,
-                   bookorgdistrict+variable~exposure_postpartumhemorrhage_and_puerpalsepsis,
-                   value.var="N")
-  
-  uglytable[is.na(`NoHemorr/NoSepsis`),`NoHemorr/NoSepsis`:=0]
-  uglytable[is.na(`NoHemorr/YESSepsis`),`NoHemorr/YESSepsis`:=0]
-  uglytable[is.na(`YESHemorr/NoSepsis`),`YESHemorr/NoSepsis`:=0]
-  uglytable[is.na(`YESHemorr/YESSepsis`),`YESHemorr/YESSepsis`:=0]
-  
-  setorder(uglytable, bookorgdistrict, variable)
-  
-  openxlsx::write.xlsx(uglytable, 
-                       file.path(
-                         FOLDER_DROPBOX_RESULTS,
-                         "pniph",
-                         "abstracts_2018",
-                         "cpo.xlsx"))
-  
-}
-
-OLDAnalyse_pniph_abstract_2018_cpo<- function(d){  
-
-  #this is for cpo people
-  d$village
-  d$city
-  d$camp
-  d$bookhighrisk
-  unique(d$anhighrisk_1)
-  
-  #Make categories for variables #ers and percents for each cat
-  #cpopregoutcome_1 NA, "LIVE", "STILL","ABO","NEO_DEATH","INF_DEATH","LATE_DEATH"
-  unique(d$cpopregoutcome_1)
-  #cpoplaceofbirth_1 GOV",
-  #"PH",
-  #"PC",
-  #"NGO",
-  #"UNRWA",
-  #"TRANS",
-  #"HOME",
-  #NA
-  #cpomodedelivery_1
-  #"Spontaneous vaginal",
-  #"Caesarian section",
-  #"Assisted vaginal",
-  #"VACCUUM",
-  #NA
-  #conintendedplaceofbirth
-  #conrecommendedplaceofbirth
-  unique(d$cpoplaceofbirth_1)
-  unique(d$cpomodedelivery_1)
-  unique(d$conintendedplaceofbirth)
-  unique(d$conrecommendedplaceofbirth)
-  unique(d$cpogestage_1)
-  #make into categories 0-24, 25-38, <38
-  
-  #Gestational age at last anc visit less than 36 and more than 36 weeks
-  #Average anc visits per woman
-  #numbers and percents of woman who received counseling on the following
-  d$ancounsdanger_1
-  d$ancounslabor_1
-  d$ancounsnut_1
-  
-
-  
-  vars_cpodvt <- names(d)[stringr::str_detect(names(d),"^cpodvt_")]
-  vars_cpoeclampsia <-names(d)[stringr::str_detect(names(d),"^cpoeclampsia_")]
-  vars_cpopreeclampsia <- names(d)[stringr::str_detect(names(d),"^cpopreeclampsia_")]
-  vars_cpocomplicationsnone <- names(d)[stringr::str_detect(names(d),"^cpocomplicationsnone_")]
-  vars_cpoantepartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpoantepartumhemorrhage_")]
-  vars_cpopostpartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpopostpartumhemorrhage_")]
-  vars_cpopuerpalsepsis <- names(d)[stringr::str_detect(names(d),"^cpopuerpalsepsis_")]
-  vars_ancounsdanger <- names(d)[stringr::str_detect(names(d),"^ancounsdanger_")]
-  vars_ancounslabor <- names(d)[stringr::str_detect(names(d),"^ancounslabor_")]
-  vars_ancounsnut <- names(d)[stringr::str_detect(names(d),"^ancounsnut_")]
-  
-  #vars_cpopregoutcome <-names(d)[stringr::str_detect(names(d),"^cpopregoutcome_")]
-  
-  d[,pniph_000EVERYONE:=1]
-  vars_demo <- c(
-    "pniph_000EVERYONE",
-    "pniph_agecat2",
-    "pniph_avgincomecat",
-    "pniph_incomecat2",
-    "pniph_agemarriagecat2",
-    "pniph_agepregnancycat2",
-    "pniph_educationcat2"
-  )
-  
-  smallD <- d[ident_dhis2_control==F &
-                bookdate>="2017-09-01" & bookdate<="2018-09-01" &
-                ident_dhis2_booking==TRUE & 
-                ident_dhis2_an==TRUE & 
-                ident_dhis2_cpo==TRUE & 
-                ident_dhis2_ppc==TRUE,
-              c(
-                "bookorgdistrict",
-                vars_cpodvt,
-                vars_cpoeclampsia,
-                vars_cpopreeclampsia,
-                vars_cpocomplicationsnone,
-                vars_cpoantepartumhemorrhage,
-                vars_cpopostpartumhemorrhage,
-                vars_cpopuerpalsepsis,
-                vars_ancounsdanger,
-                vars_ancounslabor,
-                vars_ancounsnut,
-                vars_demo
-              ),with=F]
- 
-  # duplicate the dataset
-  # make one of them have a district of palestine
-  # then put them on top of each other
-  smallDPalestine <- copy(smallD)
-  smallDPalestine[,bookorgdistrict:="0PALESTINE"]
-  
-  smallD <- rbind(smallD,smallDPalestine)
-  smallD[,id:=1:.N]
-  
-  # please create me a 7 unit long list
-  res <- vector("list",length=length(vars_demo))
-  
-  # i want all the vars that are not in vars_demo
-  varsIwant <- names(smallD)
-  varsIwant <- varsIwant[!varsIwant %in% vars_demo]
-  
-  for(i in 1:length(res)){
-    var <- vars_demo[i]
-    res[[i]] <- copy(smallD)
-    res[[i]][,DEMO:=sprintf("%s=%s",var,get(var))]
-    # only keep the vars that I want
-    res[[i]] <- res[[i]][,c(varsIwant,"DEMO"),with=F]
-  }
-  # compress the list into 1 data.table
-  smallD <- rbindlist(res)
-  
-  long <- melt.data.table(smallD, id.vars=c(
-    "id",
-    "DEMO",
-    "bookorgdistrict"
-  ),variable.factor = F, value.factor = F)
-  
-  
-  uglytable <- long[,
-                    .(
-                      denominator=.N,
-                      is_NA=sum(is.na(value)),
-                      not_NA=sum(!is.na(value)),
-                      value0=sum(value==0,na.rm=T),
-                      value1=sum(value==1,na.rm=T),
-                      value2=sum(value==2,na.rm=T),
-                      value3=sum(value==3,na.rm=T)
-                    ),
-                    keyby=.(
-                      bookorgdistrict,
-                      DEMO,
-                      variable
-                      )
-                    ]
-  
-  openxlsx::write.xlsx(uglytable, 
-                       file.path(
-                         FOLDER_DROPBOX_RESULTS,
-                         "pniph",
-                         "abstracts_2018",
-                         "cpo.xlsx"))
-  
-# 
-#   
-#   
-#   
-#   
-#   
-#   
-#   
-#   #for demographic
-#   agecat
-#   avgincomecat
-#   incomecat
-#   agemarriagecat
-#   agepregnancycat
-#   educationcat
-#   village
-#   city
-#   camp
-#   #members <3   3-5   >5
-#   
-#   bookevent
-#   bookhighrisk
-#   anchighrisk
-#   
-#   #unique bookrogname 
-#   
-#   #gest age at last visit (less than 36 and more than 36 weeks)
-#   #avg anc visits per woman
-#   
-#   
-#   vars_cpoantepartumhemorrhage	<- names(d)[stringr::str_detect(names(d),"^cpoantepartumhemorrhage_")]
-#   vars_cpopuerpalsepsis	<- names(d)[stringr::str_detect(names(d),"^cpopuerpalsepsis_")]
-#   vars_cpoantepartumhemorrhage	<- names(d)[stringr::str_detect(names(d),"^cpoantepartumhemorrhage_")]
-#   vars_cpocomplicationsnone	<- names(d)[stringr::str_detect(names(d),"^cpocomplicationsnone_")]
-#   vars_ancounsdanger	<- names(d)[stringr::str_detect(names(d),"^ancounsdanger_")]
-#   vars_ancounsnut	<- names(d)[stringr::str_detect(names(d),"^ancounsnut_")]
-#   vars_ancounslabor	<- names(d)[stringr::str_detect(names(d),"^ancounslabor_")]
-#   
-#   
-#   
-#   
-#   smallD <- d[ident_dhis2_control==F &
-#                 bookyearmonth>=09-2017 & bookyearmonth<=09-2018,
-#               ident_dhis2_anc==T,
-#               ident_dhis2_ppc==T,
-#               ident_dhis2_cpo==T,
-#               
-#               # ident_dhis2_df_no_gf_or_bf==F
-#               
-#               c(agecat,
-#                 avgincomecat,
-#                 incomecat,
-#                 agemarriagecat,
-#                 agepregnancycat,
-#                 educationcat,
-#                 vars_cpoantepartumhemorrhage,
-#                 vars_cpopuerpalsepsis,
-#                 vars_cpoantepartumhemorrhage,
-#                 vars_cpocomplicationsnone,
-#                 vars_ancounsdanger,
-#                 vars_ancounsnut,
-#                 vars_ancounslabor
-#                 
-#               )] 
-}
-
 
 Analyse_clex_abstract_2018_clex<- function(d){
   
-  # this only for booking people
-  # for converting text to numbers(go inside this variable and lookfor cle 
-  # to lower function::::Translate characters in character vectors
-  # in particular from upper to lower case or vice versa.)
+  ###############the last analyaia for clexane##
+
   
-  
+  d[,x_thrombolytic_problems:=
+      (bookhistthrom==1) |
+      stringr::str_detect(tolower(bookhistbloodspec),"thromb") |
+      (bookhistprevdvt==1)
+      ]
+
   d[,x_bookmedpress_clex:=as.numeric(stringr::str_detect(tolower(bookmedpres),"cle"))]
   d[,x_bookhistmed_clex:=as.numeric(stringr::str_detect(tolower(bookhistmed),"cle"))]
+  d[,x_booktext_clex:= x_bookmedpress_clex | x_bookhistmed_clex]
+
+  res<-d[ident_dhis2_control==F &
+      bookyear %in% c(2017,2018) &
+      ident_dhis2_booking==TRUE,
+    .(
+      N=.N,
+      
+      x_thrombolytic_problems_NA=sum(is.na(x_thrombolytic_problems)),
+      x_thrombolytic_problems_0=sum(x_thrombolytic_problems==FALSE,na.rm=T),
+      x_thrombolytic_problems_1=sum(x_thrombolytic_problems==TRUE,na.rm=T),
+      
+     bookabortionnothromb_1=sum(bookhistabort==1 & x_thrombolytic_problems==F,na.rm=T),
+     bookivfnoabortionnothromb_1=sum(bookhistivf==1 & bookhistabort==0 & x_thrombolytic_problems==F,na.rm=T),
+     bookinfernoivfnoabortionnothromb_1=sum(bookhistinfert==1& bookhistivf==0 & bookhistabort==0 & x_thrombolytic_problems==F,na.rm=T)
+     
+     ),
+    keyby=.(
+      bookhistclex,
+      x_booktext_clex
+      
+    )]
   
-  # is there something written in these variables?
-  d[,x_bookmedpress:=!is.na(bookmedpres) & bookmedpres!=""]
-  d[,x_bookhistmed:=!is.na(bookhistmed) & bookhistmed!=""]
-  
-  # initialize the variable as NA
-  d[,pniph_bookclex:=as.logical(NA)]
-  
-  # if any of these three variables are 0/FALSE, then pniph_bookclex=FALSE
-  d[bookhistclex==0,pniph_bookclex:=FALSE]
-  d[x_bookmedpress_clex==FALSE,pniph_bookclex:=FALSE]
-  d[x_bookhistmed_clex==FALSE,pniph_bookclex:=FALSE]
-  
-  # if any of these three variables are 1/TRUE, then pniph_bookclex=TRUE
-  d[bookhistclex==TRUE,pniph_bookclex:=TRUE]
-  d[x_bookmedpress_clex==TRUE,pniph_bookclex:=TRUE]
-  d[x_bookhistmed_clex==TRUE,pniph_bookclex:=TRUE]
-  
-  xtabs(~d$pniph_bookclex,addNA=T)
-  
-  ########################
-  # combine anchistclex and anmedpres_
-   vars <- c(
-    names(d)[stringr::str_detect(names(d),"^anchistclex_")],
-   names(d)[stringr::str_detect(names(d),"^anmedpres_")]
-   )
-  outcome <- "pniph_anchistclex_medpres"
-  
-  d[,(outcome):=as.logical(NA)]
-  # if they respond at all, set them to FALSE
-  for(i in vars) d[!is.na(get(i)),(outcome):=FALSE]
-  # if they respond with 1, set them to TRUE
-  for(i in vars) d[get(i)==1,(outcome):=TRUE]
-  for(i in vars) d[stringr::str_detect(tolower(get(i)),"clex"),(outcome):=TRUE]
-  
-  ########################
-  # combine anhistthrom
-  vars <- c(
-    names(d)[stringr::str_detect(names(d),"^anhistthr_")],
-    names(d)[stringr::str_detect(names(d),"^anhistbloodspec_")]
-  )
-  outcome <- "pniph_anhistthrom_bloodspec"
-  
-  d[,(outcome):=as.logical(NA)]
-  # if they respond at all, set them to FALSE
-  for(i in vars) d[!is.na(get(i)),(outcome):=FALSE]
-  # if they respond with 1, set them to TRUE
-  for(i in vars) d[get(i)==1,(outcome):=TRUE]
-  for(i in vars) d[stringr::str_detect(tolower(get(i)),"thromb"),(outcome):=TRUE]
-  
-  ########################
-  # combine anhistblood
-  vars <- names(d)[stringr::str_detect(names(d),"^anhistblood_")]
-  outcome <- "pniph_anhistblood"
-  
-  d[,(outcome):=as.logical(NA)]
-  # if they respond at all, set them to FALSE
-  for(i in vars) d[!is.na(get(i)),(outcome):=FALSE]
-  # if they respond with 1, set them to TRUE
-  for(i in vars) d[get(i)==1,(outcome):=TRUE]
-  
-  
-  ############################
-  #### UGLY TABLE FOR BOOKING
-  
-  ###want to add ident_hr_clinic to count out of total bookorgnames
-  #(d$ident_hr_clinic)
-  
-  vars <- c(
-    "ident_dhis2_booking",
-    "bookhistabort",
-    "bookhistivf",
-    "bookhistinfert",
-    "bookhistblood",
-    "bookhistpreterm"
-  )
-  #"bookhistthrom",
-  #"bookhistprevdvt",
-  
-  res <- vector("list",length=length(vars))
-  
-  for(i in 1:length(res)){
-    newData1 <- d[ident_dhis2_control==F &
-                    bookyear %in% c(2017,2018) &
-                    ident_dhis2_booking==TRUE
-                  ,
-                  c(
-                    "pniph_bookclex",
-                    "bookhistclex",
-                    "x_bookmedpress_clex",
-                    "x_bookhistmed_clex",
-                    "x_bookmedpress",
-                    "x_bookhistmed",
-                    "bookorgdistrict",
-                    "bookhistthrom",
-                    "bookhistprevdvt",
-                    "ident_hr_clinic",
-                    vars[i]
-                  ),
-                  with=F
-                  ]
-    newData2 <- copy(newData1)
-    newData2[,bookorgdistrict:="0PALESTINE"]
-    
-    newData <- rbind(newData1,newData2)
-    
-    setnames(newData,vars[i],"variableOfInterest")
-    
-    temp <- newData[,
-                    .(
-                      N=.N,
-                      mixedBookClexYes=sum(pniph_bookclex==TRUE,na.rm=T),
-                      bookhistclex=sum(bookhistclex==TRUE,na.rm=T),
-                      x_bookmedpress_clex=sum(x_bookmedpress_clex==TRUE,na.rm=T),
-                      x_bookhistmed_clex=sum(x_bookhistmed_clex==TRUE,na.rm=T),
-                      x_bookmedpress=sum(x_bookmedpress==TRUE,na.rm=T),
-                      x_bookhistmed=sum(x_bookhistmed==TRUE,na.rm=T)
-                    ),
-                    keyby=.(
-                      bookorgdistrict,
-                      ident_hr_clinic,
-                      variableOfInterest,
-                      bookhistthrom,
-                      bookhistprevdvt
-                    )]
-    temp[,variable:=sprintf("%s - %s",vars[i],variableOfInterest)]
-    temp[,variableOfInterest:=NULL]
-    
-    res[[i]] <- temp
-  }
-  res <- rbindlist(res)
- 
-   setcolorder(res,c("bookorgdistrict",
-                    "variable",
-                    "ident_hr_clinic",
-                    "bookhistthrom",
-                    "bookhistprevdvt"))
-  setorder(res,
-           bookorgdistrict,
-           variable,
-           ident_hr_clinic,
-           bookhistthrom,
-           bookhistprevdvt)
   
   openxlsx::write.xlsx(res, 
                        file.path(
@@ -1028,260 +636,11 @@ Analyse_clex_abstract_2018_clex<- function(d){
                          "abstracts_2018",
                          "clexbookcases.xlsx"))
   
-  ############################
-  #### UGLY TABLE FOR ANC
   
-  vars <- c(
-    "pniph_anhistthrom_bloodspec",
-    "pniph_anhistblood",
-    "ident_dhis2_an"
-  )
-  res <- vector("list",length=length(vars))
-  
-  for(i in 1:length(res)){
-    newData1 <- d[ident_dhis2_control==F&
-                    bookyear %in% c(2017,2018) &  #ask richard---orbookyear==2018&
-                    ident_dhis2_booking==TRUE &
-                    ident_dhis2_an==TRUE
-                  ,
-                  c(
-                    "pniph_bookclex",
-                    "pniph_anchistclex_medpres",
-                    "bookorgdistrict",
-                    vars[i]
-                  ),
-                  with=F
-                  ]
-    newData2 <- copy(newData1)
-    newData2[,bookorgdistrict:="0PALESTINE"]
-    
-    newData <- rbind(newData1,newData2)
-    
-    setnames(newData,vars[i],"variableOfInterest")
-    
-    temp <- newData[,
-                    .(
-                      N=.N,
-                      bookClexYes=sum(pniph_bookclex==TRUE,na.rm=T),
-                      #ancClexYes=sum(pniph_anchistclex_medpres==TRUE,na.rm=T),
-                      bookandancClexYes=sum(pniph_bookclex==TRUE & pniph_anchistclex_medpres==TRUE,na.rm=T)
-                    ),
-                    keyby=.(
-                      bookorgdistrict,
-                      variableOfInterest
-                    )]
-    temp[,variable:=sprintf("%s - %s",vars[i],variableOfInterest)]
-    temp[,variableOfInterest:=NULL]
-    
-    res[[i]] <- temp
-  }
-  res <- rbindlist(res)
-  setcolorder(res,c("bookorgdistrict","variable"))
-  setorder(res,bookorgdistrict,variable)
-  
-  openxlsx::write.xlsx(res, 
-                       file.path(
-                         FOLDER_DROPBOX_RESULTS,
-                         "pniph",
-                         "abstracts_2018",
-                         "clexanccases.xlsx"))
   
   
 }
-
-OLDAnalyse_clex_abstract_2018_clex<- function(d){
-    
-    # this only for booking people
-    # for converting text to numbers(go inside this variable and lookfor cle 
-    # to lower function::::Translate characters in character vectors
-    # in particular from upper to lower case or vice versa.)
-    
-    
-    d[,x_bookmedpress_clex:=as.numeric(stringr::str_detect(tolower(bookmedpres),"cle"))]
-    d[,x_bookhistmed_clex:=as.numeric(stringr::str_detect(tolower(bookhistmed),"cle"))]
-    
-    # initialize the variable as NA
-    d[,pniph_bookclex:=as.logical(NA)]
-    
-    # if any of these three variables are 0/FALSE, then pniph_bookclex=FALSE
-    d[bookhistclex==0,pniph_bookclex:=FALSE]
-    d[x_bookmedpress_clex==FALSE,pniph_bookclex:=FALSE]
-    d[x_bookhistmed_clex==FALSE,pniph_bookclex:=FALSE]
-    
-    # if any of these three variables are 1/TRUE, then pniph_bookclex=TRUE
-    d[bookhistclex==TRUE,pniph_bookclex:=TRUE]
-    d[x_bookmedpress_clex==TRUE,pniph_bookclex:=TRUE]
-    d[x_bookhistmed_clex==TRUE,pniph_bookclex:=TRUE]
-    
-    xtabs(~d$pniph_bookclex,addNA=T)
-    
-    ########################
-    # combine anchistclex and anmedpres_
-   # vars <- c(
-    #  names(d)[stringr::str_detect(names(d),"^anchistclex_")],
-     # names(d)[stringr::str_detect(names(d),"^anmedpres_")]
-     # )
-    outcome <- "pniph_anchistclex_medpres"
-    
-    d[,(outcome):=as.logical(NA)]
-    # if they respond at all, set them to FALSE
-    for(i in vars) d[!is.na(get(i)),(outcome):=FALSE]
-    # if they respond with 1, set them to TRUE
-    for(i in vars) d[get(i)==1,(outcome):=TRUE]
-    for(i in vars) d[stringr::str_detect(tolower(get(i)),"clex"),(outcome):=TRUE]
-    
-    ########################
-    # combine anhistthrom
-    vars <- c(
-      names(d)[stringr::str_detect(names(d),"^anhistthr_")],
-      names(d)[stringr::str_detect(names(d),"^anhistbloodspec_")]
-    )
-    outcome <- "pniph_anhistthrom_bloodspec"
-    
-    d[,(outcome):=as.logical(NA)]
-    # if they respond at all, set them to FALSE
-    for(i in vars) d[!is.na(get(i)),(outcome):=FALSE]
-    # if they respond with 1, set them to TRUE
-    for(i in vars) d[get(i)==1,(outcome):=TRUE]
-    for(i in vars) d[stringr::str_detect(tolower(get(i)),"thromb"),(outcome):=TRUE]
-    
-    ########################
-    # combine anhistblood
-    vars <- names(d)[stringr::str_detect(names(d),"^anhistblood_")]
-    outcome <- "pniph_anhistblood"
-    
-    d[,(outcome):=as.logical(NA)]
-    # if they respond at all, set them to FALSE
-    for(i in vars) d[!is.na(get(i)),(outcome):=FALSE]
-    # if they respond with 1, set them to TRUE
-    for(i in vars) d[get(i)==1,(outcome):=TRUE]
-    
   
-    ############################
-    #### UGLY TABLE FOR BOOKING
-    
-    ###want to add ident_hr_clinic to count out of total bookorgnames
-    #(d$ident_hr_clinic)
-    
-    vars <- c(
-      "ident_dhis2_booking",
-      "bookhistthrom",
-      "bookhistabort",
-      "bookhistivf",
-      "bookhistinfert",
-      "bookhistblood",
-      "bookhistprevdvt",
-      "bookhistpreterm"
-    )
-    res <- vector("list",length=length(vars))
-    
-    for(i in 1:length(res)){
-      newData1 <- d[ident_dhis2_control==F &
-                      bookyear %in% c(2017,2018) &
-                      ident_dhis2_booking==TRUE
-                    ,
-                    c(
-                      "pniph_bookclex",
-                      "pniph_anchistclex_medpres",
-                      "bookorgdistrict",
-                      vars[i]
-                    ),
-                    with=F
-                    ]
-      newData2 <- copy(newData1)
-      newData2[,bookorgdistrict:="0PALESTINE"]
-      
-      newData <- rbind(newData1,newData2)
-      
-      setnames(newData,vars[i],"variableOfInterest")
-      
-      temp <- newData[,
-                .(
-                  N=.N,
-                  bookClexYes=sum(pniph_bookclex==TRUE,na.rm=T),
-                  ancClexYes=sum(pniph_anchistclex_medpres==TRUE,na.rm=T),
-                  bookandancClexYes=sum(pniph_bookclex==TRUE & pniph_anchistclex_medpres==TRUE,na.rm=T)
-                ),
-                keyby=.(
-                  bookorgdistrict,
-                  variableOfInterest
-                )]
-      temp[,variable:=sprintf("%s - %s",vars[i],variableOfInterest)]
-      temp[,variableOfInterest:=NULL]
-      
-      res[[i]] <- temp
-    }
-    res <- rbindlist(res)
-    setcolorder(res,c("bookorgdistrict","variable"))
-    setorder(res,bookorgdistrict,variable)
-    
-    openxlsx::write.xlsx(res, 
-                         file.path(
-                           FOLDER_DROPBOX_RESULTS,
-                           "pniph",
-                           "abstracts_2018",
-                           "clexbookcases.xlsx"))
-
-    ############################
-    #### UGLY TABLE FOR ANC
-    
-    vars <- c(
-      "pniph_anhistthrom_bloodspec",
-      "pniph_anhistblood",
-      "ident_dhis2_an"
-    )
-    res <- vector("list",length=length(vars))
-    
-    for(i in 1:length(res)){
-      newData1 <- d[ident_dhis2_control==F&
-                      bookyear %in% c(2017,2018) &  #ask richard---orbookyear==2018&
-                      ident_dhis2_booking==TRUE &
-                      ident_dhis2_an==TRUE
-                    ,
-                    c(
-                      "pniph_bookclex",
-                      #"pniph_anchistclex_medpres",
-                      "bookorgdistrict",
-                      vars[i]
-                    ),
-                    with=F
-                    ]
-      newData2 <- copy(newData1)
-      newData2[,bookorgdistrict:="0PALESTINE"]
-      
-      newData <- rbind(newData1,newData2)
-      
-      setnames(newData,vars[i],"variableOfInterest")
-      
-      temp <- newData[,
-                      .(
-                        N=.N,
-                        bookClexYes=sum(pniph_bookclex==TRUE,na.rm=T),
-                        #ancClexYes=sum(pniph_anchistclex_medpres==TRUE,na.rm=T),
-                        bookandancClexYes=sum(pniph_bookclex==TRUE & pniph_anchistclex_medpres==TRUE,na.rm=T)
-                      ),
-                      keyby=.(
-                        bookorgdistrict,
-                        variableOfInterest
-                      )]
-      temp[,variable:=sprintf("%s - %s",vars[i],variableOfInterest)]
-      temp[,variableOfInterest:=NULL]
-      
-      res[[i]] <- temp
-    }
-    res <- rbindlist(res)
-    setcolorder(res,c("bookorgdistrict","variable"))
-    setorder(res,bookorgdistrict,variable)
-    
-    openxlsx::write.xlsx(res, 
-                         file.path(
-                           FOLDER_DROPBOX_RESULTS,
-                           "pniph",
-                           "abstracts_2018",
-                           "clexanccases.xlsx"))
-    
-    
-}
 
 
 Analyse_pniph_abstract_2018<- function(d){
@@ -1290,5 +649,4 @@ Analyse_pniph_abstract_2018<- function(d){
   Analyse_clex_abstract_2018_clex(d)
   Analyse_pniph_abstract_2018_ppc()
 }
-
 
