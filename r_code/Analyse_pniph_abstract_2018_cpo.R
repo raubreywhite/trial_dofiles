@@ -32,19 +32,51 @@ Analyse_pniph_abstract_2018_cpo<- function(d){
     "pniph_agemarriagecat2",
     "pniph_agepregnancycat2",
     "pniph_educationcat2",
+    "pniph_householdcat",
     
     names(d)[stringr::str_detect(names(d),"^ancounsdanger_")],
     names(d)[stringr::str_detect(names(d),"^ancounslabor_")],
     names(d)[stringr::str_detect(names(d),"^ancounsnut_")]
   )
+ 
+  vars_recom_pod <-c( "NA",
+                      "GOV",   
+                      "PH",    
+                      "PC",    
+                      "HOME",
+                      "NGO",
+                      "UNRWA", 
+                      "TRANS",
+                      ""
+  )
+  
+  vars_cpomodeofdelivery <- c(
+                        "Spontaneous vaginal",
+                        "Caesarian section",
+                        "Assisted vaginal",
+                        "VACCUUM",
+                        "NA"
+  )
+  
+  vars_cpooutcome <- c("LIVE",
+                       "ABO",
+                       "STILL",
+                       "INF-DEATH",
+                       "LATE-DEATH",
+                       "NEO-DEATH",
+                       "NA"
+    
+    
+  )
+  
+ 
   
   # THESE ARE VARIABLES THAT YOU CAN USE TO CREATE MORE COLUMNS
   vars_for_columns <- c(
     "exposure_postpartumhemorrhage",
     "exposure_puerpalsepsis",
     "cpopregoutcome_1"
-    "e"
-  )
+    )
   
   smallD <- d[ident_dhis2_control==F &
                 bookdate>="2017-09-01" & bookdate<="2018-09-01" &
@@ -187,7 +219,7 @@ OLDAnalyse_pniph_abstract_2018_cpo<- function(d){
   unique(d$conrecommendedplaceofbirth)
   unique(d$cpogestage_1)
   #make into categories 0-24, 25-38, <38
-  
+  unique(d$cpopregoutcome_1)
   #Gestational age at last anc visit less than 36 and more than 36 weeks
   #Average anc visits per woman
   #numbers and percents of woman who received counseling on the following

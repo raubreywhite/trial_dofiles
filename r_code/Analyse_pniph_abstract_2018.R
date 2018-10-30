@@ -6,7 +6,8 @@ Analyse_pniph_abstract_2018_ppc<- function(){
                     minBookDate="2017-01-01",
                     maxBookDate="2018-09-01",
                     delete=c("^lab",
-                              "^us"
+                              "^us",
+                              "man"
                              ))
   
   d <- d[
@@ -587,6 +588,33 @@ Analyse_pniph_abstract_2018_nbc<- function(d){
                          "pniph",
                          "abstracts_2018",
                          "nbc.xlsx"))
+  
+  
+#### number of clinics and visits, etc
+  d <- d[
+    ident_dhis2_control==F &
+      bookdate>="2017-01-01" & bookdate<="2018-09-01" &
+      ident_dhis2_nbc==T]
+ unique(d$nbcorgname_1)
+  tryCatch({
+    # number of visits
+    tab <- d[,.(
+      NWomen=.N,
+      numVisit1=sum(!is.na(nbcevent_1)),
+      numVisit2=sum(!is.na(nbcevent_2)),
+      numVisit3=sum(!is.na(nbcevent_3))
+    ),keyby=.(
+      nbcorgname_1
+    )]
+    
+    openxlsx::write.xlsx(tab, 
+                         file.path(
+                           FOLDER_DROPBOX_RESULTS,
+                           "pniph",
+                           "abstracts_2018",
+                           "nbc_list_of_clinics.xlsx"))
+  })
+  
   
   
 }

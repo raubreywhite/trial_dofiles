@@ -240,3 +240,26 @@ CreatingFurtherVariablesPNIPH <-function(d){
   xtabs(~d$pniph_num_ppc_visits, addNA=T)
 }
 
+#gestage at last anc visit, includes booking visit
+vars_gestages <- c(
+ names(d)[stringr::str_detect(names(d),"^angestage_")]
+)
+
+ d[,pniph_gestageatlastvisit:=as.numeric(NA)]
+ for(i in vars_gestages){
+   d[!is.na(get(i)) & get(i)>0, pniph_gestageatlastvisit:=get(i)]
+}
+ d$gestageatlastvisit
+
+ ###creating gest age categories at last visit
+ d[,pniph_gestageatlastvisit_cats:=pniph_gestageatlastvisit,
+                             breaks=c(0,36,40,42,999999),
+                             include.lowest=T]
+
+unique(d$gestageatlastvisit)
+
+
+###make cpo gest age into categories
+d[,pniph_cpogestage_cats:=cpogestage_1,
+                    breaks=c(0,25,38,41,99999),
+                    include.lowest=T]
