@@ -35,6 +35,10 @@ Analyse_pniph_abstract_2018_cpo<- function(d){
     "pniph_householdcat",
     "pniph_cpogestage_1_cats",
     "pniph_gestageatlastvisit_cats",
+    "bookrecobirth",
+    "pniph_risktype_chronichypertension",
+    "pniph_risktype_anemia",
+    "pniph_risktype_mildbleeding",
     names(d)[stringr::str_detect(names(d),"^ancounsdanger_")],
     names(d)[stringr::str_detect(names(d),"^ancounslabor_")],
     names(d)[stringr::str_detect(names(d),"^ancounsnut_")],
@@ -66,13 +70,14 @@ Analyse_pniph_abstract_2018_cpo<- function(d){
               ),with=F]
   checkingD <- copy(smallD)
   
-  tryCatch({
+  
     # number of visits
     tab <- d[ident_dhis2_control==F &
                bookdate>="2017-09-01" & bookdate<="2018-09-01" &
                ident_dhis2_booking==TRUE & 
                ident_dhis2_an==TRUE & 
-               ident_dhis2_cpo==TRUE & 
+               ident_dhis2_cpo==TRUE &
+               ident_dhis2_risk==TRUE &
                ident_dhis2_ppc==TRUE,.(
       NWomen=.N
     ),keyby=.(
@@ -85,9 +90,7 @@ Analyse_pniph_abstract_2018_cpo<- function(d){
                            "pniph",
                            "abstracts_2018",
                            "cpo_list_of_clinics.xlsx"))
-  },error = function(e){
-    print("*****Analyse_pniph_abstract_2018_cpo() NOT WORKING cpo_list_of_clinics.xlsx")  
-  })
+   
   
   # duplicate the dataset
   # make one of them have a district of palestine

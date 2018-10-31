@@ -240,6 +240,7 @@ CreatingFurtherVariablesPNIPH <-function(d){
     d[!is.na(get(i)),pniph_num_ppc_visits:=pniph_num_ppc_visits+1]
   }
   xtabs(~d$pniph_num_ppc_visits, addNA=T)
+
   
   #gestage at last anc visit, includes booking visit
   vars_gestages <- c("bookgestage",
@@ -264,6 +265,23 @@ CreatingFurtherVariablesPNIPH <-function(d){
   d[,pniph_cpogestage_1_cats:=cut(cpogestage_1,
     breaks=c(0,25,38,41,99999),
     include.lowest=T)]
+  
+  # Has anemia/hypertension/bleeding
+  d[,pniph_risktype_anemia:=F]
+  d[,pniph_risktype_chronichypertension:=F]
+  d[,pniph_risktype_vaginalbleeding:=F]
+  vars <- names(d)[stringr::str_detect(names(d),"^risktype_")]
+  for(i in vars){
+    d[get(i)%in%c("MildAnemia",
+                  "ModerateAnemia",
+                  "SevereAnemia"),pniph_risktype_anemia:=T]
+  d[get(i)%in%c("ChronicHypertension"),pniph_risktype_chronichypertension:=T]
+  d[get(i)%in%c("MildBleeding"),pniph_risktype_mildbleeding:=T]
+ 
+    
+  }
+  
+  
   
   
   
