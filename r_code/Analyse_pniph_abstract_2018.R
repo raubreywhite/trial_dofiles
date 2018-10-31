@@ -635,7 +635,11 @@ Analyse_clex_abstract_2018_clex<- function(d){
       stringr::str_detect(tolower(bookhistbloodspec),"thromb") |
       (bookhistprevdvt==1)
       ]
-
+  d[,x_clexane:=
+      (bookhistclex==1) |
+      (x_booktext_clex==TRUE)
+    ]
+  
   d[,x_bookmedpress_clex:=as.numeric(stringr::str_detect(tolower(bookmedpres),"cle"))]
   d[,x_bookhistmed_clex:=as.numeric(stringr::str_detect(tolower(bookhistmed),"cle"))]
   d[,x_booktext_clex:= x_bookmedpress_clex | x_bookhistmed_clex]
@@ -656,8 +660,7 @@ Analyse_clex_abstract_2018_clex<- function(d){
      
      ),
     keyby=.(
-      bookhistclex,
-      x_booktext_clex
+      x_clexane
       
     )]
   
