@@ -227,8 +227,19 @@ Analyse_EnteredVsCalculated <- function(d){
            c(mahima_gestageatbirthwk_1_cats)])
   #Both
   xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE,
-           c(mahima_gestageatbirthwk_1_cats)])
+             ident_TRIAL_1==TRUE]$mahima_gestageatbirthwk_1_cats)
+  
+  #Distributions within categories
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_gestageatbirthwk_1_cats=="(40.9,1e+04]",
+           c(mahima_gestageatbirthwk_1)])
+  ###for rounded one just change it to the rounded one after c. 
+  #Distributions within last category
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_gestageatbirthwk_1_cats=="(40.9,1e+04]",
+           c(mahima_gestageatbirthwk_1_rounded)])
   
  #Control 
   xtabs(~d[bookyearmonth<="2017-03" & 

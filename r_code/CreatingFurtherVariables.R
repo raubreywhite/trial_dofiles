@@ -146,6 +146,8 @@ CreatingFurtherVariablesMahima <- function(d){
   ####use calculated to see how many low or high gest ages
   #### preterm: <38 weeks, postterm: >=41 weeks
   
+  #created rounded variable for gestational ages at birth
+  d[,mahima_gestageatbirthwk_1_rounded:=floor(mahima_gestageatbirthwk_1)]
   d[,mahima_gestageatbirthwk_1_cats:=cut(mahima_gestageatbirthwk_1,
                                  breaks=c(-30,0,37,40.85,9999),
                                  include.lowest=T)]
@@ -238,28 +240,32 @@ CreatingFurtherVariablesPNIPH <-function(d){
     d[!is.na(get(i)),pniph_num_ppc_visits:=pniph_num_ppc_visits+1]
   }
   xtabs(~d$pniph_num_ppc_visits, addNA=T)
+  
+  #gestage at last anc visit, includes booking visit
+  vars_gestages <- c("bookgestage",
+    names(d)[stringr::str_detect(names(d),"^angestage_")]
+  )
+  
+  d[,pniph_gestageatlastvisit:=as.numeric(NA)]
+  for(i in vars_gestages){
+    d[!is.na(get(i)) & get(i)>0, pniph_gestageatlastvisit:=get(i)]
+  }
+  d$gestageatlastvisit
+  
+  ###creating gest age categories at last visit
+  d[,pniph_gestageatlastvisit_cats:=cut(pniph_gestageatlastvisit,
+    breaks=c(0,36,40,42,999999),
+    include.lowest=T)]
+  
+  unique(d$gestageatlastvisit)
+  
+  
+  ###make cpo gest age into categories
+  d[,pniph_cpogestage_1_cats:=cut(cpogestage_1,
+    breaks=c(0,25,38,41,99999),
+    include.lowest=T)]
+  
+  
+  
 }
 
-#gestage at last anc visit, includes booking visit
-vars_gestages <- c(
- names(d)[stringr::str_detect(names(d),"^angestage_")]
-)
-
- d[,pniph_gestageatlastvisit:=as.numeric(NA)]
- for(i in vars_gestages){
-   d[!is.na(get(i)) & get(i)>0, pniph_gestageatlastvisit:=get(i)]
-}
- d$gestageatlastvisit
-
- ###creating gest age categories at last visit
- d[,pniph_gestageatlastvisit_cats:=pniph_gestageatlastvisit,
-                             breaks=c(0,36,40,42,999999),
-                             include.lowest=T]
-
-unique(d$gestageatlastvisit)
-
-
-###make cpo gest age into categories
-d[,pniph_cpogestage_cats:=cpogestage_1,
-                    breaks=c(0,25,38,41,99999),
-                    include.lowest=T]

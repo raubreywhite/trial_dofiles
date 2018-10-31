@@ -33,45 +33,18 @@ Analyse_pniph_abstract_2018_cpo<- function(d){
     "pniph_agepregnancycat2",
     "pniph_educationcat2",
     "pniph_householdcat",
-    
+    "pniph_cpogestage_1_cats",
+    "pniph_gestageatlastvisit_cats",
     names(d)[stringr::str_detect(names(d),"^ancounsdanger_")],
     names(d)[stringr::str_detect(names(d),"^ancounslabor_")],
-    names(d)[stringr::str_detect(names(d),"^ancounsnut_")]
-  )
+    names(d)[stringr::str_detect(names(d),"^ancounsnut_")],
+    names(d)[stringr::str_detect(names(d),"^cpomodedelivery_")],
+    names(d)[stringr::str_detect(names(d),"^cpopregoutcome_")]        
+             
+    )
  
-  vars_recom_pod <-c( "NA",
-                      "GOV",   
-                      "PH",    
-                      "PC",    
-                      "HOME",
-                      "NGO",
-                      "UNRWA", 
-                      "TRANS",
-                      ""
-  )
-  
-  vars_cpomodeofdelivery <- c(
-                        "Spontaneous vaginal",
-                        "Caesarian section",
-                        "Assisted vaginal",
-                        "VACCUUM",
-                        "NA"
-  )
-  
-  vars_cpooutcome <- c("LIVE",
-                       "ABO",
-                       "STILL",
-                       "INF-DEATH",
-                       "LATE-DEATH",
-                       "NEO-DEATH",
-                       "NA"
-    
-    
-  )
-  
  
-  
-  # THESE ARE VARIABLES THAT YOU CAN USE TO CREATE MORE COLUMNS
+ # THESE ARE VARIABLES THAT YOU CAN USE TO CREATE MORE COLUMNS
   vars_for_columns <- c(
     "exposure_postpartumhemorrhage",
     "exposure_puerpalsepsis",
