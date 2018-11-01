@@ -205,43 +205,253 @@ Analyse_EnteredVsCalculated <- function(d){
     units="mm",
     plot=p)
   
+####differences with rounded entered gestages
+##Creating differences between the rounded calculated and entered gest ages
+  d[,difference_rounded:= mahima_gestageatbirthwk_1_rounded-mahima_hospenteredgestage_1]
+ 
+  
+  res <- list()
+  
+  
+  f <- t.test(d[bookyearmonth<="2017-03" & 
+                  ident_TRIAL_1==TRUE & 
+                  ident_dhis2_control==T]$difference_rounded)
+  res[[length(res)+1]] <- data.frame("label"="t.test control gestage diff_rounded",
+                                     "pvalue"=f$p.value)
+  
+  f <- t.test(d[ bookyearmonth<="2017-03" & 
+                   ident_TRIAL_1==TRUE & 
+                   ident_dhis2_control==F]$difference_rounded)
+  res[[length(res)+1]] <- data.frame("label"="t.test inter gestage diff_rounded",
+                                     "pvalue"=f$p.value)
+  
+  ##is the rounded calculated different than the entered. non parametric testing
+  f <- wilcox.test(d[bookyearmonth<="2017-03" & 
+                       ident_TRIAL_1==TRUE & 
+                       ident_dhis2_control==T]$difference_rounded,
+                   mu = 0, alternative = "two.sided")
+  res[[length(res)+1]] <- data.frame("label"="wilcoxon.test control gestage diff_rounded",
+                                     "pvalue"=f$p.value)
+  
+  f <- wilcox.test(d[bookyearmonth<="2017-03" & 
+                       ident_TRIAL_1==TRUE & 
+                       ident_dhis2_control==F]$difference_rounded,
+                   mu = 0, alternative = "two.sided")
+  res[[length(res)+1]] <- data.frame("label"="wilcoxon.test inter gestage diff_rounded",
+                                     "pvalue"=f$p.value)
+  
+  f <- wilcox.test(d[bookyearmonth<="2017-03" & 
+                       ident_TRIAL_1==TRUE]$difference_rounded,
+                   mu = 0, alternative = "two.sided")
+  res[[length(res)+1]] <- data.frame("label"="wilcoxon.test control&inter diff_rounded gestage diff_rounded",
+                                     "pvalue"=f$p.value)
+  ##removing outlier and comparing significance in intervention and control gestages
+  f <- t.test(difference_rounded ~ ident_dhis2_control, 
+              data = d[bookyearmonth<="2017-03" & 
+                         difference_rounded<400 &
+                         ident_TRIAL_1==TRUE ])
+  res[[length(res)+1]] <- data.frame("label"="t.test (no outlier) btwn rounded gestage diff in two groups",
+                                     "pvalue"=f$p.value)
+  
+  
+  f<- wilcox.test(difference_rounded ~ ident_dhis2_control, 
+                  data = d[bookyearmonth<="2017-03" & 
+                             ident_TRIAL_1==TRUE ])
+  res[[length(res)+1]] <- data.frame("label"="t.test (w/outlier) btwn rounded gestage diff in two groups",
+                                     "pvalue"=f$p.value)
+  #if want to add df from wilcoxon, set it equal to 99 because it doesnt exist here
+  
+  res <- rbindlist(res)
   
   
   
-###printing out prevalences for the hospital birth gest age stuff
+  #unique(d$bookyearmonth)
+  openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,
+                                     "mahima",
+                                     "trial_1",
+                                     "entered_and_rounded_calculated_gest_ages_statisticaltests.xlsx"))
+  
+  p<-ggplot(d[bookyearmonth<="2017-03" & ident_TRIAL_1==TRUE],aes(x=difference_rounded, colour = ident_dhis2_control)) 
+  p <- p+ geom_density()
+  p <-p + xlim(-25, 25)
+  
+  
+  
+  ## comparing mahima gestational age rounded calculated vs entered
+  
+  #dev.off() try to run this code if get weird graphic errors
+  p <- ggplot(d[ident_TRIAL_1==TRUE], aes(x=mahima_gestageatbirthwk_1_rounded, y=mahima_hospenteredgestage_1))
+  p <- p + geom_abline(intercept = 0, slope = 1, colour="red")
+  p <- p + geom_point()
+  p <- p + labs(title="Entered and Calculated Gestational Ages_rounded")
+  p <- p + scale_x_continuous("Calculated Gestational Ages")
+  p <- p + theme_grey (base_size = 16)
+  p <- p + labs(caption=GraphCaption())
+  
+  
+  ggsave(filename = file.path(
+    FOLDER_DROPBOX_RESULTS,
+    "mahima",
+    "trial_1",
+    "entered_and_rounded_calculated_gest_ages.png"),
+    height=210,
+    width=297,
+    units="mm",
+    plot=p)
+  
+  
+  
+  
+  
+###printing out prevalences for the hospital birth gest age stuff ROUNDED
 ###sink() is like capture in STATA
   sink()
   sink(file.path(FOLDER_DROPBOX_RESULTS,
                                      "mahima",
                                      "trial_1",
-                                     "hospital gA calculated and entered.txt"))
- #Control Alone
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE & 
-             ident_dhis2_control==T,
-           c(mahima_gestageatbirthwk_1_cats)])
-  #Intervention Alone
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE & 
-             ident_dhis2_control==F,
-           c(mahima_gestageatbirthwk_1_cats)])
-  #Both
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE]$mahima_gestageatbirthwk_1_cats)
+                                     "hospital gA rounded_calculated and entered.txt"))
   
-  #Distributions within categories
+  cat("\ncreating a smaller dataset just for this purpose\n")
+  analysisDataset <- d[bookyearmonth<="2017-03"&
+                         ident_TRIAL_1==TRUE &
+                         !is.na(mahima_gestageatbirthwk_1) &
+                         !is.na(mahima_hospenteredgestage_1)&
+                         !is.na(mahima_gestageatbirthwk_1_rounded),
+                       c("bookevent",
+                         "mahima_hospenteredgestage_1",
+                         "mahima_gestageatbirthwk_1",
+                         "mahima_gestageatbirthwk_1_rounded")]
+  cat("\n\n Denonimator in the dataset that have both variables\n\n") 
+  cat("\n\n") 
+  print(nrow(d[bookyearmonth<="2017-03" & 
+                 ident_TRIAL_1==TRUE & 
+                 !is.na(mahima_hospenteredgestage_1) & 
+                 !is.na(mahima_gestageatbirthwk_1_rounded)]))
+  
+  xtabs(~d$mahima_gestageatbirthwk_1_cats)
+  xtabs(~d$mahima_hospenteredgestage_1_cats)
+  xtabs(~d$mahima_hospenteredgestage_1_cats + d$mahima_gestageatbirthwk_1_cats)
+  
+  
+  cat("\nIQRcalculatedgestage\n")
+  quantile(x=analysisDataset$mahima_gestageatbirthwk_1, 
+           probs = seq(0, 1, 0.25), 
+           na.rm = TRUE)
+  cat("\nIQRroundedcalculatedgestage\n")
+  quantile(x=analysisDataset$mahima_gestageatbirthwk_1_rounded, 
+           probs = seq(0, 1, 0.25), 
+           na.rm = TRUE)
+  cat("\nIQRenteredgestage\n")
+  quantile(x=analysisDataset$mahima_hospenteredgestage_1, 
+           probs = seq(0, 1, 0.25), 
+           na.rm = TRUE)
+  
+ 
+  cat("\n\nDistributions_of_Cats\n")
+  cat("\nPostterm_41-42_rounded distribution\n")
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE &
-             mahima_gestageatbirthwk_1_cats=="(40.9,1e+04]",
-           c(mahima_gestageatbirthwk_1)])
-  ###for rounded one just change it to the rounded one after c. 
-  #Distributions within last category
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             mahima_gestageatbirthwk_1_cats=="(40.9,1e+04]",
+             !is.na(mahima_gestageatbirthwk_1)&
+             mahima_gestageatbirthwk_1_cats=="(40.9,42.9]",
            c(mahima_gestageatbirthwk_1_rounded)])
   
- #Control 
+  cat("\nPostterm_rounded_after 42 distribution\n")
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_gestageatbirthwk_1)&
+             mahima_gestageatbirthwk_1_cats=="(42.9,1e+04]",
+           c(mahima_gestageatbirthwk_1_rounded)])
+  
+  cat("\nABO_rounded\n") 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_gestageatbirthwk_1_cats=="(0,23.9]",
+           c(mahima_gestageatbirthwk_1_rounded)])
+  
+  cat("\nTerm_calculated\n") 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_gestageatbirthwk_1_cats=="(37.9,40.9]",
+           c(mahima_gestageatbirthwk_1)])
+  
+  
+  cat("\nTerm_entered\n") 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_hospenteredgestage_1_cats=="(37,40]",
+           c(mahima_hospenteredgestage_1)])
+  
+  
+  
+  cat("\nPreterm_rounded\n") 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_gestageatbirthwk_1_cats=="(23.9,37.9]",
+           c(mahima_gestageatbirthwk_1_rounded)])
+  
+  cat("\n\nDistributions_of_Cats\n")
+  cat("\nPostterm_calculated_after 42 distribution\n")
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_gestageatbirthwk_1_cats=="(42.9,1e+04]",
+           c(mahima_gestageatbirthwk_1)])
+  
+  cat("\n\nDistributions_of_Cats\n")
+  cat("\nPostterm_calculated_41-42 distribution\n")
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_gestageatbirthwk_1_cats=="(40.9,42.9]",
+           c(mahima_gestageatbirthwk_1)])
+  
+  cat("\nABO_calculated\n") 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_gestageatbirthwk_1_cats=="(0,23.9]",
+           c(mahima_gestageatbirthwk_1)])
+  
+  cat("\nPreterm_calculated\n") 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_gestageatbirthwk_1_cats=="(23.9,37.9]",
+           c(mahima_gestageatbirthwk_1)])
+  
+  cat("\n\nDistributions_of_Cats\n")
+  cat("\nPostterm_entered after 42 weeks distribution\n")
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_hospenteredgestage_1_cats=="(42,1e+04]",
+           c(mahima_hospenteredgestage_1)])
+  
+  cat("\nPostterm_entered for 41 and 42 weeks distribution\n")
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_hospenteredgestage_1_cats=="(40,42]",
+           c(mahima_hospenteredgestage_1)])
+ 
+   cat("\nABO_entered\n") 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_hospenteredgestage_1_cats=="(0,24]",
+           c(mahima_hospenteredgestage_1)])
+ 
+   cat("\nPreterm_entered\n") 
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             mahima_hospenteredgestage_1_cats=="(24,37]",
+           c(mahima_hospenteredgestage_1)])
+  
+  
+  cat("\nCrosstabCats\n") 
+  xtabs(~d$mahima_gestageatbirthwk_1_cats)
+  xtabs(~d$mahima_hospenteredgestage_1_cats)
+  
+  cat("\nCrosstabVars\n") 
+  xtabs(~d$mahima_hospenteredgestage_1)
+  xtabs(~d$mahima_gestageatbirthwk_1)
+  xtabs(~d$mahima_gestageatbirthwk_1_rounded)
+  
+  
+#Control 
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE & 
              ident_dhis2_control==T,
@@ -255,20 +465,148 @@ Analyse_EnteredVsCalculated <- function(d){
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE, 
           c(mahima_hospenteredgestage_1_cats)])
- cat("\n\n Denonimator in the dataset that have both variables\n\n") 
- cat("\n\n") 
- print(nrow(d[bookyearmonth<="2017-03" & 
-                 ident_TRIAL_1==TRUE & 
-                 !is.na(mahima_hospenteredgestage_1) & 
-                 !is.na(mahima_gestageatbirthwk_1)]))
   
-  xtabs(~d$mahima_gestageatbirthwk_1_cats)
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE, 
+           c(mahima_gestageatbirthwk_1_cats)])
   
-  xtabs(~d$mahima_hospenteredgestage_1_cats)
-  xtabs(~d$mahima_hospenteredgestage_1_cats + d$mahima_gestageatbirthwk_1_cats)
+ 
+  
   
 
-  sink()
+  
+sink()
+  
+  ###Kappa test for reliability not rounded
+  ###Using intraclass correlation here because these are continuous variables
+  str(d$mahima_hospenteredgestage_1)
+  str(d$mahima_gestageatbirthwk_1)
+  #want kappa for continuous variables, normal kappa wont work
+  # this one needs long format so want wide to long
+  #creating a smaller dataset just for this purpose
+  analysisDataset <- d[bookyearmonth<="2017-03"&
+                         ident_TRIAL_1==TRUE &
+                         !is.na(mahima_gestageatbirthwk_1) &
+                         !is.na(mahima_hospenteredgestage_1),
+                       c("bookevent",
+                         "mahima_hospenteredgestage_1",
+                         "mahima_gestageatbirthwk_1")]
+  
+  long <-melt.data.table(analysisDataset,
+                         id.vars = "bookevent")
+  
+  ###if any ones have an empty value, should check them this way
+# d[bookevent=="----", c("motheridno", 
+#                        "bookyearmonth", 
+#                        "mahima_hospenteredgestage_1",
+#                       "mahima_hospenteredgestage_1")]
+  
+  f <- ICC::ICCest("bookevent", value, data = long, 
+                   alpha = 0.05, 
+                   CI.type = c("THD", "Smith"))
+  
+  res<-list()
+  
+  res[[length(res)+1]] <- data.frame("label"="intraclass correlation test btwn gestage entered and calculated",
+                                     "denominator"=f$N,
+                                     "correlationcoefficient"=f$ICC,
+                                     "lowerCI"=f$LowerCI,
+                                     "upperCI"=f$UpperCI,
+                                     "kappa"=f$k,
+                                     "w/inGroupOrIndivVar"=f$varw,
+                                     "amongIndivOrGroup"=f$vara)
+  
+  ###covariance--this is bounded unlike variance and covariance not rounded
+  ###in the analysis dataset we have bookevent
+  ###so choose only the variables you want to compare or else it will break it
+  ###this one will only give you a pearsons value because its "pairwise.complete.obs"
+  f <- cor(x=analysisDataset$mahima_hospenteredgestage_1, 
+           analysisDataset$mahima_gestageatbirthwk_1, 
+           use = "pairwise.complete.obs",
+           method = c("pearson"))
+  
+  res[[length(res)+1]] <- data.frame("label"=" pearson correlation coeff btwn gestage entered and calculated",
+                                     "correlationcoefficient"=f)
+  
+  ###here we want spearman coefficient
+  f <- cor(x=analysisDataset$mahima_hospenteredgestage_1, 
+           analysisDataset$mahima_gestageatbirthwk_1, 
+           use = "pairwise.complete.obs",
+           method = c("spearman"))
+  res[[length(res)+1]] <- data.frame("label"="spearman correlation coeff btwn gestage entered and calculated",
+                                     "correlationcoefficient"=f)
+  res <- rbindlist(res, fill=T)
+  
+  openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,
+                                     "mahima",
+                                     "trial_1",
+                                     "entered_and_calculated_gest_ages_ICC.xlsx"))
+  
+  
+  ###Kappa test for reliability ROUNDED
+  ###Using intraclass correlation here because these are continuous variables
+  str(d$mahima_hospenteredgestage_1)
+  str(d$mahima_gestageatbirthwk_1_rounded)
+  #want kappa for continuous variables, normal kappa wont work
+  # this one needs long format so want wide to long
+  #creating a smaller dataset just for this purpose
+  analysisDataset <- d[bookyearmonth<="2017-03"&
+                         ident_TRIAL_1==TRUE &
+                         !is.na(mahima_gestageatbirthwk_1_rounded) &
+                         !is.na(mahima_hospenteredgestage_1),
+                       c("bookevent",
+                         "mahima_hospenteredgestage_1",
+                         "mahima_gestageatbirthwk_1_rounded")]
+  
+  long <-melt.data.table(analysisDataset,
+                         id.vars = "bookevent")
+  
+  ###if any ones have an empty value, should check them this way
+#d[bookevent=="----", c("motheridno", 
+#                       "bookyearmonth", 
+#                       "mahima_hospenteredgestage_1",
+#                       "mahima_gestageatbirthwk_1_rounded")]
+  
+  f <- ICC::ICCest("bookevent", value, data = long, 
+                   alpha = 0.05, 
+                   CI.type = c("THD", "Smith"))
+  
+  res<-list()
+  
+  res[[length(res)+1]] <- data.frame("label"="intraclass correlation test btwn gestage entered and rounded calculated",
+                                     "denominator"=f$N,
+                                     "correlationcoefficient"=f$ICC,
+                                     "lowerCI"=f$LowerCI,
+                                     "upperCI"=f$UpperCI,
+                                     "kappa"=f$k,
+                                     "w/inGroupOrIndivVar"=f$varw,
+                                     "amongIndivOrGroup"=f$vara)
+  
+  ###covariance--this is bounded unlike variance and covariance ROUNDED
+  ###in the analysis dataset we have bookevent
+  ###so choose only the variables you want to compare or else it will break it
+  ###this one will only give you a pearsons value because its "pairwise.complete.obs"
+  f <- cor(x=analysisDataset$mahima_hospenteredgestage_1, 
+           analysisDataset$mahima_gestageatbirthwk_1_rounded, 
+           use = "pairwise.complete.obs",
+           method = c("pearson"))
+  
+  res[[length(res)+1]] <- data.frame("label"=" pearson correlation coeff btwn gestage entered and rounded calculated",
+                                     "correlationcoefficient"=f)
+  
+  ###here we want spearman coefficient
+  f <- cor(x=analysisDataset$mahima_hospenteredgestage_1, 
+           analysisDataset$mahima_gestageatbirthwk_1_rounded, 
+           use = "pairwise.complete.obs",
+           method = c("spearman"))
+  res[[length(res)+1]] <- data.frame("label"="spearman correlation coeff btwn gestage entered and rounded calculated",
+                                     "correlationcoefficient"=f)
+  res <- rbindlist(res, fill=T)
+  
+  openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,
+                                     "mahima",
+                                     "trial_1",
+                                     "entered_and_rounded_calculated_gest_ages_ICC.xlsx"))
   
   
 }

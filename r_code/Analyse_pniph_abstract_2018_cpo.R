@@ -56,7 +56,7 @@ Analyse_pniph_abstract_2018_cpo<- function(d){
     )
   
   smallD <- d[ident_dhis2_control==F &
-                bookdate>="2017-09-01" & bookdate<="2018-09-01" &
+                bookdate>="2018-01-01" & bookdate<="2018-09-01" &
                 ident_dhis2_booking==TRUE & 
                 ident_dhis2_an==TRUE & 
                 ident_dhis2_cpo==TRUE & 
@@ -73,11 +73,10 @@ Analyse_pniph_abstract_2018_cpo<- function(d){
   
     # number of visits
     tab <- d[ident_dhis2_control==F &
-               bookdate>="2017-09-01" & bookdate<="2018-09-01" &
+               bookdate>="2018-01-01" & bookdate<="2018-09-01" &
                ident_dhis2_booking==TRUE & 
                ident_dhis2_an==TRUE & 
                ident_dhis2_cpo==TRUE &
-               ident_dhis2_risk==TRUE &
                ident_dhis2_ppc==TRUE,.(
       NWomen=.N
     ),keyby=.(
@@ -149,11 +148,18 @@ Analyse_pniph_abstract_2018_cpo<- function(d){
                          "abstracts_2018",
                          "cpo.xlsx"))
   
+  
+  ###demographic numbers and percents####
+  
+  
+  
+  
+  
 }
 
 OLDAnalyse_pniph_abstract_2018_cpo<- function(d){  
   smallCPOd <- d[ident_dhis2_control==F &
-                   bookdate>="2017-09-01" & bookdate<="2018-09-01" &
+                   bookdate>="2017-01-01" & bookdate<="2017-12-01" &
                    ident_dhis2_booking==TRUE & 
                    ident_dhis2_an==TRUE & 
                    ident_dhis2_cpo==TRUE & 
@@ -273,7 +279,7 @@ XXXXAnalyse_pniph_abstract_2018_cpo<- function(d){
   )
   
   smallD <- d[ident_dhis2_control==F &
-                bookdate>="2017-09-01" & bookdate<="2018-09-01" &
+                bookdate>="2017-01-01" & bookdate<="2017-12-01" &
                 ident_dhis2_booking==TRUE & 
                 ident_dhis2_an==TRUE & 
                 ident_dhis2_cpo==TRUE & 
@@ -335,7 +341,7 @@ XXXXAnalyse_pniph_abstract_2018_cpo<- function(d){
 
 OLDAnalyse_pniph_abstract_2018_cpo<- function(d){  
 smallCPOd <- d[ident_dhis2_control==F &
-                       bookdate>="2017-09-01" & bookdate<="2018-09-01" &
+                       bookdate>="2017-01-01" & bookdate<="2017-12-01" &
                        ident_dhis2_booking==TRUE & 
                        ident_dhis2_an==TRUE & 
                        ident_dhis2_cpo==TRUE & 

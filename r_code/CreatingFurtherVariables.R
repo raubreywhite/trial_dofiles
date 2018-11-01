@@ -149,10 +149,10 @@ CreatingFurtherVariablesMahima <- function(d){
   #created rounded variable for gestational ages at birth
   d[,mahima_gestageatbirthwk_1_rounded:=floor(mahima_gestageatbirthwk_1)]
   d[,mahima_gestageatbirthwk_1_cats:=cut(mahima_gestageatbirthwk_1,
-                                 breaks=c(-30,0,37,40.85,9999),
+                                 breaks=c(-30,0,23.9,37.9,40.9,44,9999),
                                  include.lowest=T)]
   d[,mahima_hospenteredgestage_1_cats:=cut(mahima_hospenteredgestage_1,
-                                    breaks=c(-30,0,37,40.85,9999),
+                                    breaks=c(-30,0,24,37,40,44,9999),
                                     include.lowest=T)]
   xtabs(~d$mahima_gestageatbirthwk_1_cats)
   xtabs(~d$mahima_hospenteredgestage_1_cats)
@@ -255,9 +255,9 @@ CreatingFurtherVariablesPNIPH <-function(d){
   
   ###creating gest age categories at last visit
   d[,pniph_gestageatlastvisit_cats:=cut(pniph_gestageatlastvisit,
-    breaks=c(0,36,40,42,999999),
+    breaks=c(0,36,40,42,9999),
     include.lowest=T)]
-  
+  d$pniph_gestageatlastvisit_cats
   unique(d$gestageatlastvisit)
   
   

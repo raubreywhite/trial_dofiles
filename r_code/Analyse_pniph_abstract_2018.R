@@ -3,17 +3,16 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   rm("d", envir=.GlobalEnv)
 
   d <- CleanAllData(includePPC=T,
-                    minBookDate="2017-01-01",
+                    minBookDate="2018-01-01",
                     maxBookDate="2018-09-01",
                     delete=c("^lab",
                               "^us",
-                              "man"
+                              "^man"
                              ))
   
   d <- d[
-    ident_dhis2_ppc==1 & 
-      ident_dhis2_an==1 & 
-      ident_dhis2_control==F]
+    ident_dhis2_ppc==1 &
+    ident_dhis2_control==F]
   
   tryCatch({
     # number of visits
@@ -118,7 +117,8 @@ Analyse_pniph_abstract_2018_ppc<- function(){
       "age",
       "avgincome",
       "agemarriage",
-      "agepregnancy"
+      "agepregnancy",
+      "education"
   )
   
   #categories for breast problems
@@ -141,7 +141,9 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   vars_cpoantepartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpoantepartumhemorrhage_")]
   vars_cpoevent <- names(d)[stringr::str_detect(names(d),"^cpoevent_")]
   vars_ppclochiaamount <- names(d)[stringr::str_detect(names(d),"^ppclochiaamount_")]
+  vars_cpopostpartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpopostpartumhemorrhage_")]
   
+
 #d$ppcincisiontearinspectionbleeding_1
 #d$ppcincisiontearcondition_1
   
@@ -305,6 +307,7 @@ Analyse_pniph_abstract_2018_ppc<- function(){
                 vars_ppcevent,
                 vars_cpoevent,
                 vars_cpoantepartumhemorrhage,
+                vars_cpopostpartumhemorrhage,
                 vars_demo,
                 vars_demo2,
                 "pniph_num_ppc_visits"
@@ -644,27 +647,7 @@ Analyse_clex_abstract_2018_clex<- function(d){
   d[,x_bookhistmed_clex:=as.numeric(stringr::str_detect(tolower(bookhistmed),"cle"))]
   d[,x_booktext_clex:= x_bookmedpress_clex | x_bookhistmed_clex]
 
-  res<-d[ident_dhis2_control==F &
-      bookyear %in% c(2017,2018) &
-      ident_dhis2_booking==TRUE,
-    .(
-      N=.N,
-      
-      x_thrombolytic_problems_NA=sum(is.na(x_thrombolytic_problems)),
-      x_thrombolytic_problems_0=sum(x_thrombolytic_problems==FALSE,na.rm=T),
-      x_thrombolytic_problems_1=sum(x_thrombolytic_problems==TRUE,na.rm=T),
-      
-     bookabortionnothromb_1=sum(bookhistabort==1 & x_thrombolytic_problems==F,na.rm=T),
-     bookivfnoabortionnothromb_1=sum(bookhistivf==1 & bookhistabort==0 & x_thrombolytic_problems==F,na.rm=T),
-     bookinfernoivfnoabortionnothromb_1=sum(bookhistinfert==1& bookhistivf==0 & bookhistabort==0 & x_thrombolytic_problems==F,na.rm=T)
-     
-     ),
-    keyby=.(
-      x_clexane
-      
-    )]
-  
-  
+
   openxlsx::write.xlsx(res, 
                        file.path(
                          FOLDER_DROPBOX_RESULTS,
@@ -672,9 +655,7 @@ Analyse_clex_abstract_2018_clex<- function(d){
                          "abstracts_2018",
                          "clexbookcases.xlsx"))
   
-  
-  
-  
+ 
 }
   
 
