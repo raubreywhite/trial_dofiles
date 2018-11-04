@@ -15,11 +15,11 @@ CleanAllData <- function(
   
   if(length(delete)>0){
     for(i in delete){
-      print(sprintf("Before deleting %s: %s rows",i,nrow(dhis)))
+      print(sprintf("Before deleting %s: %s colmns",i,ncol(dhis)))
       # delete all the variables named in 'delete' from dhis2
       vars <- names(dhis)[stringr::str_detect(names(dhis),i)]
       dhis[,(vars):=NULL]
-      print(sprintf("After deleting %s: %s rows",i,nrow(dhis)))
+      print(sprintf("After deleting %s: %s colmns",i,ncol(dhis)))
     }
   }
 
@@ -55,9 +55,9 @@ CleanAllData <- function(
   
   # this variable says where the baby info gets matched from
   d[,matching:=as.character(NA)]
-  d[ident_avic_any==TRUE & is.na(matching),matching:="Avicenna"]
-  d[ident_hbo==TRUE & is.na(matching),matching:="Governmental"]
-  d[ident_dhis2_dhis2hbo==TRUE & is.na(matching),matching:="Private"]
+  if("ident_avic_any" %in% names(d)) d[ident_avic_any==TRUE & is.na(matching),matching:="Avicenna"]
+  if("ident_hbo" %in% names(d))  d[ident_hbo==TRUE & is.na(matching),matching:="Governmental"]
+  if("ident_dhis2_dhis2hbo" %in% names(d))  d[ident_dhis2_dhis2hbo==TRUE & is.na(matching),matching:="Private"]
   d[is.na(matching),matching:="Not"]
   
   # CLEAN DIFFERENT FILES CONSISTENTLY (e.g. gestational age)

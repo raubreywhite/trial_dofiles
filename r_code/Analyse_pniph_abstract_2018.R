@@ -3,7 +3,7 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   rm("d", envir=.GlobalEnv)
 
   d <- CleanAllData(includePPC=T,
-                    minBookDate="2018-01-01",
+                    minBookDate="2017-01-01",
                     maxBookDate="2018-09-01",
                     delete=c("^lab",
                               "^us",
@@ -12,7 +12,10 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   
   d <- d[
     ident_dhis2_ppc==1 &
-    ident_dhis2_control==F]
+    ident_dhis2_control==F&
+      bookdate>="2018-01-01"]
+  
+  
   
   tryCatch({
     # number of visits
@@ -102,6 +105,9 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   #bookevent
   
   d[,pniph_000EVERYONE:=1]
+  
+  
+  d[,pniph_0000EVERYONE:=1]
   vars_demo <- c(
     "pniph_000EVERYONE",
     "pniph_agecat",
@@ -119,7 +125,7 @@ Analyse_pniph_abstract_2018_ppc<- function(){
       "agemarriage",
       "agepregnancy",
       "education",
-      "pniph_educationcat"
+      "pniph_0000EVERYONE"
   )
   
   #categories for breast problems

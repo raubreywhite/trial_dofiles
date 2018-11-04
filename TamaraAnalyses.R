@@ -44,9 +44,8 @@ desiredPackages <- c("stringr",
                      "rel",
                      "gridExtra",
                      "openssl",
-                     "fmsb",
-                     "ICC"
-                     )
+                     "fmsb"
+)
 for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
 
 
@@ -73,68 +72,101 @@ DATA_DATE <- min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)
 
 weekyear <- sprintf("%s-%s",lubridate::isoyear(lubridate::today()),lubridate::isoweek(lubridate::today()))
 yearmonth <- sprintf("%s-%s",
-        lubridate::year(lubridate::today()),
-        lubridate::month(lubridate::today()))
+                     lubridate::year(lubridate::today()),
+                     lubridate::month(lubridate::today()))
+### SETUP ENDS
 
-# CREATE FOLDERS
+# Load in datafile
 
-dir.create(FOLDER_DROPBOX_RESULTS)
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"hbo_completeness"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"data_quality"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"pniph"))
-
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima","random"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima","trial_1"))
-dir.create(file.path(FOLDER_DROPBOX_RESULTS,"pniph","abstracts_2018"))
-
-
-#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1"))
-#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1","demographics"))
-#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"trial_1","random_indicators"))
-#dir.create(file.path(FOLDER_DROPBOX_RESULTS,"indicators_for_mahima"))
-
-
-###################
-###################
-###################
-###### SETUP ENDS
-###################
-###################
-###################
-
-####################
-####################
-# CODE STARTS HERE #
-####################
-####################
-
-# make this TRUE if you want to include the PPC
-d <- CleanAllData(includePPC=FALSE)
-
-####################
-#NOW run HBO stuff##
-
-SaveAllDataFiles(d)
-
-Analyses(d=LoadDataFileFromNetwork())
-
-##################
-##################
-# CODE ENDS HERE #
-##################
-##################
-
-MissingHBO()
-
-
-####
-# PLACE OF DELIVERY INFORMATION CHECKING
-# LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPORT
 d <- LoadDataFileFromNetwork()
-CreatingFurtherVariablesPNIPH(d)
-#### bookvisitspec shouldnt be known  pcnidnumber_1  amdmotherbirthdate_1
-###previdnumber_1   manidnumber  riskidnumber   d$hbodaltidnum_1   hbodaltidnum_1
-###anidnumber_1     labid     usid     
+
+Mahimastaff
+Mabstract <- d[ident_TRIAL_1==TRUE,
+               .(numWomen=.N),
+               
+               keyby= agecat]
+
+
+
+
+nrow(d[ident_dhis2_control==F &ident_dhis2_booking==T])
+nrow(d[ident_dhis2_control==F &ident_dhis2_nbc==T])
+
+
+vars <- names(d)[stringr::str_detect(names(d),"^labhb_[0-9]*")]
+
+d[,labhb_x:=0]
+
+for(i in vars){
+  d[get(i)==1, labhb_x:=labhb_x+1]
+}
+
+sum(d[ident_dhis2_control==F]$labhb_x,na.rm=T)
+
+
+
+
+
+vars <- names(d)[stringr::str_detect(names(d),"^usevent_[0-9]*")]
+
+d[,usevent_x:=0]
+
+for(i in vars){
+  d[!is.na(get(i)), usevent_x:=usevent_x + 1]
+}
+
+sum(d[ident_dhis2_control==F]$usevent_x,na.rm=T)
+
+#HYPERTENTION
+vars <- names(d)[stringr::str_detect(names(d),"^anbpsyst_[0-9]*")]
+
+d[,anbpsyst_x:=0]
+
+for(i in vars){
+  d[!is.na(get(i))& get(i)>0, anbpsyst_x:=anbpsyst_x + 1]
+}
+
+sum(d[ident_dhis2_control==F]$anbpsyst_x,na.rm=T)
+
+# 
+
+#xtabs(~d$ident_dhis2_control + d$ident_dhis2_booking)   
+
+
+#diabetes
+
+
+
+
+
+
+# urinary tract infections
+
+
+
+
+
+
+#PPC
+d <- CleanAllData(includePPC=T,
+                  minBookDate="2017-01-01",
+                  maxBookDate="2018-09-27",
+                  delete=c("^lab",
+                           "^us",
+                           "^man",
+                           "^risk",
+                           "^an",
+                           "^book"
+                            ))
+
+d <- d[
+  ident_dhis2_ppc==1 &
+  ident_dhis2_control==F]
+
+
+#As of 2017, the MCH e Registry contains data on 24,832 registered antenatal care visits, 
+#18,374 postpartum care visits and 16,409 newborn care visits. From antenatal care, 
+#data on core process indicators is available on screening of anemia        hypertension,
+#diabetes                and urinary tract infections.
 
 

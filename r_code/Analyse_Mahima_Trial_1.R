@@ -346,115 +346,32 @@ Analyse_EnteredVsCalculated <- function(d){
   quantile(x=analysisDataset$mahima_hospenteredgestage_1, 
            probs = seq(0, 1, 0.25), 
            na.rm = TRUE)
+  
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE &
              !is.na(mahima_gestageatbirthwk_1),
-           c(mahima_hospenteredgestage_1)])
+           c(mahima_hospenteredgestage_1_cats)])
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE &
              !is.na(mahima_hospenteredgestage_1),
            c(mahima_gestageatbirthwk_1_cats)])
   
  
-  cat("\n\nDistributions_of_Cats\n")
-  cat("\nPostterm_41-42_rounded distribution\n")
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_hospenteredgestage_1)&
-             mahima_gestageatbirthwk_1_cats=="(40.7,44]",
-           c(mahima_gestageatbirthwk_1_rounded)])
-  
-  cat("\nPostterm_rounded_after 42 distribution\n")
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_hospenteredgestage_1)&
-             mahima_gestageatbirthwk_1_cats=="(44,1e+04]",
-           c(mahima_gestageatbirthwk_1_rounded)])
-  
-  cat("\nABO_rounded\n") 
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_hospenteredgestage_1) &
-             mahima_gestageatbirthwk_1_cats=="(0,23.7]",
-           c(mahima_gestageatbirthwk_1_rounded)])
-  
-  cat("\nTerm_calculated\n") 
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_hospenteredgestage_1) &
-             mahima_gestageatbirthwk_1_cats=="(37.7,40.7]",
-           c(mahima_gestageatbirthwk_1)])
-  
-  
-  cat("\nTerm_entered\n") 
+ cat("\nentered_cats_dist\n") 
+
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE &
              !is.na(mahima_gestageatbirthwk_1) &
-             mahima_hospenteredgestage_1_cats=="(37,40]",
+             mahima_hospenteredgestage_1_cats=="[-30,0]",
            c(mahima_hospenteredgestage_1)])
   
   
-  
-  cat("\nPreterm_rounded\n") 
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_hospenteredgestage_1) &
-             mahima_gestageatbirthwk_1_cats=="(23.7,37.7]",
-           c(mahima_gestageatbirthwk_1_rounded)])
-  
-  cat("\n\nDistributions_of_Cats\n")
-  cat("\nPostterm_calculated_after 44 distribution\n")
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_hospenteredgestage_1) &
-             mahima_gestageatbirthwk_1_cats=="(44,1e+04]",
-           c(mahima_gestageatbirthwk_1)])
-  
-  cat("\n\nDistributions_of_Cats\n")
-  cat("\nPostterm_calculated_41-42 distribution\n")
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_hospenteredgestage_1) &
-             mahima_gestageatbirthwk_1_cats=="(40.7,44]",
-           c(mahima_gestageatbirthwk_1)])
-  
-  cat("\nABO_calculated\n") 
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_hospenteredgestage_1) &
-             mahima_gestageatbirthwk_1_cats=="(0,23.7]",
-           c(mahima_gestageatbirthwk_1)])
-  
-  cat("\nPreterm_calculated\n") 
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_hospenteredgestage_1) &
-             mahima_gestageatbirthwk_1_cats=="(23.7,37.7]",
-           c(mahima_gestageatbirthwk_1)])
-  
-  cat("\n\nDistributions_of_Cats\n")
-  cat("\nPostterm_entered after 44 weeks distribution\n")
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_gestageatbirthwk_1) &
-             mahima_hospenteredgestage_1_cats=="(44,1e+04]",
-           c(mahima_hospenteredgestage_1)])
-  
-  cat("\nPostterm_entered for 40 and 44 weeks distribution\n")
-  xtabs(~d[bookyearmonth<="2017-03" & 
-             ident_TRIAL_1==TRUE &
-             !is.na(mahima_gestageatbirthwk_1) &
-             mahima_hospenteredgestage_1_cats=="(40,44]",
-           c(mahima_hospenteredgestage_1)])
- 
-   cat("\nABO_entered\n") 
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE &
              !is.na(mahima_gestageatbirthwk_1) &
              mahima_hospenteredgestage_1_cats=="(0,24]",
            c(mahima_hospenteredgestage_1)])
- 
-   cat("\nPreterm_entered\n") 
+  
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE &
              !is.na(mahima_gestageatbirthwk_1) &
@@ -462,6 +379,60 @@ Analyse_EnteredVsCalculated <- function(d){
            c(mahima_hospenteredgestage_1)])
   
   
+ xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_gestageatbirthwk_1) &
+             mahima_hospenteredgestage_1_cats=="(37,41]",
+           c(mahima_hospenteredgestage_1)])
+  
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_gestageatbirthwk_1) &
+             mahima_hospenteredgestage_1_cats=="(41,44]",
+           c(mahima_hospenteredgestage_1)])
+  
+  cat("\nTerm_entered\n")
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_hospenteredgestage_1) &
+             mahima_gestageatbirthwk_1_cats=="[-30,0]",
+           c(mahima_gestageatbirthwk_1)])
+  
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_hospenteredgestage_1) &
+             mahima_gestageatbirthwk_1_cats=="(0,24.7]",
+           c(mahima_gestageatbirthwk_1)])
+  
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_gestageatbirthwk_1) &
+             mahima_gestageatbirthwk_1_cats=="(24.7,37.7]",
+           c(mahima_gestageatbirthwk_1)])
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_hospenteredgestage_1) &
+             mahima_gestageatbirthwk_1_cats=="(37.7,41.7]",
+           c(mahima_gestageatbirthwk_1)])
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_hospenteredgestage_1) &
+             mahima_gestageatbirthwk_1_cats=="(41.7,44]",
+           c(mahima_gestageatbirthwk_1)])
+  
+ # cat("\n\nDistributions_of_Cats\n")
+ # cat("\nPostterm_41-42_rounded distribution\n")
+  #xtabs(~d[bookyearmonth<="2017-03" & 
+          #   ident_TRIAL_1==TRUE &
+           #  !is.na(mahima_hospenteredgestage_1)&
+           #  mahima_gestageatbirthwk_1_cats=="(40.7,42.7]",
+           #c(mahima_gestageatbirthwk_1_rounded)])
+  #xtabs(~d[bookyearmonth<="2017-03" & 
+             #ident_TRIAL_1==TRUE &
+            # !is.na(mahima_hospenteredgestage_1)&
+             #mahima_gestageatbirthwk_1_cats=="(42.7,44]",
+           #c(mahima_gestageatbirthwk_1_rounded)])
+ 
   #cat("\nCrosstabCats\n") 
   #xtabs(~d$mahima_gestageatbirthwk_1_cats)
   #xtabs(~d$mahima_hospenteredgestage_1_cats)

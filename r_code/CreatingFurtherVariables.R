@@ -149,7 +149,7 @@ CreatingFurtherVariablesMahima <- function(d){
   #created rounded variable for gestational ages at birth
   d[,mahima_gestageatbirthwk_1_rounded:=floor(mahima_gestageatbirthwk_1)]
   d[,mahima_gestageatbirthwk_1_cats:=cut(mahima_gestageatbirthwk_1,
-                                 breaks=c(-30,0,23.7,37.7,41.7,44,9999),
+                                 breaks=c(-30,0,24.7,37.7,41.7,44,9999),
                                  include.lowest=T)]
   d[,mahima_hospenteredgestage_1_cats:=cut(mahima_hospenteredgestage_1,
                                     breaks=c(-30,0,24,37,41,44,9999),
