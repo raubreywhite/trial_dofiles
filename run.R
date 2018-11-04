@@ -135,5 +135,11 @@ d <- LoadDataFileFromNetwork()
 CreatingFurtherVariablesPNIPH(d)
 #### bookvisitspec shouldnt be known  pcnidnumber_1  amdmotherbirthdate_1
 ###previdnumber_1   manidnumber  riskidnumber   d$hbodaltidnum_1   hbodaltidnum_1
-###anidnumber_1     labid     usid      
+###anidnumber_1     labid     usid     
 
+#As of 2017, the MCH e Registry contains data on 24,832 registered antenatal care visits, 
+
+ # xtabs(~d$ident_dhis2_control==F ident_dhis2_booking==TRUE   ident_dhis2_ppc==1 ident_dhis2_nbc==T)
+#18,374 postpartum care visits and 16,409 newborn care visits. From antenatal care, 
+#data on core process indicators is available on screening of anemia        hypertension,
+#diabetes                and urinary tract infections.

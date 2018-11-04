@@ -149,10 +149,10 @@ CreatingFurtherVariablesMahima <- function(d){
   #created rounded variable for gestational ages at birth
   d[,mahima_gestageatbirthwk_1_rounded:=floor(mahima_gestageatbirthwk_1)]
   d[,mahima_gestageatbirthwk_1_cats:=cut(mahima_gestageatbirthwk_1,
-                                 breaks=c(-30,0,23.9,37.9,40.9,44,9999),
+                                 breaks=c(-30,0,23.7,37.7,41.7,44,9999),
                                  include.lowest=T)]
   d[,mahima_hospenteredgestage_1_cats:=cut(mahima_hospenteredgestage_1,
-                                    breaks=c(-30,0,24,37,40,44,9999),
+                                    breaks=c(-30,0,24,37,41,44,9999),
                                     include.lowest=T)]
   xtabs(~d$mahima_gestageatbirthwk_1_cats)
   xtabs(~d$mahima_hospenteredgestage_1_cats)
@@ -161,8 +161,6 @@ CreatingFurtherVariablesMahima <- function(d){
   # we can just do d[rows that i want, c("gestagecats", "gestageenteredcats")]
   #sum each source alone for each of these two variables
   #then can calculate the prevalence
-  
-  
   
   
   # to detect some women with wrong gestational age

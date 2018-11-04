@@ -118,7 +118,8 @@ Analyse_pniph_abstract_2018_ppc<- function(){
       "avgincome",
       "agemarriage",
       "agepregnancy",
-      "education"
+      "education",
+      "pniph_educationcat"
   )
   
   #categories for breast problems
@@ -512,7 +513,6 @@ Analyse_pniph_abstract_2018_nbc<- function(d){
                 vars_nbcweightgrams,
                 vars_nbcbirthweightgrams,
                 vars_nbcgestationalageatdelivery,
-                
                 "pniph_nbcdaysatvisit",
                 var_risks,
                 vars_demo
@@ -638,16 +638,39 @@ Analyse_clex_abstract_2018_clex<- function(d){
       stringr::str_detect(tolower(bookhistbloodspec),"thromb") |
       (bookhistprevdvt==1)
       ]
-  d[,x_clexane:=
-      (bookhistclex==1) |
-      (x_booktext_clex==TRUE)
-    ]
+ 
   
   d[,x_bookmedpress_clex:=as.numeric(stringr::str_detect(tolower(bookmedpres),"cle"))]
   d[,x_bookhistmed_clex:=as.numeric(stringr::str_detect(tolower(bookhistmed),"cle"))]
-  d[,x_booktext_clex:= x_bookmedpress_clex | x_bookhistmed_clex]
+  
+  d[,x_booktext_clex:=x_bookmedpress_clex | x_bookhistmed_clex]
 
+  d[,x_clexane:=(bookhistclex==1) | (x_booktext_clex==TRUE)]
+  
+  
+  res <- d[ident_dhis2_control==F &
+           bookyear %in% c(2017,2018) &
+           ident_dhis2_booking==TRUE,
+           
+                  .(
+                    N=.N,
+                    x_thrombolytic_problems_na=sum(x_thrombolytic_problems,addNA=T),
+                    x_thrombolytic_problems_0=sum(x_thrombolytic_problems==FALSE,na.rm=T),
+                    x_thrombolytic_problems_1=sum(x_thrombolytic_problems==TRUE,na.rm=T)
+                   # bookotherindic_1=sum(==TRUE,na.rm=T)|()|()|()||||
+                    
+                     # bookhistabort
+                   # bookhistivf
+                   # bookhistinfert
+                    
+    
+                  ),
+                  keyby=.(
+                    x_booktext_clex
+                  )]
+  
 
+  
   openxlsx::write.xlsx(res, 
                        file.path(
                          FOLDER_DROPBOX_RESULTS,
