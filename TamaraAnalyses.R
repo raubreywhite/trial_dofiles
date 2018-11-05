@@ -79,33 +79,85 @@ yearmonth <- sprintf("%s-%s",
 # Load in datafile
 
 d <- LoadDataFileFromNetwork()
+sink()
+sink(file.path(FOLDER_DROPBOX_RESULTS,
+               "mahima",
+               "trial_1",
+               "TRIAL_1_Numbers.txt"))
+cat("\nNumber of Women in TRIAL\n")
+nrow(d[bookdate>="2017-01-15"&
+         bookdate<="2017-09-15"&
+         ident_TRIAL_1==T])
 
-Mahimastaff
+cat("\nNumber of Women in ARM A\n")
+nrow(d[bookdate>="2017-01-15"&
+         bookdate<="2017-09-15"&
+         ident_TRIAL_1==T &
+         ident_dhis2_control==T])
+
+cat("\nNumber of Women in ARM B\n")
+nrow(d[bookdate>="2017-01-15"&
+         bookdate<="2017-09-15"&
+         ident_TRIAL_1==T &
+         ident_dhis2_control==F])
+
+
+#Mahima's stuff
+#Numbers by age categories
+cat("\nAge Cat_ALL women in Trial_1\n")
 Mabstract <- d[ident_TRIAL_1==TRUE,
                .(numWomen=.N),
                
                keyby= agecat]
+print(Mabstract)
+
+cat("\nAge Cat_ALL women in Trial_1_ARM A\n")
+Mabstract <- d[ident_TRIAL_1==TRUE&
+              ident_dhis2_control==T,
+               .(numWomen=.N),
+               
+               keyby= agecat]
+print(Mabstract)
+
+
+cat("\nAge Cat_ALL women in Trial_1_ARM B\n")
+Mabstract <- d[ident_TRIAL_1==TRUE&
+                 ident_dhis2_control==F,
+               .(numWomen=.N),
+               
+               keyby= agecat]
+print(Mabstract)
 
 
 
 
+
+sink()
+
+
+
+
+#####
+nrow(d[ident_TRIAL_1==T &
+         ident_dhis2_control==T &
+         ident_dhis2_booking==T ])
 nrow(d[ident_dhis2_control==F &ident_dhis2_booking==T])
 nrow(d[ident_dhis2_control==F &ident_dhis2_nbc==T])
 
+###Anemia
 
 vars <- names(d)[stringr::str_detect(names(d),"^labhb_[0-9]*")]
-
 d[,labhb_x:=0]
 
 for(i in vars){
-  d[get(i)==1, labhb_x:=labhb_x+1]
+  d[!is.na(get(i))& get(i)>0, labhb_x:=labhb_x + 1]
 }
 
 sum(d[ident_dhis2_control==F]$labhb_x,na.rm=T)
 
 
 
-
+###Ultrasound
 
 vars <- names(d)[stringr::str_detect(names(d),"^usevent_[0-9]*")]
 
@@ -134,13 +186,45 @@ sum(d[ident_dhis2_control==F]$anbpsyst_x,na.rm=T)
 
 
 #diabetes
+vars <- names(d)[stringr::str_detect(names(d),"^labogct_[0-9]*")]
 
+d[,labogct_x:=0]
 
+for(i in vars){
+  d[!is.na(get(i))& get(i)>0, labogct_x:=labogct_x + 1]
+}
 
+sum(d[ident_dhis2_control==F]$labogct_x,na.rm=T)
+
+#Diabetes
+d$labogct_1
+d$labfastbloodglu_1
+d$labbloodglu_1
+
+vars <- c(names(d)[stringr::str_detect(names(d),"^labogct_[0-9]*")],
+          names(d)[stringr::str_detect(names(d),"^labfastbloodglu_[0-9]*")],
+          names(d)[stringr::str_detect(names(d),"^labbloodglu_[0-9]*")])
+
+d[,diabetes_x:=0]
+
+for(i in vars){
+  d[!is.na(get(i))& get(i)>0, diabetes_x:=diabetes_x + 1]
+}
+
+sum(d[ident_dhis2_control==F]$diabetes_x,na.rm=T)
 
 
 
 # urinary tract infections
+vars <- names(d)[stringr::str_detect(names(d),"^laburuti_[0-9]*")]
+
+d[,laburuti_x:=0]
+
+for(i in vars){
+  d[!is.na(get(i))& get(i)>0, laburuti_x:=laburuti_x + 1]
+}
+
+sum(d[ident_dhis2_control==F]$laburuti_x,na.rm=T)
 
 
 
@@ -162,6 +246,9 @@ d <- CleanAllData(includePPC=T,
 d <- d[
   ident_dhis2_ppc==1 &
   ident_dhis2_control==F]
+
+
+
 
 
 #As of 2017, the MCH e Registry contains data on 24,832 registered antenatal care visits, 

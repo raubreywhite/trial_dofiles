@@ -13,7 +13,7 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   d <- d[
     ident_dhis2_ppc==1 &
     ident_dhis2_control==F&
-      bookdate>="2018-01-01"]
+      ppcdate_1>="2018-01-01"]
   
   
   
@@ -125,7 +125,12 @@ Analyse_pniph_abstract_2018_ppc<- function(){
       "agemarriage",
       "agepregnancy",
       "education",
-      "pniph_0000EVERYONE"
+      "pniph_0000EVERYONE",
+      "ppcdaysafterdelivery_1_cat",
+      "ppcdaysafterdelivery_2_cat",
+      "ppcdaysafterdelivery_3_cat",
+      "ppcdaysafterdelivery_4_cat"
+      
   )
   
   #categories for breast problems
@@ -134,7 +139,23 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   unique(d$ppcdaysafterdelivery_1)
   #or we can calculate them because the numbers are off??
   #d$ppcdateofdelivery_1 and d$ppcdate_1
-  #cats: (1-7),(8-15),(16-22),(23-30),(31-37),(38-42)
+  #cats: (0-6),(38-42)
+  
+  # for categiories variables 
+  
+  d[,ppcdaysafterdelivery_1_cat:=cut(ppcdaysafterdelivery_1, breaks=c(-10,-1,6,35,42,9999))]
+  xtabs(~d$ppcdaysafterdelivery_1_cat)
+  
+  
+  d[,ppcdaysafterdelivery_2_cat:=cut(ppcdaysafterdelivery_2, breaks=c(-10,-1,6,35,42,9999))]
+  xtabs(~d$ppcdaysafterdelivery_2_cat)
+  
+  d[,ppcdaysafterdelivery_3_cat:=cut(ppcdaysafterdelivery_3, breaks=c(-10,-1,6,35,42,9999))]
+  xtabs(~d$ppcdaysafterdelivery_3_cat)
+  
+  d[,ppcdaysafterdelivery_4_cat:=cut(ppcdaysafterdelivery_4, breaks=c(-10,-1,6,35,42,9999))]
+  xtabs(~d$ppcdaysafterdelivery_4_cat)
+  
   
   #Want to know these
   vars_ppcbreastinspectionabnormalsecretion	<- names(d)[stringr::str_detect(names(d),"^ppcbreastinspectionabnormalsecretion_")]
