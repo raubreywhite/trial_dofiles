@@ -138,6 +138,12 @@ sink()
 
 
 #####
+
+
+# to save things in notepad and dont forgett to put sink at the bottom
+sink()
+sink(file.path(FOLDER_DATA_RESULTS,
+            "SystemUpdatedNumbers.txt"))
 nrow(d[ident_TRIAL_1==T &
          ident_dhis2_control==T &
          ident_dhis2_booking==T ])
@@ -185,7 +191,7 @@ sum(d[ident_dhis2_control==F]$anbpsyst_x,na.rm=T)
 #xtabs(~d$ident_dhis2_control + d$ident_dhis2_booking)   
 
 
-#diabetes
+#diabetes seperately
 vars <- names(d)[stringr::str_detect(names(d),"^labogct_[0-9]*")]
 
 d[,labogct_x:=0]
@@ -196,11 +202,32 @@ for(i in vars){
 
 sum(d[ident_dhis2_control==F]$labogct_x,na.rm=T)
 
-#Diabetes
-d$labogct_1
-d$labfastbloodglu_1
-d$labbloodglu_1
 
+###RBS
+vars <- names(d)[stringr::str_detect(names(d),"^labbloodglu_[0-9]*")]
+
+d[,labbloodglu_x:=0]
+
+for(i in vars){
+  d[!is.na(get(i))& get(i)>0, labbloodglu_x:=labbloodglu_x + 1]
+}
+
+sum(d[ident_dhis2_control==F]$labbloodglu_x,na.rm=T)
+
+###RBS
+vars <- names(d)[stringr::str_detect(names(d),"^labfastbloodglu_[0-9]*")]
+
+d[,labbloodglu_x:=0]
+
+for(i in vars){
+  d[!is.na(get(i))& get(i)>0, labfastbloodglu_x:=labfastbloodglu_x + 1]
+}
+
+sum(d[ident_dhis2_control==F]$labfastbloodglu_x,na.rm=T)
+
+
+
+#Diabetes(OGCT, FBS,RBS TOTAL)
 vars <- c(names(d)[stringr::str_detect(names(d),"^labogct_[0-9]*")],
           names(d)[stringr::str_detect(names(d),"^labfastbloodglu_[0-9]*")],
           names(d)[stringr::str_detect(names(d),"^labbloodglu_[0-9]*")])
@@ -248,7 +275,7 @@ d <- d[
   ident_dhis2_control==F]
 
 
-
+sink()
 
 
 #As of 2017, the MCH e Registry contains data on 24,832 registered antenatal care visits, 

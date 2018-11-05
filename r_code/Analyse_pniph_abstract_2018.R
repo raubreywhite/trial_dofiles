@@ -115,7 +115,11 @@ Analyse_pniph_abstract_2018_ppc<- function(){
     "pniph_incomecat",
     "pniph_agemarriagecat",
     "pniph_agepregnancycat",
-    "pniph_educationcat"
+    "pniph_educationcat",
+    "ppcdaysafterdelivery_1_cat",
+    "ppcdaysafterdelivery_2_cat",
+    "ppcdaysafterdelivery_3_cat",
+    "ppcdaysafterdelivery_4_cat"
   )
   
   ###fix these for what she wants
@@ -125,12 +129,7 @@ Analyse_pniph_abstract_2018_ppc<- function(){
       "agemarriage",
       "agepregnancy",
       "education",
-      "pniph_0000EVERYONE",
-      "ppcdaysafterdelivery_1_cat",
-      "ppcdaysafterdelivery_2_cat",
-      "ppcdaysafterdelivery_3_cat",
-      "ppcdaysafterdelivery_4_cat"
-      
+      "pniph_0000EVERYONE"
   )
   
   #categories for breast problems
@@ -158,6 +157,7 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   
   
   #Want to know these
+  #$ means that its the end
   vars_ppcbreastinspectionabnormalsecretion	<- names(d)[stringr::str_detect(names(d),"^ppcbreastinspectionabnormalsecretion_")]
   vars_breastinspectionbreastswelling	<- names(d)[stringr::str_detect(names(d),"^breastinspectionbreastswelling_")]
   vars_breastinspectioncrackednipples	<- names(d)[stringr::str_detect(names(d),"^breastinspectioncrackednipples_")]
@@ -165,7 +165,7 @@ Analyse_pniph_abstract_2018_ppc<- function(){
   vars_ppcbreastinspectionredness	<- names(d)[stringr::str_detect(names(d),"^ppcbreastinspectionredness_")]
   vars_ppcbreastinspectiontenderness	<- names(d)[stringr::str_detect(names(d),"^ppcbreastinspectiontenderness_")]
   vars_ppcbreastnoproblems <- names(d)[stringr::str_detect(names(d),"^ppcbreastnoproblems_")]
-  vars_ppcdaysafterdelivery <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
+  vars_ppcdaysafterdelivery <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_[0-9]$")]
   vars_cpoantepartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpoantepartumhemorrhage_")]
   vars_cpoevent <- names(d)[stringr::str_detect(names(d),"^cpoevent_")]
   vars_ppclochiaamount <- names(d)[stringr::str_detect(names(d),"^ppclochiaamount_")]
