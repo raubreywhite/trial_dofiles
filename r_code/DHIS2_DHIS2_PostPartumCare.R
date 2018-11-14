@@ -1,6 +1,6 @@
 
 
-DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp) {
+DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   # if it is a conrol, then throw an error
   if(isControl) stop("control code not written for risk factors")
   
@@ -8,6 +8,10 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp) {
     controlName = "Postpartum care.csv",
     clinicName = "Postpartum care.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   d<- Removeduplicate(d=d,tag="ppc",isControl=isControl)

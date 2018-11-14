@@ -1,4 +1,10 @@
-Analyses <- function(d=NULL){
+GazaAnalyses <- function(d=NULL){
+  if(!exists("d")) d <- LoadDataFileFromNetwork()
+  
+  Analyse_BookingDescriptives(d[ident_dhis2_booking==1])
+}
+
+WBAnalyses <- function(d=NULL){
   if(!exists("d")) d <- LoadDataFileFromNetwork()
   
   IndicatorsPNIPHDashboard(d)

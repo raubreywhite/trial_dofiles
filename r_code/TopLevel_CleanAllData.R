@@ -2,7 +2,8 @@ CleanAllData <- function(
   includePPC=TRUE,
   minBookDate="2001-01-01",
   maxBookDate="2100-01-01",
-  delete=c()
+  delete=c(),
+  IS_GAZA
   ){
   timeStart <- Sys.time()
   
@@ -10,7 +11,8 @@ CleanAllData <- function(
   dhis=suppressWarnings(DHIS2_Master(
     includePPC=includePPC,
     minBookDate=minBookDate,
-    maxBookDate=maxBookDate
+    maxBookDate=maxBookDate,
+    IS_GAZA=IS_GAZA
     ))
   
   if(length(delete)>0){
@@ -22,6 +24,8 @@ CleanAllData <- function(
       print(sprintf("After deleting %s: %s colmns",i,ncol(dhis)))
     }
   }
+  
+  if(IS_GAZA) return(dhis)
 
   keepMotherID <- unique(dhis$motheridno)
   

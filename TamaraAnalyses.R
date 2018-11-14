@@ -144,14 +144,43 @@ sink()
 sink()
 sink(file.path(FOLDER_DATA_RESULTS,
             "SystemUpdatedNumbers.txt"))
-nrow(d[ident_TRIAL_1==T &
-         ident_dhis2_control==T &
-         ident_dhis2_booking==T ])
-nrow(d[ident_dhis2_control==F &ident_dhis2_booking==T])
+
+#cat("\nNumber of women in trial\n")
+#nrow(d[ident_TRIAL_1==T &
+#         ident_dhis2_control==T &
+#         ident_dhis2_booking==T ])
+#nrow(d[ident_dhis2_control==F &ident_dhis2_booking==T])
+
+
+#ANC
+cat("\nNumANC\n")
+nrow(d[ident_dhis2_control==F &ident_dhis2_an==T])
+
+cat("\nNumANCvisits\n")
+vars <- names(d)[stringr::str_detect(names(d),"^anevent_[0-9]*")]
+d[,anevent_x:=0]
+
+for(i in vars){
+  d[!is.na(get(i)), anevent_x:=anevent_x + 1]
+}
+
+sum(d[ident_dhis2_control==F]$anevent_x,na.rm=T)
+
+#NBC
+cat("\nNumNBC\n")
 nrow(d[ident_dhis2_control==F &ident_dhis2_nbc==T])
+cat("\nNumNBCvisits\n")
+vars <- names(d)[stringr::str_detect(names(d),"^nbcevent_[0-9]*")]
+d[,nbcevent_x:=0]
+
+for(i in vars){
+  d[!is.na(get(i)), nbcevent_x:=nbcevent_x + 1]
+}
+
+sum(d[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
 
 ###Anemia
-
+cat("\nNumber of anemia tests on system\n")
 vars <- names(d)[stringr::str_detect(names(d),"^labhb_[0-9]*")]
 d[,labhb_x:=0]
 
@@ -164,9 +193,8 @@ sum(d[ident_dhis2_control==F]$labhb_x,na.rm=T)
 
 
 ###Ultrasound
-
+cat("\nNumber of ultrasound tests on system\n")
 vars <- names(d)[stringr::str_detect(names(d),"^usevent_[0-9]*")]
-
 d[,usevent_x:=0]
 
 for(i in vars){
@@ -176,14 +204,13 @@ for(i in vars){
 sum(d[ident_dhis2_control==F]$usevent_x,na.rm=T)
 
 #HYPERTENTION
+cat("\nNumber of antenatal blood pressure tests on system\n")
 vars <- names(d)[stringr::str_detect(names(d),"^anbpsyst_[0-9]*")]
-
 d[,anbpsyst_x:=0]
 
 for(i in vars){
   d[!is.na(get(i))& get(i)>0, anbpsyst_x:=anbpsyst_x + 1]
 }
-
 sum(d[ident_dhis2_control==F]$anbpsyst_x,na.rm=T)
 
 # 
@@ -192,6 +219,7 @@ sum(d[ident_dhis2_control==F]$anbpsyst_x,na.rm=T)
 
 
 #diabetes seperately
+cat("\nNumber of OGCT on system\n")
 vars <- names(d)[stringr::str_detect(names(d),"^labogct_[0-9]*")]
 
 d[,labogct_x:=0]
@@ -204,8 +232,8 @@ sum(d[ident_dhis2_control==F]$labogct_x,na.rm=T)
 
 
 ###RBS
+cat("\nNumber of RBS tests on system\n")
 vars <- names(d)[stringr::str_detect(names(d),"^labbloodglu_[0-9]*")]
-
 d[,labbloodglu_x:=0]
 
 for(i in vars){
@@ -214,10 +242,11 @@ for(i in vars){
 
 sum(d[ident_dhis2_control==F]$labbloodglu_x,na.rm=T)
 
-###RBS
+###FBS
+cat("\nNumber of FBS tests on system\n")
 vars <- names(d)[stringr::str_detect(names(d),"^labfastbloodglu_[0-9]*")]
 
-d[,labbloodglu_x:=0]
+d[,labfastbloodglu_x:=0]
 
 for(i in vars){
   d[!is.na(get(i))& get(i)>0, labfastbloodglu_x:=labfastbloodglu_x + 1]
@@ -228,6 +257,7 @@ sum(d[ident_dhis2_control==F]$labfastbloodglu_x,na.rm=T)
 
 
 #Diabetes(OGCT, FBS,RBS TOTAL)
+cat("\nNumber of DIABETES ogct, fbs, and rbs tests on system\n")
 vars <- c(names(d)[stringr::str_detect(names(d),"^labogct_[0-9]*")],
           names(d)[stringr::str_detect(names(d),"^labfastbloodglu_[0-9]*")],
           names(d)[stringr::str_detect(names(d),"^labbloodglu_[0-9]*")])
@@ -243,6 +273,7 @@ sum(d[ident_dhis2_control==F]$diabetes_x,na.rm=T)
 
 
 # urinary tract infections
+cat("\nNumber of Urinary tract infections tests on system\n")
 vars <- names(d)[stringr::str_detect(names(d),"^laburuti_[0-9]*")]
 
 d[,laburuti_x:=0]
@@ -253,8 +284,7 @@ for(i in vars){
 
 sum(d[ident_dhis2_control==F]$laburuti_x,na.rm=T)
 
-
-
+sink()
 
 
 
@@ -275,7 +305,7 @@ d <- d[
   ident_dhis2_control==F]
 
 
-sink()
+
 
 
 #As of 2017, the MCH e Registry contains data on 24,832 registered antenatal care visits, 

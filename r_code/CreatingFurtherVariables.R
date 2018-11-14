@@ -126,7 +126,7 @@ CreatingFurtherVariablesMahima <- function(d){
     d[ident_dhis2_dhis2hbo==TRUE & !is.na(get(sprintf("dhis2hbogestagedeliv_%s",i))),
       (sprintf("mahima_hospenteredgestage_%s", i)):=get(sprintf("dhis2hbogestagedeliv_%s", i))]
   }
-  
+
   #Govt
  
   nam <-names(d)[stringr::str_detect(names(d),"^hbogestagedeliv_[0-9]*$")]
@@ -149,11 +149,12 @@ CreatingFurtherVariablesMahima <- function(d){
   #created rounded variable for gestational ages at birth
   d[,mahima_gestageatbirthwk_1_rounded:=floor(mahima_gestageatbirthwk_1)]
   d[,mahima_gestageatbirthwk_1_cats:=cut(mahima_gestageatbirthwk_1,
-                                 breaks=c(-30,0,24.7,37.7,41.7,44,9999),
+                                 breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
                                  include.lowest=T)]
   d[,mahima_hospenteredgestage_1_cats:=cut(mahima_hospenteredgestage_1,
-                                    breaks=c(-30,0,24,37,41,44,9999),
+                                    breaks=c(-30,0,24,32,37,41,44,9999),
                                     include.lowest=T)]
+  
   xtabs(~d$mahima_gestageatbirthwk_1_cats)
   xtabs(~d$mahima_hospenteredgestage_1_cats)
  
@@ -161,6 +162,7 @@ CreatingFurtherVariablesMahima <- function(d){
   # we can just do d[rows that i want, c("gestagecats", "gestageenteredcats")]
   #sum each source alone for each of these two variables
   #then can calculate the prevalence
+
   
   
   # to detect some women with wrong gestational age
@@ -177,10 +179,127 @@ CreatingFurtherVariablesMahima <- function(d){
   #hist(d$mahima_gestageatbirthwk)
   
   
-  #Diabetes indicators
-  xtabs(~d$bookhistgdm,addNA=T)
-  xtabs(~d$ident_dhis2_booking+ d$bookhistgdm,addNA=T)
+  
+  ####SYSTEM GENERATED GESTATIONAL AGES
+  ####USE LAST VISIT UsEDD AND BIRTHDATE FROM HOSPITALS
+  d$abbbabybirthdate_1
+  d$dhis2hbodate_1
+  d$hbodate_1
+  d$expecteddateofdelivery
+  #d$usedd_1
+  #d[ident_TRIAL_1==T,
+  #  c(usedd_1,
+  #    usedd_2)]
+  
+  ###Make the last edd date for each woman
+  ###Use mahimadateofbirthvariable_
+  ####then make a variable for gestational ages 
+  ####for system generated
+  
+  #Making usedd for the last one
+  nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
+  #num <- stringr::str_replace(nam,"usedd_","")
+  d[,lastusedd:=as.character(NA)]
+  for(i in nam ){
+    print(i)
+    #d[ident_us==TRUE & !is.na(usedd_1),
+    # systemgenerated_1:=usedd_1]
+    d[ !is.na(get(i)) &
+        get(i)!="",
+       lastusedd:=get(i)]
+  }
+  unique(d[,c("usedd_1","lastusedd")])
+  d[usedd_1=="2017-07-12" & lastusedd=="2017-06-27", c(nam), with=F] 
+ d[,lastusedd:=as.Date(lastusedd)]
+ 
+ d$lastusedd
+
+#using lastusedd and minus from hbodates 
+#so that we can get actual gA from usedd
+#get the diff btwn the hbodob and usedd
+ #lastuseddminusdob tis is the diff in days between hosp and usedd
+ d[,lastuseddminusdob:=round(as.numeric(
+    difftime(mahima_dateofbirth_1,lastusedd, units="weeks")),digits=1)]
+  d$lastuseddminusdob
+class(d$lastuseddminusdob)
+
+  
+#calculate the gA from diff plus 40(usgestage_expected)   
+d[,usgestage_expected:=40]
+d[,mahima_gA_1_us:=lastuseddminusdob+40]
+unique(d$mahima_gA_1_us)  
+class(d$mahima_gA_1_us)
+ 
+#d[,us_dateofconception_1:=usdate_1-usgestage_1*7]
+#d$us_dateofconception_1
+
+
+
+###Making first usedd if its at <=21 gA variable
+nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
+num <- stringr::str_replace(nam,"usedd_","")
+d[,first_1_21_usedd:=as.character(NA)]
+for(i in num ){
+  print(i)
+  
+  var_usedd <- sprintf("usedd_%s",i)
+  var_usgestage <- sprintf("usgestage_%s",1)
+  
+  d[!is.na(get(var_usedd)) &
+      get(var_usedd) != "" &
+      !is.na(get(var_usgestage)) &
+      get(var_usgestage) > 0 &
+      get(var_usgestage) <= 21 &
+      is.na(first_1_21_usedd),
+    first_1_21_usedd:=get(var_usedd)]
 }
+d$first_1_21_usedd
+sum(!is.na(d$first_1_21_usedd))
+
+#Making gA for first_1_21_usedd
+
+d[,first_1_21_usedd_diffbtwnHBO:=round(as.numeric(
+  difftime(mahima_dateofbirth_1,first_1_21_usedd, units="weeks")),digits=1)]
+
+d[,first_1_21_usedd_gA:=first_1_21_usedd_diffbtwnHBO+40]
+
+d$first_1_21_usedd_gA
+
+
+
+###Make a combination of variables
+#make sure they are the same types and
+#decide the type. make sure the second one is the same as the edd
+
+d[,comboUSandLMPgA:=mahima_gestageatbirthwk_1]
+d[!is.na(first_1_21_usedd_gA),comboUSandLMPgA:=first_1_21_usedd_gA]
+
+
+d[,mahima_gA_1_us_cats:=cut(mahima_gA_1_us,
+                            breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
+                            include.lowest=T)]
+
+d[,first_1_21_usedd_gA_cats:=cut(first_1_21_usedd_gA,
+                                 breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
+                                 include.lowest=T)]
+
+d[,comboUSandLMPgA_cats:=cut(comboUSandLMPgA,
+                             breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
+                             include.lowest=T)]
+
+
+
+
+
+
+}
+
+
+  
+  
+  
+ 
+
 
 
 CreatingFurtherVariablesPNIPH <-function(d){

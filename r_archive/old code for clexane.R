@@ -65,8 +65,9 @@ Analyse_clex_abstract_2018_clex<- function(d){
     names(d)[stringr::str_detect(names(d),"^anchistclex_")],
     names(d)[stringr::str_detect(names(d),"^anmedpres_")]
   )
-  outcome <- "pniph_anchistclex_medpres"
   
+  outcome <- "pniph_anchistclex_medpres"
+ 
   d[,(outcome):=as.logical(NA)]
   # if they respond at all, set them to FALSE
   for(i in vars) d[!is.na(get(i)),(outcome):=FALSE]

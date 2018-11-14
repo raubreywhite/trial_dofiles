@@ -1,16 +1,20 @@
-DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
+DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   FOLDERS <- DHIS2_Folders(isControl = isControl)
   
   d <- Get_DHIS2_Data(
     controlName = "ANC Follow up sheet.csv",
     clinicName = "Antenatal care visit.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   #setnames(d, 2, "uniqueid")
   
   d<- Removeduplicate(d=d,tag="anc",isControl=isControl)
   
-  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl)
+  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl, IS_GAZA=IS_GAZA)
   
   if (isControl) {
     d[,conabortion:=NULL] 
@@ -113,7 +117,10 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp) {
   setnames(d,which(stringr::str_detect(names(d),"^ancfetalpresentationcheckedbypalpation")),"anexampalp")
   setnames(d,which(stringr::str_detect(names(d),"^whichancvisitisthis")),"anvisitweeks")
   setnames(d,which(stringr::str_detect(names(d),"^ancmedicineprescription")),"anmedpres")
-  setnames(d,which(stringr::str_detect(names(d),"^ancgestationalageatvisitweeks")),"angestage")
+  varNum <- which(
+    stringr::str_detect(names(d),"^ancgestationalageatvisitweeks") | 
+    stringr::str_detect(names(d),"^ancgestationaageatvisitweeks"))
+  setnames(d,varNum,"angestage")
   setnames(d,which(stringr::str_detect(names(d),"^anchighriskdesignatedwoman")),"anhighrisk")
   setnames(d,which(stringr::str_detect(names(d),"^ancotheridentifiedconditions")),"anothercond")
   setnames(d,which(stringr::str_detect(names(d),"^anchistoryofchronichypertension")),"anhisthtn")

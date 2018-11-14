@@ -1,4 +1,4 @@
-DHIS2_Remove_If_All_Cols_Empty <- function(d,isControl,continuousNumberLimit=5){
+DHIS2_Remove_If_All_Cols_Empty <- function(d,isControl,continuousNumberLimit=5,IS_GAZA=F){
   if(isControl){
     n <- names(d)
     # identifying the variable after identifcationdocument number
@@ -41,7 +41,11 @@ DHIS2_Remove_If_All_Cols_Empty <- function(d,isControl,continuousNumberLimit=5){
   } else {
     n <- names(d)
     # identifying the variable after identifcationdocument number
-    startPoint <- which(n=="identificationdocumentnumber")+1
+    if(IS_GAZA){
+      startPoint <- which(n=="organisationunit")+1
+    } else {
+      startPoint <- which(n=="identificationdocumentnumber")+1
+    }
     
     # delete numberNotMissing if it exists
     d[,numberNotMissing:=NULL]

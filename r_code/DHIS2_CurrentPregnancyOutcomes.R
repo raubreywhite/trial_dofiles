@@ -1,6 +1,6 @@
 
 
-DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_ident_dhis2_booking) {
+DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_ident_dhis2_booking, IS_GAZA=FALSE) {
   # if it is a conrol, then throw an error
   if(isControl) stop("control code not written for risk factors")
   
@@ -8,6 +8,10 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
     controlName = "Current pregnancy outcome.csv",
     clinicName = "Current pregnancy outcome.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   

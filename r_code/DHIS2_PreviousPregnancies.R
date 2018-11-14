@@ -1,4 +1,4 @@
-DHIS2_PreviousPregnancies <- function(isControl, earlyData, booklmp) {
+DHIS2_PreviousPregnancies <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   
   d <- Get_DHIS2_Data(
     controlName = "Previous pregnancy table.csv",
@@ -6,6 +6,10 @@ DHIS2_PreviousPregnancies <- function(isControl, earlyData, booklmp) {
     isControl=isControl,
     useFreadControl = F,
     useFreadClinic = T)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
 

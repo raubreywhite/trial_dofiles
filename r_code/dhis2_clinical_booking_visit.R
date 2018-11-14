@@ -1,4 +1,7 @@
-DHIS2_BookingVisit <- function(isControl, keepDoubleBookings=FALSE) {
+DHIS2_BookingVisit <- function(isControl,
+                               keepDoubleBookings=FALSE,
+                               IS_GAZA=FALSE
+                               ) {
   FOLDERS <- DHIS2_Folders(isControl = isControl)
 
   if (isControl) {
@@ -126,6 +129,13 @@ DHIS2_BookingVisit <- function(isControl, keepDoubleBookings=FALSE) {
 
   for (i in names(d)) setnames(d, i, ExtractOnlyEnglishLettersAndNumbers(i)[[1]])
 
+  if(IS_GAZA){
+    if(!"identificationdocumentnumber" %in% names(d)){
+      message("no identification document number -- we create one")
+      d[,identificationdocumentnumber:=1:.N]
+    }
+    setnames(d,"ancgestationaageatvisitweeks","ancgestationalageatvisitweeks")
+  }
 
   setnames(d, "event", "bookevent")
   setnames(d, "programstageinstance", "uniqueid")
@@ -319,8 +329,7 @@ DHIS2_BookingVisit <- function(isControl, keepDoubleBookings=FALSE) {
   nrow(d)
 
 
-  data_DHIS2_Demographics <- DHIS2_Demographics(isControl = isControl)
-
+  data_DHIS2_Demographics <- DHIS2_Demographics(isControl = isControl, IS_GAZA=IS_GAZA)
   nrow(d)
   d <- merge(d, data_DHIS2_Demographics, by = c("uniqueid"), all = T)
   nrow(d)
@@ -395,14 +404,16 @@ DHIS2_BookingVisit <- function(isControl, keepDoubleBookings=FALSE) {
   
   ConvertAllFactorsToChar(d)
   
-  toremove <- readxl::read_excel("../data_raw/structural_data/remove_from_dhis2.xlsx")
-  setDT(toremove)
-  
-  warning("make sure this actually works")
-  d <- d[!(
-    bookevent %in% na.omit(toremove$bookevent) |
-      uniqueid %in% na.omit(toremove$uniqueid)
-  )]
+  if(file.exists(file.path(FOLDER_DATA_RAW,"structural_data/remove_from_dhis2.xlsx"))){
+    toremove <- readxl::read_excel(file.path(FOLDER_DATA_RAW,"structural_data/remove_from_dhis2.xlsx"))
+    setDT(toremove)
+    
+    warning("make sure this actually works")
+    d <- d[!(
+      bookevent %in% na.omit(toremove$bookevent) |
+        uniqueid %in% na.omit(toremove$uniqueid)
+    )]
+  }
   
   #### data extractor
   d[,dataextractor:=unlist(ExtractOnlyEnglishLetters(dataextractor))]

@@ -1,4 +1,4 @@
-DHIS2_PregnancyClosingNotes <- function(isControl, earlyData, booklmp) {
+DHIS2_PregnancyClosingNotes <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   # if it is a conrol, then throw an error
   if(isControl) stop("control code not written for risk factors")
   
@@ -6,6 +6,10 @@ DHIS2_PregnancyClosingNotes <- function(isControl, earlyData, booklmp) {
     controlName = "Pregnancy file closing notes.csv",
     clinicName = "Pregnancy file closing notes.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   

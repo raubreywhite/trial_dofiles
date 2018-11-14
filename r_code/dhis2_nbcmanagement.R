@@ -1,10 +1,14 @@
-DHIS2_NBManagement <- function(isControl, earlyData, booklmp) {
+DHIS2_NBManagement <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   if(isControl) stop("control code not written for DHIS2_Management")
   
   d <- Get_DHIS2_Data(
     controlName = "X",
     clinicName = "NBC Managements.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
@@ -33,6 +37,9 @@ DHIS2_NBManagement <- function(isControl, earlyData, booklmp) {
   setnames(d,"organisationunitcode","nbmanorgcode")
   setnames(d,"organisationunit","nbmanorgunit")
   setnames(d,"identificationdocumentnumber","nbmanidnumber")
+  if(IS_GAZA){
+    if(!"managementdetails" %in% names(d)) d[,managementdetails:=""]
+  }
   setnames(d,"managementdetails","nbmandetail")
   setnames(d,"managementtype","nbmantypex")
   setnames(d,"managementperformed","nbmanperf")

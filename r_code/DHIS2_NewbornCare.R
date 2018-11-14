@@ -1,4 +1,4 @@
-DHIS2_NewbornCare <- function(isControl, earlyData, booklmp) {
+DHIS2_NewbornCare <- function(isControl, earlyData, booklmp, IS_GAZA=IS_GAZA) {
   # if it is a conrol, then throw an error
   if(isControl) stop("control code not written for controls")
   
@@ -6,13 +6,17 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp) {
     controlName = "Newborn care.csv",
     clinicName = "Newborn care.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   d<- Removeduplicate(d=d,tag="nnc",isControl=isControl)
   
   ####
   nrow(d)
-  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl)
+  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl,IS_GAZA=IS_GAZA)
   nrow(d)
   
   nrow(d)

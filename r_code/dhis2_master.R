@@ -34,7 +34,8 @@ DHIS2_Master <- function(
   keepDoubleBookings=FALSE,
   includePPC=TRUE,
   minBookDate="2001-01-01",
-  maxBookDate="2100-01-01"
+  maxBookDate="2100-01-01",
+  IS_GAZA=FALSE
   ){
   ####
   # DHIS2 BOOKING
@@ -42,18 +43,20 @@ DHIS2_Master <- function(
   if(keepDoubleBookings){
     data_DHIS2_Booking <-  DHIS2_BookingVisit(isControl=TRUE,keepDoubleBookings=TRUE)
   } else {
-    con <- DHIS2_BookingVisit(isControl=TRUE)
-    int <- DHIS2_BookingVisit(isControl=FALSE)
-    data_DHIS2_Booking <- rbind(
-      con,
-      int)
+    data_DHIS2_Booking <- int <- DHIS2_BookingVisit(isControl=FALSE,IS_GAZA=IS_GAZA)
+    if(!IS_GAZA){
+      con <- DHIS2_BookingVisit(isControl=TRUE)
+      data_DHIS2_Booking <- rbind(
+        con,
+        int)
+    }
   }
   # restrict bookdate
   data_DHIS2_Booking <- data_DHIS2_Booking[bookdate>=minBookDate & bookdate<=maxBookDate]
   
   # here we load in "bookorgname" and give a bunch of indicators
   # i.e. trial 1 indicators
-  sData <- readxl::read_excel("../data_raw/structural_data/bookorgname.xlsx")
+  sData <- readxl::read_excel(file.path(FOLDER_DATA_RAW,"structural_data/bookorgname.xlsx"))
   setDT(sData)
   sData[is.na(NEW_bookorgname),NEW_bookorgname:=bookorgname]
   
@@ -69,9 +72,7 @@ DHIS2_Master <- function(
   unique(data_DHIS2_Booking$bookorgname)
   
   missingNames <- data.table("bookorgname"=unique(data_DHIS2_Booking$bookorgname)[!unique(data_DHIS2_Booking$bookorgname) %in% sData$bookorgname])
-  openxlsx::write.xlsx(missingNames,"../data_raw/structural_data/to_be_processed_bookorgname.xlsx")
-  
-  #
+  openxlsx::write.xlsx(missingNames,file.path(FOLDER_DATA_RAW,"structural_data/to_be_processed_bookorgname.xlsx"))
   
   nrow(data_DHIS2_Booking)
   data_DHIS2_Booking <- merge(data_DHIS2_Booking,sData,by=c("bookorgname"),all.x=T)
@@ -107,63 +108,71 @@ DHIS2_Master <- function(
   ####
   # DHIS2 ANTENATAL
   print("CLEANING DHIS2 ANTENATAL")
-  con <- DHIS2_Antenatal(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
-  int <- DHIS2_Antenatal(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
-  data_DHIS2_Antenatal <- rbind(
-    con,
-    int)
+  data_DHIS2_Antenatal <- int <- DHIS2_Antenatal(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+  if(!IS_GAZA){
+    con <- DHIS2_Antenatal(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
+    data_DHIS2_Antenatal <- rbind(
+      con,
+      int)
+  }
   
   ####
   # DHIS2 LAB
   print("CLEANING DHIS2 LAB")
+  data_DHIS2_Lab <- int <- DHIS2_Lab(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+  if(!IS_GAZA){
   con <- DHIS2_Lab(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
-  int <- DHIS2_Lab(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
-  data_DHIS2_Lab <- rbind(
-    con,
-    int)
+    data_DHIS2_Lab <- rbind(
+      con,
+      int)
+  }
   
   ####
   # DHIS2 ULTRASOUND
   print("CLEANING DHIS2 ULTRASOUND")
-  con <- DHIS2_Ultrasound(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
-  int <- DHIS2_Ultrasound(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
-  data_DHIS2_Ultrasound <- rbind(
-    con,
-    int)
+  data_DHIS2_Ultrasound <- int <- DHIS2_Ultrasound(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+  if(!IS_GAZA){
+    con <- DHIS2_Ultrasound(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
+    data_DHIS2_Ultrasound <- rbind(
+      con,
+      int)
+  }
   
   ####
   # DHIS2 RISK
   print("CLEANING DHIS2 RISK")
-  data_DHIS2_RiskFactors <- DHIS2_RiskFactors(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
+  data_DHIS2_RiskFactors <- DHIS2_RiskFactors(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
   
   ####
   # DHIS2 MANAGEMENTS
   print("CLEANING DHIS2 MANAGEMENT")
-  data_DHIS2_Management <- DHIS2_Management(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
+  data_DHIS2_Management <- DHIS2_Management(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
   
   ####
   # DHIS2 RISK
   print("CLEANING DHIS2 NNCRISK")
-  data_DHIS2_NNCRiskFactors <- DHIS2_NNCRiskFactors(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
+  data_DHIS2_NNCRiskFactors <- DHIS2_NNCRiskFactors(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
   
   ####
   # DHIS2 MANAGEMENTS
   print("CLEANING DHIS2 NBMANAGEMENT")
-  data_DHIS2_NBManagement <- DHIS2_NBManagement(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
+  data_DHIS2_NBManagement <- DHIS2_NBManagement(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
   
   ####
   # PREVIOUS PREGNANCIES
   print("CLEANING DHIS2 PREVIOUS PREGNANCY")
-  con <- DHIS2_PreviousPregnancies(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
-  int <- DHIS2_PreviousPregnancies(isControl=FALSE, earlyData=earlyData, booklmp=booklmp)
-  data_DHIS2_PreviousPregnancies <- rbind(
-    con,
-    int)
+  data_DHIS2_PreviousPregnancies <- int <- DHIS2_PreviousPregnancies(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+  if(!IS_GAZA){
+    con <- DHIS2_PreviousPregnancies(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
+    data_DHIS2_PreviousPregnancies <- rbind(
+      con,
+      int)
+  }
   
   ####
   # HOSPITAL BIRTH OUTCOMES
   print("CLEANING DHIS2 HOSPITAL BIRTH OUTCOMES")
-  data_DHIS2_HospitalBirthOutcomes <- DHIS2_HospitalBirthOutcomes(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
+  if(!IS_GAZA) data_DHIS2_HospitalBirthOutcomes <- DHIS2_HospitalBirthOutcomes(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
   
   ####
   #
@@ -171,19 +180,22 @@ DHIS2_Master <- function(
   data_DHSI2_CurrentPregnancyOutcomes <- DHIS2_CurrentPregnancyOutcomes(isControl=F,
                                                                         earlyData = earlyData,
                                                                         booklmp = booklmp,
-                                                                        data_ident_dhis2_booking = data_ident_dhis2_booking)
+                                                                        data_ident_dhis2_booking = data_ident_dhis2_booking,
+                                                                        IS_GAZA=IS_GAZA)
   ####
   #
   print("CLINICAL CURRENT PREG OUTCOMES")
   data_DHIS2_PregnancyClosingNotes <- DHIS2_PregnancyClosingNotes(isControl=F,
                                                                         earlyData = earlyData,
-                                                                        booklmp = booklmp)
+                                                                        booklmp = booklmp,
+                                                                  IS_GAZA=IS_GAZA)
   ####
   #
   print("POSTPARTUM CARE")
   data_DHIS2_PostPartumCare <- DHIS2_DHIS2_PostPartumCare(isControl=F,
                                                           earlyData = earlyData,
-                                                          booklmp = booklmp)
+                                                          booklmp = booklmp,
+                                                          IS_GAZA=IS_GAZA)
   if(!keepDoubleBookings){
     nrow(data_DHIS2_PostPartumCare)
     data_DHIS2_PostPartumCare <- merge(x=data_DHIS2_PostPartumCare,y=pData,
@@ -203,7 +215,8 @@ DHIS2_Master <- function(
   print("NBC CARE")
   data_DHIS2_NewbornCare <- DHIS2_NewbornCare(isControl=F,
                                                           earlyData = earlyData,
-                                                          booklmp = booklmp)
+                                                          booklmp = booklmp,
+                                              IS_GAZA=IS_GAZA)
   
   
   
@@ -316,18 +329,20 @@ DHIS2_Master <- function(
   nrow(d)
   ncol(d)
   
-  print("RESHAPE TO WIDE AND MERGE DHIS2 HOSPITAL BIRTH OUTCOMES")
-  d <- ReshapeToWideAndMerge(
-    base=d,
-    additional=data_DHIS2_HospitalBirthOutcomes,
-    valueVarsRegex="^dhis2hbo",
-    dcastFormula="uniqueid+bookevent+booknum~eventnum",
-    mergeVars=c("uniqueid","bookevent","booknum"),
-    identName="ident_dhis2_dhis2hbo"
-  )
-  nrow(data_DHIS2_Booking)
-  nrow(d)
-  ncol(d)
+  if(!IS_GAZA){
+    print("RESHAPE TO WIDE AND MERGE DHIS2 HOSPITAL BIRTH OUTCOMES")
+    d <- ReshapeToWideAndMerge(
+      base=d,
+      additional=data_DHIS2_HospitalBirthOutcomes,
+      valueVarsRegex="^dhis2hbo",
+      dcastFormula="uniqueid+bookevent+booknum~eventnum",
+      mergeVars=c("uniqueid","bookevent","booknum"),
+      identName="ident_dhis2_dhis2hbo"
+    )
+    nrow(data_DHIS2_Booking)
+    nrow(d)
+    ncol(d)
+  }
   
   print("RESHAPE TO WIDE AND MERGE data_DHSI2_CurrentPregnancyOutcomes")
   d <- ReshapeToWideAndMerge(

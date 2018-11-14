@@ -16,12 +16,16 @@ Analyse_BookingDescriptives <- function(d=NULL){
   p <- p + geom_label(mapping=aes(label=numWomen), size=1)
   p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
   p
-  ggsave(filename=file.path(
-    FOLDER_DROPBOX_RESULTS,
-    "mahima",
-    "trial_1",
-    "bookings_by_month.png"),
-         plot=p)
+  ggsave(
+    filename=file.path(
+      FOLDER_DROPBOX_RESULTS,
+      "mahima",
+      "trial_1",
+      "bookings_by_month.png"),
+    plot=p, 
+    width = 297, 
+    height = 210, 
+    units = "mm")
   
   # if we use "by=.()" it wont be sorted
   # if we use "keyby=.()" it will be sorted
@@ -309,7 +313,7 @@ Analyse_EnteredVsCalculated <- function(d){
   sink(file.path(FOLDER_DROPBOX_RESULTS,
                                      "mahima",
                                      "trial_1",
-                                     "hospital gA rounded_calculated and entered.txt"))
+                                     "hospital gA calculated and entered(lmp).txt"))
   
   cat("\ncreating a smaller dataset just for this purpose\n")
   analysisDataset <- d[bookyearmonth<="2017-03"&
@@ -333,15 +337,25 @@ Analyse_EnteredVsCalculated <- function(d){
   #xtabs(~d$mahima_hospenteredgestage_1_cats)
   xtabs(~d$mahima_hospenteredgestage_1_cats + d$mahima_gestageatbirthwk_1_cats)
   
+  cat("\nMeancalculatedgestAge\n")
+  mean(analysisDataset$mahima_gestageatbirthwk_1)
   
   cat("\nIQRcalculatedgestage\n")
   quantile(x=analysisDataset$mahima_gestageatbirthwk_1, 
            probs = seq(0, 1, 0.25), 
            na.rm = TRUE)
+  cat("\nMean_mahima_hospenteredgestage_1")
+  mean(analysisDataset$mahima_hospenteredgestage_1)
+  
   cat("\nIQRroundedcalculatedgestage\n")
   quantile(x=analysisDataset$mahima_gestageatbirthwk_1_rounded, 
            probs = seq(0, 1, 0.25), 
            na.rm = TRUE)
+  
+  cat("\nMahima_hospenteredgestage_1\n")
+  mean(analysisDataset$mahima_hospenteredgestage_1, na.rm=T)
+  
+  
   cat("\nIQRenteredgestage\n")
   quantile(x=analysisDataset$mahima_hospenteredgestage_1, 
            probs = seq(0, 1, 0.25), 
@@ -375,7 +389,13 @@ Analyse_EnteredVsCalculated <- function(d){
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE &
              !is.na(mahima_gestageatbirthwk_1) &
-             mahima_hospenteredgestage_1_cats=="(24,37]",
+             mahima_hospenteredgestage_1_cats=="(24,32]",
+           c(mahima_hospenteredgestage_1)])
+  
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_gestageatbirthwk_1) &
+             mahima_hospenteredgestage_1_cats=="(32,37]",
            c(mahima_hospenteredgestage_1)])
   
   
@@ -407,8 +427,15 @@ Analyse_EnteredVsCalculated <- function(d){
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE &
              !is.na(mahima_gestageatbirthwk_1) &
-             mahima_gestageatbirthwk_1_cats=="(24.7,37.7]",
+             mahima_gestageatbirthwk_1_cats=="(24.7,32.7]",
            c(mahima_gestageatbirthwk_1)])
+  
+  xtabs(~d[bookyearmonth<="2017-03" & 
+             ident_TRIAL_1==TRUE &
+             !is.na(mahima_gestageatbirthwk_1) &
+             mahima_gestageatbirthwk_1_cats=="(32.7,37.7]",
+           c(mahima_gestageatbirthwk_1)])
+  
   xtabs(~d[bookyearmonth<="2017-03" & 
              ident_TRIAL_1==TRUE &
              !is.na(mahima_hospenteredgestage_1) &
@@ -469,6 +496,216 @@ Analyse_EnteredVsCalculated <- function(d){
  
   
 sink()
+
+######US edd of last visit for woman###
+sink()
+sink(file.path(FOLDER_DROPBOX_RESULTS,
+               "mahima",
+               "trial_1",
+               "mahima_gA_1_us_LASTvisit and hbo_dob(us).txt"))
+
+
+
+
+cat("\n")
+cat("\nDiffbetweenuseddAndHospdateinWeeks\n")
+mahima_gA_1_us__mean <- mean(d[bookyearmonth<="2017-03" & 
+                                ident_TRIAL_1==TRUE]$mahima_gA_1_us, 
+                                na.rm=TRUE)
+print(mahima_gA_1_us__mean)
+
+analysisDatasetUSgA <- d[bookyearmonth<="2017-03" & 
+    ident_TRIAL_1==TRUE & 
+    !is.na(mahima_hospenteredgestage_1) &
+    !is.na(mahima_gestageatbirthwk_1) &
+    !is.na(mahima_gA_1_us) &
+    !is.na(lastuseddminusdob)&
+    !is.na(mahima_gA_1_us_cats),
+  c("mahima_dateofbirth_1",
+    "lastusedd",
+    "mahima_gA_1_us",
+    "lastuseddminusdob",
+    "mahima_gA_1_us_cats")]
+
+
+cat("\nIQRcalculatedgestage\n")
+quantile(x=analysisDatasetUSgA$mahima_gA_1_us, 
+         probs = seq(0, 1, 0.25), 
+         na.rm = TRUE)
+
+cat("\n mahima_gA_1_us_mean\n")
+mean(d[bookyearmonth<="2017-03" & 
+         ident_TRIAL_1==TRUE]$mahima_gA_1_us, na.rm=TRUE)
+
+cat("\nTRIAL\n")
+xtabs(~analysisDatasetUSgA$mahima_gA_1_us_cats)
+
+cat("\nbelow0US\n")
+xtabs(~analysisDatasetUSgA[
+              mahima_gA_1_us_cats=="[-30,0]",
+              c(mahima_gA_1_us)])
+cat("\nABO\n")
+xtabs(~analysisDatasetUSgA[
+               mahima_gA_1_us_cats=="(0,24.7]",
+              c(mahima_gA_1_us)])
+cat("\nreallyPRE\n")
+xtabs(~analysisDatasetUSgA[
+  mahima_gA_1_us_cats=="(24.7,32.7]",
+  c(mahima_gA_1_us)])
+cat("\nPRE\n")
+xtabs(~analysisDatasetUSgA[
+          mahima_gA_1_us_cats=="(32.7,37.7]",
+           c(mahima_gA_1_us)])
+cat("\nTerm\n")
+xtabs(~analysisDatasetUSgA[
+  mahima_gA_1_us_cats=="(37.7,41.7]",
+  c(mahima_gA_1_us)])
+cat("\nPost\n")
+xtabs(~analysisDatasetUSgA[
+  mahima_gA_1_us_cats=="(41.7,44]",
+  c(mahima_gA_1_us)])
+
+
+cat("\nDenominators for mahima_gA_1_us\n")
+cat("\nDenominators for TRIAL mahima_gA_1_us\n")
+nrow(d[bookyearmonth<="2017-03" & 
+         ident_TRIAL_1==TRUE & 
+         !is.na(mahima_hospenteredgestage_1) &
+         !is.na(mahima_gestageatbirthwk_1) &
+         !is.na(mahima_gA_1_us) &
+         !is.na(lastuseddminusdob)&
+         !is.na(mahima_gA_1_us_cats),
+       c("mahima_dateofbirth_1",
+         "lastusedd",
+         "mahima_gA_1_us",
+         "lastuseddminusdob",
+         "mahima_gA_1_us_cats")])
+
+cat("\nDenominators for ARM A mahima_gA_1_us\n")
+nrow(d[bookyearmonth<="2017-03" & 
+         ident_TRIAL_1==TRUE & 
+         ident_dhis2_control==TRUE &
+         !is.na(mahima_hospenteredgestage_1) &
+         !is.na(mahima_gestageatbirthwk_1) &
+         !is.na(mahima_gA_1_us) &
+         !is.na(lastuseddminusdob)&
+         !is.na(mahima_gA_1_us_cats),
+       c("mahima_dateofbirth_1",
+         "lastusedd",
+         "mahima_gA_1_us",
+         "lastuseddminusdob",
+         "mahima_gA_1_us_cats")])
+
+
+
+cat("\nDenominators for ARM B mahima_gA_1_us\n")
+nrow(d[bookyearmonth<="2017-03" & 
+        ident_TRIAL_1==TRUE & 
+        ident_dhis2_control==TRUE &
+        !is.na(mahima_hospenteredgestage_1) &
+        !is.na(mahima_gestageatbirthwk_1) &
+        !is.na(mahima_gA_1_us) &
+        !is.na(lastuseddminusdob)&
+        !is.na(mahima_gA_1_us_cats),
+      c("mahima_dateofbirth_1",
+        "lastusedd",
+        "mahima_gA_1_us",
+        "lastuseddminusdob",
+        "mahima_gA_1_us_cats")])
+
+
+cat("\nDenominators forlastuseddminusdob\n")
+cat("\nDenominators for TRIAL lastuseddminusdob\n")
+nrow(d[bookyearmonth<="2017-03" & 
+         ident_TRIAL_1==TRUE & 
+         !is.na(mahima_hospenteredgestage_1) &
+         !is.na(mahima_gestageatbirthwk_1) &
+         !is.na(mahima_gA_1_us) &
+         !is.na(lastuseddminusdob),
+          c("mahima_dateofbirth_1",
+            "lastusedd",
+            "mahima_gA_1_us",
+            "lastuseddminusdob")])
+
+cat("\nDenominators for ARM A lastuseddminusdob\n")
+nrow(d[bookyearmonth<="2017-03" & 
+         ident_TRIAL_1==TRUE &
+         ident_dhis2_control==T &
+         !is.na(mahima_hospenteredgestage_1) &
+         !is.na(mahima_gestageatbirthwk_1) &
+         !is.na(mahima_gA_1_us) &
+         !is.na(lastuseddminusdob),
+       c("mahima_dateofbirth_1",
+         "lastusedd",
+         "mahima_gA_1_us",
+         "lastuseddminusdob")])
+
+
+
+cat("\nDenominators for ARM B lastuseddminusdob\n")
+nrow(d[bookyearmonth<="2017-03" & 
+         ident_TRIAL_1==TRUE &
+         ident_dhis2_control==F &
+         !is.na(mahima_hospenteredgestage_1) &
+         !is.na(mahima_gestageatbirthwk_1) &
+         !is.na(mahima_gA_1_us) &
+         !is.na(lastuseddminusdob),
+       c("mahima_dateofbirth_1",
+         "lastusedd",
+         "mahima_gA_1_us",
+         "lastuseddminusdob")])
+
+sink()
+
+
+res <- list()
+
+
+f <- t.test(d[bookyearmonth<="2017-03" & 
+                ident_TRIAL_1==TRUE & 
+                ident_dhis2_control==T &
+                !is.na(mahima_hospenteredgestage_1) &
+                !is.na(mahima_gestageatbirthwk_1) &
+                !is.na(mahima_gA_1_us) &
+                !is.na(lastuseddminusdob)]$mahima_gA_1_us,
+                mu=40, paired=FALSE)
+res[[length(res)+1]] <- data.frame("label"="t.test mahima_gA_1_us",
+                                   "pvalue"=f$p.value)
+
+f <- t.test(d[bookyearmonth<="2017-03" & 
+                ident_TRIAL_1==TRUE & 
+                ident_dhis2_control==F &
+                !is.na(mahima_hospenteredgestage_1) &
+                !is.na(mahima_gestageatbirthwk_1) &
+                !is.na(mahima_gA_1_us) &
+                !is.na(lastuseddminusdob)]$mahima_gA_1_us,
+            mu=40, paired=FALSE)
+res[[length(res)+1]] <- data.frame("label"="t.test intervention mahima_gA_1_us",
+                                   "pvalue"=f$p.value)
+
+
+f <- t.test(d[bookyearmonth<="2017-03" & 
+                ident_TRIAL_1==TRUE & 
+                !is.na(mahima_hospenteredgestage_1) &
+                !is.na(mahima_gestageatbirthwk_1) &
+                !is.na(mahima_gA_1_us) &
+                !is.na(lastuseddminusdob)]$mahima_gA_1_us,
+            mu=40, paired=FALSE)
+res[[length(res)+1]] <- data.frame("label"="t.test TRIAL mahima_gA_1_us",
+                                   "pvalue"=f$p.value)
+
+
+
+
+res <- rbindlist(res)
+
+openxlsx::write.xlsx(res,file.path(FOLDER_DROPBOX_RESULTS,
+                                   "mahima",
+                                   "trial_1",
+                                   "us_gest_ages_statisticaltests.xlsx"))
+
+
+
   
   ###Kappa test for reliability not rounded
   ###Using intraclass correlation here because these are continuous variables

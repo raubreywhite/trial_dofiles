@@ -1,10 +1,14 @@
-DHIS2_NNCRiskFactors <- function(isControl, earlyData, booklmp) {
+DHIS2_NNCRiskFactors <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   if(isControl) stop("control code not written for risk factors")
   
   d <- Get_DHIS2_Data(
     controlName = "x",
     clinicName = "NNC Risks.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   

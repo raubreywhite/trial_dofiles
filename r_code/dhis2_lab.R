@@ -1,16 +1,20 @@
-DHIS2_Lab <- function(isControl, earlyData, booklmp) {
+DHIS2_Lab <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   FOLDERS <- DHIS2_Folders(isControl = isControl)
   
   d <- Get_DHIS2_Data(
     controlName = "Lab results.csv",
     clinicName = "Lab results.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
   d<- Removeduplicate(d=d,tag="lab",isControl=isControl)
   
-  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl)
+  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl, IS_GAZA=IS_GAZA)
   
   # give it a bookevent
   d <- GiveItABookEvent(
@@ -55,7 +59,10 @@ DHIS2_Lab <- function(isControl, earlyData, booklmp) {
   setnames(d,"organisationunitcode","laborgcode")
   setnames(d,"organisationunit","laborgunit")
   setnames(d,"identificationdocumentnumber","labidnumber")
-  setnames(d,"ancgestationalageatvisitweeks","labgestage")
+  varNum <- which(
+    stringr::str_detect(names(d),"^ancgestationalageatvisitweeks") | 
+    stringr::str_detect(names(d),"^ancgestationaageatvisitweeks"))
+  setnames(d,varNum,"labgestage")
   setnames(d,"labwherewerethetestsperformed","labplace")
   setnames(d,"labtestsperformedatotherspecifiedclinic","labplacespec")
   setnames(d,"ancorppcvisit","labanpp")

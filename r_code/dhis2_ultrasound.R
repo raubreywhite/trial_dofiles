@@ -1,8 +1,12 @@
-DHIS2_Ultrasound <- function(isControl, earlyData, booklmp) {
+DHIS2_Ultrasound <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   d <- Get_DHIS2_Data(
     controlName = "Ultrasound.csv",
     clinicName = "Ultrasound results.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
@@ -59,7 +63,10 @@ DHIS2_Ultrasound <- function(isControl, earlyData, booklmp) {
   setnames(d,"organisationunitcode","usorgcode")
   setnames(d,"organisationunit","usorgunit")
   setnames(d,"identificationdocumentnumber","usidnumber")
-  setnames(d,"ancgestationalageatvisitweeks","usgestage")
+  varNum <- which(
+    stringr::str_detect(names(d),"^ancgestationalageatvisitweeks") | 
+      stringr::str_detect(names(d),"^ancgestationaageatvisitweeks"))
+  setnames(d,varNum,"usgestage")
   setnames(d,"usreason","usreason")
   setnames(d,"usperformanceofultrasound","usplace")
   setnames(d,"usperformedelsewhere","usplaceother")

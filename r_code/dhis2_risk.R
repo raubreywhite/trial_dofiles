@@ -1,10 +1,14 @@
-DHIS2_RiskFactors <- function(isControl, earlyData, booklmp) {
+DHIS2_RiskFactors <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   if(isControl) stop("control code not written for risk factors")
   
   d <- Get_DHIS2_Data(
     controlName = "Ultrasound.csv",
     clinicName = "ANCRisks.csv",
     isControl=isControl)
+  if(IS_GAZA){
+    message("no identification document number -- we create one")
+    d[,identificationdocumentnumber:=1:.N]
+  }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
@@ -35,7 +39,10 @@ DHIS2_RiskFactors <- function(isControl, earlyData, booklmp) {
   setnames(d,"identificationdocumentnumber","riskidnumber")
   setnames(d,"ancrisktype","risktype")
   setnames(d,"riskdescription","riskdesx")
-  setnames(d,"ancgestationalageatvisitweeks","riskgestage")
+  varNum <- which(
+    stringr::str_detect(names(d),"^ancgestationalageatvisitweeks") | 
+      stringr::str_detect(names(d),"^ancgestationaageatvisitweeks"))
+  setnames(d,varNum,"riskgestage")
   setnames(d,"createdeventidentifier","riskdesy")
   
   return(d)
