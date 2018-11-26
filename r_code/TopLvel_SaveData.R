@@ -477,11 +477,13 @@ SaveCISMACDataBase<- function(){
   
   #### THESE ARE THE VARIABLES THAT DONT EXIST!!!!!!
   varsDontExist <- varsKeep[!varsKeep %in% names(d)]
+  if(length(varsDontExist)>0){
   message("THESE VARIABLES DONT EXIST IN CISMAC DATABASE")
   for(i in varsDontExist) message(i)
   stop("THESE VARIABLES DONT EXIST IN CISMAC DATABASE")
+  }
   
-  d <-d[ident_TRIAL_1==T,varsKeep,with=T]
+  d <-d[ident_TRIAL_1==T,varsKeep,with=F]
   
   A <-d[ident_dhis2_control==T]
   B <-d[ident_dhis2_control==F]
