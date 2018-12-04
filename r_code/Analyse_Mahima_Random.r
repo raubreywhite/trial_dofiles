@@ -117,12 +117,20 @@ ggsave(filename=file.path(
   ######## 
 
 ####Denominators
+#tringr::str_subset(names(d),"expecte")
 
 d[,bookyearmonth:=sprintf("%s-%s",lubridate::year(bookdate),formatC(lubridate::month(bookdate),width=2,flag="0"))]
 
 res <- d[,.(
   total=.N,
   mahimasClinics=sum(ident_TRIAL_1,na.rm=T),
+  missing_ident_expected_delivered=sum(ident_TRIAL_1==T &
+                                        (ident_expected_delivered==F|
+                                           is.na(ident_expected_delivered))),
+                                       
+  mahimasClinicsAndExpctdtoHaveDeliv=sum(ident_dhis2_booking==1 &
+                                           ident_TRIAL_1 & 
+                                           ident_expected_delivered, na.rm=T),
   trialArmA=sum(ident_TRIAL_1==T &ident_dhis2_control==T, na.rm=T),
   trialArmB=sum(ident_TRIAL_1==T &ident_dhis2_control==F, na.rm=T),
   is_Avicenna_abb_amd=sum(
@@ -148,7 +156,38 @@ res <- d[,.(
     ident_TRIAL_1==T & 
       ident_dhis2_control==F &
       ident_avic_abb==T & 
-      ident_avic_amd==T, na.rm=T)
+      ident_avic_amd==T, na.rm=T),
+  
+  is_paperhbo_A=sum(
+    ident_TRIAL_1==T & 
+      ident_dhis2_control==T &
+      ident_paperhbo, na.rm=T),
+  
+  is_paperhbo_B=sum(
+    ident_TRIAL_1==T & 
+      ident_dhis2_control==F &
+      ident_paperhbo==T, na.rm=T),
+  
+  is_privateonsystem_A=sum(
+    ident_TRIAL_1==T & 
+      ident_dhis2_control==F &
+      ident_dhis2_dhis2hbo==T, na.rm=T),
+  
+  is_privateonsystem__B=sum(
+    ident_TRIAL_1==T & 
+      ident_dhis2_control==T &
+      ident_dhis2_dhis2hbo==T, na.rm=T),
+  
+  is_govtonsystem_A=sum(
+    ident_TRIAL_1==T & 
+      ident_dhis2_control==T &
+      ident_hbo==T, na.rm=T),
+  
+  is_govtonsystem_B=sum(
+    ident_TRIAL_1==T & 
+      ident_dhis2_control==F &
+      ident_hbo==F, na.rm=T)
+  
   
   
   ),by=.(
@@ -161,6 +200,7 @@ print(res)
 res[,propAvicenna:=is_Avicenna_abb_amd/mahimasClinics]
 res[,propAvicennaA:=is_Avicenna_abb_amd_A/trialArmA]
 res[,propAvicennaB:=is_Avicenna_abb_amd_B/trialArmB]
+
 
 res[,monthlyAviccenaPvalue:=
       ChiSqTestForMonthlyAvicennaMatching(
@@ -198,7 +238,7 @@ res[,totalAviccenaPvalue:=overallPvalue]
 openxlsx::write.xlsx(res, file.path(FOLDER_DROPBOX_RESULTS,
                                     "mahima",
                                     "random",
-                                    "DENOMINATORS.xlsx"))
+                                    "DENOMINATORS_r.xlsx"))
 
 }
 

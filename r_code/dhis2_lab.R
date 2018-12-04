@@ -14,8 +14,6 @@ DHIS2_Lab <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   
   d<- Removeduplicate(d=d,tag="lab",isControl=isControl)
   
-  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl, IS_GAZA=IS_GAZA)
-  
   # give it a bookevent
   d <- GiveItABookEvent(
     d=d,

@@ -68,6 +68,9 @@ DHIS2_Master <- function(
   pData <- sData[,c("bookorgname","bookorgdistrict")]
   setnames(pData,c("ppcorgname","ppcorgdistrict"))
   
+  nData <- sData[,c("bookorgname","bookorgdistrict")]
+  setnames(nData,c("nbcorgname","nbcorgdistrict"))
+  
   # identify new bookorgnames!!
   unique(data_DHIS2_Booking$bookorgname)
   
@@ -217,6 +220,11 @@ DHIS2_Master <- function(
                                                           earlyData = earlyData,
                                                           booklmp = booklmp,
                                               IS_GAZA=IS_GAZA)
+  if(!keepDoubleBookings & IS_GAZA==FALSE){
+    nrow(data_DHIS2_NewbornCare)
+    data_DHIS2_NewbornCare <- merge(x=data_DHIS2_NewbornCare,y=nData,
+                                       by="nbcorgname",all.x=T)
+  }
   
   
   
@@ -403,7 +411,7 @@ DHIS2_Master <- function(
   d[,calc_expected_due_delivery:=booklmp+280]
   d[is.na(calc_expected_due_delivery),
     calc_expected_due_delivery:=usdate_1-usgestage_1*7+280]
-  d[,isExpectedToHaveDelivered:=ifelse(calc_expected_due_delivery+14<as.Date(sprintf("%s-%s-01",MAX_YEAR,MAX_MONTH)),TRUE,FALSE)]
+  d[,isExpectedToHaveDelivered:=expecteddateofdelivery < min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)]
   xtabs(~d$isExpectedToHaveDelivered)
   
   setnames(d,"demoidnumber","motheridno")
@@ -434,6 +442,22 @@ DHIS2_Master <- function(
   if(!includePPC){
     d <- d[ident_dhis2_booking==1]
   }
+  
+  if(!keepDoubleBookings){
+    #duplication problems///remove duplicated demographic sheets which deosent have booking or ppc or nbc
+    
+    duplicated_demographic_cases <- d[ident_dhis2_demo==1 & ident_dhis2_booking==0
+        & is.na(ident_dhis2_ppc)& is.na(ident_dhis2_nbc)]
+    
+    
+    openxlsx::write.xlsx(duplicated_demographic_cases,file.path( FOLDER_DATA_RESULTS,
+                                       "duplicated demographic cases.xlsx"))
+    
+    
+    d <- d[!(ident_dhis2_demo==1 & ident_dhis2_booking==0
+               & is.na(ident_dhis2_ppc)& is.na(ident_dhis2_nbc))]
+  }
+ 
   
   return(d)
 }

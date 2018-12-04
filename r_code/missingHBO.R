@@ -9,7 +9,8 @@ MissingHBOInternal <- function(d){
       ident_TRIAL_1==TRUE &
       is.na(d$ident_avic_any) &
       is.na(d$ident_dhis2_dhis2hbo) &
-      is.na(d$ident_hbo),
+      is.na(d$ident_hbo) &
+      is.na(d$ident_paperhbo),
     c("bookevent",
       "motheridno",
       "bookorgdistrict",
@@ -114,17 +115,24 @@ MissingHBO <- function(){
     }
   }
   
-  setorder(womenNew,bookyearmonth)
-  if(nrow(womenNew)>0) openxlsx::write.xlsx(womenNew,
-                                            file.path(FOLDER_DATA_MBO,"new",sprintf("%s.xlsx",yearmonth)))
+  if(nrow(womenNew)>0){
+    setorder(womenNew,bookyearmonth)
+    openxlsx::write.xlsx(womenNew,
+                       file.path(FOLDER_DATA_MBO,
+                                 "new",
+                                 sprintf("%s.xlsx",yearmonth)))
+    
+  }
+ 
+  
   setorder(abortionsOld,ident_TRIAL_1_clinics,bookyearmonth)
   openxlsx::write.xlsx(abortionsOld,
                        file.path(FOLDER_DATA_MBO,"abortions_old.xlsx"))
-  
-  setorder(abortionsNew,ident_TRIAL_1_clinics,bookyearmonth)
-  openxlsx::write.xlsx(abortionsNew,
+  if(nrow(abortionsNew)>0){
+    setorder(abortionsNew,ident_TRIAL_1_clinics,bookyearmonth)
+    openxlsx::write.xlsx(abortionsNew,
                        file.path(FOLDER_DATA_MBO,"abortions_new.xlsx"))
-
+  }
   
 }
 

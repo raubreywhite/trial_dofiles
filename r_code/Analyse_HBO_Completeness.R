@@ -18,6 +18,7 @@ Analyse_HBO_Completeness <-function(d){
     tokeep[matching=="Avicenna",merged_namehospbirth:=abbname_1]
     tokeep[matching=="Governmental",merged_namehospbirth:=hboorganisationunitname_1]
     tokeep[matching=="Private",merged_namehospbirth:=dhis2hboconnamehospbirth_1]
+    tokeep[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery]
     
     # denominator (number sent)
     
@@ -26,6 +27,7 @@ Analyse_HBO_Completeness <-function(d){
     tokeep[matching=="Avicenna",merged_pregoutcome:=abbbabybirthresult_1]
     tokeep[matching=="Governmental",merged_pregoutcome:=hboprevpregoutcome_1]
     tokeep[matching=="Private",merged_pregoutcome:=dhis2hbopregoutcome_1]
+    tokeep[matching=="PaperHBO",merged_pregoutcome:=paperhbo_outcome]
     xtabs(~tokeep$merged_pregoutcome+tokeep$matching)
     
     # abortion
@@ -38,18 +40,21 @@ Analyse_HBO_Completeness <-function(d){
     tokeep[matching=="Avicenna",merged_gestagedeliv:=as.numeric(stringr::str_extract(abbbabypregnancynoofweeks_1,"^[0-9][0-9]"))]
     tokeep[matching=="Governmental",merged_gestagedeliv:=hbogestagedeliv_1]
     tokeep[matching=="Private",merged_gestagedeliv:=dhis2hbogestagedeliv_1]
+    tokeep[matching=="PaperHBO",merged_gestagedeliv:=paperhbo_gestationalageatbirthweeks]
     
     # weight
     # - dhis2hbopregbweight_1
     tokeep[matching=="Avicenna",merged_pregbweight:=as.numeric(abbbabyweight_1)]
     tokeep[matching=="Governmental",merged_pregbweight:=hboprevpregbweight_1]
     tokeep[matching=="Private",merged_pregbweight:=dhis2hbopregbweight_1]
+    tokeep[matching=="PaperHBO",merged_pregbweight:=paperhbo_weightgrams]
     
     # date of delivery
     # - dhis2hbodateofdeliveryhospital_1
     tokeep[matching=="Avicenna",merged_datedeliv:=abbbabybirthdate_1]
     tokeep[matching=="Governmental",merged_datedeliv:=as.character(hbodateofdeliveryhospital_1)]
     tokeep[matching=="Private",merged_datedeliv:=dhis2hbodateofdeliveryhospital_1]
+    tokeep[matching=="PaperHBO",merged_datedeliv:=paperhbo_birthdate]
     xtabs(~tokeep$matching+tokeep$merged_datedeliv)
     
     # hemo
@@ -57,6 +62,7 @@ Analyse_HBO_Completeness <-function(d){
     tokeep[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
     tokeep[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
     tokeep[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
+    tokeep[matching=="PaperHBO",merged_birthhemo:=paperhbo_hbgatadmissiontohospital]
     
     # blood p
     # - dhis2hbosystbp_1
@@ -71,12 +77,14 @@ Analyse_HBO_Completeness <-function(d){
     tokeep[matching=="Avicenna",merged_modedeliv:=abbbabybirthtype_1]
     tokeep[matching=="Governmental",merged_modedeliv:=hbomodeprevdeliv_1]
     tokeep[matching=="Private",merged_modedeliv:=dhis2hbomodedeliv_1]
+    tokeep[matching=="PaperHBO",merged_modedeliv:=paperhbo_modeofdelivery]
     
     # presentation at deliv
     # - dhis2hbousfetalpresentation_1
     tokeep[matching=="Avicenna",merged_presentationdeliv:=abbbabybirthtype_1]
     tokeep[matching=="Governmental",merged_presentationdeliv:=hbousfetalpresentation_1]
     tokeep[matching=="Private",merged_presentationdeliv:=dhis2hbousfetalpresentation_1]
+    tokeep[matching=="PaperHBO",merged_presentationdeliv:=paperhbo_presentationatdelivery]
     
     # indic for csection
     # - dhis2hboindicforcsec_1
@@ -84,6 +92,16 @@ Analyse_HBO_Completeness <-function(d){
     tokeep[matching=="Avicenna",merged_indic_csection:=abbbabybirthtype_1]
     tokeep[matching=="Governmental",merged_indic_csection:=hboindiccsectioninanycol_1]
     tokeep[matching=="Private",merged_indic_csection:=dhis2hboindicforcsec_1]
+    tokeep[matching=="PaperHBO",merged_indic_csection:=paperhbo_indicationforcesarian]
+    
+    missing <- tokeep[matching=="Not",c("motheridno","bookevent","bookyearmonth")]
+    setorder(missing,bookyearmonth)
+    
+    openxlsx::write.xlsx(x=missing,file=file.path(
+      FOLDER_DATA_RESULTS,
+      "hbo_completeness",
+      sprintf("%s_HBO_Completeness_NOT_MATCHING.xlsx",DATA_DATE)))
+    
     
     results <- tokeep[,.(
       denominator=.N,
@@ -97,7 +115,10 @@ Analyse_HBO_Completeness <-function(d){
       merged_modedeliv_notmiss=sum(!is.na(merged_modedeliv)),
       merged_presentationdeliv_notmiss=sum(!is.na(merged_presentationdeliv)),
       merged_indic_csection_notmiss=sum(!is.na(merged_indic_csection))
-    ),by=.(bookyearmonth,matching)]
+      
+    ),by=.(bookyearmonth,
+           ident_dhis2_control,
+           matching)]
     
     setorder(results,bookyearmonth,matching)
     
@@ -111,7 +132,7 @@ Analyse_HBO_Completeness <-function(d){
       "hbo_completeness",
       sprintf("%s_HBO_Completeness.xlsx",DATA_DATE)))
     
-    # unmatched govt hospital cases from hbo sheet
+# unmatched govt hospital cases from hbo sheet
     
      #makes a HBO with women who had a missing id
     h <-HBO_Master(deleteMissingMotherIDNO = FALSE)
@@ -132,6 +153,9 @@ Analyse_HBO_Completeness <-function(d){
       FOLDER_DATA_RESULTS,
       "hbo_completeness",
       sprintf("%s_HBO_Completeness_unmatched_cases.xlsx",DATA_DATE)))
+    
+    
+ 
     
     
 }

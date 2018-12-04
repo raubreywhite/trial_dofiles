@@ -12,11 +12,14 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp, IS_GAZA=IS_GAZA) {
   }
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
-  d<- Removeduplicate(d=d,tag="nnc",isControl=isControl)
+  d<- Removeduplicate(d=d,tag="nbc",isControl=isControl)
   
   ####
   nrow(d)
-  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl,IS_GAZA=IS_GAZA)
+  d <- Removeduplicate(d=d,
+                       tag="nbc",
+                       isControl=isControl,
+                       oneObsPerWomanDate=F)
   nrow(d)
   
   nrow(d)

@@ -136,6 +136,22 @@ LoadDataFileFromNetwork <- function(){
   return(d)
 }
 
+LoadDataFileFromNetworkGaza <- function(){
+  print("RELOADING GAZA DATASET FROM NETWORK DRIVE")
+  d <- readRDS(file.path(FOLDER_DATA_CLEAN_GAZA,"full_data_from_r.rds"))
+  print("FINISHED RELOADING DATASET FROM NETWORK DRIVE")
+  
+  return(d)
+}
+
+LoadDataFileFromNetworkWB <- function(){
+  print("RELOADING WB DATASET FROM NETWORK DRIVE")
+  d <- readRDS(file.path(FOLDER_DATA_CLEAN_WB,"full_data_from_r.rds"))
+  print("FINISHED RELOADING DATASET FROM NETWORK DRIVE")
+  
+  return(d)
+}
+
 LoadAnonDataFileFromNetwork<- function(){
   print("RELOADING ANON DATASET FROM NETWORK DRIVE")
   d <- readRDS(file.path(FOLDER_DATA_CLEAN,"oslo_anon_data_from_r.rds"))

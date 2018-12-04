@@ -12,9 +12,9 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   d[,eventdate:=as.Date(eventdate)]
   #setnames(d, 2, "uniqueid")
   
+  nrow(d)
   d<- Removeduplicate(d=d,tag="anc",isControl=isControl)
-  
-  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl, IS_GAZA=IS_GAZA)
+  nrow(d)
   
   if (isControl) {
     d[,conabortion:=NULL] 

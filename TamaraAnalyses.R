@@ -139,7 +139,8 @@ sink()
 
 #####
 
-
+#Buthaina's staff
+#you should run this from sink to sink
 # to save things in notepad and dont forgett to put sink at the bottom
 sink()
 sink(file.path(FOLDER_DATA_RESULTS,
@@ -157,18 +158,23 @@ cat("\nNumANC\n")
 nrow(d[ident_dhis2_control==F &ident_dhis2_an==T])
 
 cat("\nNumANCvisits\n")
-vars <- names(d)[stringr::str_detect(names(d),"^anevent_[0-9]*")]
+vars <- c(
+  "bookevent",
+  names(d)[stringr::str_detect(names(d),"^anevent_[0-9]*")]
+)
 d[,anevent_x:=0]
 
 for(i in vars){
   d[!is.na(get(i)), anevent_x:=anevent_x + 1]
 }
 
-sum(d[ident_dhis2_control==F]$anevent_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
+        bookdate<="2017-12-31"]$anevent_x,na.rm=T)
 
 #NBC
 cat("\nNumNBC\n")
-nrow(d[ident_dhis2_control==F &ident_dhis2_nbc==T])
+nrow(d[ident_dhis2_control==F &ident_dhis2_nbc==T& bookdate>="2017-01-01"&
+         bookdate<="2017-12-31"])
 cat("\nNumNBCvisits\n")
 vars <- names(d)[stringr::str_detect(names(d),"^nbcevent_[0-9]*")]
 d[,nbcevent_x:=0]
@@ -177,7 +183,8 @@ for(i in vars){
   d[!is.na(get(i)), nbcevent_x:=nbcevent_x + 1]
 }
 
-sum(d[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
+        bookdate<="2017-12-31"]$nbcevent_x,na.rm=T)
 
 ###Anemia
 cat("\nNumber of anemia tests on system\n")
@@ -188,7 +195,8 @@ for(i in vars){
   d[!is.na(get(i))& get(i)>0, labhb_x:=labhb_x + 1]
 }
 
-sum(d[ident_dhis2_control==F]$labhb_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
+        bookdate<="2017-12-31"]$labhb_x,na.rm=T)
 
 
 
@@ -201,7 +209,8 @@ for(i in vars){
   d[!is.na(get(i)), usevent_x:=usevent_x + 1]
 }
 
-sum(d[ident_dhis2_control==F]$usevent_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
+        bookdate<="2017-12-31"]$usevent_x,na.rm=T)
 
 #HYPERTENTION
 cat("\nNumber of antenatal blood pressure tests on system\n")
@@ -211,7 +220,8 @@ d[,anbpsyst_x:=0]
 for(i in vars){
   d[!is.na(get(i))& get(i)>0, anbpsyst_x:=anbpsyst_x + 1]
 }
-sum(d[ident_dhis2_control==F]$anbpsyst_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
+        bookdate<="2017-12-31"]$anbpsyst_x,na.rm=T)
 
 # 
 
@@ -240,7 +250,8 @@ for(i in vars){
   d[!is.na(get(i))& get(i)>0, labbloodglu_x:=labbloodglu_x + 1]
 }
 
-sum(d[ident_dhis2_control==F]$labbloodglu_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
+        bookdate<="2017-12-31"]$labbloodglu_x,na.rm=T)
 
 ###FBS
 cat("\nNumber of FBS tests on system\n")
@@ -282,34 +293,35 @@ for(i in vars){
   d[!is.na(get(i))& get(i)>0, laburuti_x:=laburuti_x + 1]
 }
 
-sum(d[ident_dhis2_control==F]$laburuti_x,na.rm=T)
-
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
+        bookdate<="2017-12-31"]$laburuti_x,na.rm=T)
+#we can trust in sink
 sink()
 
 
 
 #PPC
-d <- CleanAllData(includePPC=T,
-                  minBookDate="2017-01-01",
-                  maxBookDate="2018-09-27",
-                  delete=c("^lab",
-                           "^us",
-                           "^man",
-                           "^risk",
-                           "^an",
-                           "^book"
-                            ))
+#d <- CleanAllData(includePPC=T,
+                #  minBookDate="2017-01-01",
+                 # maxBookDate="2017-09-27",
+                  #delete=c("^lab",
+# "^us",
+#  "^man",
+#  "^risk",
+#  "^an",
+#  "^book"
+#   ))
 
-d <- d[
-  ident_dhis2_ppc==1 &
-  ident_dhis2_control==F]
+#d <- d[
+# ident_dhis2_ppc==1 &
+ # ident_dhis2_control==F]
 
 
 
 
 
 #As of 2017, the MCH e Registry contains data on 24,832 registered antenatal care visits, 
-#18,374 postpartum care visits and 16,409 newborn care visits. From antenatal care, 
+#26640 postpartum care visits and 16,409 newborn care visits. From antenatal care, 
 #data on core process indicators is available on screening of anemia        hypertension,
 #diabetes                and urinary tract infections.
 

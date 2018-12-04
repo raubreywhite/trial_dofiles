@@ -16,7 +16,12 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   setnames(d, 2, "uniqueid")
   
   ####
-  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl)
+  nrow(d)
+  d <- Removeduplicate(d=d,
+                       tag="cpo",
+                       isControl=isControl,
+                       oneObsPerWomanDate=F)
+  nrow(d)
   
   nrow(d)
   d <- RemoveEventByFile(d=d, filename="remove_from_dhis2_cpo.xlsx")

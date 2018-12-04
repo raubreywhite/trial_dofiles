@@ -10,11 +10,10 @@ WBAnalyses <- function(d=NULL){
   IndicatorsPNIPHDashboard(d)
   
   Analyse_HBO_Completeness(d[ident_dhis2_booking==1])
-  #Analyse_DataQuality(d)
+  Analyse_DataQuality(d)
   
   Analyse_Mahima_Random(d)
   Analyse_Mahima_Trial_1(d)
   
-  Analyse_pniph_abstract_2018(d)
   #Analyse_Medical_History_Trial_1(d)
 }

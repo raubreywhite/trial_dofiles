@@ -1,6 +1,6 @@
 
 
-Removeduplicate <- function(d,tag,isControl){
+Removeduplicate <- function(d,tag,isControl,oneObsPerWomanDate=TRUE){
   if(tag=="demobook"){
     d[,eventdate:=bookdate]
   }
@@ -56,14 +56,15 @@ Removeduplicate <- function(d,tag,isControl){
   
   xtabs(~d$isDuplicate)
   
-  #now we are trying to see if there are still any duplicates
-  #if there are still duplicates, take the first one
-  
-  #1:.N THAT MEANS 1 UNTIL THE TOTAL NUMBER OF ROWS THAT WE HAVE FOR EVERY WOMAN-DATE
-  d[isDuplicate==F,rownum:=1:.N, by=.(uniqueid,eventdate)] 
-  
-  d[isDuplicate==F & rownum>1,isDuplicate:=T]
-  
+  if(oneObsPerWomanDate){
+    #now we are trying to see if there are still any duplicates
+    #if there are still duplicates, take the first one
+    
+    #1:.N THAT MEANS 1 UNTIL THE TOTAL NUMBER OF ROWS THAT WE HAVE FOR EVERY WOMAN-DATE
+    d[isDuplicate==F,rownum:=1:.N, by=.(uniqueid,eventdate)] 
+    
+    d[isDuplicate==F & rownum>1,isDuplicate:=T]
+  }
   xtabs(~d$isDuplicate)
   
   

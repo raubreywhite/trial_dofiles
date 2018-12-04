@@ -103,63 +103,20 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
   d[is.na(demoidnumber), demoidnumber:=c(1:.N)]
   d[,demoorgname:=ExtractOnlyEnglishLetters(stringr::str_to_lower(demoorgname))]
   
-  #fwrite(d,"C:/Users/Mervett_Isbeih/Desktop/test.txt")
-  if(FALSE){
-    # adding in a variable for mahima's clniical trial 1
-    mahima <- data.table(readxl::read_excel(file.path(
-      "data_raw","structural_data","isMahimaClinicsTrial1.xlsx"
-    )))
-    
-    d[,isMahimaClinicsTrial1:=FALSE]
-    d[demoorgunit %in% mahima$demoorgunit,isMahimaClinicsTrial1:=TRUE]
-    
-    # fixing bookorgnames
-    bookorgnames <- readxl::read_excel(file.path(
-      "data_raw","structural_data","bad_to_good_bookorgname.xlsx"
-    ))
-    setnames(bookorgnames,"badbookorgname","demoorgname")
-    bookorgnames[,X__1:=NULL]
-    
-    # joinby demorgname using "bookorgnames", unm(b)
-    dim(d)
-    d <- merge(d,bookorgnames,by="demoorgname",all.x=T)
-    dim(d)
-    
-    # overwriting demorgname with goodbookorgname if it exists
-    d[!is.na(goodbookorgname),demoorgname:=goodbookorgname]
-    # delete goodbookorgname
-    d[,goodbookorgname:=NULL]
-    
-    # fixing id numbers to be aviccena ("the truth")
-    aviccena_id_numbers <- data.table(readxl::read_excel(file.path(
-      "data_raw","structural_data","pretrial_export_to_aviccena_id_numbers.xlsx"
-    )))
-    aviccena_id_numbers <- aviccena_id_numbers[!is.na(aviccena) & !is.na(export),
-                                               c("aviccena","export")]
-    aviccena_id_numbers[,aviccena:=bit64::as.integer64(aviccena)]
-    aviccena_id_numbers[,export:=bit64::as.integer64(export)]
-    
-    # only 43 of these excel numbers match in the data
-    sum(aviccena_id_numbers$export %in% d$demoidnumber,na.rm=T)
-    # these are the ones that dont match
-    aviccena_id_numbers$export[!aviccena_id_numbers$export %in% d$demoidnumber]
-    
-    # these are the ones that dont match
-    fwrite(aviccena_id_numbers[!export %in% d$demoidnumber],"data_debugging/id_numbers_not_matching.csv")
-    
-    setnames(aviccena_id_numbers,"export","demoidnumber")
-    
-    dim(d)
-    d <- merge(d,aviccena_id_numbers,by="demoidnumber",all.x=T)
-    dim(d)
-    
-    # overwriting demoidnumber with aviccena if it exists
-    d[!is.na(aviccena),demoidnumber:=aviccena]
-    # delete aviccena variable/column (because the information has already
-    # been copied over to demoidnumber
-    d[,aviccena:=NULL]
-  }
+  d[,ident_dhis2_demo:=1]
+  
   
   ConvertAllFactorsToChar(d)
+  
+ d[,datecreated:=stringr::str_sub(datecreated,1,10)]
+ d[, c( "uniqueid","datecreated")]
+ unique( d[, c( "demoidnumber","datecreated")])
+
+ #d[,rownum:=1:.N,by=.(demoidnumber,datecreated)]
+ #xtabs(~d$rownum)
+ 
+ #d[rownum==1,]
+ #d[rownum>1,]
+ 
   return(d)
 }

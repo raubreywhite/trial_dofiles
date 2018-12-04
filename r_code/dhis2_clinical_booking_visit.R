@@ -336,7 +336,7 @@ DHIS2_BookingVisit <- function(isControl,
   
   # if control and dont have booking, then delete
   if(isControl){
-    d <- d[!is.na(bookorgname)]
+    d <- d[!is.na(bookevent)]
   } else {
     #if intervention and dont have booking, then bookorgname="ppconly"
     d[is.na(bookorgname),bookorgname:="ppconly"]

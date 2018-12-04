@@ -8,10 +8,12 @@ DHIS2_HospitalBirthOutcomes <- function(isControl, earlyData, booklmp) {
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
-  d <- DHIS2_Remove_If_All_Cols_Empty(
-    d=d,
-    isControl=isControl,
-    continuousNumberLimit=0)
+  nrow(d)
+  d <- Removeduplicate(d=d,
+                      tag="dhis2hbo",
+                      isControl=isControl,
+                      oneObsPerWomanDate=F)
+  nrow(d)
  
   setnames(d,"nncgestationalageatdelivery","gestagedeliv")
   setnames(d,"ancpreviouspregnancyoutcome","pregoutcome")

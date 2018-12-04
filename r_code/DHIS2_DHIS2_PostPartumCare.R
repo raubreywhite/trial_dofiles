@@ -16,11 +16,6 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp, IS_GAZA=FA
   setnames(d, 2, "uniqueid")
   d<- Removeduplicate(d=d,tag="ppc",isControl=isControl)
   
-  ####
-  nrow(d)
-  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl)
-  nrow(d)
-  
   nrow(d)
   d <- RemoveEventByFile(d=d, filename="remove_from_dhis2_ppc.xlsx")
   nrow(d)

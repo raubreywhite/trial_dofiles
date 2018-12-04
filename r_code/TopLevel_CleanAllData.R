@@ -55,6 +55,15 @@ CleanAllData <- function(
     avicenna=HBO_Master())
   nrow(d)
   
+  # MERGE DATAFILE WITH PAPERHBO
+  paperhbo_search_for_bookevent(d)
+  
+  nrow(d)
+  d <- merge(d,paperhbo(
+    src="bookeventsfound",
+    tagWithPaperHBO=TRUE),by="bookevent",all.x=T)
+  nrow(d)
+  
   print("****0")
   
   # this variable says where the baby info gets matched from
@@ -62,7 +71,9 @@ CleanAllData <- function(
   if("ident_avic_any" %in% names(d)) d[ident_avic_any==TRUE & is.na(matching),matching:="Avicenna"]
   if("ident_hbo" %in% names(d))  d[ident_hbo==TRUE & is.na(matching),matching:="Governmental"]
   if("ident_dhis2_dhis2hbo" %in% names(d))  d[ident_dhis2_dhis2hbo==TRUE & is.na(matching),matching:="Private"]
+  if("ident_paperhbo" %in% names(d))  d[ident_paperhbo==TRUE & is.na(matching),matching:="PaperHBO"]
   d[is.na(matching),matching:="Not"]
+  xtabs(~d$matching)
   
   # CLEAN DIFFERENT FILES CONSISTENTLY (e.g. gestational age)
   #CleaningDifferentFilesConsistently(d)
@@ -73,8 +84,6 @@ CleanAllData <- function(
   print("****2")
   CreatingFurtherVariablesMahima(d)
   print("****3")
-  CreatingFurtherVariablesPNIPH(d)
-  print("****4")
   
   # CALC INDICATORS OLSO
   IndicatorsOsloGenerate(d)

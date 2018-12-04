@@ -8,6 +8,7 @@ MatchEarlyToLate <- function(earlyData,lateData,id,earlyDate,earlyNum,lateDate,l
   # 
   # lengthAfterEarlyEvent <- 365
   # 
+  setorderv(earlyData,c(id,earlyDate))
   earlyData[,startDate:=get(earlyDate)]
   earlyData[,endDate:=shift(startDate,n=1L,type="lead"),by=get(id)]
   # those two lines describe if the enddate will be not available or more than 42 weeks (that means the next pregnancy)

@@ -288,6 +288,101 @@ d[,comboUSandLMPgA_cats:=cut(comboUSandLMPgA,
                              include.lowest=T)]
 
 
+###Making unified hospital birth data variables for CISMAC###
+
+# name of hospital
+# -dhis2hboconnamehospbirth_1,
+d[matching=="Avicenna",merged_namehospbirth:=abbname_1]
+d[matching=="Governmental",merged_namehospbirth:=hboorganisationunitname_1]
+d[matching=="Private",merged_namehospbirth:=dhis2hboconnamehospbirth_1]
+d[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery]
+
+#type of hospital delivered in
+#vars <- names(d)[stringr::str_detect(names(d),"^merged_namehospbirth")]
+#for(v in vars){
+ # d[get(v)=="First visit",(v):="1"]
+  #d[get(v)=="Second visit",(v):="2"]
+ # d[get(v)=="Beyond second visit",(v):="3"]
+#}
+
+
+# outcome
+# - dhis2hbopregoutcome_1
+d[matching=="Avicenna",merged_pregoutcome:=abbbabybirthresult_1]
+d[matching=="Governmental",merged_pregoutcome:=hboprevpregoutcome_1]
+d[matching=="Private",merged_pregoutcome:=dhis2hbopregoutcome_1]
+d[matching=="PaperHBO",merged_pregoutcome:=paperhbo_outcome]
+xtabs(~d$merged_pregoutcome+d$matching)
+
+# abortion
+# - dhis2hbopregoutcome_1
+d[!is.na(merged_pregoutcome),merged_abortion:=merged_pregoutcome %in% c("ABO")]
+xtabs(~d$merged_abortion+d$matching)
+
+# gestational age
+# - dhis2hbogestagedeliv_1
+d[matching=="Avicenna",merged_gestagedeliv:=as.numeric(stringr::str_extract(abbbabypregnancynoofweeks_1,"^[0-9][0-9]"))]
+d[matching=="Governmental",merged_gestagedeliv:=hbogestagedeliv_1]
+d[matching=="Private",merged_gestagedeliv:=dhis2hbogestagedeliv_1]
+d[matching=="PaperHBO",merged_gestagedeliv:=paperhbo_gestationalageatbirthweeks]
+unique(d$merged_namehospbirth)
+
+
+
+# weight
+# - dhis2hbopregbweight_1
+d[matching=="Avicenna",merged_pregbweight:=as.numeric(abbbabyweight_1)]
+d[matching=="Governmental",merged_pregbweight:=hboprevpregbweight_1]
+d[matching=="Private",merged_pregbweight:=dhis2hbopregbweight_1]
+d[matching=="PaperHBO",merged_pregbweight:=paperhbo_weightgrams]
+
+# date of delivery
+# - dhis2hbodateofdeliveryhospital_1
+d[matching=="Avicenna",merged_datedeliv:=abbbabybirthdate_1]
+d[matching=="Governmental",merged_datedeliv:=as.character(hbodateofdeliveryhospital_1)]
+d[matching=="Private",merged_datedeliv:=dhis2hbodateofdeliveryhospital_1]
+d[matching=="PaperHBO",merged_datedeliv:=paperhbo_birthdate]
+xtabs(~d$matching+d$merged_datedeliv)
+
+# hemo
+# - dhis2hbolabcbchemoglobin_1
+d[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
+d[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
+d[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
+d[matching=="PaperHBO",merged_birthhemo:=paperhbo_hbgatadmissiontohospital]
+
+
+
+
+# blood p
+# - dhis2hbosystbp_1
+# - dhis2hbodiastbp_1
+warning("need to fix blood pressure")
+#d[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
+#d[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
+#d[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
+
+# mode of deliv
+# - dhis2hbomodedeliv_1
+d[matching=="Avicenna",merged_modedeliv:=abbbabybirthtype_1]
+d[matching=="Governmental",merged_modedeliv:=hbomodeprevdeliv_1]
+d[matching=="Private",merged_modedeliv:=dhis2hbomodedeliv_1]
+d[matching=="PaperHBO",merged_modedeliv:=paperhbo_modeofdelivery]
+
+# presentation at deliv
+# - dhis2hbousfetalpresentation_1
+d[matching=="Avicenna",merged_presentationdeliv:=abbbabybirthtype_1]
+d[matching=="Governmental",merged_presentationdeliv:=hbousfetalpresentation_1]
+d[matching=="Private",merged_presentationdeliv:=dhis2hbousfetalpresentation_1]
+d[matching=="PaperHBO",merged_presentationdeliv:=paperhbo_presentationatdelivery]
+
+# indic for csection
+# - dhis2hboindicforcsec_1
+warning("merged_indic_csection:=abbbabybirthtype_1")
+d[matching=="Avicenna",merged_indic_csection:=abbbabybirthtype_1]
+d[matching=="Governmental",merged_indic_csection:=hboindiccsectioninanycol_1]
+d[matching=="Private",merged_indic_csection:=dhis2hboindicforcsec_1]
+d[matching=="PaperHBO",merged_indic_csection:=paperhbo_indicationforcesarian]
 
 
 
@@ -299,108 +394,4 @@ d[,comboUSandLMPgA_cats:=cut(comboUSandLMPgA,
   
   
  
-
-
-
-CreatingFurtherVariablesPNIPH <-function(d){
-  # abstract 2018
-  d[,pniph_agecat:=cut(age,
-                       breaks=c(0,20,25,30,35,40,45,50,100),
-                       include.lowest=T)]
-  d[,pniph_agecat2:=cut(age,
-                        breaks=c(0,20,30,40,100),
-                        include.lowest=T)]
-  d[,pniph_agemarriagecat:=cut(agemarriage,
-                               breaks=c(0,20,25,30,35,40,100),
-                               include.lowest=T)]
-  d[,pniph_agemarriagecat2:=cut(agemarriage,
-                                breaks=c(0,20,30,40,100),
-                                include.lowest=T)]
-  d[,pniph_agepregnancycat:=cut(agepregnancy,
-                                breaks=c(0,20,25,30,35,40,100),
-                                include.lowest=T)]
-  d[,pniph_agepregnancycat2:=cut(agepregnancy,
-                                 breaks=c(0,20,30,40,100),
-                                 include.lowest=T)]
-  
-  d[,pniph_educationcat:=cut(education,
-                             breaks=c(0,9,13,100),
-                             include.lowest=T)]
-  
-  d[,pniph_educationcat2:=cut(education,
-                              breaks=c(0,11,12,16,100),
-                              include.lowest=T)]
-  levels(d$pniph_educationcat2)
-  
-  d[,pniph_avgincome := income/members]
-  
-  d[,pniph_avgincomecat:=cut(pniph_avgincome,
-                             breaks=c(0,200,900,1824,3054,100000),
-                             include.lowest=T)]
-  d[,pniph_incomecat:=cut(income,
-                          breaks=c(0,200,900,1824,3054,100000),
-                          include.lowest=T)]
-  d[,pniph_incomecat2:=cut(income,
-                           breaks=c(0,1500,3000,5000,100000),
-                           include.lowest=T)]
-  
-  d[,pniph_householdcat:=cut(members,
-                             breaks=c(0,3,5,30),
-                             include.lowest=T)]
-
-  d[,pniph_nbcdaysatvisit:=as.numeric(nbcdate_1-nbcdateofdelivery_1)]
-  
-  # number of ppc visits
-  d[,pniph_num_ppc_visits:=0]
-  vars <- names(d)[stringr::str_detect(names(d),"ppcevent")]
-  for(i in vars){
-    d[!is.na(get(i)),pniph_num_ppc_visits:=pniph_num_ppc_visits+1]
-  }
-  xtabs(~d$pniph_num_ppc_visits, addNA=T)
-
-  
-  #gestage at last anc visit, includes booking visit
-  vars_gestages <- c("bookgestage",
-    names(d)[stringr::str_detect(names(d),"^angestage_")]
-  )
-  
-  d[,pniph_gestageatlastvisit:=as.numeric(NA)]
-  for(i in vars_gestages){
-    d[!is.na(get(i)) & get(i)>0, pniph_gestageatlastvisit:=get(i)]
-  }
-  d$gestageatlastvisit
-  
-  ###creating gest age categories at last visit
-  d[,pniph_gestageatlastvisit_cats:=cut(pniph_gestageatlastvisit,
-    breaks=c(0,36,40,42,9999),
-    include.lowest=T)]
-  d$pniph_gestageatlastvisit_cats
-  unique(d$gestageatlastvisit)
-  
-  
-  ###make cpo gest age into categories
-  d[,pniph_cpogestage_1_cats:=cut(cpogestage_1,
-    breaks=c(0,25,38,41,99999),
-    include.lowest=T)]
-  
-  # Has anemia/hypertension/bleeding
-  d[,pniph_risktype_anemia:=F]
-  d[,pniph_risktype_chronichypertension:=F]
-  d[,pniph_risktype_vaginalbleeding:=F]
-  vars <- names(d)[stringr::str_detect(names(d),"^risktype_")]
-  for(i in vars){
-    d[get(i)%in%c("MildAnemia",
-                  "ModerateAnemia",
-                  "SevereAnemia"),pniph_risktype_anemia:=T]
-  d[get(i)%in%c("ChronicHypertension"),pniph_risktype_chronichypertension:=T]
-  d[get(i)%in%c("MildBleeding"),pniph_risktype_mildbleeding:=T]
- 
-    
-  }
-  
-  
-  
-  
-  
-}
 

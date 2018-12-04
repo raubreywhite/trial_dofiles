@@ -21,6 +21,7 @@ Setup(IS_GAZA=FALSE)
 
 # make this TRUE if you want to include the PPC
 d <- CleanAllData(includePPC=FALSE, IS_GAZA=FALSE)
+xtabs(~d$matching, addNA=T)
 
 ####################
 #NOW run HBO stuff##
@@ -44,7 +45,6 @@ MissingHBO()
 # PLACE OF DELIVERY INFORMATION CHECKING
 # LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPORT
 d <- LoadDataFileFromNetwork()
-d$CreatingFurtherVariablesPNIPH(d)
 #### bookvisitspec shouldnt be known  pcnidnumber_1  amdmotherbirthdate_1
 ###previdnumber_1   manidnumber  riskidnumber   d$hbodaltidnum_1   hbodaltidnum_1
 ###anidnumber_1     labid     usid     

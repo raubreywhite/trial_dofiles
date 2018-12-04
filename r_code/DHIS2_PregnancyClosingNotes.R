@@ -13,7 +13,12 @@ DHIS2_PregnancyClosingNotes <- function(isControl, earlyData, booklmp, IS_GAZA=F
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
-  d <- DHIS2_Remove_If_All_Cols_Empty(d=d,isControl=isControl)
+  nrow(d)
+  d <- Removeduplicate(d=d,
+                       tag="pcn",
+                       isControl=isControl,
+                       oneObsPerWomanDate=F)
+  nrow(d)
   
   # give it a bookevent
   d <- GiveItABookEvent(
