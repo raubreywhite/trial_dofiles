@@ -8,12 +8,14 @@ DHIS2_NNCRiskFactors <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+  } else {
+    d[,eventdate:=as.Date(eventdate)]
   }
-  d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
   nrow(d)
-  d<- Removeduplicate(d=d,tag="nncrisk",isControl=isControl,oneObsPerWomanDate=F)
+  d<- Removeduplicate(d=d,tag="nncrisk",isControl=isControl,maxObsPerWomanDate=NULL)
   nrow(d)
   
   # give it a bookevent

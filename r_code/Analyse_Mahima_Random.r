@@ -66,13 +66,62 @@ BASE_LINE_STATISTICAL_ANALYSIS <- function(d){
              ident_dhis2_control
            )]
   MATCH[,cohort:="Matched with Avicenna"]
-  print(MATCH)    
+  print(MATCH)  
   
   
-  plotData <- rbind(bookings,
+  MATCH_gov <- d[ident_TRIAL_1==TRUE & 
+                       isExpectedToHaveDelivered==TRUE &
+                        is.na(ident_avic_any) &
+                        is.na(ident_hbo) &
+                       !is.na(ident_dhis2_dhis2hbo),
+                     .(
+                       numWomen=.N
+                     ),
+                     by=.(
+                       ident_dhis2_control
+                     )]
+  MATCH_gov[,cohort:="Matched with Governmental"]
+  print(MATCH_gov)
+  
+  MATCH_priv <- d[ident_TRIAL_1==TRUE & 
+                   isExpectedToHaveDelivered==TRUE &
+                   is.na(ident_avic_any) &
+                   is.na(ident_dhis2_dhis2hbo) &
+                   !is.na(ident_hbo),
+                 .(
+                   numWomen=.N
+                 ),
+                 by=.(
+                   ident_dhis2_control
+                 )]
+  MATCH_priv[,cohort:="Matched with Private"]
+  print(MATCH_priv)
+  
+  MATCH_excel <- d[ident_TRIAL_1==TRUE & 
+                    isExpectedToHaveDelivered==TRUE &
+                    is.na(ident_avic_any) &
+                    is.na(ident_dhis2_dhis2hbo) &
+                    is.na(ident_hbo) &
+                    !is.na(ident_paperhbo),
+                  .(
+                    numWomen=.N
+                  ),
+                  by=.(
+                    ident_dhis2_control
+                  )]
+  MATCH_excel[,cohort:="Matched with Excel"]
+  print(MATCH_excel)
+  
+  
+  
+plotData <- rbind(bookings,
                     Trial1,
                     EPD,
-                    MATCH)
+                    MATCH,
+                    MATCH_gov,
+                    MATCH_priv,
+                    MATCH_excel
+                  )
   
   print(plotData)
   
@@ -82,7 +131,10 @@ BASE_LINE_STATISTICAL_ANALYSIS <- function(d){
                              "Bookings",
                              "Trial 1",
                              "Expected to be delivered",
-                             "Matched with Avicenna"
+                             "Matched with Avicenna",
+                             "Matched with Governmental",
+                             "Matched with Private",
+                             "Matched with Excel"
                            ))]
   
   plotData[,intOrControl:="Intervention"]
@@ -93,6 +145,12 @@ BASE_LINE_STATISTICAL_ANALYSIS <- function(d){
   setorder(plotData,cohort,-intOrControl)
   plotData[,cumulative_y:=cumsum(numWomen)-numWomen/2,by=cohort]
   
+  #making the cohort names into seperate lines so when they are printed on the graph 
+  #they will look nice
+  levels(plotData$cohort) <- gsub(" ", "\n", levels(plotData$cohort))
+  
+  #need to fix label inside the the added matched cases
+  
 p <- ggplot(plotData)
 p <- p + geom_bar(mapping=aes(x=cohort,y=numWomen,fill=intOrControl),stat="identity",colour="black")
 p <- p + geom_text(mapping=aes(x=cohort,y=cumulative_y,label=numWomen))
@@ -100,6 +158,8 @@ p <- p + theme_gray(base_size = 16)
 p <- p + scale_fill_brewer("",palette="BuPu")
 p <- p + scale_x_discrete("")
 p <- p + scale_y_continuous("Number of women in 2017")
+p <- p + theme(axis.text.x = element_text(face="bold", color="#993333", 
+                                          size=5, angle=0))
 p <- p + labs(title="Trial 1")
 p <- p + labs(caption=sprintf("Date of data extraction: %s",CLINIC_CONTROL_DATE))
 p
@@ -117,7 +177,7 @@ ggsave(filename=file.path(
   ######## 
 
 ####Denominators
-#tringr::str_subset(names(d),"expecte")
+#stringr::str_subset(names(d),"expecte")
 
 d[,bookyearmonth:=sprintf("%s-%s",lubridate::year(bookdate),formatC(lubridate::month(bookdate),width=2,flag="0"))]
 

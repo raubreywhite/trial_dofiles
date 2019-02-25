@@ -88,17 +88,17 @@ GiveItABookEvent <- function(
   if(!keepbooklmp) d[,booklmp:=NULL]
   
   setorderv(d,cols=c(id,"bookevent","booknum",lateDate))
-  d[,eventnum:=1:.N,by=.(uniqueid,bookevent,booknum)]
-  if(id!="uniqueid") stop("ERROR ID MUST BE UNIQUEID")
+  d[,eventnum:=1:.N,by=.(get(id),bookevent,booknum)]
+  #if(id!="uniqueid") stop("ERROR ID MUST BE UNIQUEID")
   
   if(!is.null(numberOfEventsIfAbnormal) & !is.null(fileNameForPotentialDuplicates)){
     # automatically pull out all the rows
     # for women with more than numberOfEventsIfNormal events!
     if(nrow(d[eventnum>=numberOfEventsIfAbnormal])>0){
-      badWomen <- unique(d[eventnum>=numberOfEventsIfAbnormal]$uniqueid)
+      badWomen <- unique(d[eventnum>=numberOfEventsIfAbnormal][[id]])
       
       openxlsx::write.xlsx(
-        d[uniqueid %in% badWomen],
+        d[get(id) %in% badWomen],
         file=file.path(
           FOLDER_DATA_RAW,
           "possible_duplicates",

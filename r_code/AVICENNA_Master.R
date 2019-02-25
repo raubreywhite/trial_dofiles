@@ -1,4 +1,4 @@
-AVICENNA_Master <- function(keepMotherID, includeObs=FALSE){
+AVICENNA_Master <- function(keepMotherID, includeObs=TRUE){
   print("AVICENNA MOTHERS DETAILS")
   data_AVICENNA_Mothers_Details <- AVICENNA_Mothers_Details(keepMotherID=keepMotherID)
   data_AVICENNA_Mothers_Details[,ident_avic_amd:=TRUE]

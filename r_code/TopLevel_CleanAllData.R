@@ -9,6 +9,7 @@ CleanAllData <- function(
   
   # CLEAN DHIS
   dhis=suppressWarnings(DHIS2_Master(
+    keepDoubleBookings=FALSE,
     includePPC=includePPC,
     minBookDate=minBookDate,
     maxBookDate=maxBookDate,
@@ -30,7 +31,7 @@ CleanAllData <- function(
   keepMotherID <- unique(dhis$motheridno)
   
   # CLEAN AVICENNA
-  avicenna=AVICENNA_Master(keepMotherID=keepMotherID, includeObs = FALSE)
+  avicenna=AVICENNA_Master(keepMotherID=keepMotherID, includeObs = TRUE)
   
   # MERGE DHIS TO AVICENNA
   nrow(dhis)
@@ -38,6 +39,7 @@ CleanAllData <- function(
     dhis=dhis,
     avicenna=avicenna)
   nrow(d)
+  length(unique(d$bookevent))
   
   d[,avicennanum:=NULL]
   d[,minDate:=NULL]
@@ -54,24 +56,52 @@ CleanAllData <- function(
     dhis=d,
     avicenna=HBO_Master())
   nrow(d)
+  length(unique(d$bookevent))
   
   # MERGE DATAFILE WITH PAPERHBO
   paperhbo_search_for_bookevent(d)
   
   nrow(d)
-  d <- merge(d,paperhbo(
-    src="bookeventsfound",
-    tagWithPaperHBO=TRUE),by="bookevent",all.x=T)
+  d <- ReshapeToWideAndMerge(
+    base=d,
+    additional=paperhbo(
+      src="bookeventsfound",
+      tagWithPaperHBO=TRUE),
+    valueVarsRegex="^paperhbo",
+    dcastFormula="motheridno+bookevent+booknum~eventnum",
+    mergeVars=c("motheridno","bookevent","booknum"),
+    identName="ident_paperhbo"
+  )
   nrow(d)
+  ncol(d)
+  
+  length(d$bookevent)
+  length(unique(d$bookevent))
   
   print("****0")
   
   # this variable says where the baby info gets matched from
   d[,matching:=as.character(NA)]
-  if("ident_avic_any" %in% names(d)) d[ident_avic_any==TRUE & is.na(matching),matching:="Avicenna"]
-  if("ident_hbo" %in% names(d))  d[ident_hbo==TRUE & is.na(matching),matching:="Governmental"]
-  if("ident_dhis2_dhis2hbo" %in% names(d))  d[ident_dhis2_dhis2hbo==TRUE & is.na(matching),matching:="Private"]
-  if("ident_paperhbo" %in% names(d))  d[ident_paperhbo==TRUE & is.na(matching),matching:="PaperHBO"]
+  d[,matching_avicenna:=FALSE]
+  d[,matching_gov:=FALSE]
+  d[,matching_private:=FALSE]
+  d[,matching_hbo:=FALSE]
+  if("ident_avic_any" %in% names(d)){
+    d[ident_avic_abb==TRUE & ident_avic_amd==TRUE & is.na(matching),matching:="Avicenna"]
+    d[ident_avic_abb==TRUE & ident_avic_amd==TRUE, matching_avicenna:=TRUE]
+  }
+  if("ident_hbo" %in% names(d)){
+    d[ident_hbo==TRUE & is.na(matching),matching:="Governmental"]
+    d[ident_hbo==TRUE, matching_gov:=TRUE]
+  }
+  if("ident_dhis2_dhis2hbo" %in% names(d)){
+    d[ident_dhis2_dhis2hbo==TRUE & is.na(matching),matching:="Private"]
+    d[ident_dhis2_dhis2hbo==TRUE, matching_private:=TRUE]
+  }
+  if("ident_paperhbo" %in% names(d)){
+    d[ident_paperhbo==TRUE & is.na(matching),matching:="PaperHBO"]
+    d[ident_paperhbo==TRUE, matching_hbo:=TRUE]
+  }
   d[is.na(matching),matching:="Not"]
   xtabs(~d$matching)
   

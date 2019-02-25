@@ -1,10 +1,6 @@
 ###### SETUP STARTS ######
 
-tryCatch({
-  setwd("X:/data processing/trial_dofiles")
-}, error=function(err){
-  setwd("Z:/data processing/trial_dofiles")
-})
+setwd("C:/data processing/trial_dofiles")
 
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 sapply(fileSources, source, .GlobalEnv)
@@ -20,8 +16,11 @@ Setup(IS_GAZA=FALSE)
 ####################
 
 # make this TRUE if you want to include the PPC
-d <- CleanAllData(includePPC=FALSE, IS_GAZA=FALSE)
+d <- CleanAllData(includePPC=T, IS_GAZA=FALSE)
 xtabs(~d$matching, addNA=T)
+
+nrow(d)
+length(unique(d$bookevent))
 
 ####################
 #NOW run HBO stuff##

@@ -197,6 +197,11 @@ CreatingFurtherVariablesMahima <- function(d){
   ####for system generated
   
   #Making usedd for the last one
+  # newdates_1<-as.Date(d$usedd_1, "%Y-%m-%d")
+  # unique(d[is.na(newdates_1) & !is.na(usedd_1)]$usedd_1)
+  # d[usedd_1=="",usedd_1:=NA]
+  # d[,usedd_1:=as.Date(usedd_1)]
+  
   nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
   #num <- stringr::str_replace(nam,"usedd_","")
   d[,lastusedd:=as.character(NA)]
@@ -204,15 +209,16 @@ CreatingFurtherVariablesMahima <- function(d){
     print(i)
     #d[ident_us==TRUE & !is.na(usedd_1),
     # systemgenerated_1:=usedd_1]
-    d[ !is.na(get(i)) &
-        get(i)!="",
+    d[ !is.na(get(i)),
+       #&
+        #get(i)!="",
        lastusedd:=get(i)]
   }
   unique(d[,c("usedd_1","lastusedd")])
   d[usedd_1=="2017-07-12" & lastusedd=="2017-06-27", c(nam), with=F] 
- d[,lastusedd:=as.Date(lastusedd)]
- 
- d$lastusedd
+ d[,lastusedd:=as.Date(as.numeric(lastusedd),origin="1970-01-01")]
+ as.Date(17290,origin="1970-01-01")
+ unique(d$lastusedd)
 
 #using lastusedd and minus from hbodates 
 #so that we can get actual gA from usedd
@@ -238,7 +244,7 @@ class(d$mahima_gA_1_us)
 ###Making first usedd if its at <=21 gA variable
 nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
 num <- stringr::str_replace(nam,"usedd_","")
-d[,first_1_21_usedd:=as.character(NA)]
+d[,first_1_21_usedd:=as.Date(NA)]
 for(i in num ){
   print(i)
   
@@ -246,14 +252,15 @@ for(i in num ){
   var_usgestage <- sprintf("usgestage_%s",1)
   
   d[!is.na(get(var_usedd)) &
-      get(var_usedd) != "" &
+    
       !is.na(get(var_usgestage)) &
       get(var_usgestage) > 0 &
       get(var_usgestage) <= 21 &
       is.na(first_1_21_usedd),
-    first_1_21_usedd:=get(var_usedd)]
+    first_1_21_usedd:=as.Date(get(var_usedd),format="%Y-%m-%d")]
 }
-d$first_1_21_usedd
+unique(d$usgestage_1)
+unique(d$first_1_21_usedd)
 sum(!is.na(d$first_1_21_usedd))
 
 #Making gA for first_1_21_usedd
@@ -263,7 +270,7 @@ d[,first_1_21_usedd_diffbtwnHBO:=round(as.numeric(
 
 d[,first_1_21_usedd_gA:=first_1_21_usedd_diffbtwnHBO+40]
 
-d$first_1_21_usedd_gA
+unique(d$first_1_21_usedd_gA)
 
 
 
@@ -290,12 +297,100 @@ d[,comboUSandLMPgA_cats:=cut(comboUSandLMPgA,
 
 ###Making unified hospital birth data variables for CISMAC###
 
+#BMI
+d[,bookbmi:=((bookweight/bookheight/bookheight)*10000)]
+
+# MERVET FILL IN HERE
+
+matchvars <- list(
+  "merged_namehospbirth_"=c("abbname_",
+                           "hboorganisationunitname_",
+                           "dhis2hboconnamehospbirth_",
+                           "paperhbo_placeofdelivery_"),
+  
+  "merged_pregoutcome_"=c("abbbabybirthresult_",
+                           "hboprevpregoutcome_",
+                           "dhis2hbopregoutcome_",
+                           "paperhbo_outcome_"),
+  
+  "merged_gestageatdelivery_"=c("abbbabypregnancynoofweeks_",
+                                "hbogestagedeliv_",
+                                "dhis2hbogestagedeliv_",
+                                "paperhbo_gestationalageatbirthweeks_"),
+  
+  "merged_birthweight_"=c("abbbabyweight_",
+                          "hboprevpregbweight_",
+                          "dhis2hbopregbweight_",
+                          "paperhbo_weightgrams_"),
+  
+  "merged_babybirthdate_"=c("abbbabybirthdate_",
+                            "hbodateofdeliveryhospital_",
+                            "dhis2hbodateofdeliveryhospital_",
+                            "paperhbo_birthdate_"),
+  
+  "merged_hbatadmission_"=c("alabtestresult_",
+                            "hboconlabcbchemoglobin_",
+                            "dhis2hbolabcbchemoglobin_",
+                            "paperhbo_hbgatadmissiontohospital_"),
+  
+  "merged_modeofdelivery_"=c("abbbabybirthtype_",
+                            "hbomodeprevdeliv_",
+                            "dhis2hbomodedeliv_",
+                            "paperhbo_modeofdelivery_"),
+  
+  "merged_fetalpresentation_"=c("abbbabybirthtype_",
+                               "hbousfetalpresentation_",
+                               "dhis2hbousfetalpresentation_",
+                               "paperhbo_presentationatdelivery_"),
+  
+  "merged_indicationforcsection_"=c("abbbabybirthtype_",
+                                   "hboindiccsectioninanycol_",
+                                   "dhis2hboindicforcsec_",
+                                   "paperhbo_indicationforcesarian_")
+  
+   )
+  
+
+
+
+for(i in seq_along(matchvars)){
+  # finding out how many "new" variables we need to create
+  # i.e. are there 2 births or 6 births?
+  vars <- c()
+  for(j in matchvars[[i]]){
+    vars <- c(vars, stringr::str_subset(names(d),sprintf("^%s",j)))
+  }
+  # extract the numbers at the end (so we know how many new variables to create)
+  vars <- unique(stringr::str_extract(vars,"_[0-9]*$"))
+  # remove the _
+  vars <- stringr::str_sub(vars,2)
+  
+  # here we create the new variables
+  # i.e _1, _2, _3, ... (numbers stored in 'vars')
+  for(j in vars){
+    newvar <- sprintf("%s%s", names(matchvars)[i], j)
+    
+    avicennavar<- sprintf("%s%s", matchvars[[i]][1], j)
+    govvar<- sprintf("%s%s",      matchvars[[i]][2], j)
+    privatevar<- sprintf("%s%s",  matchvars[[i]][3], j)
+    paperhbovar<- sprintf("%s%s", matchvars[[i]][4], j)
+    
+    # some of the variables on the right hand side dont exist
+    # so this will give errors
+    # so 'try' just says "try and then ignore it if it doesnt work"
+    try(d[matching=="Avicenna",(newvar):=get(avicennavar)],TRUE)
+    try(d[matching=="Governmental",(newvar):=get(govvar)],TRUE)
+    try(d[matching=="Private",(newvar):=get(privatevar)],TRUE)
+    try(d[matching=="PaperHBO",(newvar):=get(paperhbovar)],TRUE)
+  }
+}
+
 # name of hospital
 # -dhis2hboconnamehospbirth_1,
 d[matching=="Avicenna",merged_namehospbirth:=abbname_1]
 d[matching=="Governmental",merged_namehospbirth:=hboorganisationunitname_1]
 d[matching=="Private",merged_namehospbirth:=dhis2hboconnamehospbirth_1]
-d[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery]
+d[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery_1]
 
 #type of hospital delivered in
 #vars <- names(d)[stringr::str_detect(names(d),"^merged_namehospbirth")]
@@ -311,7 +406,7 @@ d[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery]
 d[matching=="Avicenna",merged_pregoutcome:=abbbabybirthresult_1]
 d[matching=="Governmental",merged_pregoutcome:=hboprevpregoutcome_1]
 d[matching=="Private",merged_pregoutcome:=dhis2hbopregoutcome_1]
-d[matching=="PaperHBO",merged_pregoutcome:=paperhbo_outcome]
+d[matching=="PaperHBO",merged_pregoutcome:=paperhbo_outcome_1]
 xtabs(~d$merged_pregoutcome+d$matching)
 
 # abortion
@@ -324,7 +419,7 @@ xtabs(~d$merged_abortion+d$matching)
 d[matching=="Avicenna",merged_gestagedeliv:=as.numeric(stringr::str_extract(abbbabypregnancynoofweeks_1,"^[0-9][0-9]"))]
 d[matching=="Governmental",merged_gestagedeliv:=hbogestagedeliv_1]
 d[matching=="Private",merged_gestagedeliv:=dhis2hbogestagedeliv_1]
-d[matching=="PaperHBO",merged_gestagedeliv:=paperhbo_gestationalageatbirthweeks]
+d[matching=="PaperHBO",merged_gestagedeliv:=paperhbo_gestationalageatbirthweeks_1]
 unique(d$merged_namehospbirth)
 
 
@@ -334,14 +429,14 @@ unique(d$merged_namehospbirth)
 d[matching=="Avicenna",merged_pregbweight:=as.numeric(abbbabyweight_1)]
 d[matching=="Governmental",merged_pregbweight:=hboprevpregbweight_1]
 d[matching=="Private",merged_pregbweight:=dhis2hbopregbweight_1]
-d[matching=="PaperHBO",merged_pregbweight:=paperhbo_weightgrams]
+d[matching=="PaperHBO",merged_pregbweight:=paperhbo_weightgrams_1]
 
 # date of delivery
 # - dhis2hbodateofdeliveryhospital_1
 d[matching=="Avicenna",merged_datedeliv:=abbbabybirthdate_1]
 d[matching=="Governmental",merged_datedeliv:=as.character(hbodateofdeliveryhospital_1)]
 d[matching=="Private",merged_datedeliv:=dhis2hbodateofdeliveryhospital_1]
-d[matching=="PaperHBO",merged_datedeliv:=paperhbo_birthdate]
+d[matching=="PaperHBO",merged_datedeliv:=paperhbo_birthdate_1]
 xtabs(~d$matching+d$merged_datedeliv)
 
 # hemo
@@ -349,7 +444,7 @@ xtabs(~d$matching+d$merged_datedeliv)
 d[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
 d[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
 d[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
-d[matching=="PaperHBO",merged_birthhemo:=paperhbo_hbgatadmissiontohospital]
+d[matching=="PaperHBO",merged_birthhemo:=paperhbo_hbgatadmissiontohospital_1]
 
 
 
@@ -367,14 +462,14 @@ warning("need to fix blood pressure")
 d[matching=="Avicenna",merged_modedeliv:=abbbabybirthtype_1]
 d[matching=="Governmental",merged_modedeliv:=hbomodeprevdeliv_1]
 d[matching=="Private",merged_modedeliv:=dhis2hbomodedeliv_1]
-d[matching=="PaperHBO",merged_modedeliv:=paperhbo_modeofdelivery]
+d[matching=="PaperHBO",merged_modedeliv:=paperhbo_modeofdelivery_1]
 
 # presentation at deliv
 # - dhis2hbousfetalpresentation_1
 d[matching=="Avicenna",merged_presentationdeliv:=abbbabybirthtype_1]
 d[matching=="Governmental",merged_presentationdeliv:=hbousfetalpresentation_1]
 d[matching=="Private",merged_presentationdeliv:=dhis2hbousfetalpresentation_1]
-d[matching=="PaperHBO",merged_presentationdeliv:=paperhbo_presentationatdelivery]
+d[matching=="PaperHBO",merged_presentationdeliv:=paperhbo_presentationatdelivery_1]
 
 # indic for csection
 # - dhis2hboindicforcsec_1
@@ -382,7 +477,7 @@ warning("merged_indic_csection:=abbbabybirthtype_1")
 d[matching=="Avicenna",merged_indic_csection:=abbbabybirthtype_1]
 d[matching=="Governmental",merged_indic_csection:=hboindiccsectioninanycol_1]
 d[matching=="Private",merged_indic_csection:=dhis2hboindicforcsec_1]
-d[matching=="PaperHBO",merged_indic_csection:=paperhbo_indicationforcesarian]
+d[matching=="PaperHBO",merged_indic_csection:=paperhbo_indicationforcesarian_1]
 
 
 

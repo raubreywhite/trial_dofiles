@@ -209,6 +209,15 @@ Analyse_EnteredVsCalculated <- function(d){
     units="mm",
     plot=p)
   
+  ####Graphs for distribution of gestational ages with categories
+  p <- ggplot(d[ident_TRIAL_1==TRUE & 
+                  ident_dhis2_control==FALSE &
+                  bookyearmonth>= "2017-01" &
+                  bookyearmonth<= "2017-03"
+                  ], 
+                aes(x=mahima_gestageatbirthwk_1_cats, y=mahima_gestageatbirthwk_1))
+ 
+
 ####differences with rounded entered gestages
 ##Creating differences between the rounded calculated and entered gest ages
   d[,difference_rounded:= mahima_gestageatbirthwk_1_rounded-mahima_hospenteredgestage_1]

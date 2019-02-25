@@ -6,8 +6,10 @@ DHIS2_Ultrasound <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+  } else {
+    d[,eventdate:=as.Date(eventdate)]
   }
-  d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
   d<- Removeduplicate(d=d,tag="ult",isControl=isControl)
@@ -52,7 +54,9 @@ DHIS2_Ultrasound <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   
   
   setnames(d,"event","usevent")
-  #setnames(d,"programstageinstance","uniqueid")
+  NamesToChange(d,badname=c("programstageinstance",
+                    "trackedentity"),
+              goodname="uniqueid")
   setnames(d,"programstage","usprogstage")
   setnames(d,"eventdate","usdate")
   setnames(d,"longitude","uslong")
@@ -104,6 +108,15 @@ DHIS2_Ultrasound <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"ussuspectedintrauterinegrowthrestrictionsuspectedsmallforgestationalagefetus","usiugr")
   setnames(d,"ussuspectedlargeforgestationalagefetus","uslga")
   setnames(d,"usrecommendationscomments","uscomments")
+  
+  if(IS_GAZA){
+    d[,usedd:=as.Date(usedd, "%d/%m/%Y")]
+  } else {
+    newdates<-as.Date(d$usedd, "%Y-%m-%d")
+    unique(d[is.na(newdates) & !is.na(usedd)]$usedd)
+    d[usedd=="",usedd:=NA]
+    d[,usedd:=as.Date(usedd)]
+  }
   
   return(d)
 }

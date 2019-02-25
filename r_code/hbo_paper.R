@@ -17,8 +17,12 @@ paperhbo<- function(src="original",tagWithPaperHBO=FALSE){
   }
   
   d <- rbindlist(d)
+  
   setnames(d,arabicStemR::transliterate(names(d)))
   setnames(d,unlist(ExtractOnlyEnglishLetters(names(d))))
+  if("idnumber" %in% names(d)) setnames(d,"idnumber","motheridno")
+  d[,motheridno:=as.numeric(motheridno)]
+  d[is.na(motheridno),motheridno:=1:.N]
   
   names(d)
   
@@ -43,17 +47,17 @@ paperhbo<- function(src="original",tagWithPaperHBO=FALSE){
       systolicbp := sub("([0-9]*)/([0-9]*)", "\\1", systolicbp)]
     
     d[,birthdate:=as.Date(birthdate,format="%d-%m-%Y")]
+    d[,file_original:=file]
   } else {
     d[,birthdate:=as.Date(birthdate,format="%d-%m-%Y")]
+    d[,booknum:=as.numeric(booknum)]
   }
   
   if(tagWithPaperHBO){
     for(n in names(d)){
-      if(n %in% c("bookevent")) next
+      if(n %in% c("bookevent","eventnum","booknum","motheridno")) next
       setnames(d,n,sprintf("paperhbo_%s",n))
     }
-    
-    d[, ident_paperhbo:=TRUE]
   }
   
   return(d)
@@ -64,21 +68,23 @@ paperhbo_search_for_bookevent <- function(d){
   setnames(p,"bookevent","OLD_bookevent")
   setnames(p,"bookdate","OLD_bookdate")
   
-  setnames(p,"idnumber","uniqueid")
+ # setnames(p,"motheridno","uniqueid")
   setnames(p,"birthdate","eventdate")
   earlyData <- unique(d[ident_dhis2_booking==T,c("motheridno","bookdate","booknum")])
   booklmp <- unique(d[ident_dhis2_booking==T,c("motheridno","bookevent","booknum","booklmp")])
   
-  setnames(earlyData,"motheridno","uniqueid")
-  setnames(booklmp,"motheridno","uniqueid")
-  earlyData[,uniqueid:=as.character(uniqueid)]
-  booklmp[,uniqueid:=as.character(uniqueid)]
+  #setnames(earlyData,"motheridno","uniqueid")
+  #setnames(booklmp,"motheridno","uniqueid")
+  earlyData[,motheridno:=as.character(motheridno)]
+  booklmp[,motheridno:=as.character(motheridno)]
+  
+  p[,xxxtempuniqueid:=1:.N]
   
   p2 <- GiveItABookEvent(
-    d=p[!is.na(eventdate) & !is.na(uniqueid)],
+    d=p[!is.na(eventdate) & !is.na(motheridno)],
     booklmp=booklmp,
     earlyData=earlyData,
-    id="uniqueid",
+    id="motheridno",
     earlyDate="bookdate",
     earlyNum="booknum",
     lateDate="eventdate",
@@ -89,25 +95,20 @@ paperhbo_search_for_bookevent <- function(d){
   )
   
   names(p2)[!names(p2) %in% names(p)]
-  p2[,eventnum:=NULL]
-  p2[,booknum:=NULL]
+  p[,eventnum:=1]
+  p[,booknum:=1]
   p[,bookevent:=as.character(NA)]
   
-  p3 <- rbind(p[!uniqueid %in% p2$uniqueid],p2)
+  p3 <- rbind(p[!xxxtempuniqueid %in% p2$xxxtempuniqueid],p2)
+  p3[,xxxtempuniqueid:=NULL]
   nrow(p)
   nrow(p3)
   
-  setnames(p3,"uniqueid","idnumber")
+  #setnames(p3,"uniqueid","motheridno")
   setnames(p3,"eventdate","birthdate")
   
   p3[is.na(bookevent) & !is.na(OLD_bookevent),bookevent:=OLD_bookevent]
-  
-  # only take the first of duplicates
-  # for each bookevent, label it 1, 2, ...., 3 (within bookevent)
-  message("FIX THIS DUPLICATED PROBLEMS")
-  p3[,bn:=1:.N,by=.(bookevent)]
-  p3 <- p3[bn==1]
-  p3[,bn:=NULL]
+  p3[is.na(bookevent),bookevent:=sprintf("x-%s",1:.N)]
   
   openxlsx::write.xlsx(p3[is.na(bookevent)],
                        file=file.path(

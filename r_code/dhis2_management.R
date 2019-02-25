@@ -1,19 +1,24 @@
-DHIS2_Management <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
-  if(isControl) stop("control code not written for DHIS2_Management")
+DHIS2_Management <- function(
+  isControl, 
+  earlyData, 
+  booklmp, 
+  IS_GAZA=FALSE) {
   
   d <- Get_DHIS2_Data(
-    controlName = "Ultrasound.csv",
+    controlName = "Referrals in ANC period.csv",
     clinicName = "ANCManagements.csv",
     isControl=isControl)
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+  } else {
+    d[,eventdate:=as.Date(eventdate)]
   }
-  d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
   nrow(d)
-  d<- Removeduplicate(d=d,tag="man",isControl=isControl,oneObsPerWomanDate=F)
+  d<- Removeduplicate(d=d,tag="man",isControl=isControl,maxObsPerWomanDate=NULL)
   nrow(d)
   
   # give it a bookevent
@@ -29,25 +34,49 @@ DHIS2_Management <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     keepbooklmp=FALSE
   )
   
-  setnames(d,"event","manevent")
-  #setnames(d,"programstageinstance","uniqueid")
-  setnames(d,"programstage","manprogstage")
-  setnames(d,"eventdate","mandate")
-  setnames(d,"longitude","manlong")
-  setnames(d,"latitude","manlat")
-  setnames(d,"organisationunitname","manorgname")
-  setnames(d,"organisationunitcode","manorgcode")
-  setnames(d,"organisationunit","manorgunit")
-  setnames(d,"identificationdocumentnumber","manidnumber")
-  varNum <- which(
-    stringr::str_detect(names(d),"^ancgestationalageatvisitweeks") | 
-      stringr::str_detect(names(d),"^ancgestationaageatvisitweeks"))
-  setnames(d,varNum,"mangestage")
-  setnames(d,"managementdetails","mandetail")
-  setnames(d,"managementtype","mantypex")
-  setnames(d,"managementperformed","manperf")
-  setnames(d,"createdeventidentifier","mantypey")
-  
+  if(isControl){
+    # TAMARA/MERVETT FIX CONTROL VARIABLES HERE
+    setnames(d,"event","manevent")
+    setnames(d,"programstage","manprogstage")
+    setnames(d,"eventdate","mandate")
+    setnames(d,"longitude","manlong")
+    setnames(d,"latitude","manlat")
+    setnames(d,"organisationunitname","manorgname")
+    setnames(d,"organisationunitcode","manorgcode")
+    setnames(d,"organisationunit","manorgunit")
+    d[,manidnumber:=as.numeric(NA)]
+    setnames(d,"ancgestationalageatvisitweeks","mangestage")
+    setnames(d,"managementtypereferralselector","mantypex")
+    setnames(d,"usrecommendationscomments","mandetail")
+    setnames(d,"managementdetailsselector","mantypey")
+    d[,manperf:=as.integer(NA)]
+    
+    
+   
+    
+    
+    
+  } else {
+    # intervention stuff is done here
+    setnames(d,"event","manevent")
+    #setnames(d,"programstageinstance","uniqueid")
+    setnames(d,"programstage","manprogstage")
+    setnames(d,"eventdate","mandate")
+    setnames(d,"longitude","manlong")
+    setnames(d,"latitude","manlat")
+    setnames(d,"organisationunitname","manorgname")
+    setnames(d,"organisationunitcode","manorgcode")
+    setnames(d,"organisationunit","manorgunit")
+    setnames(d,"identificationdocumentnumber","manidnumber")
+    varNum <- which(
+      stringr::str_detect(names(d),"^ancgestationalageatvisitweeks") | 
+        stringr::str_detect(names(d),"^ancgestationaageatvisitweeks"))
+    setnames(d,varNum,"mangestage")
+    setnames(d,"managementdetails","mandetail")
+    setnames(d,"managementtype","mantypex")
+    setnames(d,"managementperformed","manperf")
+    setnames(d,"createdeventidentifier","mantypey")
+  }
   
   return(d)
 }

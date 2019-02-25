@@ -9,8 +9,10 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp, IS_GAZA=IS_GAZA) {
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+  } else {
+    d[,eventdate:=as.Date(eventdate)]
   }
-  d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   d<- Removeduplicate(d=d,tag="nbc",isControl=isControl)
   
@@ -19,7 +21,7 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp, IS_GAZA=IS_GAZA) {
   d <- Removeduplicate(d=d,
                        tag="nbc",
                        isControl=isControl,
-                       oneObsPerWomanDate=F)
+                       maxObsPerWomanDate=NULL)
   nrow(d)
   
   nrow(d)
@@ -60,6 +62,8 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp, IS_GAZA=IS_GAZA) {
   nbcNames <- stringr::str_replace_all(nncNames,"^nnc","nbc")
   
   setnames(d,nncNames,nbcNames)
+  
+  d[,nbcorgname:=unlist(ExtractOnlyEnglishLetters(nbcorgname))]
   
   return(d)
 }

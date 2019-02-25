@@ -152,6 +152,16 @@ LoadDataFileFromNetworkWB <- function(){
   return(d)
 }
 
+LoadDataFileFromNetworkPal <- function(){
+  dWB <- LoadDataFileFromNetworkWB()
+  dWB[,ident_gaza:=FALSE]
+  dG <- LoadDataFileFromNetworkGaza()
+  dG[,ident_gaza:=TRUE]
+  dPal <- rbind(dWB,dG,fill=T)
+  
+  return(dPal)
+}
+
 LoadAnonDataFileFromNetwork<- function(){
   print("RELOADING ANON DATASET FROM NETWORK DRIVE")
   d <- readRDS(file.path(FOLDER_DATA_CLEAN,"oslo_anon_data_from_r.rds"))
@@ -388,21 +398,21 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^prevnocompl_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^prevnocompl_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^prevnocompl_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hboprogramstage_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbodate_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hboconwomandob_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbodateofdeliveryhospital_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbogestagedeliv_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbopregoutcome_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbopregbweight_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbosystbp_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbodiastbp_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbomodedeliv_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbousfetalpresentation_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hboindicforcsec_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbolabcbchemoglobin_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbolaburinestickprotein_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^dhis2hbousrecommendcomment_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hboprogramstage_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbodate_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hboconwomandob_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbodateofdeliveryhospital_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbogestagedeliv_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbopregoutcome_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbopregbweight_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbosystbp_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbodiastbp_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbomodedeliv_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbousfetalpresentation_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hboindicforcsec_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbolabcbchemoglobin_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbolaburinestickprotein_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^dhis2hbousrecommendcomment_[0-9]*")],
     "ident_dhis2_dhis2hbo",
     names(d)[stringr::str_detect(names(d),"^pcnevent_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^pcnprogstage_[0-9]*")],
@@ -412,7 +422,6 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^pcnorgcode_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^pcnfileclosurereason_[0-9]*")],
     "ident_dhis2_pcn",
-    "ident_dhis2_nbc",
     "isExpectedToHaveDelivered",
     "motheridbook_earlyDate",
     "motheridbook_lateDate",
@@ -423,72 +432,85 @@ SaveCISMACDataBase<- function(){
     "abbeventnum",
     "alabeventnum",
     "acseventnum",
-    names(d)[stringr::str_detect(names(d),"^amdbabyrecorddatecreation_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^amddate_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^amdbabyrecorddatecreation_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^amddate_[0-9]*")],
      "ident_avic_amd",
-    names(d)[stringr::str_detect(names(d),"^acsdatatext_1[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^acsdatecreated_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^acsstatus_1[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^acsdate_1[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^acsdatatext_1[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^acsdatecreated_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^acsstatus_1[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^acsdate_1[0-9]*")],
     "ident_avic_acs",
-    names(d)[stringr::str_detect(names(d),"^alabtestname_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^alabtestunit_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^alabtestminval_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^alabtestmaxval_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^alabtestresult_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^alabdate_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^alabtestname_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^alabtestunit_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^alabtestminval_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^alabtestmaxval_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^alabtestresult_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^alabdate_[0-9]*")],
     "ident_avic_alab",
-    names(d)[stringr::str_detect(names(d),"^abbbabyweight_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabybirthresult_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabybirthtype_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbdatatext_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabybirthmark_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabybirthcomment_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabybirthdate_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabyheight_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabyapgar1minscore_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabyapgar5minscore_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabyapgar10minscore_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabypregnancynoofweeks_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabyanusstatus_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbbabyrecorddatecreation_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^abbdate_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabyweight_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabybirthresult_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabybirthtype_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbdatatext_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabybirthmark_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabybirthcomment_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabybirthdate_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabyheight_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabyapgar1minscore_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabyapgar5minscore_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabyapgar10minscore_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabypregnancynoofweeks_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabyanusstatus_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbbabyrecorddatecreation_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^abbdate_[0-9]*")],
     "ident_avic_abb",
     "ident_avic_any",
     "mahima_alab_hb_closest_to_delivery_1",
     "hboeventnum",
-    names(d)[stringr::str_detect(names(d),"^hbouniqueid_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hbodcreated_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hbodlastupdated_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hbodtrackedentity_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbouniqueid_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbodcreated_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbodlastupdated_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbodtrackedentity_[0-9]*")],
     
-    names(d)[stringr::str_detect(names(d),"^hbodinactive_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hbodidentificationdocumenttype_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboevent_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboprogramstage_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboeventdate_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hbodateofdeliveryhospital_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbodinactive_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbodidentificationdocumenttype_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboevent_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboprogramstage_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboeventdate_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbodateofdeliveryhospital_[0-9]*")],
     
-    names(d)[stringr::str_detect(names(d),"^hbogestagedeliv_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboprevpregoutcome_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboprevpregbweight_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hbomodeprevdeliv_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hbousfetalpresentation_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboindiccsectioninanycol_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbogestagedeliv_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboprevpregoutcome_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboprevpregbweight_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbomodeprevdeliv_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbousfetalpresentation_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboindiccsectioninanycol_[0-9]*")],
     
-    names(d)[stringr::str_detect(names(d),"^hbolaburinestickprotein_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboindiccsectioninanycol_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hbosystbp_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hbodiastbp_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboconreasonforcs_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboconlabcbchemoglobin_[0-9]*")],
-    names(d)[stringr::str_detect(names(d),"^hboconlabcbchematocrit_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbolaburinestickprotein_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboindiccsectioninanycol_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbosystbp_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hbodiastbp_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboconreasonforcs_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboconlabcbchemoglobin_[0-9]*")],
+    #names(d)[stringr::str_detect(names(d),"^hboconlabcbchematocrit_[0-9]*")],
     "ident_hbo",
     "matching",
     "agecat",
     "agemarriagecat",
     "agepregnancycat",
-    "incomecat"
+    "incomecat",
+    names(d)[stringr::str_detect(names(d),"^merged_namehospbirth_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^merged_pregoutcome_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^merged_abortion[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^merged_gestageatdelivery_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^merged_birthweight_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^merged_babybirthdate_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^merged_hbatadmission_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^merged_modeofdelivery_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^merged_fetalpresentation_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^merged_indicationforcsection_[0-9]*")]
+    
+
+            
   )
   
   #### THESE ARE THE VARIABLES THAT DONT EXIST!!!!!!
@@ -566,6 +588,19 @@ SaveNamesOfVariables <- function(d){
                                      "variablenames.xlsx"))
 }
 
+SaveNamesOfANCAndBook <- function(d){
+  # this will print out all names starting with an
+  a <- stringr::str_subset(names(d),"^an[a-z\\_]+_1$")
+  # this will print out all names starting with book
+  b <- stringr::str_subset(names(d),"^book")
+  ## turning book variables into anc_0
+  x <- data.frame(booking=b)
+  x$an <- ""
+  x$an[1:length(a)] <- a
+  openxlsx::write.xlsx(x,file.path(FOLDER_DROPBOX_RESULTS,
+                                   "variablenames_ANCAndBook.xlsx"))
+}
+
 SaveAllDataFiles <- function(d, IS_GAZA=FALSE){
   
   # this is a bit weird, ignore it for the moment
@@ -577,9 +612,11 @@ SaveAllDataFiles <- function(d, IS_GAZA=FALSE){
   }
   
   # start saving our files
+  SaveNamesOfANCAndBook(d)
   SaveNamesOfVariables(d)
   SaveFullFileToNetwork(d)
   Save2CasesPerMonthToNetwork(d)
   SaveAnonymousOslo(d)
+
 
 }

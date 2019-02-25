@@ -1,8 +1,6 @@
-tryCatch({
-  setwd("X:/data processing/trial_dofiles")
-}, error=function(err){
-  setwd("Z:/data processing/trial_dofiles")
-})
+
+  setwd("c:/data processing/trial_dofiles")
+
 FOLDER_DATA_RAW <- file.path(getwd(),"../data_raw")
 FOLDER_DATA_CLEAN <- file.path(getwd(),"../data_clean")
 FOLDER_DATA_RESULTS <- file.path(getwd(),"../results/")
@@ -12,11 +10,8 @@ FOLDER_DROPBOX_RESULTS <- "~/../eRegistry CRCT Dropbox/Data management eRegQual/
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 sapply(fileSources, source, .GlobalEnv)
 
-tryCatch({
-  setwd("X:/data processing/a research hRHR/trial 1/used/list of control files")
-}, error=function(err){
-  setwd("Z:/data processing/a research hRHR/trial 1/used/list of control files")
-})
+
+  setwd("c:/data processing/a research hRHR/trial 1/used/list of control files")
 
 library(data.table)
 library(ggplot2)
@@ -152,7 +147,7 @@ for(i in 1:5){
   
   missing <- skeleton[!skeleton$sent %in% recNum$received &
                         district==name]
-  
+  if(nrow(missing)==0) next
   setorder(missing,clinic,sent)
   
   missing[,obsNum:=floor(0:(.N-1)/12),by=clinic]

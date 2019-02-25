@@ -8,8 +8,10 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+  } else {
+    d[,eventdate:=as.Date(eventdate)]
   }
-  d[,eventdate:=as.Date(eventdate)]
   #setnames(d, 2, "uniqueid")
   
   nrow(d)
@@ -189,12 +191,10 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   })
   
   setnames(d,"anchomevisitoratthehealthclinic","anhomeorclinic")
-  
-  tryCatch({
-    setnames(d,"ppcwasthisinformationfirstcollec","anbackupfile")
-  }, error = function(err) {
-    setnames(d,"ppcwasthisinformationfirstcollectedonpaperandthenenteredintothesystem","anbackupfile")
-  })
+  NamesToChange(d, badname=c("ppcwasthisinformationfirstcollectedonpaperandthenenteredintothesystem",
+                             "paperbackupused",
+                             "ppcwasthisinformationfirstcollec"),
+                    goodname= "anbackupfile")
   
   setnames(d,"ancppcvisitundertakenbywhom","anseenby")
 

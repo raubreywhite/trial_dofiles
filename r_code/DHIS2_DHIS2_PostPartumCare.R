@@ -11,10 +11,14 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp, IS_GAZA=FA
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+  } else {
+    d[,eventdate:=as.Date(eventdate)]
   }
-  d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   d<- Removeduplicate(d=d,tag="ppc",isControl=isControl)
+  
+  print("Number of ALL PPC bookings")
   
   nrow(d)
   d <- RemoveEventByFile(d=d, filename="remove_from_dhis2_ppc.xlsx")
@@ -35,6 +39,9 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp, IS_GAZA=FA
     fileNameForPotentialDuplicates=sprintf("dhis2_ppc_%s",isControl)
   )
   xtabs(~d$eventnum)
+  
+  print("Number of women who have a booking AND PPC")
+  nrow(d)
   
   setnames(d,"event","ppcevent")
   setnames(d,"ancppcvisitundertakenbywhom","ppcvisitundertakenbywhom")

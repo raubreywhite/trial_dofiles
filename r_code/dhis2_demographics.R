@@ -6,6 +6,7 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
     isControl=isControl,
     setuniqueid=F)
   
+ 
   
   if(isControl){
     setnames(d,"instance","uniqueid")
@@ -13,7 +14,8 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
     setnames(d,"lastupdated","dateupdated")
     setnames(d,"organisationunit","demoorgunit")
     setnames(d,"organisationunitname","demoorgname")
-    setnames(d,"trackedentity","trackedentity")
+    if("trackedentitytype" %in% names(d)) setnames(d, "trackedentitytype", "trackedentity")
+    if(!"trackedentity" %in% names(d)) stop("cant find trackedentity")
     setnames(d,"inactive","dummy")
     setnames(d,"identificationdocumenttype","idtype")
     setnames(d,"dataextractorusername","dataextractor")
@@ -29,24 +31,50 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
     setnames(d,"village","village")
     setnames(d,"city","city")
     setnames(d,"dateofbirth","dob")
-    setnames(d,"mobilenumber","mobile")
-    setnames(d,"educationinyears","education")
-    setnames(d,"ageatmarriage","agemarriage")
-    setnames(d,"ageatfirstpregnancy","agepregnancy")
-    setnames(d,"monthlyhouseholdincomeils","income")
-    setnames(d,"numberofmembersinhousehold","members")
-    d[,street:=""]
+    #setnames(d,"mobilenumber", "mobile")
+    #print(names(d))
+    #if("mobilenumber" %in% names(d)) setnames(d, "mobilenumber(withareacode)", "education")
+    NamesToChange(d,badname =c("mobilenumber","mobilenumberwithareacode"), 
+                  goodname = "mobile")
+    #if("educationinyears" %in% names(d)) setnames(d, "educationinyears", "education")
+    #if(!"education" %in% names(d)) stop("cant find education")
+    
+    #if("ageatmarriage" %in% names(d)) setnames(d, "ageatmarriage", "agemarriage")
+    #if(!"agemarriage" %in% names(d)) stop("cant find agemarriage")
+    
+    #if("ageatfirstpregnancy" %in% names(d)) setnames(d, "ageatfirstpregnancy", "agepregnancy")
+    #if(!"agepregnancy" %in% names(d)) stop("cant find agepregnancy")
+    
+    #if("monthlyhouseholdincomeils" %in% names(d)) setnames(d, "monthlyhouseholdincomeils", "income")
+    #if(!"income" %in% names(d)) stop("cant find income")
+    
+    #if("numberofmembersinhousehold" %in% names(d)) setnames(d, "numberofmembersinhousehold", "members")
+    #if(!"members" %in% names(d)) stop("cant find members")
+    
+    NamesToChange(d,"educationinyears","education")
+    NamesToChange(d,"ageatmarriage","agemarriage")
+    NamesToChange(d,"ageatfirstpregnancy","agepregnancy")
+    NamesToChange(d,"monthlyhouseholdincomeils","income")
+    NamesToChange(d,"numberofmembersinhousehold","members")
+    if(!"street" %in% names(d)) d[,street:=""]
     d[,camp:=""]
     d[,phone:=""]
     d[,cosang:=""]
     d[,email:=""]
+    d[,doyouwanttoreceivesms:=""]
+    d[,alternateidentificationnumber:=""]
+    
   } else {
     setnames(d,"instance","uniqueid")
     setnames(d,"created","datecreated")
     setnames(d,"lastupdated","dateupdated")
     setnames(d,"organisationunit","demoorgunit")
     setnames(d,"organisationunitname","demoorgname")
-    setnames(d,"trackedentity","trackedentity")
+    # if(badname %in% names(d)) setnames(d, badname, goodname)
+    if("trackedentitytype" %in% names(d)) setnames(d, "trackedentitytype", "trackedentity")
+    # if(!goodname %in% names(d)) ERROR!!
+    if(!"trackedentity" %in% names(d)) stop("cant find trackedentity")
+      
     setnames(d,"inactive","dummy")
     setnames(d,"identificationdocumenttype","idtype")
     if(!"identificationdocumentnumber" %in% names(d)){
@@ -54,6 +82,8 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
       d[,identificationdocumentnumber:=1:.N]
     }
     setnames(d,"identificationdocumentnumber","demoidnumber")
+    #setnames(d,"areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits", "doyouwanttoreceivesms")
+   
     
     if(IS_GAZA){
       d[,firstname:=""]
@@ -80,11 +110,13 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
       
       setnames(d,"village","village")
       setnames(d,"city","city")
-      setnames(d,"mobilenumber","mobile")
+      NamesToChange(d,badname =c("mobilenumber","mobilenumberwithareacode"), 
+                      goodname = "mobile")
       
       setnames(d,"streetname","street")
       setnames(d,"camp","camp")
       setnames(d,"telephonenumber","phone")
+  
     }
 
     setnames(d,"dateofbirth","dob")
@@ -98,6 +130,8 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
     setnames(d,"emailaddress","email")
     
     d[,dataextractor:=""]
+    d[,"doyouwanttoreceivesms":=""]
+    
   }
   
   d[is.na(demoidnumber), demoidnumber:=c(1:.N)]

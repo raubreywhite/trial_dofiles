@@ -12,7 +12,7 @@ DHIS2_HospitalBirthOutcomes <- function(isControl, earlyData, booklmp) {
   d <- Removeduplicate(d=d,
                       tag="dhis2hbo",
                       isControl=isControl,
-                      oneObsPerWomanDate=F)
+                      maxObsPerWomanDate=NULL)
   nrow(d)
  
   setnames(d,"nncgestationalageatdelivery","gestagedeliv")

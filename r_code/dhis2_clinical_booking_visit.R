@@ -85,7 +85,7 @@ DHIS2_BookingVisit <- function(isControl,
     d[, anccounselingaboutlaborsigns := as.numeric(NA)]
     d[, anccounselingaboutpkuscreening := as.numeric(NA)]
     d[, ancppcvisitundertakenbywhom := as.numeric(NA)]
-    d[, ppcwasthisinformationfirstcollec := as.numeric(NA)]
+    d[, paperbackupused := as.numeric(NA)]
 
     # capture tostring anclmpstatus, replace
     # capture tostring ancotherfamilyconcernspecified, replace
@@ -307,16 +307,18 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "ancppcvisitundertakenbywhom", "bookseenby")
   setnames(d, "anchomevisitoratthehealthclinic", "bookhomeorclinic")
 
-  tryCatch({
-    setnames(d, "ppcwasthisinformationfirstcollec", "bookbackupfile")
-  }, error = function(err) {
-    setnames(d, "ppcwasthisinformationfirstcollectedonpaperandthenenteredintothesystem", "bookbackupfile")
-  })
-
+  if("paperbackupused" %in% names(d)) setnames(d, "paperbackupused", "bookbackupfile")
+  if("ppcwasthisinformationfirstcollectedonpaperandthenenteredintothesystem" %in% names(d)) setnames(d, "ppcwasthisinformationfirstcollectedonpaperandthenenteredintothesystem", "bookbackupfile")
+  if(!"bookbackupfile" %in% names(d)) stop("cant find bookbackupfile")
+  
   setnames(d,"confamilyhistoryofinbornerrorofmetabolism","bookfamhistinbornmetab")
   setnames(d,"confamilyhistoryofdiabetesmellitus","bookfamhistdiab")
   setnames(d,"confamilyhistoryofcongenitalanomaly","bookfamhistcongenanom")
   setnames(d,"anchistoryofantepartumhemorrhageinpreviouspregnancy","bookhistantparthemprevpreg")
+  
+  # more name changing
+  
+  
   
   # delete people with duplicate eventdates (these are obvious duplicates)
   nrow(d)
@@ -351,8 +353,14 @@ DHIS2_BookingVisit <- function(isControl,
   d[, ident_dhis2_booking := ifelse(is.na(bookevent), 0, 1)]
   xtabs(~d$ident_dhis2_booking)
   
+  #
   setorder(d, bookevent)
-  d[is.na(bookevent), bookdate := datecreated]
+  if(IS_GAZA){
+    d[,bookdate:=as.Date(bookdate, "%d/%m/%Y")]
+    d[is.na(bookevent), bookdate := as.Date(datecreated, "%d/%m/%Y")]
+  } else {
+    d[is.na(bookevent), bookdate := datecreated]
+  }
   d[is.na(bookevent), bookevent := sprintf("%s%s", ifelse(isControl,"CON","INT"), 1:.N)]
 
   #d[demoidnumber==852188531]
@@ -361,13 +369,18 @@ DHIS2_BookingVisit <- function(isControl,
   
   #
   d[, bookdate := as.Date(bookdate)]
+  if(IS_GAZA){
+  d[, booklmp := as.Date(booklmp,format="%d/%m/%Y")]
+  } else{
   d[, booklmp := as.Date(booklmp)]
+  }
   if (length(unique(d$dob)) == 1) {
     d[, dob := NULL]
     d[, dob := as.Date("1980-01-01")]
   } else {
     d[, dob := as.Date(dob)]
   }
+  
 
   # drop women whose 2nd, 3rd, etc pregnancies
   # have LMPs before the first pregnancy's booking date
@@ -499,6 +512,7 @@ DHIS2_BookingVisit <- function(isControl,
   #d[demoidnumber==401404496,c("demoidnumber","uniqueid","bookevent","bookdate")]
 
   d<- Removeduplicate(d=d,tag="demobook",isControl=isControl)
+  
   
   
   return(d)

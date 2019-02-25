@@ -8,8 +8,10 @@ DHIS2_Lab <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+  } else {
+    d[,eventdate:=as.Date(eventdate)]
   }
-  d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
   d<- Removeduplicate(d=d,tag="lab",isControl=isControl)
@@ -80,7 +82,10 @@ DHIS2_Lab <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"labsecondopiniononinitiatedtreatmentforuti","laburutirep")
   setnames(d,"labrandombloodsugarmgdl","labbloodglu")
   setnames(d,"labfastingbloodsugarmgdl","labfastbloodglu")
-  setnames(d,"laboralglucosechallengetestogctmgdl","labogct")
+  NamesToChange(d,badname=c("laboralglucosechallengetestogctmgdl",
+                            "labglucosechallengetestgctmgdl"),
+                  goodname="labogct")
+  #setnames(d,"laboralglucosechallengetestogctmgdl","labogct")
   setnames(d,"ancotherlabtest1","labother1")
   setnames(d,"anclabresultofotherlabtest1","labotherres1")
   setnames(d,"ancotherlabtest2","labother2")

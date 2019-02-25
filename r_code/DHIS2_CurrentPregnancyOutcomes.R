@@ -11,8 +11,10 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+  } else {
+    d[,eventdate:=as.Date(eventdate)]
   }
-  d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   
   ####
@@ -20,7 +22,7 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   d <- Removeduplicate(d=d,
                        tag="cpo",
                        isControl=isControl,
-                       oneObsPerWomanDate=F)
+                       maxObsPerWomanDate=NULL)
   nrow(d)
   
   nrow(d)

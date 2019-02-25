@@ -9,10 +9,16 @@ DHIS2_PreviousPregnancies <- function(isControl, earlyData, booklmp, IS_GAZA=FAL
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+  } else {
+    d[,eventdate:=as.Date(eventdate)]
   }
-  d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
-
+  
+  nrow(d)
+  d<- Removeduplicate(d=d,tag="prev",isControl=isControl,
+                      maxObsPerWomanDate=10)
+  nrow(d)
   
   if(isControl){
     d[,identificationdocumentnumber:=as.character(NA)]

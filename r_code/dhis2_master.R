@@ -46,9 +46,15 @@ DHIS2_Master <- function(
     data_DHIS2_Booking <- int <- DHIS2_BookingVisit(isControl=FALSE,IS_GAZA=IS_GAZA)
     if(!IS_GAZA){
       con <- DHIS2_BookingVisit(isControl=TRUE)
+      
+      names(con)[!names(con) %in% names(int)]
+      names(int)[!names(int) %in% names(con)]
+      con[,programinstancex:=NULL]
+      con[,programinstancey:=NULL]
+      
       data_DHIS2_Booking <- rbind(
         con,
-        int)
+        int, fill=T)
     }
   }
   # restrict bookdate
@@ -118,17 +124,19 @@ DHIS2_Master <- function(
       con,
       int)
   }
+  nrow(data_DHIS2_Antenatal)
   
   ####
   # DHIS2 LAB
   print("CLEANING DHIS2 LAB")
   data_DHIS2_Lab <- int <- DHIS2_Lab(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
   if(!IS_GAZA){
-  con <- DHIS2_Lab(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
+    con <- DHIS2_Lab(isControl=TRUE, earlyData=earlyData, booklmp=booklmp)
     data_DHIS2_Lab <- rbind(
       con,
       int)
   }
+  nrow(data_DHIS2_Lab)
   
   ####
   # DHIS2 ULTRASOUND
@@ -140,26 +148,38 @@ DHIS2_Master <- function(
       con,
       int)
   }
+  nrow(data_DHIS2_Ultrasound)
   
   ####
   # DHIS2 RISK
   print("CLEANING DHIS2 RISK")
   data_DHIS2_RiskFactors <- DHIS2_RiskFactors(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+  nrow(data_DHIS2_RiskFactors)
   
   ####
   # DHIS2 MANAGEMENTS
   print("CLEANING DHIS2 MANAGEMENT")
-  data_DHIS2_Management <- DHIS2_Management(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+  data_DHIS2_Management <- int <- DHIS2_Management(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+  if(!IS_GAZA){
+    con <- DHIS2_Management(isControl=TRUE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+    data_DHIS2_Management <- rbind(
+       con,
+       int
+    )
+  }
+  nrow(data_DHIS2_Management)
   
   ####
   # DHIS2 RISK
   print("CLEANING DHIS2 NNCRISK")
   data_DHIS2_NNCRiskFactors <- DHIS2_NNCRiskFactors(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+  nrow(data_DHIS2_NNCRiskFactors)
   
   ####
   # DHIS2 MANAGEMENTS
   print("CLEANING DHIS2 NBMANAGEMENT")
   data_DHIS2_NBManagement <- DHIS2_NBManagement(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+  nrow(data_DHIS2_NBManagement)
   
   ####
   # PREVIOUS PREGNANCIES
@@ -171,6 +191,7 @@ DHIS2_Master <- function(
       con,
       int)
   }
+  nrow(data_DHIS2_PreviousPregnancies)
   
   ####
   # HOSPITAL BIRTH OUTCOMES
@@ -180,11 +201,12 @@ DHIS2_Master <- function(
   ####
   #
   print("CLINICAL CURRENT PREG OUTCOMES")
-  data_DHSI2_CurrentPregnancyOutcomes <- DHIS2_CurrentPregnancyOutcomes(isControl=F,
+  data_DHIS2_CurrentPregnancyOutcomes <- DHIS2_CurrentPregnancyOutcomes(isControl=F,
                                                                         earlyData = earlyData,
                                                                         booklmp = booklmp,
                                                                         data_ident_dhis2_booking = data_ident_dhis2_booking,
                                                                         IS_GAZA=IS_GAZA)
+  nrow(data_DHIS2_CurrentPregnancyOutcomes)
   ####
   #
   print("CLINICAL CURRENT PREG OUTCOMES")
@@ -192,6 +214,7 @@ DHIS2_Master <- function(
                                                                         earlyData = earlyData,
                                                                         booklmp = booklmp,
                                                                   IS_GAZA=IS_GAZA)
+  nrow(data_DHIS2_PregnancyClosingNotes)
   ####
   #
   print("POSTPARTUM CARE")
@@ -199,6 +222,7 @@ DHIS2_Master <- function(
                                                           earlyData = earlyData,
                                                           booklmp = booklmp,
                                                           IS_GAZA=IS_GAZA)
+  nrow(data_DHIS2_PostPartumCare)
   if(!keepDoubleBookings){
     nrow(data_DHIS2_PostPartumCare)
     data_DHIS2_PostPartumCare <- merge(x=data_DHIS2_PostPartumCare,y=pData,
@@ -240,6 +264,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_an"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -253,6 +279,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_lab"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -266,6 +294,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_us"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -279,6 +309,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_risk"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -292,6 +324,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_man"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -305,6 +339,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_nncrisk"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -318,6 +354,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_nbman"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -326,17 +364,19 @@ DHIS2_Master <- function(
   
   print("RESHAPE TO WIDE AND MERGE DHIS2 PREVIOUS PREGNANCIES")
   d <- ReshapeToWideAndMerge(
-    base=d,
-    additional=data_DHIS2_PreviousPregnancies,
-    valueVarsRegex="^prev",
-    dcastFormula="uniqueid~eventnum",
-    mergeVars=c("uniqueid"),
-    identName="ident_dhis2_prev"
+   base=d,
+   additional=data_DHIS2_PreviousPregnancies,
+   valueVarsRegex="^prev",
+   dcastFormula="uniqueid~eventnum",
+   mergeVars=c("uniqueid"),
+   identName="ident_dhis2_prev"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
-  
+   
   if(!IS_GAZA){
     print("RESHAPE TO WIDE AND MERGE DHIS2 HOSPITAL BIRTH OUTCOMES")
     d <- ReshapeToWideAndMerge(
@@ -347,20 +387,24 @@ DHIS2_Master <- function(
       mergeVars=c("uniqueid","bookevent","booknum"),
       identName="ident_dhis2_dhis2hbo"
     )
+    length(d$bookevent)
+    length(unique(d$bookevent))
     nrow(data_DHIS2_Booking)
     nrow(d)
     ncol(d)
   }
   
-  print("RESHAPE TO WIDE AND MERGE data_DHSI2_CurrentPregnancyOutcomes")
+  print("RESHAPE TO WIDE AND MERGE data_DHIS2_CurrentPregnancyOutcomes")
   d <- ReshapeToWideAndMerge(
     base=d,
-    additional=data_DHSI2_CurrentPregnancyOutcomes,
+    additional=data_DHIS2_CurrentPregnancyOutcomes,
     valueVarsRegex="^cpo",
     dcastFormula="uniqueid+bookevent+booknum~eventnum",
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_cpo"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -374,6 +418,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_pcn"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -387,6 +433,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_ppc"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -400,6 +448,8 @@ DHIS2_Master <- function(
     mergeVars=c("uniqueid","bookevent","booknum"),
     identName="ident_dhis2_nbc"
   )
+  length(d$bookevent)
+  length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
   nrow(d)
   ncol(d)
@@ -438,6 +488,8 @@ DHIS2_Master <- function(
   #####################
   #####################
   #####################
+  
+  #######
   
   if(!includePPC){
     d <- d[ident_dhis2_booking==1]

@@ -12,6 +12,17 @@ MergeDHISToAVICENNA_Internal <- function(idvar="motheridno",dhis,avicenna){
   
   m <- foverlaps(lateDataKey, earlyDataKey, by.x=c(idvar, "minDate", "maxDate"),type="within")
   m <- na.omit(m[,c(idvar,"motheridbooknum","avicennanum"),with=F])
+  
+  # make sure we arent matching multiple times
+  # How many times does a woman's booknum get matched to avicenna?
+  m[,x:=1:.N,by=.(motheridno,motheridbooknum)]
+  # make sure we only take 1 avicenna per woman's booknum
+  m <- m[x==1]
+  # How many times does a woman's avicenna num get matched to dhis2?
+  m[,x:=1:.N,by=.(motheridno,avicennanum)]
+  # make sure we only take 1 booknum per woman's avicenna
+  m <- m[x==1]
+  m[,x:=NULL]
   nrow(m)
   return(m)
 }
@@ -20,7 +31,9 @@ MergeDHISToAVICENNA_Internal <- function(idvar="motheridno",dhis,avicenna){
 MergeDHISToAVICENNA <- function(dhis,avicenna){
   print("****MergeDHISToAVICENNA 1")
   # merging by motheridno
-  m1 <- MergeDHISToAVICENNA_Internal(idvar="motheridno",dhis=dhis,avicenna=avicenna)
+  m1 <- MergeDHISToAVICENNA_Internal(idvar="motheridno",
+                                     dhis=dhis,
+                                     avicenna=avicenna)
   nrow(m1)
   
   print("****MergeDHISToAVICENNA 2")

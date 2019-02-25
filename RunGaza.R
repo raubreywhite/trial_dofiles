@@ -1,10 +1,6 @@
 ###### SETUP STARTS ######
 
-tryCatch({
-  setwd("X:/data processing/trial_dofiles")
-}, error=function(err){
-  setwd("Z:/data processing/trial_dofiles")
-})
+setwd("C:/data processing/trial_dofiles")
 
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 sapply(fileSources, source, .GlobalEnv)
