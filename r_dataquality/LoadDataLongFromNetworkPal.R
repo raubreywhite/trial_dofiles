@@ -48,6 +48,13 @@ LoadDataLongFromNetworkPal <- function(){
                  value.name = longnames)
   
   xtabs(~long$variable)
+  
+  # deleting all the book variables after time point 1
+  booknames <- stringr::str_subset(names(long),"^book")
+  for(i in booknames){
+    long[variable!=1, (i):=NA]
+  }
+  
   openxlsx::write.xlsx(d[1:110], file.path(FOLDER_DATA_RESULTS_PAL,
                                            "wide.xlsx"))
   

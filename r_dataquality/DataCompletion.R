@@ -1,3 +1,44 @@
+NumberOf0 <- function(x){
+  if(length(x)==0) return(0)
+  if(is.numeric(x[1])){
+    sum(x==0,na.rm=T)
+  } else {
+    return(0)
+  }
+}
+
+NumberOfEmptyQuotes <- function(x){
+  if(length(x)==0) return(0)
+  if(is.numeric(x[1])){
+    return(0)
+  } else if(lubridate::is.Date(x[1])){
+    return(0)
+  } else {
+    sum(x=="",na.rm=T)
+  }
+}
+
+MeanNo0 <- function(x){
+  if(!is.numeric(x)) return(NA)
+  y <- x[x!=0 & !is.na(x)]
+  if(length(y)==0) return(NA)
+  return(mean(y))
+}
+
+MedianNo0 <- function(x){
+  if(!is.numeric(x)) return(NA)
+  y <- x[x!=0 & !is.na(x)]
+  if(length(y)==0) return(NA)
+  return(median(y))
+}
+
+QuantileNo0 <- function(x,probs){
+  if(!is.numeric(x)) return(NA)
+  y <- x[x!=0 & !is.na(x)]
+  if(length(y)==0) return(NA)
+  return(quantile(y,probs=probs))
+}
+
 DataCompletion <- function(){
   long <- LoadDataLongFromNetworkPal()
   
@@ -5,50 +46,126 @@ DataCompletion <- function(){
   # long[XXXXX,
   # the result of this is in wide format, you have two rows, one that
   # is for gaza, one that is for WB
-  resN <- long[, lapply(.SD, function(x) length(x)),keyby=.(ident_gaza)]
+  #resN <- long[, lapply(.SD, function(x) length(x)),keyby=.(ident_gaza)]
   # we now need to make this into long format, so we melt it and turn it into
   # long format. We keep "idvars=ident_gaza" so that we have an extra column
   # that retains the information if each row is gaza or WB
-  resN <- melt.data.table(resN,id.vars="ident_gaza")
-  setnames(resN,"value","resN")
+  #resN <- melt.data.table(resN,id.vars="ident_gaza")
+  #setnames(resN,"value","resN")
   
-  resNA <- long[, lapply(.SD, function(x) sum(is.na(x))),keyby=.(ident_gaza)]
-  resNA <- melt.data.table(resNA,id.vars="ident_gaza")
-  setnames(resNA,"value","resNA")
+  res <- long[, as.list(unlist(lapply(.SD, function(x)
+    list(
+      xIsNumeric=is.numeric(x),
+      xN=length(x),
+      xNA=sum(is.na(x)),
+      xNotNA=sum(!is.na(x)),
+      xNum0=NumberOf0(x),
+      xNumEmptyQuotes=NumberOfEmptyQuotes(x),
+      xUnique=length(unique(x)),
+      xMean=mean(as.numeric(x),na.rm=T),
+      xMedian=median(as.numeric(x),na.rm=T),
+      xp25=as.numeric(quantile(as.numeric(x),probs=0.25,na.rm=T)),
+      xp75=as.numeric(quantile(as.numeric(x),probs=0.75,na.rm=T)),
+      xMeanNo0=MeanNo0(as.numeric(x)),
+      xMedianNo0=MedianNo0(as.numeric(x)),
+      xp25No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.25)),
+      xp75No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.75))
+    )))  
+  ),keyby=.(ident_gaza)]
   
-  resNotNA <- long[, lapply(.SD, function(x) sum(!is.na(x))),keyby=.(ident_gaza)]
-  resNotNA <- melt.data.table(resNotNA,id.vars="ident_gaza")
-  setnames(resNotNA,"value","resNotNA")
+  # turn it into long format
+  res <- melt.data.table(res, id.vars="ident_gaza")
+  # split the variable name into 2 variables ("variable name", and "function")
+  res[,variable:=stringr::str_replace(variable,"\\.1\\.","_1.")]
+  res[,var:=stringr::str_split_fixed(variable,"\\.",2)[,1]]
+  res[,method:=stringr::str_split_fixed(variable,"\\.",2)[,2]]
   
-  res0 <- long[, lapply(.SD, function(x)if(is.numeric(x[1])){
-    sum(x==0,na.rm=T)} else {
-      return("0")
-    }),keyby=.(ident_gaza)]
-  res0 <- melt.data.table(res0,id.vars="ident_gaza")
-  setnames(res0,"value","res0")
+  # put all of the different values into wide format
+  res <- dcast.data.table(res,ident_gaza+var~method,value.var = "value")
   
-  res <- merge(resN, resNA, by=c("variable","ident_gaza"))
-  res <- merge(res, resNotNA, by=c("variable","ident_gaza"))
-  res <- merge(res, res0, by=c("variable","ident_gaza"))
+  # make it a bit prettier
+  setorder(res,var,-ident_gaza)
+  setcolorder(res,c("var","ident_gaza"))
   
-  res[,key2:=stringr::str_sub(variable,1,2)]
-  res[,key3:=stringr::str_sub(variable,1,3)]
+  # getting out the denominators (events!!!)
+  res[,key2:=stringr::str_sub(var,1,2)]
+  res[,key3:=stringr::str_sub(var,1,3)]
   res[,key:=key2]
   res[key %in% "nb", key:=key3]
   
-  denoms <- res[stringr::str_detect(variable,"event")]
-  denoms <- unique(denoms[,c("key","ident_gaza","resNotNA")])
-  setnames(denoms,"resNotNA","denom")
+  denoms <- res[stringr::str_detect(var,"event")]
+  denoms <- unique(denoms[,c("key","ident_gaza","xNotNA")])
+  setnames(denoms,"xNotNA","denom")
   
-  res <- merge(res,denoms,by=c("key","ident_gaza"))
+  # fix denom for booking (because booking is booking+demographics)
+  denomsBook <- long[ident_dhis2_booking==T,
+                     .(denom=sum(!is.na(bookevent))),
+       keyby=.(ident_gaza)]
+  denomsBook[,key:="bo"]
   
-  res[,resN:=NULL]
-  res[,resNA:=NULL]
+  # delete the "wrong booking" (which is really booking+demon)
+  denoms <- denoms[key!="bo"]
+  # add in the "right booking" (which is really just booking)
+  denoms <- rbind(denoms,denomsBook)
   
-  res <- res[!variable %in% c("anlong")]
+  nrow(res)
+  res <- merge(res,denoms,by=c("key","ident_gaza"),all.x=T)
+  nrow(res)
+  ## end denominators
+  
+  # doing manual fixing of what is considered to be missing
+  res[,notMissing:=xNotNA]
+  # for numeric, 0s are missing
+  res[xIsNumeric==TRUE & xUnique>5,notMissing:=xNotNA-xNum0]
+  # for strings, "" are missing
+  res[xIsNumeric==FALSE,notMissing:=xNotNA-xNumEmptyQuotes]
+  
+  # fix mean, median, p25, and p75 for when 0s are actually missing
+  res[xIsNumeric==TRUE & xUnique>5,xMean:=xMeanNo0]
+  res[xIsNumeric==TRUE & xUnique>5,xMedian:=xMedianNo0]
+  res[xIsNumeric==TRUE & xUnique>5,xp25:=xp25No0]
+  res[xIsNumeric==TRUE & xUnique>5,xp75:=xp75No0]
+  
+  res[,xMeanNo0:=NULL]
+  res[,xMedianNo0:=NULL]
+  res[,xp25No0:=NULL]
+  res[,xp75No0:=NULL]
+  
+  # delete useless variables
+  res[,xN:=NULL]
+  res[,xNA:=NULL]
+  res[,xNotNA:=NULL]
+  res[,xNum0:=NULL]
+  
+  res[,key2:=NULL]
+  res[,key3:=NULL]
+  
+  res[,xNumEmptyQuotes:=NULL]
+  
+  # make things pretty
+  res[,varType:="Numeric"]
+  res[xIsNumeric==0,varType:="String"]
+  res[,xIsNumeric:=NULL]
+  
+  res[,percComplete:=round(100*notMissing/denom,1)]
+  res[,xMean:=round(xMean,1)]
+  
+  res <- res[denom>0]
+  
+  setorder(res,ident_gaza,key,varType,var)
+  setcolorder(res,c(
+    "ident_gaza",
+    "key",
+    "varType",
+    "var",
+    "percComplete",
+    "denom",
+    "notMissing"
+    ))
   openxlsx::write.xlsx(res,
-                       file.path(FOLDER_DATA_RESULTS_PAL,
-                                 sprintf("data_completeness_names_%s.xlsx",lubridate::today())
+                       file.path(FOLDER_DROPBOX_RESULTS_PAL,
+                                 "data_quality",
+                                 "data_completeness.xlsx"
                                  ))
   
   
