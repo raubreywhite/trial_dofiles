@@ -516,13 +516,14 @@ SaveCISMACDataBase<- function(){
   #### THESE ARE THE VARIABLES THAT DONT EXIST!!!!!!
   varsDontExist <- varsKeep[!varsKeep %in% names(d)]
   if(length(varsDontExist)>0){
-  message("THESE VARIABLES DONT EXIST IN CISMAC DATABASE")
-  for(i in varsDontExist) message(i)
-  stop("THESE VARIABLES DONT EXIST IN CISMAC DATABASE")
+    message("THESE VARIABLES DONT EXIST IN CISMAC DATABASE")
+    for(i in varsDontExist) message(i)
+    stop("THESE VARIABLES DONT EXIST IN CISMAC DATABASE")
   }
   
   d <-d[ident_TRIAL_1==T,varsKeep,with=F]
   
+  # A = controls, B= intervention
   A <-d[ident_dhis2_control==T]
   B <-d[ident_dhis2_control==F]
   
@@ -549,30 +550,39 @@ SaveCISMACDataBase<- function(){
   
   for(i in seq_along(n)){
     print(i)
-    temp <-A[bookyearmonth==stack$yearmonth[i]]
-   
-   saveRDS(temp,
+    tempA <- A[bookyearmonth==stack$yearmonth[i]]
+    tempB <-B[bookyearmonth==stack$yearmonth[i]]
+    
+    # identifying how many rows the smaller dataset has
+    smallestNumber <- min(c(nrow(tempA),nrow(tempB)))
+    
+    # take a random sample of ROW NUMBERS of size 'smallestNumber' from both control/interverntion
+    sampleRowsA <- sample(1:nrow(tempA), size=smallestNumber)
+    sampleRowsB <- sample(1:nrow(tempB), size=smallestNumber)
+    
+    # here we say "please give me the 5th, the 7th, the 20th... etc rows"
+    tempA <- tempA[sampleRowsA]
+    tempB <- tempB[sampleRowsB]
+    
+   saveRDS(tempA,
            file.path(FOLDER_DATA_CLEAN,
                      "CISMACdataset",
                      lubridate::today(),
                      sprintf("%s_CISMAC_%s.rds",stack$controlName[i], stack$yearmonth[i])))
    
-   openxlsx::write.xlsx(temp,file.path(FOLDER_DATA_CLEAN,
+   openxlsx::write.xlsx(tempA,file.path(FOLDER_DATA_CLEAN,
                                        "CISMACdataset",
                                        lubridate::today(),
                                        sprintf("%s_CISMAC_%s.xlsx", stack$controlName[i], stack$yearmonth[i]))) 
-  
-    print(i)
+ 
     
-    temp <-B[bookyearmonth==stack$yearmonth[i]]
-    
-    saveRDS(temp,
+    saveRDS(tempB,
             file.path(FOLDER_DATA_CLEAN,
                       "CISMACdataset",
                       lubridate::today(),
                       sprintf("%s_CISMAC_%s.rds",stack$interventionName[i], stack$yearmonth[i])))
     
-    openxlsx::write.xlsx(temp,file.path(FOLDER_DATA_CLEAN,
+    openxlsx::write.xlsx(tempB,file.path(FOLDER_DATA_CLEAN,
                                         "CISMACdataset",
                                         lubridate::today(),
                                         sprintf("%s_CISMAC_%s.xlsx", stack$interventionName[i], stack$yearmonth[i]))) 

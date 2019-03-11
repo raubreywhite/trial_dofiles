@@ -64,12 +64,87 @@ p <- ggplot(smallD, aes(x=bookweight))
 p <- p + geom_density()
 p
 
+####################
+# bookweight
+####################
+
 #from this plot we see that someone was enetered as 6000kg 
 #so we want to see where this is happening (in which exposure group)
-p <- ggplot(smallD, aes(y=bookweight, x=prettyExposure))
+pval <- t.test(bookweight ~ prettyExposure, data=smallD)$p.value
+
+p <- ggplot(smallD, aes_string(y="bookweight", x="prettyExposure"))
 p <- p + geom_boxplot()
-p <- p +geom_boxplot(outlier.color = NA)
+p <- p + geom_boxplot(outlier.color = NA)
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+####################
+# bookbmi
+####################
+
+pval <- t.test(bookbmi ~ prettyExposure, data=smallD)$p.value
+
+p <- ggplot(smallD, aes_string(y="bookbmi", x="prettyExposure"))
+p <- p + geom_boxplot()
+p <- p + geom_boxplot(outlier.color = NA)
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p
+
+####################
+# bookbmi (doing it as a loop)
+####################
+
+form <- sprintf("%s ~ prettyExposure", "bookbmi")
+form <- glue::glue("{outcome} ~ prettyExposure", outcome="bookbmi")
+
+# 'form' is a string, not a formula. 
+# need to turn it into a formula using 'as.formula'
+pval <- t.test(as.formula(form), data=smallD)$p.value
+
+p <- ggplot(smallD, aes_string(y="bookbmi", x="prettyExposure"))
+p <- p + geom_boxplot()
+p <- p + geom_boxplot(outlier.color = NA)
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p
+
+
+########add variables we want below in the vector to get loop
+for (i in c("bookbmi", "bookweight")){
+  
+  form <- sprintf("%s ~ prettyExposure", i)
+  form <- glue::glue("{outcome} ~ prettyExposure", outcome=i)
+  
+  # 'form' is a string, not a formula. 
+  # need to turn it into a formula using 'as.formula'
+  pval <- t.test(as.formula(form), data=smallD)$p.value
+  
+  p <- ggplot(smallD, aes_string(y=i, x="prettyExposure"))
+  p <- p + geom_boxplot()
+  p <- p + geom_boxplot(outlier.color = NA)
+  p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+  p
+  
+  
+  ggsave(file.path(
+    FOLDER_DROPBOX_RESULTS,
+    sprintf("Boxplot_%s.png",i)), 
+    plot = p, width = 297, height = 210, units = "mm")
+  
+  
+}
+
+
+vector1 <- c("a","b","c")
+vector2 <- c("f","g","h")
+
+print(vector1)
+print(vector2)
+
+for(i in 1:2){
+  varThatIWant <- sprintf("vector%s",i)
+  print(get(varThatIWant))
+}
+
 
 #variables that we want to make "uglyTable for because they are yes, no, missing
 #
@@ -161,15 +236,16 @@ ggsave(filename=file.path(
   units="mm")
 
 
-
+########################
+##### bookprimi
 
 #Chi-squared for differences in bookprimi
-chisq.test(x=uglyTable$bookprimi, y = uglyTable$prettyExposure, correct = TRUE,
+pval <- chisq.test(x=uglyTable$bookprimi, y = uglyTable$prettyExposure, correct = TRUE,
            p = rep(1/length(x), length(x)), rescale.p = FALSE,
-           simulate.p.value = FALSE, B = 2000)
+           simulate.p.value = FALSE, B = 2000)$p.value
+pval <- round(pval,digits=3)
 
 
-#bookprimi
 uglyTable[!is.na(bookprimi),denom:=sum(N),by=.(prettyExposure)]
 
 #do the other way for as.factor instead better for other purposes
@@ -177,14 +253,23 @@ uglyTable[!is.na(bookprimi),denom:=sum(N),by=.(prettyExposure)]
 p <- ggplot(uglyTable, aes(x=prettyExposure, y=N, fill=as.factor(bookprimi)))
 p <- p + geom_col()
 p <- p + scale_fill_brewer(palette="Dark2")
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
 p <- ggplot(uglyTable[!is.na(bookprimi)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookprimi)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p <- p + labs(title = "Bookprimi")
         
+########################
+##### bookparity
 
-#bookparity
+#Chi-squared for differences in bookparity
+pval <- chisq.test(x=uglyTable$bookparity, y = uglyTable$prettyExposure, correct = TRUE,
+                   p = rep(1/length(x), length(x)), rescale.p = FALSE,
+                   simulate.p.value = FALSE, B = 2000)$p.value
+pval <- round(pval,digits=3)
+
 uglyTable[!is.na(bookparity),denom:=sum(N),by=.(prettyExposure)]
 
 #do the other way for as.factor instead better for other purposes
@@ -192,6 +277,7 @@ uglyTable[!is.na(bookparity),denom:=sum(N),by=.(prettyExposure)]
 p <- ggplot(uglyTable, aes(x=prettyExposure, y=N, fill=as.factor(bookparity)))
 p <- p + geom_col()
 p <- p + scale_fill_brewer(palette="Dark2")
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
 p <- ggplot(uglyTable[!is.na(bookparity)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookparity)))
@@ -200,8 +286,15 @@ p
 
 
 
+########################
+##### bookhistdm
 
-###Bookhistdm
+#Chi-squared for differences in bookhistdm
+pval <- chisq.test(x=uglyTable$bookhistdm, y = uglyTable$prettyExposure, correct = TRUE,
+                   p = rep(1/length(x), length(x)), rescale.p = FALSE,
+                   simulate.p.value = FALSE, B = 2000)$p.value
+pval <- round(pval,digits=3)
+
 uglyTable[!is.na(bookhistdm),denom:=sum(N),by=.(prettyExposure)]
 
 # delete variable
@@ -219,76 +312,143 @@ uglyTable[,prettyFill:=factor(prettyFill,levels=c("Not true","Yes"))]
 p <- ggplot(uglyTable[!is.na(bookhistdm)], aes(x=prettyExposure, y=N, fill=as.factor(bookhistdm)))
 p <- p + geom_col()
 p <- p + scale_fill_brewer(palette="Dark2")
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+########################
+##### bookhistgdm
 
+#Chi-squared for differences in bookhistgdm
+pval <- chisq.test(x=uglyTable$bookhistgdm, y = uglyTable$prettyExposure, correct = TRUE,
+                   p = rep(1/length(x), length(x)), rescale.p = FALSE,
+                   simulate.p.value = FALSE, B = 2000)$p.value
+pval <- round(pval,digits=3)
 
 #bookhistgdm
 uglyTable[!is.na(bookhistgdm),denom:=sum(N),by=.(prettyExposure)]
 
 p <- ggplot(uglyTable[!is.na(bookhistgdm)], aes(x=prettyExposure, y=N, fill=as.factor(bookhistgdm)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
 p <- ggplot(uglyTable[!is.na(bookhistgdm)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhistgdm)))
 p <- p + geom_col()
 p
 
-#bookhistotherch
+########################
+##### bookhistotherch
+
+#Chi-squared for differences in bookhistotherch
+pval <- chisq.test(x=uglyTable$bookhistotherch, y = uglyTable$prettyExposure, correct = TRUE,
+                   p = rep(1/length(x), length(x)), rescale.p = FALSE,
+                   simulate.p.value = FALSE, B = 2000)$p.value
+pval <- round(pval,digits=3)
+
 uglyTable[!is.na(bookhistotherch),denom:=sum(N),by=.(prettyExposure)]
 
+# raw numbers
 p <- ggplot(uglyTable, aes(x=prettyExposure, y=N, fill=as.factor(bookhistotherch)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+# percentage
 p <- ggplot(uglyTable[!is.na(bookhistotherch)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhistotherch)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
-#bookhistcs
+########################
+##### bookhistcs
+
+#Chi-squared for differences in bookhistcs
+pval <- chisq.test(x=uglyTable$bookhistcs, y = uglyTable$prettyExposure, correct = TRUE,
+                   p = rep(1/length(x), length(x)), rescale.p = FALSE,
+                   simulate.p.value = FALSE, B = 2000)$p.value
+pval <- round(pval,digits=3)
+
 uglyTable[!is.na(bookhistcs),denom:=sum(N),by=.(prettyExposure)]
 
+# raw numbers
 p <- ggplot(uglyTable[!is.na(bookhistcs)], aes(x=prettyExposure, y=N, fill=as.factor(bookhistcs)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+# percentage
 p <- ggplot(uglyTable[!is.na(bookhistcs)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhistcs)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+########################
+##### bookhisthtn
 
-#bookhisthtn
+#Chi-squared for differences in bookhisthtn
+pval <- chisq.test(x=uglyTable$bookhisthtn, y = uglyTable$prettyExposure, correct = TRUE,
+                   p = rep(1/length(x), length(x)), rescale.p = FALSE,
+                   simulate.p.value = FALSE, B = 2000)$p.value
+pval <- round(pval,digits=3)
+
 uglyTable[!is.na(bookhisthtn),denom:=sum(N),by=.(prettyExposure)]
 
+# raw numbers
 p <- ggplot(uglyTable[!is.na(bookhisthtn)], aes(x=prettyExposure, y=N, fill=as.factor(bookhisthtn)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+# percentage
 p <- ggplot(uglyTable[!is.na(bookhisthtn)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhisthtn)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
-#bookhistperi
+########################
+##### bookhistperi
+
+#Chi-squared for differences in bookhistperi
+pval <- chisq.test(x=uglyTable$bookhistperi, y = uglyTable$prettyExposure, correct = TRUE,
+                   p = rep(1/length(x), length(x)), rescale.p = FALSE,
+                   simulate.p.value = FALSE, B = 2000)$p.value
+pval <- round(pval,digits=3)
+
 uglyTable[!is.na(bookhistperi),denom:=sum(N),by=.(prettyExposure)]
 
+# raw numbers
 p <- ggplot(uglyTable[!is.na(bookhistperi)], aes(x=prettyExposure, y=N, fill=as.factor(bookhistperi)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+# percentage
 p <- ggplot(uglyTable[!is.na(bookhistperi)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhistperi)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+########################
+##### laburglu_1
 
-#laburglu_1
+#Chi-squared for differences in laburglu_1
+pval <- chisq.test(x=uglyTable$laburglu_1, y = uglyTable$prettyExposure, correct = TRUE,
+                   p = rep(1/length(x), length(x)), rescale.p = FALSE,
+                   simulate.p.value = FALSE, B = 2000)$p.value
+pval <- round(pval,digits=3)
+
 uglyTable[!is.na(laburglu_1),denom:=sum(N),by=.(prettyExposure)]
 
+# raw data
 p <- ggplot(uglyTable[!is.na(laburglu_1)], aes(x=prettyExposure, y=N, fill=as.factor(laburglu_1)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+# percentages
 p <- ggplot(uglyTable[!is.na(laburglu_1)], aes(x=prettyExposure, y=N/denom, fill=as.factor(laburglu_1)))
 p <- p + geom_col()
+p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
 
