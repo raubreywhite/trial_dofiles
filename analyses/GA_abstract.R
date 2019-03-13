@@ -11,7 +11,40 @@ analysisDatasetUSgA <- d[bookyearmonth<="2017-03" &
                            !is.na(first_1_21_usedd_gA_cats),
                          c("mahima_dateofbirth_1",
                            "first_1_21_usedd_gA",
-                           "first_1_21_usedd_gA_cats")]
+                           "first_1_21_usedd_gA_cats",
+                           "mahima_hospenteredgestage_1",
+                           "mahima_gestageatbirthwk_1")]
+
+# we pull ou thte 3 variables that we care about
+long <- analysisDatasetUSgA[,c(
+  "first_1_21_usedd_gA",
+  "mahima_hospenteredgestage_1",
+  "mahima_gestageatbirthwk_1"
+)]
+# i create my own id variable (per row number)
+long[,id:=1:.N]
+# reshape to long
+long <- melt.data.table(long, id.vars="id")
+
+# mixed effects linear regression with random effect for person
+# this takes into account the 'paired nature' of the data
+# (i.e. multiple observations per woman/pregnancy)
+summary(lme4::lmer(value ~ variable + (1|id), data=long))
+summary(lme4::lmer(value ~ variable + (1|id), data=long[value >= 0 & value <= 45])) # removing outliers
+
+# this is a normal linear regression
+# (but not appropriate due to the paired naturex)
+# outcome ~ exposure
+summary(lm(value ~ variable, data=long))
+# remember to look at the overall pvalue 
+# for each of the variables first!
+# lm generally just reports pair-wise comparisons
+# which are a second step in the analyses
+anova(lm(value ~ variable, data=long))
+
+### 
+
+
 cat("\nDenominator_first_1_21_usedd\n")
 nrow(analysisDatasetUSgA)
 cat("\nMean_first_1_21_usedd\n")

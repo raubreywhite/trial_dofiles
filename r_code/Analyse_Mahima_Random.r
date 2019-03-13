@@ -355,7 +355,9 @@ IndicatorsOsloGenerate <- function(d=NULL){
   # pull out the first booking date, and use it as angestage_0
   # gen angestage_0 = bookgestage
   weeks <- list(
-    "00_14"=c(0:14),
+    "00_07"=c(0:7),
+    "08_12"=c(8:12),
+    "13_14"=c(13:14),
     "15_17"=c(15:17),
     "18_22"=c(18:22),
     "23_23"=c(23:23),
@@ -395,8 +397,8 @@ IndicatorsOsloGenerate <- function(d=NULL){
   
   xtabs(~d$custo_bookgestagecat)
   
-  d[custo_bookgestagecat=="00_14",custo_anvisit_timely_by_bookgestage:=FALSE]
-  d[custo_bookgestagecat=="00_14" & 
+  d[custo_bookgestagecat %in% c("00_07","08_12","13_14"),custo_anvisit_timely_by_bookgestage:=FALSE]
+  d[custo_bookgestagecat %in% c("00_07","08_12","13_14") & 
       custo_anvisit_15_17==TRUE & 
       custo_anvisit_18_22==TRUE & 
       custo_anvisit_24_28==TRUE & 
@@ -448,29 +450,66 @@ IndicatorsOsloGenerate <- function(d=NULL){
       custo_anvisit_34_38==TRUE,
     custo_anvisit_timely_by_bookgestage:=TRUE]
   
-  xtabs(~d$custo_anvisit_timely_by_bookgestage)
-  
   ##### BLOOD PRESURE
-  for(i in c(
-    "15_17",
-    "18_22",
-    "24_28",
-    "31_33",
-    "34_38"
-  )){
-    variableVisit <- sprintf("custo_anvisit_%s",i)
-    variableDiast <- sprintf("custo_anbpdiast_%s",i)
-    variableSyst <- sprintf("custo_anbpsyst_%s",i)
-    
-    variableResult <- sprintf("custo_anvisit_with_bp_%s",i)
-    
-    d[get(variableVisit)==TRUE,(variableResult):=FALSE]
-    d[get(variableVisit)==TRUE & 
-        get(variableDiast)==TRUE &
-        get(variableSyst),(variableResult):=TRUE]
-    
-    print(xtabs(~d[[variableResult]]))
-  }
+  d[custo_bookgestagecat %in% c("00_07","08_12","13_14"),custo_anbpdiast_timely_by_bookgestage:=FALSE]
+  d[custo_bookgestagecat %in% c("00_07","08_12","13_14") & 
+      (custo_anbpdiast_00_07==TRUE | custo_anbpdiast_08_12==TRUE | custo_anbpdiast_13_14==TRUE) & 
+      custo_anbpdiast_15_17==TRUE & 
+      custo_anbpdiast_18_22==TRUE & 
+      custo_anbpdiast_24_28==TRUE & 
+      custo_anbpdiast_31_33==TRUE & 
+      custo_anbpdiast_34_38==TRUE,
+    custo_anbpdiast_timely_by_bookgestage:=TRUE]
+  
+  d[custo_bookgestagecat=="15_17",custo_anbpdiast_timely_by_bookgestage:=FALSE]
+  d[custo_bookgestagecat=="15_17" & 
+      custo_anbpdiast_15_17==TRUE & 
+      custo_anbpdiast_18_22==TRUE & 
+      custo_anbpdiast_24_28==TRUE & 
+      custo_anbpdiast_31_33==TRUE & 
+      custo_anbpdiast_34_38==TRUE,
+    custo_anbpdiast_timely_by_bookgestage:=TRUE]
+  
+  d[custo_bookgestagecat=="18_22",custo_anbpdiast_timely_by_bookgestage:=FALSE]
+  d[custo_bookgestagecat=="18_22" & 
+      custo_anbpdiast_18_22==TRUE & 
+      custo_anbpdiast_24_28==TRUE & 
+      custo_anbpdiast_31_33==TRUE & 
+      custo_anbpdiast_34_38==TRUE,
+    custo_anbpdiast_timely_by_bookgestage:=TRUE]
+  
+  d[custo_bookgestagecat=="23_23",custo_anbpdiast_timely_by_bookgestage:=FALSE]
+  d[custo_bookgestagecat=="23_23" & 
+      custo_anbpdiast_23_23==TRUE & 
+      custo_anbpdiast_24_28==TRUE & 
+      custo_anbpdiast_31_33==TRUE & 
+      custo_anbpdiast_34_38==TRUE,
+    custo_anbpdiast_timely_by_bookgestage:=TRUE]
+  
+  d[custo_bookgestagecat=="24_28",custo_anbpdiast_timely_by_bookgestage:=FALSE]
+  d[custo_bookgestagecat=="24_28" & 
+      custo_anbpdiast_24_28==TRUE & 
+      custo_anbpdiast_31_33==TRUE & 
+      custo_anbpdiast_34_38==TRUE,
+    custo_anbpdiast_timely_by_bookgestage:=TRUE]
+  
+  d[custo_bookgestagecat=="29_30",custo_anbpdiast_timely_by_bookgestage:=FALSE]
+  d[custo_bookgestagecat=="29_30" & 
+      custo_anbpdiast_29_30==TRUE & 
+      custo_anbpdiast_31_33==TRUE & 
+      custo_anbpdiast_34_38==TRUE,
+    custo_anbpdiast_timely_by_bookgestage:=TRUE]
+  
+  d[custo_bookgestagecat=="31_33",custo_anbpdiast_timely_by_bookgestage:=FALSE]
+  d[custo_bookgestagecat=="31_33" & 
+      custo_anbpdiast_31_33==TRUE & 
+      custo_anbpdiast_34_38==TRUE,
+    custo_anbpdiast_timely_by_bookgestage:=TRUE]
+  
+  d[custo_bookgestagecat=="34_38",custo_anbpdiast_timely_by_bookgestage:=FALSE]
+  d[custo_bookgestagecat=="34_38" & 
+      custo_anbpdiast_34_38==TRUE,
+    custo_anbpdiast_timely_by_bookgestage:=TRUE]
   
 }
 
@@ -479,7 +518,7 @@ IndicatorsOsloRandom <- function(d){
     numerator=sum(custo_anvisit_timely_by_bookgestage,na.rm=T),
     denominator=sum(!is.na(custo_anvisit_timely_by_bookgestage)),
     TOTALNUMOFPEOPLEINCAT=.N
-  ),by=.(
+  ),keyby=.(
     custo_bookgestagecat
   )]
   setorder(resPalestine,custo_bookgestagecat)

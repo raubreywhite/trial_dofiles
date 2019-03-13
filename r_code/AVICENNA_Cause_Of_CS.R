@@ -1,5 +1,6 @@
 AVICENNA_Cause_Of_CS <- function(keepMotherID){
-  d <- Get_AVICENNA_Data(folderName="Cause of CS",ignoreAttributes = T)[motheridno %in% keepMotherID]
+  d <- Get_AVICENNA_Data(folderName="Cause of CS",ignoreAttributes = T)
+  if(!is.null(keepMotherID)) d <- d[motheridno %in% keepMotherID]
   d[,baradmissionid:=TRUE]
   
   d[,datecreated:=Fix2DigitYear(Fix3LetterMonthToNumber(datecreated))]

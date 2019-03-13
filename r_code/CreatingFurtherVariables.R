@@ -392,6 +392,44 @@ d[matching=="Governmental",merged_namehospbirth:=hboorganisationunitname_1]
 d[matching=="Private",merged_namehospbirth:=dhis2hboconnamehospbirth_1]
 d[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery_1]
 
+#####Hospital type
+###making a new variable for hospital type
+###NA can be anything missing string, missing numeric, etc
+###Establish that this is logical, data table specific need this for comp to recognize it
+d[,merged_is_hosp_gov:=as.logical(NA)]
+d[matching %in% c("Avicenna","Governmental"), merged_is_hosp_gov:= TRUE]
+#d[d$matching %in% c("Avicenna","Governmental"),]$merged_is_hosp_gov <-  TRUE
+d[matching=="Private", merged_is_hosp_gov:=FALSE]
+###for matching is in paperhbo we need to get name of hospital to decide first
+d$merged_namehospbirth
+unique(d[matching=="PaperHBO"]$merged_namehospbirth)
+
+
+####Add in names of governmental hospitals from above
+d[matching=="PaperHBO" &
+      merged_namehospbirth %in% c("",
+                                  "",
+                                  ""),
+  merged_is_hosp_gov:=TRUE
+  
+  ]
+
+####Add in names of private hospitals from above
+d[matching=="PaperHBO" &
+    merged_namehospbirth %in% c("",
+                                "",
+                                ""),
+  merged_is_hosp_gov:=FALSE
+  
+  ]
+
+####To make sure we havent missed any...these have hosp names but arent true or false
+####because arent in our lists
+####if its not empty make sure to add the name of the hospital name in the correct place above
+unique(d[matching=="PaperHBO" &
+           is.na(merged_is_hosp_gov)]$merged_namehospbirth)
+
+
 #type of hospital delivered in
 #vars <- names(d)[stringr::str_detect(names(d),"^merged_namehospbirth")]
 #for(v in vars){
