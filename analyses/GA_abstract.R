@@ -156,10 +156,12 @@ p <- ggplot(long[value<50 & value>0], aes(x=value, fill=variable))
 p <- p + geom_density(alpha=0.3)
 p <- p + labs(title="Distribution of Gestational Age by Source",
               subtitle = "Adjusted") +
-              xlab("Weeks")
+              xlab("Weeks") +
+              ylab("Density")
 p <- p + scale_fill_brewer("Gestational Age Source", palette ="Dark2")
 #centers title 
 p <- p + theme(plot.title = element_text(hjust = 0.5))
+p <- p + theme(text = element_text(size=40))
               
 p
 
@@ -181,6 +183,8 @@ p <- p + labs(title="Distribution of Gestational Age by Source",
 p <- p + scale_fill_brewer("Gestational Age Source", palette ="Set1")
 #centers title 
 p <- p + theme(plot.title = element_text(hjust = 0.5))
+p <- p + theme(text = element_text(size=40))
+
 
 p
 
@@ -201,24 +205,10 @@ uglytable <- long[,.(
               )]
 
 
-
+#####FIX THIS######
 #creating denominator
-uglytable[,denominator:=sum(N),
-          by=variable]
-uglytable[,percentage:= 100*N/denominator]
-
-p <- ggplot(uglytable, aes(x= category, y=percentage, fill=variable))
-p <- p + geom_col(position="dodge", alpha=0.75)
-p <- p + scale_fill_brewer("Gestational Age Source", palette="Dark2")
-p <- p + scale_x_discrete("Weeks")
-p <- p + scale_y_continuous("Frequency")
-p <- p + labs(title="Distribtion of Gestational Age by Category",
-              subtitle="Non-Adjusted")
-p
-#makes everything really big
-p <- p + theme_gray(22)
-p 
-
+#run bottom code when tells you reached elapsed time limit
+#dev.off(
 #ggsave with the restrictions helps save it in higher resolution
 ggsave(file.path(
   FOLDER_DATA_RESULTS,
@@ -236,6 +226,7 @@ p <- p + scale_x_discrete("Weeks")
 p <- p + scale_y_continuous("Frequency")
 p <- p + labs(title="Distribtion of Gestational Age by Category",
               subtitle="Adjusted")
+#p <- p + geom_text(aes(label = percentage), vjust = -0.5)
 p
 #makes everything really big
 p <- p + theme_gray(22)
@@ -245,7 +236,7 @@ p
 ggsave(file.path(
   FOLDER_DATA_RESULTS,
   "mbo_r",
-  "GA_Abstract_Bar_graph_Adjusted.png"
+  "GA_Abstract_Bar_graph_Adjusted_with_labels.png"
 ), plot = p, width = 297, height = 210, unit = "mm")
 
 

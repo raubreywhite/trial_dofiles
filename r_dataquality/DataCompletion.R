@@ -109,7 +109,7 @@ DataCompletion <- function(){
   denoms <- rbind(denoms,denomsBook)
   
   nrow(res)
-  res <- merge(res,denoms,by=c("key","ident_gaza"),all.x=T)
+  res <- merge(res,denoms,by=c("key","ident_gaza"))
   nrow(res)
   ## end denominators
   
