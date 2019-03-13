@@ -590,7 +590,7 @@ IndicatorsOsloRandom <- function(d){
                                  "random",
                                  sprintf("%s_ANC_with_PPC.xlsx",CLINIC_INTERVENTION_DATE)))
   
-  openxlsx::write.xlsx(d[is.na(bookorgdistrict)], 
+  openxlsx::write.xlsx(d[is.na(bookorgdistrict) & ident_dhis2_booking==T], 
                        file.path(FOLDER_DATA_CLEAN,
                                  sprintf("%s_missing_bookorgdis.xlsx",CLINIC_INTERVENTION_DATE)))
   
@@ -602,62 +602,62 @@ IndicatorsOsloRandom <- function(d){
   
   
   #### Blood Pressure and ANC
-  
-  resPalestine <- d[ident_expected_delivered==TRUE,
-                    .(
-                      numerator_15_17=sum(custo_anvisit_with_bp_15_17,na.rm=T),
-                      denominator_15_17=sum(!is.na(custo_anvisit_with_bp_15_17)),
-                      
-                      numerator_18_22=sum(custo_anvisit_with_bp_18_22,na.rm=T),
-                      denominator_18_22=sum(!is.na(custo_anvisit_with_bp_18_22)),
-                      
-                      numerator_24_28=sum(custo_anvisit_with_bp_24_28,na.rm=T),
-                      denominator_24_28=sum(!is.na(custo_anvisit_with_bp_24_28)),
-                      
-                      numerator_31_33=sum(custo_anvisit_with_bp_31_33,na.rm=T),
-                      denominator_15_17=sum(!is.na(custo_anvisit_with_bp_31_33)),
-                      
-                      numerator_34_38=sum(custo_anvisit_with_bp_34_38,na.rm=T),
-                      denominator_34_38=sum(!is.na(custo_anvisit_with_bp_34_38))
-                    ),by=
-                      .(
-                        
-                      )]
-  
-  resDistrict <- d[ident_expected_delivered==TRUE,
-                   .(
-                     numerator_15_17=sum(custo_anvisit_with_bp_15_17,na.rm=T),
-                     denominator_15_17=sum(!is.na(custo_anvisit_with_bp_15_17)),
-                     
-                     numerator_18_22=sum(custo_anvisit_with_bp_18_22,na.rm=T),
-                     denominator_18_22=sum(!is.na(custo_anvisit_with_bp_18_22)),
-                     
-                     numerator_24_28=sum(custo_anvisit_with_bp_24_28,na.rm=T),
-                     denominator_24_28=sum(!is.na(custo_anvisit_with_bp_24_28)),
-                     
-                     numerator_31_33=sum(custo_anvisit_with_bp_31_33,na.rm=T),
-                     denominator_15_17=sum(!is.na(custo_anvisit_with_bp_31_33)),
-                     
-                     numerator_34_38=sum(custo_anvisit_with_bp_34_38,na.rm=T),
-                     denominator_34_38=sum(!is.na(custo_anvisit_with_bp_34_38))
-                     
-                   ),by=
-                     .(
-                       bookorgdistrict
-                     )]
-  
-  resDistrict
-  resPalestine[,bookorgdistrict:="0Palestine"]
-  res <- rbind(resPalestine,resDistrict)
-  res
-  
-  openxlsx::write.xlsx(res, 
-                       file.path(FOLDER_DROPBOX_RESULTS,
-                                 "mahima",
-                                 "random",
-                                 sprintf("%s_ANC_with_BP.xlsx",CLINIC_INTERVENTION_DATE)))
-  
-  
+  # 
+  # resPalestine <- d[ident_expected_delivered==TRUE,
+  #                   .(
+  #                     numerator_15_17=sum(custo_anvisit_with_bp_15_17,na.rm=T),
+  #                     denominator_15_17=sum(!is.na(custo_anvisit_with_bp_15_17)),
+  #                     
+  #                     numerator_18_22=sum(custo_anvisit_with_bp_18_22,na.rm=T),
+  #                     denominator_18_22=sum(!is.na(custo_anvisit_with_bp_18_22)),
+  #                     
+  #                     numerator_24_28=sum(custo_anvisit_with_bp_24_28,na.rm=T),
+  #                     denominator_24_28=sum(!is.na(custo_anvisit_with_bp_24_28)),
+  #                     
+  #                     numerator_31_33=sum(custo_anvisit_with_bp_31_33,na.rm=T),
+  #                     denominator_15_17=sum(!is.na(custo_anvisit_with_bp_31_33)),
+  #                     
+  #                     numerator_34_38=sum(custo_anvisit_with_bp_34_38,na.rm=T),
+  #                     denominator_34_38=sum(!is.na(custo_anvisit_with_bp_34_38))
+  #                   ),by=
+  #                     .(
+  #                       
+  #                     )]
+  # 
+  # resDistrict <- d[ident_expected_delivered==TRUE,
+  #                  .(
+  #                    numerator_15_17=sum(custo_anvisit_with_bp_15_17,na.rm=T),
+  #                    denominator_15_17=sum(!is.na(custo_anvisit_with_bp_15_17)),
+  #                    
+  #                    numerator_18_22=sum(custo_anvisit_with_bp_18_22,na.rm=T),
+  #                    denominator_18_22=sum(!is.na(custo_anvisit_with_bp_18_22)),
+  #                    
+  #                    numerator_24_28=sum(custo_anvisit_with_bp_24_28,na.rm=T),
+  #                    denominator_24_28=sum(!is.na(custo_anvisit_with_bp_24_28)),
+  #                    
+  #                    numerator_31_33=sum(custo_anvisit_with_bp_31_33,na.rm=T),
+  #                    denominator_15_17=sum(!is.na(custo_anvisit_with_bp_31_33)),
+  #                    
+  #                    numerator_34_38=sum(custo_anvisit_with_bp_34_38,na.rm=T),
+  #                    denominator_34_38=sum(!is.na(custo_anvisit_with_bp_34_38))
+  #                    
+  #                  ),by=
+  #                    .(
+  #                      bookorgdistrict
+  #                    )]
+  # 
+  # resDistrict
+  # resPalestine[,bookorgdistrict:="0Palestine"]
+  # res <- rbind(resPalestine,resDistrict)
+  # res
+  # 
+  # openxlsx::write.xlsx(res, 
+  #                      file.path(FOLDER_DROPBOX_RESULTS,
+  #                                "mahima",
+  #                                "random",
+  #                                sprintf("%s_ANC_with_BP.xlsx",CLINIC_INTERVENTION_DATE)))
+  # 
+  # 
   
   
 }

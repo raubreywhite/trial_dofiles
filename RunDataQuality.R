@@ -23,5 +23,7 @@ Analyse_AutoDuplications(d=d,location="wb")
 
 Analyse_NumberOfBookingsPerMonth(d=d, location="pal")
 
+Bookdate_vs_booklmp(d=d, location="wb")
+
 # what you care about
 DataCompletion()

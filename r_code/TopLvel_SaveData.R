@@ -561,8 +561,8 @@ SaveCISMACDataBase<- function(){
     sampleRowsB <- sample(1:nrow(tempB), size=smallestNumber)
     
     # here we say "please give me the 5th, the 7th, the 20th... etc rows"
-    tempA <- tempA[sampleRowsA]
-    tempB <- tempB[sampleRowsB]
+    #tempA <- tempA[sampleRowsA]
+    #tempB <- tempB[sampleRowsB]
     
    saveRDS(tempA,
            file.path(FOLDER_DATA_CLEAN,

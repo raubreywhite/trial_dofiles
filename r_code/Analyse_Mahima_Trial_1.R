@@ -1087,10 +1087,21 @@ Analyse_Medical_History_Trial_1 <- function(d){
   
   xtabs(~d$bookhistcs, addNA=T)
   
+  
+  
   sum(d$ident_TRIAL_1==1,na.rm=T)
   d[,rowid:=1:.N]
+  
+  varsKeep <- c(
+    "rowid",
+    "ident_dhis2_control",
+    "bookhistgdm",
+    "bookhistdm",
+    "bookhisthtn"
+  )
+  
   #tamara keep on adding new variables below
-  temp <- d[ident_TRIAL_1==TRUE,c(varsKeep==T)]
+  temp <- d[ident_TRIAL_1==TRUE,varsKeep,with=F]
   
   
   long <- melt.data.table(
@@ -1103,33 +1114,6 @@ Analyse_Medical_History_Trial_1 <- function(d){
     missing_var=sum(is.na(value))
   ),by=.(variable,ident_dhis2_control)]
   tab
-  
-  # this is the harder way
-  tab <- d[ident_TRIAL_1==TRUE,.(
-    has_bookhistgdm=sum(bookhistgdm, na.rm=T),
-    notmissing_bookhistgdm=sum(!is.na(bookhistgdm)),
-    missing_bookhistgdm=sum(is.na(bookhistgdm)),
-    
-    has_bookhistdm=sum(bookhistdm, na.rm=T),
-    notmissing_bookhistdm=sum(!is.na(bookhistdm)),
-    missing_bookhistdm=sum(is.na(bookhistdm)),
-    
-    
-    has_bookhisthtn=sum(bookhisthtn, na.rm = T),
-    notmissing_bookhisthtn=sum(!is.na(bookhisthtn)),
-    missing_bookhisthtn=sum(is.na(bookhisthtn)),
-    
-    has_bookhistperi=sum(bookhistperi, na.rm=T),
-    notmissing_bookhistperi=sum(!is.na(bookhistperi)),
-    missing_bookhistperi=sum(is.na(bookhistperi)),
-    
-    has_bookhistcs=sum(bookhistcs, na.rm=T),
-    notmissing_bookhistcs=sum(!is.na(bookhistcs)),
-    missing_bookhistcs=sum(is.na(bookhistcs))
-    
-    
-  ),
-  by=.(ident_dhis2_control)]
   
   tab
   

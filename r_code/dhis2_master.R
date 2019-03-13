@@ -509,6 +509,9 @@ DHIS2_Master <- function(
     d <- d[!(ident_dhis2_demo==1 & ident_dhis2_booking==0
                & is.na(ident_dhis2_ppc)& is.na(ident_dhis2_nbc))]
   }
+  
+  # fixing trial 1 indicator
+  #d[,ident_TRIAL_1:=ident_TRIAL_1 & ]
  
   
   return(d)

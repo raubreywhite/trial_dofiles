@@ -64,12 +64,29 @@ DataCompletion <- function(){
       xUnique=length(unique(x)),
       xMean=mean(as.numeric(x),na.rm=T),
       xMedian=median(as.numeric(x),na.rm=T),
+      xp0=as.numeric(quantile(as.numeric(x),probs=0,na.rm=T)),
+      xp1=as.numeric(quantile(as.numeric(x),probs=0.01,na.rm=T)),
+      xp5=as.numeric(quantile(as.numeric(x),probs=0.05,na.rm=T)),
       xp25=as.numeric(quantile(as.numeric(x),probs=0.25,na.rm=T)),
       xp75=as.numeric(quantile(as.numeric(x),probs=0.75,na.rm=T)),
+      xp95=as.numeric(quantile(as.numeric(x),probs=0.95,na.rm=T)),
+      xp99=as.numeric(quantile(as.numeric(x),probs=0.99,na.rm=T)),
+      xp100=as.numeric(quantile(as.numeric(x),probs=1,na.rm=T)),
       xMeanNo0=MeanNo0(as.numeric(x)),
       xMedianNo0=MedianNo0(as.numeric(x)),
+      xp0No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.0)),
+      xp1No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.01)),
+      xp5No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.05)),
       xp25No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.25)),
-      xp75No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.75))
+      xp75No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.75)),
+      xp95No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.95)),
+      xp99No0=as.numeric(QuantileNo0(as.numeric(x),probs=0.99)),
+      xp100No0=as.numeric(QuantileNo0(as.numeric(x),probs=1))
+      
+      # QuantileNo0: ....we do this for all variables just to solve the problem of variables 
+      # that have zero and zero means missing not value ...so the best mean for those variables is 
+      # mean no 0 but for other variables the best mean is (mean) and this is ugly table , down here 
+      #we can make the pretty table for those means 
     )))  
   ),keyby=.(ident_gaza)]
   
@@ -125,11 +142,24 @@ DataCompletion <- function(){
   res[xIsNumeric==TRUE & xUnique>5,xMedian:=xMedianNo0]
   res[xIsNumeric==TRUE & xUnique>5,xp25:=xp25No0]
   res[xIsNumeric==TRUE & xUnique>5,xp75:=xp75No0]
+  res[xIsNumeric==TRUE & xUnique>5,xp0:=xp0No0]
+  res[xIsNumeric==TRUE & xUnique>5,xp1:=xp1No0]
+  res[xIsNumeric==TRUE & xUnique>5,xp5:=xp5No0]
+  res[xIsNumeric==TRUE & xUnique>5,xp95:=xp95No0]
+  res[xIsNumeric==TRUE & xUnique>5,xp99:=xp99No0]
+  res[xIsNumeric==TRUE & xUnique>5,xp100:=xp100No0]
+
   
   res[,xMeanNo0:=NULL]
   res[,xMedianNo0:=NULL]
   res[,xp25No0:=NULL]
   res[,xp75No0:=NULL]
+  res[,xp0No0:=NULL]
+  res[,xp1No0:=NULL]
+  res[,xp5No0:=NULL]
+  res[,xp95No0:=NULL]
+  res[,xp99No0:=NULL]
+  res[,xp100No0:=NULL]
   
   # delete useless variables
   res[,xN:=NULL]

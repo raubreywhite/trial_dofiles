@@ -6,6 +6,7 @@ MissingHBOInternal <- function(d){
   
   #added the is ExpectedToHaveDelivered for False/wrong or missing LMPs
   tokeep <- d[
+      is.na(ident_bad_all) &
       ident_dhis2_booking==1 & 
       (isExpectedToHaveDelivered==T | isExpectedToHaveDelivered==FALSE | 
        is.na(isExpectedToHaveDelivered)) &

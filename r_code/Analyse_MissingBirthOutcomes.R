@@ -9,7 +9,7 @@ Analyse_MissingBirthOutcomes <- function(d){
   # setnames(table,"uglyname","What a pretty name!")
   d[,prettyTrial1:="Trial 1"]
   d[ident_TRIAL_1==FALSE,prettyTrial1:="_Not trial 1"]
-  tab <- d[ident_dhis2_booking==1,.(
+  tab <- d[ident_dhis2_booking==1 & !is.na(ident_bad_all),.(
     Total=.N,
     "Total expected delivery"=sum(isExpectedToHaveDelivered,na.rm=T),
     "Number of women who have a missing or false EDD"=

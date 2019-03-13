@@ -188,13 +188,13 @@ levels(long$category)
 p <- ggplot(long[value<50 & value>0], aes(x=value, fill=variable)) 
 p <- p + geom_density(alpha=0.3)
 p <- p + labs(title="Distribution of Gestational Age by Source",
-              subtitle = "Adjusted") +
+              caption = "Outliers Removed") +
               xlab("Weeks") +
               ylab("Density")
 p <- p + scale_fill_brewer("Gestational Age Source", palette ="Dark2")
 #centers title 
 p <- p + theme(plot.title = element_text(hjust = 0.5))
-p <- p + theme(text = element_text(size=40))
+p <- p + theme(text = element_text(size=24))
               
 p
 
@@ -211,12 +211,12 @@ ggsave(file.path(
 p <- ggplot(long[value<300], aes(x=value, fill=variable)) 
 p <- p + geom_density(alpha=0.3)
 p <- p + labs(title="Distribution of Gestational Age by Source",
-              subtitle= "Non-Adjusted") +
+              caption= "Outliers Not Removed") +
           xlab("Weeks")
 p <- p + scale_fill_brewer("Gestational Age Source", palette ="Set1")
 #centers title 
 p <- p + theme(plot.title = element_text(hjust = 0.5))
-p <- p + theme(text = element_text(size=40))
+p <- p + theme(text = element_text(size=24))
 
 
 p
@@ -251,15 +251,16 @@ ggsave(file.path(
 
 ####Bar Graph with restriction###
 ###Removing outliers...other values that arent possible
-
+uglytable[,percentage:=N/sum(N),by=.(variable)]
 p <- ggplot(uglytable[!category %in% c("<=0",">44")], aes(x= category, y=percentage, fill=variable))
 p <- p + geom_col(position="dodge", alpha=0.75)
 p <- p + scale_fill_brewer("Gestational Age Source", palette="Set1")
 p <- p + scale_x_discrete("Weeks")
-p <- p + scale_y_continuous("Frequency")
+p <- p + scale_y_continuous("Frequency", labels=scales::percent)
 p <- p + labs(title="Distribtion of Gestational Age by Category",
               subtitle="Adjusted")
-#p <- p + geom_text(aes(label = percentage), vjust = -0.5)
+p <- p + geom_text(aes(label = round(100*percentage)), vjust = -0.5,
+                   position=position_dodge(width=1))
 p
 #makes everything really big
 p <- p + theme_gray(22)

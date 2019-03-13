@@ -7,6 +7,9 @@ sapply(fileSources, source, .GlobalEnv)
 
 Setup(IS_GAZA=FALSE)
 
+CheckFilesAndVariables(folder="e.reg-intervention")
+CheckFilesAndVariables(folder="e.reg-control")
+
 ###### SETUP ENDS ######
 
 ####################
