@@ -213,11 +213,11 @@ p <- p + geom_density(alpha=0.3)
 p <- p + labs(title="Distribution of Gestational Age by Source",
               caption= "Outliers Not Removed") +
           xlab("Weeks")
+p <- p + scale_y_continuous("Frequency", labels=scales::percent)
 p <- p + scale_fill_brewer("Gestational Age Source", palette ="Set1")
 #centers title 
 p <- p + theme(plot.title = element_text(hjust = 0.5))
 p <- p + theme(text = element_text(size=24))
-
 
 p
 
@@ -243,11 +243,31 @@ uglytable <- long[,.(
 #run bottom code when tells you reached elapsed time limit
 #dev.off(
 #ggsave with the restrictions helps save it in higher resolution
+
+####Bar Graph with restriction###
+uglytable[,percentage:=N/sum(N),by=.(variable)]
+p <- ggplot(uglytable, aes(x= category, y=percentage, fill=variable))
+p <- p + geom_col(position="dodge", alpha=0.75)
+p <- p + scale_fill_brewer("Gestational Age Source", palette="Set1")
+p <- p + scale_x_discrete("Weeks")
+p <- p + scale_y_continuous("Frequency", labels=scales::percent)
+p <- p + labs(title="Distribtion of Gestational Age by Category",
+              caption="Outliers not removed")
+p <- p + geom_text(aes(label = round(100*percentage)), 
+                   size=6.5,
+                   vjust = -0.5,
+                   position=position_dodge(width=1))
+p <- p + theme(text = element_text(size=44))
+p <- p + theme_gray(22)
+p 
+
+#ggsave with the restrictions helps save it in higher resolution
 ggsave(file.path(
   FOLDER_DATA_RESULTS,
   "mbo_r",
-  "GA_Abstract_Bar_graph_Nonadjusted.png"
+  "GA_Abstract_Bar_graph_Not_Adjusted_with_labels.png"
 ), plot = p, width = 297, height = 210, unit = "mm")
+
 
 ####Bar Graph with restriction###
 ###Removing outliers...other values that arent possible
@@ -258,11 +278,12 @@ p <- p + scale_fill_brewer("Gestational Age Source", palette="Set1")
 p <- p + scale_x_discrete("Weeks")
 p <- p + scale_y_continuous("Frequency", labels=scales::percent)
 p <- p + labs(title="Distribtion of Gestational Age by Category",
-              subtitle="Adjusted")
-p <- p + geom_text(aes(label = round(100*percentage)), vjust = -0.5,
+              caption="Outliers removed")
+p <- p + geom_text(aes(label = round(100*percentage)),
+                   size=6.5,
+                   vjust = -0.5,
                    position=position_dodge(width=1))
-p
-#makes everything really big
+p <- p + theme(text = element_text(size=44))
 p <- p + theme_gray(22)
 p 
 

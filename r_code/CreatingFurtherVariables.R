@@ -392,7 +392,7 @@ d[matching=="Governmental",merged_namehospbirth:=hboorganisationunitname_1]
 d[matching=="Private",merged_namehospbirth:=dhis2hboconnamehospbirth_1]
 d[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery_1]
 
-#####Hospital type
+#####Hospital type#####
 ###making a new variable for hospital type
 ###NA can be anything missing string, missing numeric, etc
 ###Establish that this is logical, data table specific need this for comp to recognize it
@@ -407,18 +407,49 @@ unique(d[matching=="PaperHBO"]$merged_namehospbirth)
 
 ####Add in names of governmental hospitals from above
 d[matching=="PaperHBO" &
-      merged_namehospbirth %in% c("",
-                                  "",
-                                  ""),
+      merged_namehospbirth %in% c("PMC",
+                                  "JG",
+                                  "NG",
+                                  "Tubas",
+                                  "BJ",
+                                  "SG",
+                                  "QG",
+                                  "TT",
+                                  "HG",
+                                  "Jericho",
+                                  "YG"),
   merged_is_hosp_gov:=TRUE
   
   ]
 
 ####Add in names of private hospitals from above
+###How should we add out fo the country? Seperate Variable?
 d[matching=="PaperHBO" &
-    merged_namehospbirth %in% c("",
-                                "",
-                                ""),
+    merged_namehospbirth %in% c("PRCSR",
+                                "French",
+                                "Shephard's Field",
+                                "Dibs",
+                                "Daman",
+                                "AT",
+                                "IT",
+                                "INJ",
+                                "NT",
+                                "Amal",
+                                "Razi",
+                                "Shifa",
+                                "R3aya",
+                                "Mustaqbal",
+                                "IST",
+                                "WN",
+                                "Musallam",
+                                "WQ",
+                                "ZT",
+                                "HT",
+                                "PRSR_H",
+                                "Ahli",
+                                "Maqassad",
+                                "Home"
+                               ),
   merged_is_hosp_gov:=FALSE
   
   ]
@@ -428,6 +459,15 @@ d[matching=="PaperHBO" &
 ####if its not empty make sure to add the name of the hospital name in the correct place above
 unique(d[matching=="PaperHBO" &
            is.na(merged_is_hosp_gov)]$merged_namehospbirth)
+
+
+
+#####Delivered out of Country########
+#d[,merged_is_out_of_the_country:=as.logical(NA)]
+#d[matching=="PaperHBO" & 
+  #  merged_namehospbirth %in% c()]
+####and POD Abortion is an abortion
+
 
 
 #type of hospital delivered in
