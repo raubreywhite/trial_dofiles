@@ -78,5 +78,7 @@ DHIS2_Management <- function(
     setnames(d,"createdeventidentifier","mantypey")
   }
   
+
+  
   return(d)
 }
