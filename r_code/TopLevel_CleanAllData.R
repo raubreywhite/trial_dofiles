@@ -121,11 +121,6 @@ CleanAllData <- function(
   # CALC INDICATORS OLSO
   IndicatorsOsloGenerate(d)
 
-  # creating indicators for bad data who we cant really use
-  d[bookdate<booklmp,ident_bad_bookdate_before_booklmp:=1]
-  
-  d[ident_bad_bookdate_before_booklmp==1, ident_bad_all:=1]
-  
   timeEndAnalysis <- Sys.time()
   
   # garbage cleaning

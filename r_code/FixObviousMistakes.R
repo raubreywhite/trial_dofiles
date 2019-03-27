@@ -1,4 +1,10 @@
 FixObviousMistakes <- function(d){
+  # creating indicators for bad data who we cant really use
+  d[bookdate<booklmp,ident_bad_bookdate_before_booklmp:=1]
+  
+  d[ident_bad_bookdate_before_booklmp==1, ident_bad_all:=1]
+
+
   #variables in the mangement were more than one kind
   #for example: MildAneTreatment-flkdjfajdifj and MildAneTreatmentfjaldkjfkldj
   #so  we truncated them so they become the same
