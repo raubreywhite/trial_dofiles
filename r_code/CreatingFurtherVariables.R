@@ -527,6 +527,17 @@ d[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
 d[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
 d[matching=="PaperHBO",merged_birthhemo:=paperhbo_hbgatadmissiontohospital_1]
 
+#bloodpressureSystolic
+d[matching=="Avicenna",merged_bpsyst:=aobssistolic_1]
+d[matching=="Governmental",merged_bpsyst:=hbosystbp_1]
+d[matching=="Private",merged_bpsyst:=dhis2hbosystbp_1]
+d[matching=="PaperHBO",merged_bpsyst:=paperhbo_systolicbp_1]
+
+#bloodpressureDiastolic
+d[matching=="Avicenna",merged_bpdiast:=aobsdiastolic_1]
+d[matching=="Governmental",merged_bpdiast:=hbodiastbp_1]
+d[matching=="Private",merged_bpdiast:=dhis2hbodiastbp_1]
+d[matching=="PaperHBO",merged_bpdiast:=paperhbo_diastolicbp_1]
 
 
 

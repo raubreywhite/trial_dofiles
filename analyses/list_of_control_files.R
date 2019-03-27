@@ -1,5 +1,5 @@
 
-  setwd("c:/data processing/trial_dofiles")
+setwd("c:/data processing/trial_dofiles")
 
 FOLDER_DATA_RAW <- file.path(getwd(),"../data_raw")
 FOLDER_DATA_CLEAN <- file.path(getwd(),"../data_clean")
@@ -11,7 +11,7 @@ fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 sapply(fileSources, source, .GlobalEnv)
 
 
-  setwd("c:/data processing/a research hRHR/trial 1/used/list of control files")
+setwd("c:/data processing/a research hRHR/trial 1/used trial1/list of control files")
 
 library(data.table)
 library(ggplot2)
@@ -147,7 +147,10 @@ for(i in 1:5){
   
   missing <- skeleton[!skeleton$sent %in% recNum$received &
                         district==name]
-  if(nrow(missing)==0) next
+  if(nrow(missing)==0){
+    print(sprintf("Skipped %s",name))
+    next
+  }
   setorder(missing,clinic,sent)
   
   missing[,obsNum:=floor(0:(.N-1)/12),by=clinic]
@@ -158,7 +161,7 @@ for(i in 1:5){
   missing[,obsNum:=NULL]
   
   openxlsx::addWorksheet(wbMissing, name)
-  openxlsx::writeData(wbMissing, sheet=i, missing)
+  openxlsx::writeData(wbMissing, sheet=name, missing)
 }
 openxlsx::saveWorkbook(wbMissing, "results/not_received_filesperclinic.xlsx", overwrite=T)
 
@@ -166,7 +169,7 @@ openxlsx::saveWorkbook(wbMissing, "results/not_received_filesperclinic.xlsx", ov
 ########### 2018-08-06
 ### CON ANC File Number
 d <- LoadDataFileFromNetwork()
-d <- d[bookdate>="2017-01-01" & bookdate<="2018-01-15"]
+d <- d[bookdate>="2017-01-15" & bookdate<="2017-09-15"]
 d <- d[ident_dhis2_control==1]
 locationOfTheFirstIdentVariable <- min(which(stringr::str_detect(names(d),"^ident_")))
 d <- d[,1:locationOfTheFirstIdentVariable]

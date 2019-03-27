@@ -187,6 +187,7 @@ if(IS_GAZA){
 openxlsx::write.xlsx(SATISFYTABLE, 
                      file.path(
                        FOLDER_DATA_RESULTS,
+                       "satisfaction",
                        sprintf("%s_%s_satisfaction script.xlsx",lubridate::today(),fileTag)))
 
 
@@ -198,6 +199,7 @@ if(!IS_GAZA) setorder(CASES,gA_todaylmp,gA_todayus_1)
 openxlsx::write.xlsx(CASES, 
                      file.path(
                        FOLDER_DATA_RESULTS,
+                       "satisfaction",
                        sprintf("%s_%s_satisfaction CASES.xlsx",lubridate::today(),fileTag)))
 
 ## END HERE

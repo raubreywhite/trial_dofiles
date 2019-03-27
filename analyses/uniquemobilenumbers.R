@@ -11,6 +11,7 @@ uniquemoblienumbers <-unique(d[ident_dhis2_control==F &
                                  "mobile")])
 
 openxlsx::write.xlsx(uniquemoblienumbers,file.path(FOLDER_DATA_RESULTS,
+                                                   "satisfaction",
                                                    "uniquemobilenumbers_districts.xlsx"))
                                 
 #Feb 3, 2019

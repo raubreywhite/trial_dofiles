@@ -108,6 +108,9 @@ CleanAllData <- function(
   # CLEAN DIFFERENT FILES CONSISTENTLY (e.g. gestational age)
   #CleaningDifferentFilesConsistently(d)
   
+  #Cleaning obvious mistakes
+  FixObviousMistakes(d)
+  
   # CREATING FURTHER VARIABLES
   print("****1")
   CreatingFurtherVariablesNormal(d)
