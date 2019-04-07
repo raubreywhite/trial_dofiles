@@ -23,7 +23,7 @@ d <- CleanAllData(includePPC=F, IS_GAZA=FALSE)
 xtabs(~d$matching, addNA=T)
 
 nrow(d)
-length(unique(d$bookevent))
+xtabs(~d$ident_bad_all)
 
 #####################
 #NOW run HBO stuff##
