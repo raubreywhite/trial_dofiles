@@ -50,7 +50,8 @@ smallD[,
         ProportionofWeightsis0= mean(bookweight==0, na.rm=T),
         ProportionofWeightsOver100kg= mean(bookweight>100, na.rm=T),
         ProportionofParity= mean(bookparity, na.rm=T),
-        meanbookgestage= mean(bookgestage, na.rm=T)
+        meanbookgestage= mean(bookgestage, na.rm=T),
+        ProportionofPrimi=mean(bookprimi, na.rm=T)
     
       
       ), 
@@ -60,9 +61,9 @@ smallD[,
 
 #making our plots
 ###bookweight
-p <- ggplot(smallD, aes(x=bookweight))
-p <- p + geom_density()
-p
+# p <- ggplot(smallD, aes(x=bookweight))
+# p <- p + geom_density()
+# p
 
 ####################
 # bookweight
@@ -81,6 +82,13 @@ p
 ####################
 # bookbmi
 ####################
+
+smallD[,.(
+  meanbookheight=mean(bookheight,na.rm=T),
+  medianbookheight=median(bookheight,na.rm=T),
+  num0=sum(bookheight==0,na.rm=T)
+),
+keyby=prettyExposure]
 
 pval <- t.test(bookbmi ~ prettyExposure, data=smallD)$p.value
 
@@ -109,14 +117,23 @@ p
 
 
 ########add variables we want below in the vector to get loop
-for (i in c("bookbmi", "bookweight")){
+for (i in c("bookbmi", 
+            "bookweight",
+            "bookbpsyst",
+            "bookbpdiast",
+            "age",
+            "income",
+            "education",
+            "labhb_1")){
   
   form <- sprintf("%s ~ prettyExposure", i)
   form <- glue::glue("{outcome} ~ prettyExposure", outcome=i)
   
   # 'form' is a string, not a formula. 
   # need to turn it into a formula using 'as.formula'
-  pval <- t.test(as.formula(form), data=smallD)$p.value
+  #we say get(i)!=0 because some of the variables are zero
+  #so we want to exclude them from the t.test so we dont get false results
+  pval <- t.test(as.formula(form), data=smallD[get(i)!=0])$p.value
   
   p <- ggplot(smallD, aes_string(y=i, x="prettyExposure"))
   p <- p + geom_boxplot()
@@ -228,7 +245,7 @@ ggsave(file.path(
 ggsave(filename=file.path(
   FOLDER_DROPBOX_RESULTS,
   "mahima",
-  "random",
+  "trial_1",
   "Primi Bookings.png"),
   plot=p,
   height=210,
@@ -259,8 +276,21 @@ p
 p <- ggplot(uglyTable[!is.na(bookprimi)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookprimi)))
 p <- p + geom_col()
 p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
-p <- p + labs(title = "Bookprimi")
-        
+p <- p + labs(title = "Bookprimi",
+              y="Proportion of Women",
+              fill="bookprimi")
+p  
+
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookprimi.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 ########################
 ##### bookparity
 
@@ -277,13 +307,38 @@ uglyTable[!is.na(bookparity),denom:=sum(N),by=.(prettyExposure)]
 p <- ggplot(uglyTable, aes(x=prettyExposure, y=N, fill=as.factor(bookparity)))
 p <- p + geom_col()
 p <- p + scale_fill_brewer(palette="Dark2")
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Number of Women",
+              fill="bookparity",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookparity_with_missing.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 p <- ggplot(uglyTable[!is.na(bookparity)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookparity)))
 p <- p + geom_col()
+p <- p + scale_fill_brewer(palette="Dark2")
+p <- p + labs(y="Proportion of Women",
+              fill="bookparity",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookparity.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 
 ########################
@@ -312,8 +367,22 @@ uglyTable[,prettyFill:=factor(prettyFill,levels=c("Not true","Yes"))]
 p <- ggplot(uglyTable[!is.na(bookhistdm)], aes(x=prettyExposure, y=N, fill=as.factor(bookhistdm)))
 p <- p + geom_col()
 p <- p + scale_fill_brewer(palette="Dark2")
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Number of Women",
+              fill="bookhistdm",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhistdm.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
+
+
 
 ########################
 ##### bookhistgdm
@@ -334,7 +403,20 @@ p
 
 p <- ggplot(uglyTable[!is.na(bookhistgdm)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhistgdm)))
 p <- p + geom_col()
+p <- p + labs(y="Proportion of Women",
+              fill="bookhistgdm",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhistgdm.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 ########################
 ##### bookhistotherch
@@ -350,14 +432,37 @@ uglyTable[!is.na(bookhistotherch),denom:=sum(N),by=.(prettyExposure)]
 # raw numbers
 p <- ggplot(uglyTable, aes(x=prettyExposure, y=N, fill=as.factor(bookhistotherch)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Number of Women",
+              fill="boookhisther",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhistother.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 # percentage
 p <- ggplot(uglyTable[!is.na(bookhistotherch)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhistotherch)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Proportion of Women",
+              fill="boookhisther",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhistother_proportion.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 ########################
 ##### bookhistcs
@@ -373,14 +478,38 @@ uglyTable[!is.na(bookhistcs),denom:=sum(N),by=.(prettyExposure)]
 # raw numbers
 p <- ggplot(uglyTable[!is.na(bookhistcs)], aes(x=prettyExposure, y=N, fill=as.factor(bookhistcs)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Number of Women",
+              fill="bookhistcs",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhist.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 # percentage
 p <- ggplot(uglyTable[!is.na(bookhistcs)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhistcs)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Proportion of Women",
+              fill="bookhistcs",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhist_proportion.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 ########################
 ##### bookhisthtn
@@ -396,14 +525,40 @@ uglyTable[!is.na(bookhisthtn),denom:=sum(N),by=.(prettyExposure)]
 # raw numbers
 p <- ggplot(uglyTable[!is.na(bookhisthtn)], aes(x=prettyExposure, y=N, fill=as.factor(bookhisthtn)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Number of Women",
+              fill="bookhisthtn",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhisthtn.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 # percentage
 p <- ggplot(uglyTable[!is.na(bookhisthtn)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhisthtn)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Proportion of Women",
+              fill="bookhisthtn",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhisthtn_proportion.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
+
 
 ########################
 ##### bookhistperi
@@ -419,15 +574,38 @@ uglyTable[!is.na(bookhistperi),denom:=sum(N),by=.(prettyExposure)]
 # raw numbers
 p <- ggplot(uglyTable[!is.na(bookhistperi)], aes(x=prettyExposure, y=N, fill=as.factor(bookhistperi)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Number of Women",
+              fill="bookhistperi",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhistperi.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 # percentage
 p <- ggplot(uglyTable[!is.na(bookhistperi)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhistperi)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Proportion of Women",
+              fill="bookhistperi",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "bookhistperi_proportion.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 ########################
 ##### laburglu_1
 
@@ -442,15 +620,38 @@ uglyTable[!is.na(laburglu_1),denom:=sum(N),by=.(prettyExposure)]
 # raw data
 p <- ggplot(uglyTable[!is.na(laburglu_1)], aes(x=prettyExposure, y=N, fill=as.factor(laburglu_1)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Number of Women",
+              fill="laburglucose",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "laburglucose.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 # percentages
 p <- ggplot(uglyTable[!is.na(laburglu_1)], aes(x=prettyExposure, y=N/denom, fill=as.factor(laburglu_1)))
 p <- p + geom_col()
-p <- p + labs(caption=sprintf("Chi-squared p-value: %s",pval))
+p <- p + labs(y="Proportion of Women",
+              fill="laburglucose",
+              caption=sprintf("Chi-squared p-value: %s",pval))
 p
 
+
+ggsave(filename=file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "mahima",
+  "trial_1",
+  "laburglucose_proportion.png"),
+  plot=p,
+  height=210,
+  width=297,
+  units="mm")
 
 ###Counseling IFA
 ##counseled and if given or not?

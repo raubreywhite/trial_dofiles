@@ -1,10 +1,4 @@
 FixObviousMistakes <- function(d){
-  # creating indicators for bad data who we cant really use
-  d[bookdate<booklmp,ident_bad_bookdate_before_booklmp:=1]
-  
-  d[ident_bad_bookdate_before_booklmp==1, ident_bad_all:=1]
-
-
   #variables in the mangement were more than one kind
   #for example: MildAneTreatment-flkdjfajdifj and MildAneTreatmentfjaldkjfkldj
   #so  we truncated them so they become the same
@@ -12,8 +6,8 @@ FixObviousMistakes <- function(d){
   vars <- stringr::str_subset(names(d),"^mantypey_")
   for(i in vars){
     d[, (i) := stringr::str_replace(string=get(i),
-                                    pattern="-[a-zA-Z0-9]*$",
-                                    replacement="")
+                                          pattern="-[a-zA-Z0-9]*$",
+                                          replacement="")
       ]
     unique(d[[i]])
     d[stringr::str_detect(get(i),"^MildAnemiaTreatmentFollowup"),
@@ -27,9 +21,26 @@ FixObviousMistakes <- function(d){
     #print(unique(d[[i]]))
   }
   
+  
+  vars <- stringr::str_subset(names(d),"^riskdesy_")
+  for(i in vars){
+    d[, (i) := stringr::str_replace(string=get(i),
+                                    pattern="-[a-zA-Z0-9]*$",
+                                    replacement="")
+      ]
+    unique(d[[i]])
+  
+    #print(i)
+    #print(unique(d[[i]]))
+  }
+  
+  
   # Bookdate_before_booklmp
   #booklmp_original has NO CORRECTIONS MADE TO IT
   # while booklmp has corrections made to it
+  d[bookdate<booklmp,ident_bad_bookdate_before_booklmp:=1]
+  d[ident_bad_bookdate_before_booklmp==1, ident_bad_all:=1]
+  
   d[,booklmp_original:=booklmp]
   d[ident_bad_bookdate_before_booklmp==T & 
       ident_TRIAL_1==T &

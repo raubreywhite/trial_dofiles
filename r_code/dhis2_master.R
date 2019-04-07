@@ -69,6 +69,29 @@ DHIS2_Master <- function(
   toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
   for(i in toChangeToBool) sData[[i]] <- !is.na(sData[[i]])
   
+  # compare list of raw clinic names to structural data
+  names_from_structural_data <- unique(sData[,c("bookorgname","NEW_bookorgname")])
+  names_from_structural_data[,structural:=bookorgname]
+  names_from_structural_data[NEW_bookorgname==structural,NEW_bookorgname:=""]
+  setnames(names_from_structural_data,"NEW_bookorgname","NEW_structural_bookorgname")
+  
+  names_from_raw_data <- data_DHIS2_Booking[,.(
+    num_rows=.N
+    ),
+    keyby=.(bookorgname)
+  ]
+  names_from_raw_data[,rawdata:=bookorgname]
+  
+  merged <- merge(
+    names_from_structural_data,
+    names_from_raw_data,
+    by="bookorgname",
+    all=T
+  )
+  merged[,bookorgname:=NULL]
+  setcolorder(merged,c("structural","rawdata","num_rows"))
+  openxlsx::write.xlsx(merged,file.path(FOLDER_DATA_RAW,"structural_data/structural_vs_rawdata.xlsx"))
+  
   # create a new sdata just for PPC
   # so that we can get ppcorgdistrict
   pData <- sData[,c("bookorgname","bookorgdistrict")]

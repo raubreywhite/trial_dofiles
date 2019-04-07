@@ -29,8 +29,7 @@ CreatingFurtherVariablesNormal <- function(d){
                                include.lowest=T)]
   
   xtabs(~d$avgincomecat)
-  
-  
+ 
 }
 
 CreatingFurtherVariablesMahima <- function(d){
@@ -45,6 +44,8 @@ CreatingFurtherVariablesMahima <- function(d){
   
  # d[ident_hbo==T,
     # c("hbodate_1","hbodateofdeliveryhospital_1","hboddateofbirth_1")]
+  
+  #### 
   
   nam <- names(d)[stringr::str_detect(names(d),"^abbdate_[0-9]*$")]
   num <- stringr::str_replace(nam,"abbdate_","")
@@ -298,7 +299,12 @@ d[,comboUSandLMPgA_cats:=cut(comboUSandLMPgA,
 ###Making unified hospital birth data variables for CISMAC###
 
 #BMI
-d[,bookbmi:=((bookweight/bookheight/bookheight)*10000)]
+d[bookheight!=0 & 
+  bookweight!=0,
+  bookbmi:=10000*bookweight/(bookheight^2)]
+
+#d[!is.na(bookweight) & !is.na(bookheight),
+ # bookbmi:=((bookweight/bookheight/bookheight)*10000)]
 
 # MERVET FILL IN HERE
 
@@ -395,6 +401,10 @@ d[matching=="Governmental",merged_namehospbirth:=hboorganisationunitname_1]
 d[matching=="Private",merged_namehospbirth:=dhis2hboconnamehospbirth_1]
 d[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery_1]
 
+
+
+
+
 #####Hospital type#####
 ###making a new variable for hospital type
 ###NA can be anything missing string, missing numeric, etc
@@ -403,7 +413,8 @@ d[,merged_is_hosp_gov:=as.logical(NA)]
 d[matching %in% c("Avicenna","Governmental"), merged_is_hosp_gov:= TRUE]
 #d[d$matching %in% c("Avicenna","Governmental"),]$merged_is_hosp_gov <-  TRUE
 d[matching=="Private", merged_is_hosp_gov:=FALSE]
-###for matching is in paperhbo we need to get name of hospital to decide first
+###for matching is in paperhbo we need to get name of 
+##hospital to decide first
 d$merged_namehospbirth
 unique(d[matching=="PaperHBO"]$merged_namehospbirth)
 
@@ -418,6 +429,7 @@ d[matching=="PaperHBO" &
                                   "SG",
                                   "QG",
                                   "TT",
+                                  "Tulk Gov",
                                   "HG",
                                   "Jericho",
                                   "YG"),
@@ -437,6 +449,7 @@ d[matching=="PaperHBO" &
                                 "IT",
                                 "INJ",
                                 "NT",
+                                "Ama",
                                 "Amal",
                                 "Razi",
                                 "Shifa",
@@ -450,12 +463,29 @@ d[matching=="PaperHBO" &
                                 "HT",
                                 "PRSR_H",
                                 "Ahli",
-                                "Maqassad",
-                                "Home"
+                                "wq",
+                                "Home",
+                                "Khaled"
+                                
                                ),
   merged_is_hosp_gov:=FALSE
   
   ]
+
+
+####merged_out of the country#####
+# d[,matching_is_out_of_country:= as.logical(NA)]
+# d[!is.na(merged_is_hosp_gov),matching_is_out_of_country:= FALSE]
+
+d[ident_paperhbo==T & 
+  merged_namehospbirth %in% c("Out of the country-Hadassah",
+                              "Out of the country-Nazareth",
+                              "Out of the country-America",
+                              "Out of the country-Jordan",
+                              "Out of the country-Hilal"
+),
+matching:="Out of the country"]
+
 
 ####To make sure we havent missed any...these have hosp names but arent true or false
 ####because arent in our lists

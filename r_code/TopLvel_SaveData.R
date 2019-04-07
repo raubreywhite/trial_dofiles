@@ -175,6 +175,10 @@ SaveCISMACDataBase<- function(){
   d=LoadAnonDataFileFromNetwork()
   
   varsKeep <- c(
+    "bookdate",
+    "bookorgcode",
+    "bookorgunit",
+    "demoorgunit",
     "agecat",
     "agemarriagecat",
     "agepregnancycat",
@@ -187,7 +191,8 @@ SaveCISMACDataBase<- function(){
     "uniqueid",
     "bookevent",
     "booknum",
-    "booklmpknown",
+    "booklmp",
+    "booklmp_original",
     "bookgestage",
     "bookprimi",
     #"bookpprom",
@@ -214,20 +219,26 @@ SaveCISMACDataBase<- function(){
     "bookhistabort",
     "bookhistperi",
     "confamilyhistoryofhypertension",
-    "bookfamhistdiab",
+    "bookfamdm",
     "bookhistcs",
     "bookhistcscompl",
     "bookparity",
-    "bookhistpuersep",
+   # "bookhistpuersep",
     "bookhisteclamp",
-    "bookhistantparthemprevpreg",
-    "bookhistpph",
-    "bookhistgdm",
-    "bookhistghtn",
-    "bookhistpreecl",
-    "bookhistpreterm",
-    "conage16or40",
-    "bookhistaph",
+   # "bookhistantparthemprevpreg",
+    #"bookhistpph",
+   # "bookhistgdm",
+    #"bookhistghtn",
+    #"bookhistpreecl",
+   # "bookhistpreterm",
+   # "bookhistaph",
+    "bookhisthtn",
+    #"bookhistotherch",
+    #"bookhistblood",
+   # "bookhistotherchronic",
+  #  "bookhistbloodspec",
+    
+    #"conage16or40",
     "bookheight",
     "bookbpsyst",
     "bookbpdiast",
@@ -239,16 +250,11 @@ SaveCISMACDataBase<- function(){
     "bookexampalp",
     "consupplementsyesno",
     "conancsupplementprescription",
-    "bookhisthtn",
-    "bookhistotherch",
-    "bookhistblood",
     "bookfetalmove",
-    "bookhistbloodspec",
     "bookexamsfh",
     "bookexamedema",
     "bookrefchronic",
     "bookmedpres",
-    "bookhistotherchronic",
     "bookhighrisk",
     "bookseenby",
     "bookbackupfile",
@@ -264,6 +270,19 @@ SaveCISMACDataBase<- function(){
     "ident_TRIAL_1",
     #"ident_hr_clinic",
     "ident_TRIAL_1_clinics",
+    
+    
+    #bookfamdm
+   # bookfamhtn
+    # bookhistdm
+    # bookhistperi
+    # bookhistcs
+    # bookhistcscomp
+    # bookhisteclamp
+    # bookhistgdm
+    # bookhistpreecl
+    
+    
     names(d)[stringr::str_detect(names(d),"^anevent_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^anprogstage_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^andate_[0-9]*")],
@@ -311,7 +330,7 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^labrh_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^labict_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labhb_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^labhct_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labhct_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labrecommendationscomments_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labbloodglu_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labfastbloodglu_[0-9]*")],
@@ -346,8 +365,8 @@ SaveCISMACDataBase<- function(){
     #names(d)[stringr::str_detect(names(d),"^usamniquant_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^usamnideeppoc_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^usamniindex_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usgestsac_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usgestsacmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usgestsac_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usgestsacmm_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^usgestsacweek_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^uscrlmm_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^uscrlweeks_[0-9]*")],
@@ -390,6 +409,7 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^prevprogstage_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^prevdate_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^prevorgcode_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^prevorgunit_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^prevoutcome_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^prevmodedelivery_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^prevgdm_[0-9]*")],

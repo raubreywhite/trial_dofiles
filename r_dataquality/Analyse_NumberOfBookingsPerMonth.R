@@ -1,5 +1,9 @@
 
 Analyse_NumberOfBookingsPerMonth <- function(d,location="pal"){
+  # 'd' is all of palestine
+  # 'pd' is pal/wb/gaza depending on what we ask for
+  # this is to save time, so we dont have to load
+  # data in over and again
   x <- GetFoldersAndData(d=d,location=location)
   pd <- x$pd
   folders <- x$folders
@@ -56,6 +60,69 @@ Analyse_NumberOfBookingsPerMonth <- function(d,location="pal"){
     width=297,
     units="mm",
     plot=p)
+  
+  # compare number of people within each bookorgname by month
+  # here we do a row selection, followed by "count everyone"
+  
+  uglytable <- pd[ident_dhis2_booking==T & 
+                    ident_dhis2_control==F & 
+                    bookdate>="2017-01-01",
+                  .(
+                    N=.N
+                  ),
+                  keyby=.(
+                    bookorgdistrict,
+                    ident_gaza,
+                    bookyearmonth,
+                    bookorgname,
+                    ident_hr_clinic
+                  )]
+  
+  uglytable[ident_gaza==T,loc:="Gaza"]
+  uglytable[ident_gaza==F,loc:="West Bank"]
+  setcolorder(uglytable,"loc")
+  
+  #melt.data.table is for wide -> long
+  #dcast.data.table is for long -> wide
+  results <- dcast.data.table(
+    uglytable, 
+    loc+bookorgdistrict+ident_hr_clinic+bookorgname~bookyearmonth, 
+    value.var = "N",
+    fill=0)
+  results
+  
+  # delete the useless months that we dont want
+  results[,`2017-01`:=NULL]
+  results[,`2017-02`:=NULL]
+  results[,`2017-03`:=NULL]
+  results[,`2017-04`:=NULL]
+  results[,`2017-05`:=NULL]
+  results[,`2017-06`:=NULL]
+  results[,`2017-07`:=NULL]
+  results[,`2017-08`:=NULL]
+  results[,`2017-09`:=NULL]
+  results[,`2017-10`:=NULL]
+  results[,`2017-11`:=NULL]
+  results[,`2017-12`:=NULL]
+  results[,`2018-01`:=NULL]
+  results[,`2018-02`:=NULL]
+  results[,`2018-03`:=NULL]
+  results[,`2018-04`:=NULL]
+  results[,`2018-05`:=NULL]
+  results[,`2018-06`:=NULL]
+  results[,`2018-07`:=NULL]
+  results[,`2018-08`:=NULL]
+  results[,`2018-09`:=NULL]
+  
+  openxlsx::write.xlsx(results,
+                       file.path(
+                         folders$dropbox,
+                         "data_quality",
+                         "number_of_bookings_per_month_restricted.xlsx"))
+  
+  #pdlong <- LoadDataLongFromNetworkPal()
+  
+  
   
 }
 

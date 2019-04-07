@@ -22,6 +22,7 @@ Analyse_AutoDuplications(d=d,location="wb")
 #Analyse_AutoDuplications(d=d,location="gaza")
 
 Analyse_NumberOfBookingsPerMonth(d=d, location="pal")
+Analyse_NumberOfBookingsPerMonth(d=d, location="wb")
 
 Bookdate_vs_booklmp(d=d, location="wb")
 

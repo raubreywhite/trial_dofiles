@@ -101,9 +101,16 @@ CleanAllData <- function(
   if("ident_paperhbo" %in% names(d)){
     d[ident_paperhbo==TRUE & is.na(matching),matching:="PaperHBO"]
     d[ident_paperhbo==TRUE, matching_hbo:=TRUE]
+    d[matching_hbo==T & stringr::str_detect(tolower(paperhbo_fileoriginal_1),"gov"),matching_gov:=TRUE]
+    d[matching_hbo==T & stringr::str_detect(tolower(paperhbo_fileoriginal_1),"priv"),matching_private:=TRUE]
+    
+    d[!matching %in% c("PaperHBO","Private"),matching_private:=FALSE]
+    d[!matching %in% c("Avicenna","Governmental"),matching_gov:=FALSE]
   }
   d[is.na(matching),matching:="Not"]
   xtabs(~d$matching)
+  xtabs(~d$matching+d$matching_private)
+  xtabs(~d$matching+d$matching_gov)
   
   # CLEAN DIFFERENT FILES CONSISTENTLY (e.g. gestational age)
   #CleaningDifferentFilesConsistently(d)

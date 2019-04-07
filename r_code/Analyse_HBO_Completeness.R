@@ -7,7 +7,7 @@ Analyse_HBO_Completeness <-function(d){
       
     tokeep <- d[
       ident_dhis2_booking==1 &
-      isExpectedToHaveDelivered==TRUE &
+      #isExpectedToHaveDelivered==TRUE &
       ident_TRIAL_1==TRUE,]
     
    setorder(tokeep,bookorgname,bookdate)

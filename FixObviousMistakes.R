@@ -36,6 +36,25 @@ FixObviousMistakes <- function(d){
     booklmp:=booklmp-365]
   
   
+  #####################
+  #####Cleaning bookheight
+  
+  #missing bookheights for control will show up as empty
+  sum(is.na(d$bookheight))
+  str(d$bookheight)
+  unique(d$bookheight)
+  
+  #replace all bookheights with absolute values
+  d[,bookheight:=abs(bookheight)]
+  d[bookheight<2.0,bookheight:=bookheight*100]
+  d[bookheight>=10 &
+      bookheight<=90,bookheight:=bookheight+100]
+  d[bookheight>=1000 & 
+      bookheight<2000,bookheight:=bookheight/10]
+ d[bookheight>=100000,bookheight:=bookheight/1000]
+
+  
+  
 }
 
 

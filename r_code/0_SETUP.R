@@ -48,9 +48,9 @@ Setup <- function(IS_GAZA=FALSE){
   for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
   
   # MERETT/TAMARA CHECK OUT IF THIS IS ACTUALLY CORRECT
-  FOLDER_DROPBOX <- file.path("~","..","eRegistry CRCT Dropbox")
+  #FOLDER_DROPBOX <- file.path("~","..","eRegistry CRCT Dropbox")
   # MERVETT/TAMARA DELETE THIS ONCE DROPBOX IS INSTALLED
-  FOLDER_DROPBOX <- "C:/data processing/FAKE_DROPBOX/eRegistry CRCT Dropbox"
+  FOLDER_DROPBOX <<- "C:/data processing/FAKE_DROPBOX/eRegistry CRCT Dropbox"
   
   FOLDER_DROPBOX_RESULTS_GAZA <<- file.path(
     FOLDER_DROPBOX,

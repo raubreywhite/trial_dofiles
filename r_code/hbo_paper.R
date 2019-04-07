@@ -60,7 +60,7 @@ paperhbo<- function(src="original",tagWithPaperHBO=FALSE){
     }
   }
   
-  return(d)
+  return(unique(d))
 }
 
 paperhbo_search_for_bookevent <- function(d){
@@ -107,8 +107,8 @@ paperhbo_search_for_bookevent <- function(d){
   #setnames(p3,"uniqueid","motheridno")
   setnames(p3,"eventdate","birthdate")
   
-  p3[is.na(bookevent) & !is.na(OLD_bookevent),bookevent:=OLD_bookevent]
-  p3[is.na(bookevent),bookevent:=sprintf("x-%s",1:.N)]
+ #p3[is.na(bookevent) & !is.na(OLD_bookevent),bookevent:=OLD_bookevent]
+ #p3[is.na(bookevent),bookevent:=sprintf("x-%s",1:.N)]
   
   openxlsx::write.xlsx(p3[is.na(bookevent)],
                        file=file.path(
