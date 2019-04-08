@@ -107,8 +107,18 @@ paperhbo_search_for_bookevent <- function(d){
   #setnames(p3,"uniqueid","motheridno")
   setnames(p3,"eventdate","birthdate")
   
- #p3[is.na(bookevent) & !is.na(OLD_bookevent),bookevent:=OLD_bookevent]
- #p3[is.na(bookevent),bookevent:=sprintf("x-%s",1:.N)]
+ p3[is.na(bookevent) & !is.na(OLD_bookevent),bookevent:=OLD_bookevent]
+ # recreating eventnum so that it is compatible with both bookevent and OLD_bookevent
+ p3[!is.na(bookevent),eventnum:=1:.N,by=.(motheridno,bookevent,booknum)]
+ 
+ openxlsx::write.xlsx(p3[!is.na(bookevent)],
+                      file=file.path(
+                        FOLDER_DATA_RAW,
+                        "hbo_paper",
+                        "bookeventsfound",
+                        "found.xlsx"))
+ 
+  p3[is.na(bookevent),bookevent:=sprintf("x-%s",1:.N)]
   
   openxlsx::write.xlsx(p3[is.na(bookevent)],
                        file=file.path(
@@ -116,13 +126,6 @@ paperhbo_search_for_bookevent <- function(d){
                          "hbo_paper",
                          "bookeventsnotfound",
                          "notfound.xlsx"))
-  
-  openxlsx::write.xlsx(p3[!is.na(bookevent)],
-                       file=file.path(
-                         FOLDER_DATA_RAW,
-                         "hbo_paper",
-                         "bookeventsfound",
-                         "found.xlsx"))
 }
 
 

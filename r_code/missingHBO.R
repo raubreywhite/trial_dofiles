@@ -32,7 +32,8 @@ MissingHBOInternal <- function(d){
       "village",
       "bookintendbirth",
       "bookrecobirth",
-      "calc_expected_due_delivery"
+      "calc_expected_due_delivery",
+      "ident_bad_all"
     )]
   
   #gen IS_ABORTION="ABORTION" if bookevent==0492304932
