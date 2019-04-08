@@ -109,7 +109,7 @@ paperhbo_search_for_bookevent <- function(d){
   
  p3[is.na(bookevent) & !is.na(OLD_bookevent),bookevent:=OLD_bookevent]
  # recreating eventnum so that it is compatible with both bookevent and OLD_bookevent
- p3[!is.na(bookevent),eventnum:=1:.N,by=.(motheridno,bookevent,booknum)]
+ p3[!is.na(bookevent),eventnum:=as.numeric(1:.N),by=.(motheridno,bookevent,booknum)]
  
  openxlsx::write.xlsx(p3[!is.na(bookevent)],
                       file=file.path(
