@@ -3,7 +3,7 @@ MissingHBOInternal <- function(d){
   
   abortions <- readRDS(file.path(FOLDER_DATA_MBO,"abortions.RDS"))$bookevent
 
-  
+  if(!"ident_bad_all" %in% names(d)) d[,ident_bad_all:=as.logical(NA)]
   #added the is ExpectedToHaveDelivered for False/wrong or missing LMPs
   tokeep <- d[
       is.na(ident_bad_all) &
