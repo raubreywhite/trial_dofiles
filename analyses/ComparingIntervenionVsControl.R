@@ -451,7 +451,7 @@ ggsave(filename=file.path(
 p <- ggplot(uglyTable[!is.na(bookhistotherch)], aes(x=prettyExposure, y=N/denom, fill=as.factor(bookhistotherch)))
 p <- p + geom_col()
 p <- p + labs(y="Proportion of Women",
-              fill="boookhisther",
+              fill="boookhistotherch",
               caption=sprintf("Chi-squared p-value: %s",pval))
 p
 ggsave(filename=file.path(

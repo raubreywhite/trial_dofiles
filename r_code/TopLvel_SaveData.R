@@ -16,6 +16,22 @@ Save2CasesPerMonthToNetwork <- function(d){
   if(!file.exists(desiredFile)) openxlsx::write.xlsx(d[randomNum<=4],desiredFile)
   print("FINISHED SAVING 4 CASES PER MONTH TO NETWORK")
   d[,randomNum:=NULL]
+  
+  # Did this for cases in 2018 so we can open their file
+  # set.seed(4)
+  # d[bookyear=="2018" & ident_dhis2_control==FALSE,
+  #   randomNum:=order(runif(.N)),by=bookyearmonth]
+  # setorder(d,bookyearmonth)
+  # 
+  # desiredFile <- file.path(
+  #   FOLDER_DATA_RESULTS,"quality_control",
+  #   sprintf("%s_random_quality_control_from_intervention.xlsx",lubridate::today()))
+  #  if(!file.exists(desiredFile)) openxlsx::write.xlsx(d[randomNum<=4],desiredFile)
+  # print("FINISHED SAVING 4 CASES PER MONTH TO NETWORK")
+  # d[,randomNum:=NULL]
+  # 
+  
+  
 }
 
 SaveFullFileToNetwork <- function(d){
@@ -227,24 +243,24 @@ SaveCISMACDataBase<- function(){
     "bookhisteclamp",
    # "bookhistantparthemprevpreg",
     #"bookhistpph",
-   # "bookhistgdm",
-    #"bookhistghtn",
-    #"bookhistpreecl",
+   #"bookhistgdm",
+    "bookhistghtn",
+    "bookhistpreecl",
    # "bookhistpreterm",
    # "bookhistaph",
     "bookhisthtn",
+    "bookfamhtn",
     #"bookhistotherch",
     #"bookhistblood",
-   # "bookhistotherchronic",
-  #  "bookhistbloodspec",
-    
+   "bookhistotherchronic",
+   "bookhistbloodspec",
     #"conage16or40",
     "bookheight",
     "bookbpsyst",
     "bookbpdiast",
     "bookweight",
-    "conancgestationaageatvisitweeks",
-    "conancgestationaageatvisitsize",
+    #"conancgestationaageatvisitweeks",
+    #"conancgestationaageatvisitsize",
     "usrecommendationscommentsy",
     "bookexamfh",
     "bookexampalp",
@@ -270,19 +286,6 @@ SaveCISMACDataBase<- function(){
     "ident_TRIAL_1",
     #"ident_hr_clinic",
     "ident_TRIAL_1_clinics",
-    
-    
-    #bookfamdm
-   # bookfamhtn
-    # bookhistdm
-    # bookhistperi
-    # bookhistcs
-    # bookhistcscomp
-    # bookhisteclamp
-    # bookhistgdm
-    # bookhistpreecl
-    
-    
     names(d)[stringr::str_detect(names(d),"^anevent_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^anprogstage_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^andate_[0-9]*")],
@@ -321,14 +324,15 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^anhistrti_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^anhistchronicspec_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^anhomeorclinic_[0-9]*")],
-    "ident_dhis2_an",
+    names(d)[stringr::str_detect(names(d),"^anhistdm_[0-9]*")],
+   # "ident_dhis2_an",
     names(d)[stringr::str_detect(names(d),"^labevent_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labprogstage_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labdate_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^laborgcode_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^laborgunit_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labrh_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^labict_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labict_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labhb_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labhct_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labrecommendationscomments_[0-9]*")],
@@ -337,15 +341,15 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^laburglu_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^laburpro_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labother1_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^labotherres1_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labotherres1_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labother2_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^labotherres2_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labotherres2_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labother3_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^labotherres3_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labotherres3_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labgestage_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labplace_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labplacespec_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^labanemresp_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labanemresp_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^labogct_[0-9]*")],
     "ident_dhis2_lab",
     names(d)[stringr::str_detect(names(d),"^usevent_[0-9]*")],
@@ -357,32 +361,32 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^usegadays_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usnumberfetus_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usfh_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^uscomments_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usfh_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^uscomments_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^uspres_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usiugr_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^uslga_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usamniquant_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usamnideeppoc_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usamniindex_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usamniquant_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usamnideeppoc_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usamniindex_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usgestsac_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usgestsacmm_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usgestsacweek_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^uscrlmm_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^uscrlweeks_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usbpdmm_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usbpdweeks_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usfemurmm_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usfemurweeks_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usacmm_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usacweeks_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usgestsacweek_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^uscrlmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^uscrlweeks_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usbpdmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usbpdweeks_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usfemurmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usfemurweeks_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usacmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usacweeks_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usefw_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usgestage_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usreason_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usplace_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usmultifetdesignation_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^usanom_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^usanomspec_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usanomspec_[0-9]*")],
     "ident_dhis2_us",
     names(d)[stringr::str_detect(names(d),"^riskevent_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^riskprogstage_1[0-9]*")],
@@ -400,7 +404,7 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^manorgcode_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^manorgunit_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^mangestage_[0-9]*")],
-    #names(d)[stringr::str_detect(names(d),"^mandetail_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^mandetail_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^mantypex_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^manperf_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^mantypey_[0-9]*")],
@@ -421,7 +425,6 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^prevpph_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^prevnocompl_[0-9]*")],
     "ident_dhis2_prev",
-
     #names(d)[stringr::str_detect(names(d),"^dhis2hboprogramstage_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^dhis2hbodate_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^dhis2hboconwomandob_[0-9]*")],
@@ -437,6 +440,7 @@ SaveCISMACDataBase<- function(){
     #names(d)[stringr::str_detect(names(d),"^dhis2hbolabcbchemoglobin_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^dhis2hbolaburinestickprotein_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^dhis2hbousrecommendcomment_[0-9]*")],
+   
     "ident_dhis2_dhis2hbo",
     names(d)[stringr::str_detect(names(d),"^pcnevent_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^pcnprogstage_[0-9]*")],
@@ -494,21 +498,18 @@ SaveCISMACDataBase<- function(){
     #names(d)[stringr::str_detect(names(d),"^hbodcreated_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hbodlastupdated_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hbodtrackedentity_[0-9]*")],
-    
     #names(d)[stringr::str_detect(names(d),"^hbodinactive_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hbodidentificationdocumenttype_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hboevent_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hboprogramstage_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hboeventdate_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hbodateofdeliveryhospital_[0-9]*")],
-    
     #names(d)[stringr::str_detect(names(d),"^hbogestagedeliv_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hboprevpregoutcome_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hboprevpregbweight_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hbomodeprevdeliv_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hbousfetalpresentation_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hboindiccsectioninanycol_[0-9]*")],
-    
     #names(d)[stringr::str_detect(names(d),"^hbolaburinestickprotein_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hboindiccsectioninanycol_[0-9]*")],
     #names(d)[stringr::str_detect(names(d),"^hbosystbp_[0-9]*")],
@@ -518,7 +519,6 @@ SaveCISMACDataBase<- function(){
     #names(d)[stringr::str_detect(names(d),"^hboconlabcbchematocrit_[0-9]*")],
     "ident_hbo",
     "matching",
-  
     names(d)[stringr::str_detect(names(d),"^merged_namehospbirth_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^merged_pregoutcome_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^merged_abortion[0-9]*")],
@@ -529,7 +529,7 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^merged_modeofdelivery_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^merged_fetalpresentation_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^merged_indicationforcsection_[0-9]*")]
-    
+    ###add out of country, private, gov, etc variables
 
             
   )

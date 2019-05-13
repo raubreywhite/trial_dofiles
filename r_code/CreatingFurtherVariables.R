@@ -116,7 +116,6 @@ CreatingFurtherVariablesMahima <- function(d){
   
   
   #private/clinics  hbo entered gest ages
- 
   nam <-names(d)[stringr::str_detect(names(d),"^dhis2hbogestagedeliv_[0-9]*$")]
   num <- stringr::str_replace(nam, "dhis2hbogestagedeliv_", "")
   nam
@@ -349,14 +348,14 @@ matchvars <- list(
                                "dhis2hbousfetalpresentation_",
                                "paperhbo_presentationatdelivery_"),
   
-  "merged_indicationforcsection_"=c("abbbabybirthtype_",
+  "merged_indicationforcsection_"=c("acsdatatext_",
                                    "hboindiccsectioninanycol_",
                                    "dhis2hboindicforcsec_",
                                    "paperhbo_indicationforcesarian_")
  
   
    )
-
+###cant find fetal presentation as a variable in avicenna
 ###make a merged bp in above loop for each of the variables
   
 
@@ -418,7 +417,6 @@ d[matching=="Private", merged_is_hosp_gov:=FALSE]
 d$merged_namehospbirth
 unique(d[matching=="PaperHBO"]$merged_namehospbirth)
 
-
 ####Add in names of governmental hospitals from above
 d[matching=="PaperHBO" &
       merged_namehospbirth %in% c("PMC",
@@ -461,7 +459,7 @@ d[matching=="PaperHBO" &
                                 "WQ",
                                 "ZT",
                                 "HT",
-                                "PRSR_H",
+                                "PRCS_H",
                                 "Ahli",
                                 "wq",
                                 "Home",
@@ -597,13 +595,36 @@ d[matching=="PaperHBO",merged_presentationdeliv:=paperhbo_presentationatdelivery
 # - dhis2hboindicforcsec_1
 warning("merged_indic_csection:=abbbabybirthtype_1")
 d[matching=="Avicenna",merged_indic_csection:=abbbabybirthtype_1]
-d[matching=="Governmental",merged_indic_csection:=hboindiccsectioninanycol_1]
-d[matching=="Private",merged_indic_csection:=dhis2hboindicforcsec_1]
+d[matching=="Governmental",merged_indic_csection:=hboconreasonforcs_1]
+d[matching=="Private",merged_indic_csection:=dhis2hbousrecommendcomment_1]
 d[matching=="PaperHBO",merged_indic_csection:=paperhbo_indicationforcesarian_1]
 
-
-
-
+# #Indication for C-section from Nurse's notes : occyptoposterium
+# #found in usrecom/comments control hospitals
+# 
+# ###get rid of the punctuation in these variables
+# d[matching=="Governmental", stringr::str_replace(dhis2hbousrecommendcomment_1, ".","")]
+# 
+# d[,merged_reasonforcsec_standard:=as.character()]
+# d[matching=="Governmental"& 
+#     stringr::str_detect(tolower(hboconreasonforcs_1),
+#                        "previous"),
+#                        merged_reasonforcsec_standard:="Previous Csections"]
+# 
+# d[matching=="Private"& 
+#     stringr::str_detect(tolower(dhis2hbousrecommendcomment_1),
+#                        "previous"),
+#   merged_reasonforcsec_standard:="Previous Csections"]
+# 
+# d[matching=="Private"& 
+#     stringr::str_detect(tolower(dhis2hbousrecommendcomment_1),
+#                         "big baby"),
+#   merged_reasonforcsec_standard:="Big Baby"]
+# 
+# d[matching=="Private"& 
+#     stringr::str_detect(tolower(dhis2hbousrecommendcomment_1),
+#                         "ivf"),
+#   merged_reasonforcsec_standard:="IVF"]
 }
 
 

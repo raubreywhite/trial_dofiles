@@ -119,6 +119,8 @@ Analyse_HBO_Completeness <-function(d){
       merged_datedeliv_notmiss=sum(!is.na(merged_datedeliv)),
       merged_birthhemo_notmiss=sum(!is.na(merged_birthhemo)),
       merged_modedeliv_notmiss=sum(!is.na(merged_modedeliv)),
+      merged_bpsyst_notmiss=sum(!is.na(merged_bpsyst)),
+      merged_bpdiast_notmiss=sum(!is.na(merged_bpdiast)),
       merged_presentationdeliv_notmiss=sum(!is.na(merged_presentationdeliv)),
       merged_indic_csection_notmiss=sum(!is.na(merged_indic_csection))
       
@@ -137,6 +139,13 @@ Analyse_HBO_Completeness <-function(d){
       FOLDER_DROPBOX_RESULTS,
       "hbo_completeness",
       sprintf("%s_HBO_Completeness.xlsx",DATA_DATE)))
+    
+    
+#####HBO detailed report#####
+###place of delivery (priv, gov, out of country, home)
+###outcome: alive, abo, dead
+###avg: weight, bp, hbg
+###indic for caesarian and how many from ppc
     
 # unmatched govt hospital cases from hbo sheet
     

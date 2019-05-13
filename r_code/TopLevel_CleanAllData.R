@@ -66,10 +66,10 @@ CleanAllData <- function(
     base=d,
     additional=paperhbo(
       src="bookeventsfound",
-      tagWithPaperHBO=TRUE),
+      tagWithPaperHBO=TRUE)[,-"motherdno"],
     valueVarsRegex="^paperhbo",
-    dcastFormula="motheridno+bookevent+booknum~eventnum",
-    mergeVars=c("motheridno","bookevent","booknum"),
+    dcastFormula="bookevent+booknum~eventnum",
+    mergeVars=c("bookevent","booknum"),
     identName="ident_paperhbo"
   )
   nrow(d)

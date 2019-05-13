@@ -53,7 +53,25 @@ paperhbo<- function(src="original",tagWithPaperHBO=FALSE){
     d[,booknum:=as.numeric(booknum)]
   }
   
+  ###after we ran the data and got the "aggregate function missing"
+  ###function went to length instead and numbered the rows 1, 2,3, etc
+  ###based on if theyre duplicates, etc
+  ###because of the duplicates, did: nrow(d[paperhbo_birthdate_1==2])
+  ###to get the number of duplicate cases
+  # openxlsx::write.xlsx(d[paperhbo_birthdate_1>=2, 
+  #                        c("bookevent",
+  #                          "motheridno",
+  #                          "bookdate",
+  #                          "bookorgname",
+  #                          "firstname",
+  #                          "fathersname",
+  #                          "familyname1")],
+  #                      file=file.path(
+  #                        FOLDER_DATA_RESULTS_WB,
+  #                        sprintf("%s_Duplicate_paperhbos.xlsx",lubridate::today())))
+  
   if(tagWithPaperHBO){
+    d <- d[is.na(removebecausetwins)]
     for(n in names(d)){
       if(n %in% c("bookevent","eventnum","booknum","motheridno")) next
       setnames(d,n,sprintf("paperhbo_%s",n))
@@ -106,8 +124,9 @@ paperhbo_search_for_bookevent <- function(d){
   
   #setnames(p3,"uniqueid","motheridno")
   setnames(p3,"eventdate","birthdate")
-  
- p3[is.na(bookevent) & !is.na(OLD_bookevent),bookevent:=OLD_bookevent]
+ 
+   
+ p3[!is.na(OLD_bookevent),bookevent:=OLD_bookevent]
  # recreating eventnum so that it is compatible with both bookevent and OLD_bookevent
  p3[!is.na(bookevent),eventnum:=as.numeric(1:.N),by=.(motheridno,bookevent,booknum)]
  

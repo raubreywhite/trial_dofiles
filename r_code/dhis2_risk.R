@@ -32,7 +32,9 @@ DHIS2_RiskFactors <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   )
   
   setnames(d,"event","riskevent")
-  #setnames(d,"programstageinstance","uniqueid")
+  NamesToChange(d,badname=c("programstageinstance",
+                            "trackedentity"),
+                goodname="uniqueid")
   setnames(d,"programstage","riskprogstage")
   setnames(d,"eventdate","riskdate")
   setnames(d,"longitude","risklong")
