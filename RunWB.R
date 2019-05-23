@@ -45,7 +45,7 @@ MissingHBO()
 
 ####
 # PLACE OF DELIVERY INFORMATION CHECKING
-# LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPORT
+# LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPPORT
 d <- LoadDataFileFromNetwork()
 #### bookvisitspec shouldnt be known  pcnidnumber_1  amdmotherbirthdate_1
 ###previdnumber_1   manidnumber  riskidnumber   d$hbodaltidnum_1   hbodaltidnum_1

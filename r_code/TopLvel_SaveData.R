@@ -192,7 +192,7 @@ SaveCISMACDataBase<- function(){
   
   varsKeep <- c(
     "bookdate",
-    "bookorgcode",
+    #"bookorgcode",
     "bookorgunit",
     "demoorgunit",
     "agecat",
@@ -284,7 +284,8 @@ SaveCISMACDataBase<- function(){
     #"ident_phase2clinic",
     #"ident_phase3clinic",
     "ident_TRIAL_1",
-    #"ident_hr_clinic",
+   "str_TRIAL_1_Cluster",
+   #"ident_hr_clinic",
     "ident_TRIAL_1_clinics",
     names(d)[stringr::str_detect(names(d),"^anevent_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^anprogstage_[0-9]*")],

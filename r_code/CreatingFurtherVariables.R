@@ -328,7 +328,7 @@ matchvars <- list(
                           "dhis2hbopregbweight_",
                           "paperhbo_weightgrams_"),
   
-  "merged_babybirthdate_"=c("abbbabybirthdate_",
+  "merged_babybirthdate_"=c("abbbabyrecorddatecreation_",
                             "hbodateofdeliveryhospital_",
                             "dhis2hbodateofdeliveryhospital_",
                             "paperhbo_birthdate_"),
@@ -453,6 +453,7 @@ d[matching=="PaperHBO" &
                                 "Shifa",
                                 "R3aya",
                                 "Mustaqbal",
+                                "Must",
                                 "IST",
                                 "WN",
                                 "Musallam",
@@ -460,10 +461,14 @@ d[matching=="PaperHBO" &
                                 "ZT",
                                 "HT",
                                 "PRCS_H",
+                                "PRCSR_Hebron",
                                 "Ahli",
+                                "Hebron",
                                 "wq",
                                 "Home",
-                                "Khaled"
+                                "HOME",
+                                "Khaled",
+                                "TRANS"
                                 
                                ),
   merged_is_hosp_gov:=FALSE
@@ -477,10 +482,19 @@ d[matching=="PaperHBO" &
 
 d[ident_paperhbo==T & 
   merged_namehospbirth %in% c("Out of the country-Hadassah",
+                              "Out of the country-Mustaqbal",
                               "Out of the country-Nazareth",
                               "Out of the country-America",
+                              "Out of the country-Canada",
                               "Out of the country-Jordan",
-                              "Out of the country-Hilal"
+                              "Out of the country-Emirates",
+                              "Out of the Country-Italy",
+                              "Out of the country-Hilal",
+                              "Out of the country-PRCSJ",
+                              "Out of the country-Quds lal wlada-Qalandia",
+                              "Israel",
+                              "Maqassad",
+                              "America"
 ),
 matching:="Out of the country"]
 
@@ -542,7 +556,7 @@ d[matching=="PaperHBO",merged_pregbweight:=paperhbo_weightgrams_1]
 
 # date of delivery
 # - dhis2hbodateofdeliveryhospital_1
-d[matching=="Avicenna",merged_datedeliv:=abbbabybirthdate_1]
+d[matching=="Avicenna",merged_datedeliv:=abbbabyrecorddatecreation_1]
 d[matching=="Governmental",merged_datedeliv:=as.character(hbodateofdeliveryhospital_1)]
 d[matching=="Private",merged_datedeliv:=dhis2hbodateofdeliveryhospital_1]
 d[matching=="PaperHBO",merged_datedeliv:=paperhbo_birthdate_1]
@@ -594,7 +608,7 @@ d[matching=="PaperHBO",merged_presentationdeliv:=paperhbo_presentationatdelivery
 # indic for csection
 # - dhis2hboindicforcsec_1
 warning("merged_indic_csection:=abbbabybirthtype_1")
-d[matching=="Avicenna",merged_indic_csection:=abbbabybirthtype_1]
+d[matching=="Avicenna",merged_indic_csection:=acsdatatext_1]
 d[matching=="Governmental",merged_indic_csection:=hboconreasonforcs_1]
 d[matching=="Private",merged_indic_csection:=dhis2hbousrecommendcomment_1]
 d[matching=="PaperHBO",merged_indic_csection:=paperhbo_indicationforcesarian_1]

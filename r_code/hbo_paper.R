@@ -58,18 +58,18 @@ paperhbo<- function(src="original",tagWithPaperHBO=FALSE){
   ###based on if theyre duplicates, etc
   ###because of the duplicates, did: nrow(d[paperhbo_birthdate_1==2])
   ###to get the number of duplicate cases
-  # openxlsx::write.xlsx(d[paperhbo_birthdate_1>=2, 
-  #                        c("bookevent",
-  #                          "motheridno",
-  #                          "bookdate",
-  #                          "bookorgname",
-  #                          "firstname",
-  #                          "fathersname",
-  #                          "familyname1")],
-  #                      file=file.path(
-  #                        FOLDER_DATA_RESULTS_WB,
-  #                        sprintf("%s_Duplicate_paperhbos.xlsx",lubridate::today())))
-  
+    # openxlsx::write.xlsx(d[paperhbo_birthdate_1>=2, 
+    #                        c("bookevent",
+    #                          "motheridno",
+    #                          "bookdate",
+    #                          "bookorgname",
+    #                          "firstname",
+    #                          "fathersname",
+    #                          "familyname1")],
+    #                      file=file.path(
+    #                        FOLDER_DATA_RESULTS_WB,
+    #                        sprintf("%s_Duplicate_paperhbos.xlsx",lubridate::today())))
+    # 
   if(tagWithPaperHBO){
     d <- d[is.na(removebecausetwins)]
     for(n in names(d)){
@@ -88,8 +88,12 @@ paperhbo_search_for_bookevent <- function(d){
   
  # setnames(p,"motheridno","uniqueid")
   setnames(p,"birthdate","eventdate")
-  earlyData <- unique(d[ident_dhis2_booking==T,c("motheridno","bookdate","booknum")])
-  booklmp <- unique(d[ident_dhis2_booking==T,c("motheridno","bookevent","booknum","booklmp")])
+  earlyData <- unique(d[ident_dhis2_booking==T & !bookevent%in%p$OLD_bookevent,
+                        c("motheridno","bookdate","booknum")])
+ 
+  booklmp <- unique(d[ident_dhis2_booking==T &
+                        !bookevent%in%p$OLD_bookevent,
+                      c("motheridno","bookevent","booknum","booklmp")])
   
   #setnames(earlyData,"motheridno","uniqueid")
   #setnames(booklmp,"motheridno","uniqueid")
