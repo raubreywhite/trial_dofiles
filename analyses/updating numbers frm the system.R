@@ -348,7 +348,7 @@ nrow(d[labgestage_22_30=="0-91"])
 
 #####
 
-#Buthaina's staff
+#Buthaina's stuff
 #you should run this from sink to sink
 # to save things in notepad and dont forgett to put sink at the bottom
 sink()
@@ -534,8 +534,8 @@ sink()
 
 #As of 2017, the MCH e Registry contains data on 24,832 registered antenatal care visits, 
 #26640 postpartum care visits and 16,409 newborn care visits. From antenatal care, 
-#data on core process indicators is available on screening of anemia        hypertension,
-#diabetes                and urinary tract infections.
+#data on core process indicators is available on screening of anemia,hypertension,
+#diabetes and urinary tract infections.
 
 
 

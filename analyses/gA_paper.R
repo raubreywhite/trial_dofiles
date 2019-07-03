@@ -3,20 +3,52 @@ sink(file.path(FOLDER_DROPBOX_RESULTS,
                "trial_1",
                "gA_paper_cats.txt"))
 
-analysisDatasetUSgA <- d[bookyearmonth>="2017-01" &
-                           bookyearmonth<="2017-12" &
-                           ident_avic_abb==T &
-                           !is.na(mahima_hospenteredgestage_1) &
-                           !is.na(mahima_gestageatbirthwk_1) &
-                           !is.na(first_1_21_usedd_gA)&
-                           !is.na(first_1_21_usedd_gA_cats),
+
+analysisDatasetUSgA <- d[ ident_TRIAL_1==T &
+                            !is.na(mahima_hospenteredgestage_1),
                          c("mahima_dateofbirth_1",
                            "first_1_21_usedd_gA",
                            "first_1_21_usedd_gA_cats",
+                           "first_1_21_usedd_gA_cats_wide",
                            "mahima_hospenteredgestage_1",
-                           "mahima_gestageatbirthwk_1")]
+                           "mahima_hospenteredgestage_1_cats",
+                           "mahima_hospenteredgestage_1_cats_wide",
+                           "mahima_gestageatbirthwk_1",
+                           "mahima_gestageatbirthwk_1_cats_wide")]
+nrow(analysisDatasetUSgA)
+sum(!is.na(analysisDatasetUSgA$first_1_21_usedd_gA))
+sum(!is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1))
+sum(!is.na(analysisDatasetUSgA$mahima_hospenteredgestage_1))
+
+sum(!is.na(analysisDatasetUSgA$first_1_21_usedd_gA_cats))
+sum(!is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats))
+sum(!is.na(analysisDatasetUSgA$mahima_hospenteredgestage_1_cats))
+
+####Table 3: CHIsqtest by ultrasound and then LMP
+#used wider categories to decrease lower numbers in categories
+#tried the chi.sq test which is an estimation but it might be incorrect
+#so we constrained the limits further by merging categories with small numbers
+#so tried fishers exact test and bc sample size is too large so it didnt work
+
+xtabs(~first_1_21_usedd_gA_cats+mahima_hospenteredgestage_1_cats,data=analysisDatasetUSgA)
+chisq.test(xtabs(~first_1_21_usedd_gA_cats+mahima_hospenteredgestage_1_cats,data=analysisDatasetUSgA))
+
+
+xtabs(~first_1_21_usedd_gA_cats_wide+mahima_hospenteredgestage_1_cats_wide,data=analysisDatasetUSgA)
+chisq.test(xtabs(~first_1_21_usedd_gA_cats_wide+mahima_hospenteredgestage_1_cats_wide,data=analysisDatasetUSgA))
+
+
+xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats)
+chisq.test(xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats))
+
+xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats_wide+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats_wide)
+chisq.test(xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats_wide+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats_wide))
+
+
+
 
 # we pull ou thte 3 variables that we care about
+#should we add is hosp gov variable here too?
 long <- analysisDatasetUSgA[,c(
   "first_1_21_usedd_gA",
   "mahima_hospenteredgestage_1",
@@ -45,6 +77,11 @@ anova(lm(value ~ variable, data=long))
 
 ### 
 
+###also compare difference between governmental and private
+#matching=="Governmental" or matching=="Private"
+#merged_is_hosp_gov, true or false
+
+
 
 cat("\nDenominator_first_1_21_usedd\n")
 nrow(analysisDatasetUSgA)
@@ -64,6 +101,14 @@ quantile(x=analysisDatasetUSgA$first_1_21_usedd_gA,
 
 cat("\nTRIALcats\n")
 xtabs(~analysisDatasetUSgA$first_1_21_usedd_gA)
+xtabs(~analysisDatasetUSgA$first_1_21_usedd_gA_cats+analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats)
+
+xtabs(~analysisDatasetUSgA$first_1_21_usedd_gA_cats_wide)
+xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats_wide)
+
+
+
+
 
 cat("\nbelow0US\n")
 xtabs(~analysisDatasetUSgA[
@@ -113,30 +158,23 @@ sink()
 
 #########GRAPHS GA##########################################
 #making plots for gestage distributions
-analysisDatasetUSgA <- d[bookyearmonth>="2017-01" & 
-                           bookyearmonth<="2017-12" &
-                           ident_avic_abb==T & 
+analysisDatasetUSgA <- d[bookdate>="2017-01-15" &
+                           bookyearmonth<="2017-09-15" &
+                           ident_TRIAL_1==T &
+                           ident_avic_abb==T &
+                           !is.na(merged_is_hosp_gov) &
                            !is.na(mahima_hospenteredgestage_1) &
                            !is.na(mahima_gestageatbirthwk_1) &
                            !is.na(first_1_21_usedd_gA)&
                            !is.na(first_1_21_usedd_gA_cats),
-                         c("mahima_dateofbirth_1",
-                           "mahima_hospenteredgestage_1",
-                           "mahima_gestageatbirthwk_1",
-                           "first_1_21_usedd_gA",
-                           "first_1_21_usedd_gA_cats")]
-
-#making plots for gestage distributions
-analysisDatasetUSgA <- d[[bookyearmonth>="2017-01" & 
-                            bookyearmonth<="2017-12" &
-                            ident_avic_abb==T,
                          c("mahima_hospenteredgestage_1",
                            "mahima_gestageatbirthwk_1",
-                           "first_1_21_usedd_gA"
-                         )]
+                           "first_1_21_usedd_gA")]
+
+
 
 #dont need an id.vars here because not retaining information for each woman
-long <- melt.data.table(analysisDatasetUSgA)
+long <- melt.data.table(analysisDatasetUSgA, id.vars="id")
 head(long)
 
 #ran this and got 3 levels, so must do levels
@@ -166,6 +204,17 @@ levels(long$category) <- c("<=0",
 
 levels(long$category)
 
+xtabs(~long$category, addNA = T)
+levels(long$category) <- c("<=0",
+                           "1-24",
+                           "25-32",
+                           "33-37",
+                           "38-41",
+                           "42-44",
+                           ">44")
+
+levels(long$category)
+
 #if restrict more rows, cant produce both continous and categorical
 p <- ggplot(long[value<50 & value>0], aes(x=value, fill=variable)) 
 p <- p + geom_density(alpha=0.3)
@@ -183,7 +232,7 @@ p
 ggsave(file.path(
   FOLDER_DATA_RESULTS,
   "mbo_r",
-  "GA_Abstract_Distribution_Adjusted.png"
+  "GA_Paper_Distribution_Adjusted.png"
 ), plot = p, width = 297, height = 210, unit = "mm")
 
 
@@ -206,7 +255,7 @@ p
 ggsave(file.path(
   FOLDER_DATA_RESULTS,
   "mbo_r",
-  "GA_Abstract_Distribution_NON_Adjusted.png"
+  "GA_Paper_Distribution_NON_Adjusted.png"
 ), plot = p, width = 297, height = 210, unit = "mm")
 
 
@@ -247,7 +296,7 @@ p
 ggsave(file.path(
   FOLDER_DATA_RESULTS,
   "mbo_r",
-  "GA_Abstract_Bar_graph_Not_Adjusted_with_labels.png"
+  "GA_Paper_Bar_graph_Not_Adjusted_with_labels.png"
 ), plot = p, width = 297, height = 210, unit = "mm")
 
 
@@ -273,7 +322,7 @@ p
 ggsave(file.path(
   FOLDER_DATA_RESULTS,
   "mbo_r",
-  "GA_Abstract_Bar_graph_Adjusted_with_labels.png"
+  "GA_Paper_Bar_graph_Adjusted_with_labels.png"
 ), plot = p, width = 297, height = 210, unit = "mm")
 
 

@@ -77,6 +77,20 @@ CreatingFurtherVariablesMahima <- function(d){
     # mahima_dateofbirth_1:=hbodate_1]
     d[ident_hbo==TRUE & !is.na(get(sprintf("hbodate_%s",i))),
       (sprintf("mahima_dateofbirth_%s",i)):=get(sprintf("hbodate_%s",i))]
+    
+    
+  }
+  
+  nam <- names(d)[stringr::str_detect(names(d),"^paperhbo_birthdate_[0-9]*$")]
+  num <- stringr::str_replace(nam,"paperhbo_birthdate_","")
+  for(i in num){
+    print(i)
+    #d[ident_hbo==TRUE & !is.na(hbodate_1),
+    # mahima_dateofbirth_1:=hbodate_1]
+    d[ident_paperhbo==TRUE & !is.na(get(sprintf("paperhbo_birthdate_%s",i))),
+      (sprintf("mahima_dateofbirth_%s",i)):=get(sprintf("paperhbo_birthdate_%s",i))]
+    
+    
   }
 
   #xtabs(~d$mahima_dateofbirth_1)
@@ -140,6 +154,18 @@ CreatingFurtherVariablesMahima <- function(d){
       (sprintf("mahima_hospenteredgestage_%s", i)):=get(sprintf("hbogestagedeliv_%s", i))]
   }
   
+  #paperhbo entered gest ages
+  nam <-names(d)[stringr::str_detect(names(d),"^paperhbo_gestationalageatbirthweeks_[0-9]*$")]
+  num <- stringr::str_replace(nam, "paperhbo_gestationalageatbirthweeks_", "")
+  nam
+  num
+  #here we are replacing abb with get("abb")
+  for (i in num){
+    print(i)
+    d[ident_paperhbo==TRUE & !is.na(get(sprintf("paperhbo_gestationalageatbirthweeks_%s",i))),
+      (sprintf("mahima_hospenteredgestage_%s", i)):=get(sprintf("paperhbo_gestationalageatbirthweeks_%s", i))]
+  }
+  
   ######Creating new variables for gestational age prevalences
   ###making two variables: preterm and postterm gestational ages####
   ####use mahima gest ages to determine post or preterm births
@@ -152,12 +178,21 @@ CreatingFurtherVariablesMahima <- function(d){
                                  breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
                                  include.lowest=T)]
   d[,mahima_hospenteredgestage_1_cats:=cut(mahima_hospenteredgestage_1,
-                                    breaks=c(-30,0,24,32,37,41,44,9999),
-                                    include.lowest=T)]
+                                           breaks=c(-30,0,24,32,37,41,44,9999),
+                                           include.lowest=T)]
+  d[,mahima_hospenteredgestage_1_cats_wide:=cut(mahima_hospenteredgestage_1,
+                                                breaks=c(-30,37.7,41.7,9999),
+                                           include.lowest=T)]
   
+  xtabs(~d$mahima_gestageatbirthwk_1)
   xtabs(~d$mahima_gestageatbirthwk_1_cats)
-  xtabs(~d$mahima_hospenteredgestage_1_cats)
- 
+ d[!is.na(mahima_gestageatbirthwk_1) & 
+     is.na(mahima_gestageatbirthwk_1_cats), 
+   c("mahima_gestageatbirthwk_1",
+     "mahima_gestageatbirthwk_1_cats")]
+   
+  
+  
   #calculate prevalences: from my data set that i want
   # we can just do d[rows that i want, c("gestagecats", "gestageenteredcats")]
   #sum each source alone for each of these two variables
@@ -239,406 +274,480 @@ class(d$mahima_gA_1_us)
 #d[,us_dateofconception_1:=usdate_1-usgestage_1*7]
 #d$us_dateofconception_1
 
-
-
-###Making first usedd if its at <=21 gA variable
-nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
-num <- stringr::str_replace(nam,"usedd_","")
-d[,first_1_21_usedd:=as.Date(NA)]
-for(i in num ){
-  print(i)
   
-  var_usedd <- sprintf("usedd_%s",i)
-  var_usgestage <- sprintf("usgestage_%s",1)
   
-  d[!is.na(get(var_usedd)) &
+  ###Making first usedd if its at <=21 gA variable
+  nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
+  num <- stringr::str_replace(nam,"usedd_","")
+  d[,first_1_21_usedd:=as.Date(NA)]
+  for(i in num ){
+    print(i)
     
-      !is.na(get(var_usgestage)) &
-      get(var_usgestage) > 0 &
-      get(var_usgestage) <= 21 &
-      is.na(first_1_21_usedd),
-    first_1_21_usedd:=as.Date(get(var_usedd),format="%Y-%m-%d")]
-}
-unique(d$usgestage_1)
-unique(d$first_1_21_usedd)
-sum(!is.na(d$first_1_21_usedd))
-
-#Making gA for first_1_21_usedd
-
-d[,first_1_21_usedd_diffbtwnHBO:=round(as.numeric(
-  difftime(mahima_dateofbirth_1,first_1_21_usedd, units="weeks")),digits=1)]
-
-d[,first_1_21_usedd_gA:=first_1_21_usedd_diffbtwnHBO+40]
-
-unique(d$first_1_21_usedd_gA)
-
-
-
-###Make a combination of variables
-#make sure they are the same types and
-#decide the type. make sure the second one is the same as the edd
-
-d[,comboUSandLMPgA:=mahima_gestageatbirthwk_1]
-d[!is.na(first_1_21_usedd_gA),comboUSandLMPgA:=first_1_21_usedd_gA]
-
-
-d[,mahima_gA_1_us_cats:=cut(mahima_gA_1_us,
-                            breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
-                            include.lowest=T)]
-
-d[,first_1_21_usedd_gA_cats:=cut(first_1_21_usedd_gA,
-                                 breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
-                                 include.lowest=T)]
-
-d[,comboUSandLMPgA_cats:=cut(comboUSandLMPgA,
-                             breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
-                             include.lowest=T)]
-
-
-###Making unified hospital birth data variables for CISMAC###
-
-#BMI
-d[bookheight!=0 & 
-  bookweight!=0,
-  bookbmi:=10000*bookweight/(bookheight^2)]
-
-#d[!is.na(bookweight) & !is.na(bookheight),
- # bookbmi:=((bookweight/bookheight/bookheight)*10000)]
-
-# MERVET FILL IN HERE
-
-matchvars <- list(
-  "merged_namehospbirth_"=c("abbname_",
-                           "hboorganisationunitname_",
-                           "dhis2hboconnamehospbirth_",
-                           "paperhbo_placeofdelivery_"),
-  
-  "merged_pregoutcome_"=c("abbbabybirthresult_",
-                           "hboprevpregoutcome_",
-                           "dhis2hbopregoutcome_",
-                           "paperhbo_outcome_"),
-  
-  "merged_gestageatdelivery_"=c("abbbabypregnancynoofweeks_",
-                                "hbogestagedeliv_",
-                                "dhis2hbogestagedeliv_",
-                                "paperhbo_gestationalageatbirthweeks_"),
-  
-  "merged_birthweight_"=c("abbbabyweight_",
-                          "hboprevpregbweight_",
-                          "dhis2hbopregbweight_",
-                          "paperhbo_weightgrams_"),
-  
-  "merged_babybirthdate_"=c("abbbabyrecorddatecreation_",
-                            "hbodateofdeliveryhospital_",
-                            "dhis2hbodateofdeliveryhospital_",
-                            "paperhbo_birthdate_"),
-  
-  "merged_hbatadmission_"=c("alabtestresult_",
-                            "hboconlabcbchemoglobin_",
-                            "dhis2hbolabcbchemoglobin_",
-                            "paperhbo_hbgatadmissiontohospital_"),
-  
-  "merged_modeofdelivery_"=c("abbbabybirthtype_",
-                            "hbomodeprevdeliv_",
-                            "dhis2hbomodedeliv_",
-                            "paperhbo_modeofdelivery_"),
-  
-  "merged_fetalpresentation_"=c("abbbabybirthtype_",
-                               "hbousfetalpresentation_",
-                               "dhis2hbousfetalpresentation_",
-                               "paperhbo_presentationatdelivery_"),
-  
-  "merged_indicationforcsection_"=c("acsdatatext_",
-                                   "hboindiccsectioninanycol_",
-                                   "dhis2hboindicforcsec_",
-                                   "paperhbo_indicationforcesarian_")
- 
-  
-   )
-###cant find fetal presentation as a variable in avicenna
-###make a merged bp in above loop for each of the variables
-  
-
-
-
-for(i in seq_along(matchvars)){
-  # finding out how many "new" variables we need to create
-  # i.e. are there 2 births or 6 births?
-  vars <- c()
-  for(j in matchvars[[i]]){
-    vars <- c(vars, stringr::str_subset(names(d),sprintf("^%s",j)))
+    var_usedd <- sprintf("usedd_%s",i)
+    var_usgestage <- sprintf("usgestage_%s",1)
+    
+    d[!is.na(get(var_usedd)) &
+      
+        !is.na(get(var_usgestage)) &
+        get(var_usgestage) > 0 &
+        get(var_usgestage) <= 21 &
+        is.na(first_1_21_usedd),
+      first_1_21_usedd:=as.Date(get(var_usedd),format="%Y-%m-%d")]
   }
-  # extract the numbers at the end (so we know how many new variables to create)
-  vars <- unique(stringr::str_extract(vars,"_[0-9]*$"))
-  # remove the _
-  vars <- stringr::str_sub(vars,2)
+  unique(d$usgestage_1)
+  unique(d$first_1_21_usedd)
+  sum(!is.na(d$first_1_21_usedd))
   
-  # here we create the new variables
-  # i.e _1, _2, _3, ... (numbers stored in 'vars')
-  for(j in vars){
-    newvar <- sprintf("%s%s", names(matchvars)[i], j)
+  #Making gA for first_1_21_usedd
+  
+  d[,first_1_21_usedd_diffbtwnHBO:=round(as.numeric(
+    difftime(mahima_dateofbirth_1,first_1_21_usedd, units="weeks")),digits=1)]
+  
+  d[,first_1_21_usedd_gA:=first_1_21_usedd_diffbtwnHBO+40]
+  
+  unique(d$first_1_21_usedd_gA)
+  
+  
+  
+  ###Make a combination of variables
+  #make sure they are the same types and
+  #decide the type. make sure the second one is the same as the edd
+  
+  d[,comboUSandLMPgA:=mahima_gestageatbirthwk_1]
+  d[!is.na(first_1_21_usedd_gA),comboUSandLMPgA:=first_1_21_usedd_gA]
+  
+  
+  d[,mahima_gA_1_us_cats:=cut(mahima_gA_1_us,
+                              breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
+                              include.lowest=T)]
+  
+  d[,first_1_21_usedd_gA_cats:=cut(first_1_21_usedd_gA,
+                                   breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
+                                   include.lowest=T)]
+  
+  d[,comboUSandLMPgA_cats:=cut(comboUSandLMPgA,
+                               breaks=c(-30,0,24.7,32.7,37.7,41.7,44,9999),
+                               include.lowest=T)]
+  
+  #Making the categories bigger because when we did first cross tab for 
+  #gA they were empty/very small therefore not enough
+  d[,first_1_21_usedd_gA_cats_wide:=cut(first_1_21_usedd_gA,
+                                   breaks=c(-30,37.7,41.7,9999),
+                                   include.lowest=T)]
+  d[,mahima_gestageatbirthwk_1_cats_wide:=cut(mahima_gestageatbirthwk_1,
+                              breaks=c(-30,37.7,41.7,9999),
+                              include.lowest=T)]
+  
+  
+  ###Making unified hospital birth data variables for CISMAC###
+  
+  #BMI
+  d[bookheight!=0 & 
+    bookweight!=0,
+    bookbmi:=10000*bookweight/(bookheight^2)]
+  
+  #d[!is.na(bookweight) & !is.na(bookheight),
+   # bookbmi:=((bookweight/bookheight/bookheight)*10000)]
+  
+  # MERVET FILL IN HERE
+  
+  matchvars <- list(
+    "merged_namehospbirth_"=c("abbname_",
+                             "hboorganisationunitname_",
+                             "dhis2hboconnamehospbirth_",
+                             "paperhbo_placeofdelivery_"),
     
-    avicennavar<- sprintf("%s%s", matchvars[[i]][1], j)
-    govvar<- sprintf("%s%s",      matchvars[[i]][2], j)
-    privatevar<- sprintf("%s%s",  matchvars[[i]][3], j)
-    paperhbovar<- sprintf("%s%s", matchvars[[i]][4], j)
+    "merged_pregoutcome_"=c("abbbabybirthresult_",
+                             "hboprevpregoutcome_",
+                             "dhis2hbopregoutcome_",
+                             "paperhbo_outcome_"),
     
-    # some of the variables on the right hand side dont exist
-    # so this will give errors
-    # so 'try' just says "try and then ignore it if it doesnt work"
-    try(d[matching=="Avicenna",(newvar):=get(avicennavar)],TRUE)
-    try(d[matching=="Governmental",(newvar):=get(govvar)],TRUE)
-    try(d[matching=="Private",(newvar):=get(privatevar)],TRUE)
-    try(d[matching=="PaperHBO",(newvar):=get(paperhbovar)],TRUE)
+    "merged_gestageatdelivery_"=c("abbbabypregnancynoofweeks_",
+                                  "hbogestagedeliv_",
+                                  "dhis2hbogestagedeliv_",
+                                  "paperhbo_gestationalageatbirthweeks_"),
+    
+    "merged_birthweight_"=c("abbbabyweight_",
+                            "hboprevpregbweight_",
+                            "dhis2hbopregbweight_",
+                            "paperhbo_weightgrams_"),
+    
+    "merged_babybirthdate_"=c("abbbabyrecorddatecreation_",
+                              "hbodateofdeliveryhospital_",
+                              "dhis2hbodateofdeliveryhospital_",
+                              "paperhbo_birthdate_"),
+    
+    "merged_hbatadmission_"=c("alabtestresult_",
+                              "hboconlabcbchemoglobin_",
+                              "dhis2hbolabcbchemoglobin_",
+                              "paperhbo_hbgatadmissiontohospital_"),
+    
+    "merged_modeofdelivery_"=c("abbbabybirthtype_",
+                              "hbomodeprevdeliv_",
+                              "dhis2hbomodedeliv_",
+                              "paperhbo_modeofdelivery_"),
+    
+    "merged_fetalpresentation_"=c("abbbabybirthtype_",
+                                 "hbousfetalpresentation_",
+                                 "dhis2hbousfetalpresentation_",
+                                 "paperhbo_presentationatdelivery_"),
+    
+    "merged_indicationforcsection_"=c("acsdatatext_",
+                                     "hboindiccsectioninanycol_",
+                                     "dhis2hboindicforcsec_",
+                                     "paperhbo_indicationforcesarian_")
+   
+    
+     )
+  ###cant find fetal presentation as a variable in avicenna
+  ###make a merged bp in above loop for each of the variables
+    
+  
+  
+  
+  for(i in seq_along(matchvars)){
+    # finding out how many "new" variables we need to create
+    # i.e. are there 2 births or 6 births?
+    vars <- c()
+    for(j in matchvars[[i]]){
+      vars <- c(vars, stringr::str_subset(names(d),sprintf("^%s",j)))
+    }
+    # extract the numbers at the end (so we know how many new variables to create)
+    vars <- unique(stringr::str_extract(vars,"_[0-9]*$"))
+    # remove the _
+    vars <- stringr::str_sub(vars,2)
+    
+    # here we create the new variables
+    # i.e _1, _2, _3, ... (numbers stored in 'vars')
+    for(j in vars){
+      newvar <- sprintf("%s%s", names(matchvars)[i], j)
+      
+      avicennavar<- sprintf("%s%s", matchvars[[i]][1], j)
+      govvar<- sprintf("%s%s",      matchvars[[i]][2], j)
+      privatevar<- sprintf("%s%s",  matchvars[[i]][3], j)
+      paperhbovar<- sprintf("%s%s", matchvars[[i]][4], j)
+      
+      # some of the variables on the right hand side dont exist
+      # so this will give errors
+      # so 'try' just says "try and then ignore it if it doesnt work"
+      try(d[matching=="Avicenna",(newvar):=get(avicennavar)],TRUE)
+      try(d[matching=="Governmental",(newvar):=get(govvar)],TRUE)
+      try(d[matching=="Private",(newvar):=get(privatevar)],TRUE)
+      try(d[matching=="PaperHBO",(newvar):=get(paperhbovar)],TRUE)
+    }
   }
-}
-
-# name of hospital
-# -dhis2hboconnamehospbirth_1,
-d[matching=="Avicenna",merged_namehospbirth:=abbname_1]
-d[matching=="Governmental",merged_namehospbirth:=hboorganisationunitname_1]
-d[matching=="Private",merged_namehospbirth:=dhis2hboconnamehospbirth_1]
-d[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery_1]
-
-
-
-
-
-#####Hospital type#####
-###making a new variable for hospital type
-###NA can be anything missing string, missing numeric, etc
-###Establish that this is logical, data table specific need this for comp to recognize it
-d[,merged_is_hosp_gov:=as.logical(NA)]
-d[matching %in% c("Avicenna","Governmental"), merged_is_hosp_gov:= TRUE]
-#d[d$matching %in% c("Avicenna","Governmental"),]$merged_is_hosp_gov <-  TRUE
-d[matching=="Private", merged_is_hosp_gov:=FALSE]
-###for matching is in paperhbo we need to get name of 
-##hospital to decide first
-d$merged_namehospbirth
-unique(d[matching=="PaperHBO"]$merged_namehospbirth)
-
-####Add in names of governmental hospitals from above
-d[matching=="PaperHBO" &
-      merged_namehospbirth %in% c("PMC",
-                                  "JG",
-                                  "NG",
-                                  "Tubas",
-                                  "BJ",
-                                  "SG",
-                                  "QG",
-                                  "TT",
-                                  "Tulk Gov",
-                                  "HG",
-                                  "Jericho",
-                                  "YG"),
-  merged_is_hosp_gov:=TRUE
   
-  ]
-
-####Add in names of private hospitals from above
-###How should we add out fo the country? Seperate Variable?
-d[matching=="PaperHBO" &
-    merged_namehospbirth %in% c("PRCSR",
-                                "French",
-                                "Shephard's Field",
-                                "Dibs",
-                                "Daman",
-                                "AT",
-                                "IT",
-                                "INJ",
-                                "NT",
-                                "Ama",
-                                "Amal",
-                                "Razi",
-                                "Shifa",
-                                "R3aya",
-                                "Mustaqbal",
-                                "Must",
-                                "IST",
-                                "WN",
-                                "Musallam",
-                                "WQ",
-                                "ZT",
-                                "HT",
-                                "PRCS_H",
-                                "PRCSR_Hebron",
-                                "Ahli",
-                                "Hebron",
-                                "wq",
-                                "Home",
-                                "HOME",
-                                "Khaled",
-                                "TRANS"
-                                
-                               ),
-  merged_is_hosp_gov:=FALSE
+  # name of hospital
+  # -dhis2hboconnamehospbirth_1,
+  d[matching=="Avicenna",merged_namehospbirth:=abbname_1]
+  d[matching=="Governmental",merged_namehospbirth:=hboorganisationunitname_1]
+  d[matching=="Private",merged_namehospbirth:=dhis2hboconnamehospbirth_1]
+  d[matching=="PaperHBO",merged_namehospbirth:=paperhbo_placeofdelivery_1]
   
-  ]
+  
+  
+  
+  
+  #####Hospital type#####
+  ###making a new variable for hospital type
+  ###NA can be anything missing string, missing numeric, etc
+  ###Establish that this is logical, data table specific need this for comp to recognize it
+  d[,merged_is_hosp_gov1`:=as.logical(NA)]
+  d[matching %in% c("Avicenna","Governmental"), merged_is_hosp_gov:= TRUE]
+  #d[d$matching %in% c("Avicenna","Governmental"),]$merged_is_hosp_gov <-  TRUE
+  d[matching=="Private", merged_is_hosp_gov:=FALSE]
+  ###for matching is in paperhbo we need to get name of 
+  ##hospital to decide first
+  d$merged_namehospbirth
+  unique(d[matching=="PaperHBO"]$merged_namehospbirth)
+  
+  ####Add in names of governmental hospitals from above
+  d[matching=="PaperHBO" &
+        merged_namehospbirth %in% c("PMC",
+                                    "JG",
+                                    "NG",
+                                    "Tubas",
+                                    "BJ",
+                                    "SG",
+                                    "QG",
+                                    "TT",
+                                    "Tulk Gov",
+                                    "HG",
+                                    "Jericho",
+                                    "YG"),
+    merged_is_hosp_gov:=TRUE
+    
+    ]
+  
+  ####Add in names of private hospitals from above
+  ###How should we add out fo the country? Seperate Variable?
+  d[matching=="PaperHBO" &
+      merged_namehospbirth %in% c("PRCSR",
+                                  "French",
+                                  "Shephard's Field",
+                                  "Dibs",
+                                  "Daman",
+                                  "AT",
+                                  "IT",
+                                  "INJ",
+                                  "NT",
+                                  "Ama",
+                                  "Amal",
+                                  "Razi",
+                                  "Shifa",
+                                  "R3aya",
+                                  "Mustaqbal",
+                                  "Must",
+                                  "IST",
+                                  "WN",
+                                  "Musallam",
+                                  "WQ",
+                                  "ZT",
+                                  "HT",
+                                  "PRCS_H",
+                                  "PRCSR_Hebron",
+                                  "Ahli",
+                                  "Hebron",
+                                  "wq",
+                                  "Home",
+                                  "HOME",
+                                  "Khaled",
+                                  "TRANS"
+                                  
+                                 ),
+    merged_is_hosp_gov:=FALSE
+    
+    ]
+  
+  
+  ####merged_out of the country#####
+  # d[,matching_is_out_of_country:= as.logical(NA)]
+  # d[!is.na(merged_is_hosp_gov),matching_is_out_of_country:= FALSE]
+  
+  d[ident_paperhbo==T & 
+    merged_namehospbirth %in% c("Out of the country-Hadassah",
+                                "Out of the country-Mustaqbal",
+                                "Out of the country-Nazareth",
+                                "Out of the country-America",
+                                "Out of the country-Canada",
+                                "Out of the country-Jordan",
+                                "Out of the country-Emirates",
+                                "Out of the Country-Italy",
+                                "Out of the country-Hilal",
+                                "Out of the country-PRCSJ",
+                                "Out of the country-Quds lal wlada-Qalandia",
+                                "Israel",
+                                "Maqassad",
+                                "America"
+  ),
+  matching:="Out of the country"]
+  
+  
+  ####To make sure we havent missed any...these have hosp names but arent true or false
+  ####because arent in our lists
+  ####if its not empty make sure to add the name of the hospital name in the correct place above
+  unique(d[matching=="PaperHBO" &
+             is.na(merged_is_hosp_gov)]$merged_namehospbirth)
+  
+  
+  
+  #####Delivered out of Country########
+  #d[,merged_is_out_of_the_country:=as.logical(NA)]
+  #d[matching=="PaperHBO" & 
+    #  merged_namehospbirth %in% c()]
+  ####and POD Abortion is an abortion
+  
+  
+  
+  #type of hospital delivered in
+  #vars <- names(d)[stringr::str_detect(names(d),"^merged_namehospbirth")]
+  #for(v in vars){
+   # d[get(v)=="First visit",(v):="1"]
+    #d[get(v)=="Second visit",(v):="2"]
+   # d[get(v)=="Beyond second visit",(v):="3"]
+  #}
+  
+  
+  # outcome
+  # - dhis2hbopregoutcome_1
+  d[matching=="Avicenna",merged_pregoutcome:=abbbabybirthresult_1]
+  d[matching=="Governmental",merged_pregoutcome:=hboprevpregoutcome_1]
+  d[matching=="Private",merged_pregoutcome:=dhis2hbopregoutcome_1]
+  d[matching=="PaperHBO",merged_pregoutcome:=paperhbo_outcome_1]
+  xtabs(~d$merged_pregoutcome+d$matching)
+  
+  # abortion
+  # - dhis2hbopregoutcome_1
+  d[!is.na(merged_pregoutcome),merged_abortion:=merged_pregoutcome %in% c("ABO")]
+  xtabs(~d$merged_abortion+d$matching)
+  
+  # gestational age
+  # - dhis2hbogestagedeliv_1
+  d[matching=="Avicenna",merged_gestagedeliv:=as.numeric(stringr::str_extract(abbbabypregnancynoofweeks_1,"^[0-9][0-9]"))]
+  d[matching=="Governmental",merged_gestagedeliv:=hbogestagedeliv_1]
+  d[matching=="Private",merged_gestagedeliv:=dhis2hbogestagedeliv_1]
+  d[matching=="PaperHBO",merged_gestagedeliv:=paperhbo_gestationalageatbirthweeks_1]
+  unique(d$merged_namehospbirth)
+  
+  
+  
+  # weight
+  # - dhis2hbopregbweight_1
+  d[matching=="Avicenna",merged_pregbweight:=as.numeric(abbbabyweight_1)]
+  d[matching=="Governmental",merged_pregbweight:=hboprevpregbweight_1]
+  d[matching=="Private",merged_pregbweight:=dhis2hbopregbweight_1]
+  d[matching=="PaperHBO",merged_pregbweight:=paperhbo_weightgrams_1]
+  
+  # date of delivery
+  # - dhis2hbodateofdeliveryhospital_1
+  d[matching=="Avicenna",merged_datedeliv:=abbbabyrecorddatecreation_1]
+  d[matching=="Governmental",merged_datedeliv:=as.character(hbodateofdeliveryhospital_1)]
+  d[matching=="Private",merged_datedeliv:=dhis2hbodateofdeliveryhospital_1]
+  d[matching=="PaperHBO",merged_datedeliv:=paperhbo_birthdate_1]
+  xtabs(~d$matching+d$merged_datedeliv)
+  
+  # hemo
+  # - dhis2hbolabcbchemoglobin_1
+  d[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
+  d[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
+  d[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
+  d[matching=="PaperHBO",merged_birthhemo:=paperhbo_hbgatadmissiontohospital_1]
+  
+  #bloodpressureSystolic
+  d[matching=="Avicenna",merged_bpsyst:=aobssistolic_1]
+  d[matching=="Governmental",merged_bpsyst:=hbosystbp_1]
+  d[matching=="Private",merged_bpsyst:=dhis2hbosystbp_1]
+  d[matching=="PaperHBO",merged_bpsyst:=paperhbo_systolicbp_1]
+  
+  #bloodpressureDiastolic
+  d[matching=="Avicenna",merged_bpdiast:=aobsdiastolic_1]
+  d[matching=="Governmental",merged_bpdiast:=hbodiastbp_1]
+  d[matching=="Private",merged_bpdiast:=dhis2hbodiastbp_1]
+  d[matching=="PaperHBO",merged_bpdiast:=paperhbo_diastolicbp_1]
+  
+  
+  
+  # blood p
+  # - dhis2hbosystbp_1
+  # - dhis2hbodiastbp_1
+  warning("need to fix blood pressure")
+  #d[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
+  #d[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
+  #d[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
+  
+  # mode of deliv
+  # - dhis2hbomodedeliv_1
+  d[matching=="Avicenna",merged_modedeliv:=abbbabybirthtype_1]
+  d[matching=="Governmental",merged_modedeliv:=hbomodeprevdeliv_1]
+  d[matching=="Private",merged_modedeliv:=dhis2hbomodedeliv_1]
+  d[matching=="PaperHBO",merged_modedeliv:=paperhbo_modeofdelivery_1]
+  
+  # presentation at deliv
+  # - dhis2hbousfetalpresentation_1
+  d[matching=="Avicenna",merged_presentationdeliv:=abbbabybirthtype_1]
+  d[matching=="Governmental",merged_presentationdeliv:=hbousfetalpresentation_1]
+  d[matching=="Private",merged_presentationdeliv:=dhis2hbousfetalpresentation_1]
+  d[matching=="PaperHBO",merged_presentationdeliv:=paperhbo_presentationatdelivery_1]
+  
+  # indic for csection
+  # - dhis2hboindicforcsec_1
+  warning("merged_indic_csection:=abbbabybirthtype_1")
+  d[matching=="Avicenna",merged_indic_csection:=acsdatatext_1]
+  d[matching=="Governmental",merged_indic_csection:=hboconreasonforcs_1]
+  d[matching=="Private",merged_indic_csection:=dhis2hbousrecommendcomment_1]
+  d[matching=="PaperHBO",merged_indic_csection:=paperhbo_indicationforcesarian_1]
+  
+  # #Indication for C-section from Nurse's notes : occyptoposterium
+  # #found in usrecom/comments control hospitals
+  # 
+  # ###get rid of the punctuation in these variables
+  # d[matching=="Governmental", stringr::str_replace(dhis2hbousrecommendcomment_1, ".","")]
+  # 
+  # d[,merged_reasonforcsec_standard:=as.character()]
+  # d[matching=="Governmental"& 
+  #     stringr::str_detect(tolower(hboconreasonforcs_1),
+  #                        "previous"),
+  #                        merged_reasonforcsec_standard:="Previous Csections"]
+  # 
+  # d[matching=="Private"& 
+  #     stringr::str_detect(tolower(dhis2hbousrecommendcomment_1),
+  #                        "previous"),
+  #   merged_reasonforcsec_standard:="Previous Csections"]
+  # 
+  # d[matching=="Private"& 
+  #     stringr::str_detect(tolower(dhis2hbousrecommendcomment_1),
+  #                         "big baby"),
+  #   merged_reasonforcsec_standard:="Big Baby"]
+  # 
+  # d[matching=="Private"& 
+  #     stringr::str_detect(tolower(dhis2hbousrecommendcomment_1),
+  #                         "ivf"),
+  #   merged_reasonforcsec_standard:="IVF"]
+  
+  
+  
+  ###MAKING con/gravida/para variables
+  #gravida
+  # 
+  # d[booknum==2, c("uniqueid")]
+  # d[uniqueid=="bWg3AC74qIP", c("bookdate", 
+  #                            "prevoutcome_1", 
+  #                            "prevoutcome_2",
+  #                            "prevoutcome_3",
+  #                            "prevdate_1",
+  #                            "prevdate_2",
+  #                            "prevdate_3")]
+  # unique(d$prevoutcome_1)
+  # 
+  # d[,gravida:=1]
+  # d[!is.na(prevoutcome_1) & prevoutcome_1!="" & prevdate_1<bookdate, gravida:=gravida+1]
+  # 
+  # d[!is.na(prevoutcome_2) & prevoutcome_2!="" & prevdate_2<bookdate, gravida:=gravida+1]
+  # 
+  # d[uniqueid=="bWg3AC74qIP", c("bookdate", 
+  #                              "prevoutcome_1", 
+  #                              "prevoutcome_2",
+  #                              "prevoutcome_3",
+  #                              "prevdate_1",
+  #                              "prevdate_2",
+  #                              "prevdate_3",
+  #                              "gravida")]
+  
+  vars <- stringr::str_subset(names(d), "^prevoutcome_")
+  
+  #delete prevoutcome_ from it to get the actual number
+  vars <- stringr::str_remove(vars, "prevoutcome_")
+  
+  d[,gravida:=1]
+  
+  
+  for(i in vars){
+    print(i)
+    prevoutcome <-sprintf("prevoutcome_%s",i)
+    prevdate <- sprintf("prevdate_%s",i)
+    d[!is.na(get(prevoutcome)) & get(prevoutcome)!="" & get(prevdate)<bookdate, gravida:=gravida+1]
+    
+    
+  
+  }
+  
+  #checking to see if code works
+  xtabs(~d$gravida)
+  
+  d[gravida==6, c("uniqueid")]
+  
+  vars1 <- stringr::str_subset(names(d), "^prevoutcome_")
+  vars2 <- stringr::str_subset(names(d), "^prevdate_")
+  
+  #see all pregnancies for this woman
+  #must have with=F because we want to list columns without quatations (variable we want to look inside)
+  d[uniqueid=="MllpIRQU8Hk", c("gravida", 
+                               "bookdate", 
+                               vars1,
+                               vars2), with=F]
+  
+  #3 ways to look inside get(variable)
 
-
-####merged_out of the country#####
-# d[,matching_is_out_of_country:= as.logical(NA)]
-# d[!is.na(merged_is_hosp_gov),matching_is_out_of_country:= FALSE]
-
-d[ident_paperhbo==T & 
-  merged_namehospbirth %in% c("Out of the country-Hadassah",
-                              "Out of the country-Mustaqbal",
-                              "Out of the country-Nazareth",
-                              "Out of the country-America",
-                              "Out of the country-Canada",
-                              "Out of the country-Jordan",
-                              "Out of the country-Emirates",
-                              "Out of the Country-Italy",
-                              "Out of the country-Hilal",
-                              "Out of the country-PRCSJ",
-                              "Out of the country-Quds lal wlada-Qalandia",
-                              "Israel",
-                              "Maqassad",
-                              "America"
-),
-matching:="Out of the country"]
-
-
-####To make sure we havent missed any...these have hosp names but arent true or false
-####because arent in our lists
-####if its not empty make sure to add the name of the hospital name in the correct place above
-unique(d[matching=="PaperHBO" &
-           is.na(merged_is_hosp_gov)]$merged_namehospbirth)
-
-
-
-#####Delivered out of Country########
-#d[,merged_is_out_of_the_country:=as.logical(NA)]
-#d[matching=="PaperHBO" & 
-  #  merged_namehospbirth %in% c()]
-####and POD Abortion is an abortion
-
-
-
-#type of hospital delivered in
-#vars <- names(d)[stringr::str_detect(names(d),"^merged_namehospbirth")]
-#for(v in vars){
- # d[get(v)=="First visit",(v):="1"]
-  #d[get(v)=="Second visit",(v):="2"]
- # d[get(v)=="Beyond second visit",(v):="3"]
-#}
-
-
-# outcome
-# - dhis2hbopregoutcome_1
-d[matching=="Avicenna",merged_pregoutcome:=abbbabybirthresult_1]
-d[matching=="Governmental",merged_pregoutcome:=hboprevpregoutcome_1]
-d[matching=="Private",merged_pregoutcome:=dhis2hbopregoutcome_1]
-d[matching=="PaperHBO",merged_pregoutcome:=paperhbo_outcome_1]
-xtabs(~d$merged_pregoutcome+d$matching)
-
-# abortion
-# - dhis2hbopregoutcome_1
-d[!is.na(merged_pregoutcome),merged_abortion:=merged_pregoutcome %in% c("ABO")]
-xtabs(~d$merged_abortion+d$matching)
-
-# gestational age
-# - dhis2hbogestagedeliv_1
-d[matching=="Avicenna",merged_gestagedeliv:=as.numeric(stringr::str_extract(abbbabypregnancynoofweeks_1,"^[0-9][0-9]"))]
-d[matching=="Governmental",merged_gestagedeliv:=hbogestagedeliv_1]
-d[matching=="Private",merged_gestagedeliv:=dhis2hbogestagedeliv_1]
-d[matching=="PaperHBO",merged_gestagedeliv:=paperhbo_gestationalageatbirthweeks_1]
-unique(d$merged_namehospbirth)
-
-
-
-# weight
-# - dhis2hbopregbweight_1
-d[matching=="Avicenna",merged_pregbweight:=as.numeric(abbbabyweight_1)]
-d[matching=="Governmental",merged_pregbweight:=hboprevpregbweight_1]
-d[matching=="Private",merged_pregbweight:=dhis2hbopregbweight_1]
-d[matching=="PaperHBO",merged_pregbweight:=paperhbo_weightgrams_1]
-
-# date of delivery
-# - dhis2hbodateofdeliveryhospital_1
-d[matching=="Avicenna",merged_datedeliv:=abbbabyrecorddatecreation_1]
-d[matching=="Governmental",merged_datedeliv:=as.character(hbodateofdeliveryhospital_1)]
-d[matching=="Private",merged_datedeliv:=dhis2hbodateofdeliveryhospital_1]
-d[matching=="PaperHBO",merged_datedeliv:=paperhbo_birthdate_1]
-xtabs(~d$matching+d$merged_datedeliv)
-
-# hemo
-# - dhis2hbolabcbchemoglobin_1
-d[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
-d[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
-d[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
-d[matching=="PaperHBO",merged_birthhemo:=paperhbo_hbgatadmissiontohospital_1]
-
-#bloodpressureSystolic
-d[matching=="Avicenna",merged_bpsyst:=aobssistolic_1]
-d[matching=="Governmental",merged_bpsyst:=hbosystbp_1]
-d[matching=="Private",merged_bpsyst:=dhis2hbosystbp_1]
-d[matching=="PaperHBO",merged_bpsyst:=paperhbo_systolicbp_1]
-
-#bloodpressureDiastolic
-d[matching=="Avicenna",merged_bpdiast:=aobsdiastolic_1]
-d[matching=="Governmental",merged_bpdiast:=hbodiastbp_1]
-d[matching=="Private",merged_bpdiast:=dhis2hbodiastbp_1]
-d[matching=="PaperHBO",merged_bpdiast:=paperhbo_diastolicbp_1]
-
-
-
-# blood p
-# - dhis2hbosystbp_1
-# - dhis2hbodiastbp_1
-warning("need to fix blood pressure")
-#d[matching=="Avicenna",merged_birthhemo:=alabtestresult_1]
-#d[matching=="Governmental",merged_birthhemo:=hboconlabcbchemoglobin_1]
-#d[matching=="Private",merged_birthhemo:=dhis2hbolabcbchemoglobin_1]
-
-# mode of deliv
-# - dhis2hbomodedeliv_1
-d[matching=="Avicenna",merged_modedeliv:=abbbabybirthtype_1]
-d[matching=="Governmental",merged_modedeliv:=hbomodeprevdeliv_1]
-d[matching=="Private",merged_modedeliv:=dhis2hbomodedeliv_1]
-d[matching=="PaperHBO",merged_modedeliv:=paperhbo_modeofdelivery_1]
-
-# presentation at deliv
-# - dhis2hbousfetalpresentation_1
-d[matching=="Avicenna",merged_presentationdeliv:=abbbabybirthtype_1]
-d[matching=="Governmental",merged_presentationdeliv:=hbousfetalpresentation_1]
-d[matching=="Private",merged_presentationdeliv:=dhis2hbousfetalpresentation_1]
-d[matching=="PaperHBO",merged_presentationdeliv:=paperhbo_presentationatdelivery_1]
-
-# indic for csection
-# - dhis2hboindicforcsec_1
-warning("merged_indic_csection:=abbbabybirthtype_1")
-d[matching=="Avicenna",merged_indic_csection:=acsdatatext_1]
-d[matching=="Governmental",merged_indic_csection:=hboconreasonforcs_1]
-d[matching=="Private",merged_indic_csection:=dhis2hbousrecommendcomment_1]
-d[matching=="PaperHBO",merged_indic_csection:=paperhbo_indicationforcesarian_1]
-
-# #Indication for C-section from Nurse's notes : occyptoposterium
-# #found in usrecom/comments control hospitals
-# 
-# ###get rid of the punctuation in these variables
-# d[matching=="Governmental", stringr::str_replace(dhis2hbousrecommendcomment_1, ".","")]
-# 
-# d[,merged_reasonforcsec_standard:=as.character()]
-# d[matching=="Governmental"& 
-#     stringr::str_detect(tolower(hboconreasonforcs_1),
-#                        "previous"),
-#                        merged_reasonforcsec_standard:="Previous Csections"]
-# 
-# d[matching=="Private"& 
-#     stringr::str_detect(tolower(dhis2hbousrecommendcomment_1),
-#                        "previous"),
-#   merged_reasonforcsec_standard:="Previous Csections"]
-# 
-# d[matching=="Private"& 
-#     stringr::str_detect(tolower(dhis2hbousrecommendcomment_1),
-#                         "big baby"),
-#   merged_reasonforcsec_standard:="Big Baby"]
-# 
-# d[matching=="Private"& 
-#     stringr::str_detect(tolower(dhis2hbousrecommendcomment_1),
-#                         "ivf"),
-#   merged_reasonforcsec_standard:="IVF"]
 }
 
 

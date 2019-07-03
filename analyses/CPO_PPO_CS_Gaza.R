@@ -39,6 +39,9 @@ currentpregout[,.(N=.N), keyby=.(MODCURRENT,PODCURRENT)]
 
 setorder(currentpregout)
 
+length(unique(currentpregout$event))
+length(currentpregout$event)
+
 xtabs(~currentpregout$PODCURRENT+currentpregout$MODCURRENT, addNA = T)
 
 sink()
@@ -53,13 +56,6 @@ setnames(prevpregout,"ANC Mode of previous delivery", "MODprev")
 xtabs(~prevpregout$PODprev, addNA = T)
 xtabs(~prevpregout$MODprev, addNA = T)
 xtabs(~prevpregout$PODprev+prevpregout$MODprev, addNA = T)
-
-
-
-
-
-
-
 
 
 sink()
@@ -79,9 +75,24 @@ xtabs(~cpo_analysis$cpomodedelivery_1, addNA = T)
 
 cpo_analysis[,.(N=.N), keyby=.(cpomodedelivery_1,cpoplaceofbirth_1)]
 
-
-
 xtabs(~cpo_analysis$cpoplaceofbirth_1+cpo_analysis$cpomodedelivery_1, addNA = T)
+
+
+####NBC####
+NBC<- fread("C:/data processing/data_raw/e.reg-interventionGaza/2019-01-08/Clinical Newborn care.csv", encoding="UTF-8")
+
+length(unique(NBC$Event))
+length(NBC$Event)
+
+
+
+#####Gaza_PPC####
+
+PPC <- fread("C:/data processing/data_raw/e.reg-interventionGaza/2019-01-08/Clinical Postpartum care.csv", encoding="UTF-8")
+
+length(unique(PPC$Event))
+length(PPC$Event)
+
 
 sink()
 
