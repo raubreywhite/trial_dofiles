@@ -131,6 +131,10 @@ Setup <- function(IS_GAZA=FALSE){
     dir.create(file.path(FOLDER_DROPBOX_RESULTS_WB,"data_quality"))
     dir.create(file.path(FOLDER_DROPBOX_RESULTS_GAZA,"data_quality"))
     
+    dir.create(file.path(FOLDER_DROPBOX_RESULTS_PAL,"trial_2"))
+    dir.create(file.path(FOLDER_DROPBOX_RESULTS_WB,"trial_2"))
+    dir.create(file.path(FOLDER_DROPBOX_RESULTS_GAZA,"trial_2"))
+    
     dir.create(file.path(FOLDER_DROPBOX_RESULTS,"booking_descriptives"))
     dir.create(file.path(FOLDER_DROPBOX_RESULTS,"hbo_completeness"))
     dir.create(file.path(FOLDER_DROPBOX_RESULTS,"mahima"))

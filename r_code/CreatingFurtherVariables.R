@@ -452,7 +452,7 @@ class(d$mahima_gA_1_us)
   ###making a new variable for hospital type
   ###NA can be anything missing string, missing numeric, etc
   ###Establish that this is logical, data table specific need this for comp to recognize it
-  d[,merged_is_hosp_gov1`:=as.logical(NA)]
+  d[,merged_is_hosp_gov1:=as.logical(NA)]
   d[matching %in% c("Avicenna","Governmental"), merged_is_hosp_gov:= TRUE]
   #d[d$matching %in% c("Avicenna","Governmental"),]$merged_is_hosp_gov <-  TRUE
   d[matching=="Private", merged_is_hosp_gov:=FALSE]

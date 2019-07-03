@@ -306,6 +306,7 @@ IndicatorsOsloANCVisits <- function(d,weeks,variableOfInterestName,variableOfInt
   d[,angestage_0:=bookgestage]
   d[,anbpdiast_0:=bookbpdiast]
   d[,anbpsyst_0:=bookbpsyst]
+  # MAKE BOOK VISIT FOR ANEMIA
   
   # pull out a list of all of the angestage variables
   listOfGestAgeVars <- names(d)[stringr::str_detect(names(d),"^angestage")]
@@ -345,6 +346,7 @@ IndicatorsOsloANCVisits <- function(d,weeks,variableOfInterestName,variableOfInt
   d[,angestage_0:=NULL]
   d[,anbpdiast_0:=NULL]
   d[,anbpsyst_0:=NULL]
+  # DELETE ANEMIA HERE
 }
 
 #this one just makes the variables
@@ -384,6 +386,13 @@ IndicatorsOsloGenerate <- function(d=NULL){
                           variableOfInterestName="anbpdiast",
                           variableOfInterestPattern="anbpdiast",
                           zeroIsMissing=TRUE)
+  
+  # DO THIS FOR ANEMIA
+  #IndicatorsOsloANCVisits(d=d,
+  #                        weeks=weeks,
+  #                        variableOfInterestName="anbpdiast",
+  #                        variableOfInterestPattern="anbpdiast",
+  #                        zeroIsMissing=TRUE)
   
   
   # determine booking week group
