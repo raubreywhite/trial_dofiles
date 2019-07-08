@@ -43,7 +43,8 @@ Setup <- function(IS_GAZA=FALSE){
                        "ICC",
                        "arabicStemR",
                        "lme4",
-                       "fs"
+                       "fs",
+                       "fancycut"
   )
   for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
   

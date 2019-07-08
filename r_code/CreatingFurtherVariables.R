@@ -747,6 +747,89 @@ class(d$mahima_gA_1_us)
                                vars2), with=F]
   
   #3 ways to look inside get(variable)
+  
+  
+###### Para variable######
+  # d[booknum==2, c("uniqueid")]
+  # d[uniqueid=="bWg3AC74qIP", c("bookdate", 
+  #                             "prevoutcome_1", 
+  #                             "prevoutcome_2",
+  #                             "prevoutcome_3",
+  #                           "prevdate_1",
+  #                             "prevdate_2",
+  #                           "prevdate_3")]
+  
+  vars <- stringr::str_subset(names(d), "^prevoutcome_")
+  
+  #delete prevoutcome_ from it to get the actual number
+  vars <- stringr::str_remove(vars, "prevoutcome_")
+  
+  d[,para:=0]
+  
+  
+  for(i in vars){
+    print(i)
+    prevoutcome <-sprintf("prevoutcome_%s",i)
+    prevdate <- sprintf("prevdate_%s",i)
+    d[!is.na(get(prevoutcome)) & 
+        get(prevoutcome)!="" & 
+        get(prevoutcome)=="LIVE" |get(prevoutcome)=="STILL" &
+        get(prevdate)<bookdate, para:=para+1]
+    
+    
+    
+  }
+  
+  #checking to see if code works
+  xtabs(~d$para)
+  
+  d[para==6, c("uniqueid")]
+  
+  vars1 <- stringr::str_subset(names(d), "^prevoutcome_")
+  vars2 <- stringr::str_subset(names(d), "^prevdate_")
+  
+  #see all pregnancies for this woman
+  #must have with=F because we want to list columns without quatations (variable we want to look inside)
+  d[uniqueid=="MllpIRQU8Hk", c("para", 
+                               "bookdate", 
+                               vars1,
+                               vars2), with=F]
+  
+  
+  
+  
+  ####GestAge for control clinics calculation#####
+  unique(d$conancgestationaageatvisitweeks)
+  
+  #replace this with the booking gestage
+  d[ident_TRIAL_1==T & ident_dhis2_control==T,bookgestage:=conancgestationaageatvisitweeks]  
+  
+  vars<- stringr::str_subset(names(d), "^andate_")
+  vars <- stringr::str_remove(vars, "andate_")
+  
+  i=vars[1]
+  
+  #floor: rounding down because: if youre 12 weeks and 6 days you are still 12 weeks.
+  
+  for(i in vars){
+    print(i)
+    andate <-sprintf("andate_%s",i)
+    angestage <- sprintf("angestage_%s",i)
+    
+    d[ident_TRIAL_1==T & ident_dhis2_control==T, 
+      (angestage):= floor(as.numeric(difftime(get(andate),booklmp, units="weeks")))]
+    
+    d[ident_dhis2_control==T & ident_TRIAL_1==T, c("angestage_1")]
+    
+  }
+  
+
+
+
+
+
+
+
 
 }
 

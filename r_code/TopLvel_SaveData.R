@@ -239,6 +239,8 @@ SaveCISMACDataBase<- function(){
     "bookexamlimb",
     "bookexamlimbabn",
     "usrecommendationscommentsx",
+    "gravida",
+    "para",
     #"conabortion",
     #"congravida",
     #"conld",
