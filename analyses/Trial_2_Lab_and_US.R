@@ -44,6 +44,13 @@ r1a <- stringr::str_subset(names(td),"^riskgestage_")
 r1b <- stringr::str_subset(names(td),"^riskdate_")
 r2 <- stringr::str_subset(names(td),"^risktype_")
 
+m1 <- stringr::str_subset(names(td),"^mandate_")
+m2 <- stringr::str_subset(names(td),"^mantypey_")
+m3 <- stringr::str_subset(names(td),"^mangestage_")
+
+
+
+
 
 
 #blood glu
@@ -117,7 +124,10 @@ widelab <- td[,c("bookevent",
                  l6,
                  r1a,
                  r1b,
-                 r2),with=F]
+                 r2,
+                 m1,
+                 m2,
+                 m3),with=F]
 
 
 #add labfasting blood glucose variable down here
@@ -139,7 +149,10 @@ longlab <- melt(widelab, id.vars = c("bookevent",
                   "^labfastbloodglu_",
                   "^riskgestage_",
                   "^riskdate_",
-                  "^risktype_"
+                  "^risktype_",
+                  "^mandate_",
+                  "^mantypey_",
+                  "^mangestage_"
                 ),
                 value.name=c(
                   "labgestage",
@@ -148,7 +161,13 @@ longlab <- melt(widelab, id.vars = c("bookevent",
                   "labhb",
                   "labbloodglu",
                   "laburglu",
-                  "labfastbloodglu"
+                  "labfastbloodglu",
+                  "riskgestage",
+                  "riskdate",
+                  "risktype",
+                  "mandate",
+                  "mantypey",
+                  "mangestage"
                 ))
 
 #since labgestage are in whole numbers we dont have to worry about the decimal places
@@ -192,6 +211,35 @@ longlab[,bookgestagecat:=fancycut::fancycut(x=bookgestage,
                                             "39-99"='[39,99]'
 )]
 
+longlab[,riskgestagecat:=fancycut::fancycut(x=riskgestage,
+                                            "0-7"='[0,7]',
+                                            "8-12"='[8,12]',
+                                            "13-14"='[13,14]',
+                                            "15-17"='[15,17]',
+                                            "18-22"='[18,22]',
+                                            "23-23"='[23,23]',
+                                            "24-28"='[24,28]',
+                                            "29-30"='[29,30]',
+                                            "31-33"='[31,33]',
+                                            "34-38"='[34,38]',
+                                            "39-99"='[39,99]'
+)]
+
+longlab[,mangestagecat:=fancycut::fancycut(x=mangestage,
+                                            "0-7"='[0,7]',
+                                            "8-12"='[8,12]',
+                                            "13-14"='[13,14]',
+                                            "15-17"='[15,17]',
+                                            "18-22"='[18,22]',
+                                            "23-23"='[23,23]',
+                                            "24-28"='[24,28]',
+                                            "29-30"='[29,30]',
+                                            "31-33"='[31,33]',
+                                            "34-38"='[34,38]',
+                                            "39-99"='[39,99]'
+)]
+
+
 sum(!is.na(longlab[is.na(bookgestagecat)]$bookgestage))
 
 
@@ -205,14 +253,59 @@ sum(!is.na(longlab[is.na(bookgestagecat)]$bookgestage))
 #   Large = '(5,10]'
 #)
 
+# lab risk
 
+# declare all the people this is valid for
+longlab[book_anemia==T,book_anemia_risk:=FALSE]
+
+####### CREATING CLEAN DEFINITIONS FOR EACH ROW
+longlab[,has_labhb:=!is.na(labhb) & labhb>0]
+longlab[,has_labanemia:=!is.na(labhb) & labhb>0 & labhb<11]
+
+# we need to figure out the first gestational age with anemia
+# so we can use this variable with the risk data
+longlab[,labgestage_first_anemia:=NULL]
+longlab[has_labanemia==TRUE,
+        labgestage_first_anemia:=min(labgestage,na.rm=T),
+        by=bookevent]
+longlab[is.infinite(labgestage_first_anemia),labgestage_first_anemia:=NA]
+longlab[,labgestage_first_anemia:=mean(labgestage_first_anemia,na.rm=T),
+        by=bookevent]
+longlab[!is.na(labgestage_first_anemia), has_labanemia_risk:=FALSE]
+longlab[!is.na(has_labanemia_risk) &
+          risktype %in% c(
+            "MildAnemia",
+            "ModerateAnemia",
+            "SevereAnemia",
+            "HGBNotImproved"
+          ) &
+          riskgestage >= labgestage_first_anemia, has_labanemia_risk:=TRUE]
+
+longlab[,has_labanemia_risk_man:=!is.na(has_labanemia_risk) & 
+                                  mantypey%in%c("MildAnemiaTreatmentFollowup",
+                                                "MildAneTreatment",
+                                                "ModAnemiaTreatmentFollowup",
+                                                "ModAneTreatment",
+                                                "SevAne"
+                                              
+                                  ) ]
+
+longlab[,has_labbloodglu:=!is.na(labhb) & labbloodglu>0]
+longlab[,has_labogct:=!is.na(labogct) & labogct>0]
+longlab[,has_labfastbloodglu:=!is.na(labfastbloodglu) & labfastbloodglu>0]
+
+
+length(unique(each_woman$bookevent))
 # aggregate this down to each woman
-each_woman <- longlab[!is.na(labgestage),.(
-  has_labhb=max(!is.na(labhb) & labhb>0),
-  has_labanemia=max(!is.na(labhb) & labhb>0 & labhb<11),
-  has_labbloodglu=(!is.na(labhb) & labbloodglu>0),
-  has_labogct=max(!is.na(labogct) & labogct>0),
-  has_labfastbloodglu=max(!is.na(labfastbloodglu) & labfastbloodglu>0)
+each_woman <- longlab[,.(
+  has_labhb=max(has_labhb,na.rm=T),
+  has_labanemia=max(has_labanemia,na.rm=T),
+  has_labanemia_risk=max(has_labanemia_risk,na.rm=T),
+  has_labanemia_risk_man=max(has_labanemia_risk_man,na.rm=T),
+  has_labanemia_risk_man2=sum(has_labanemia_risk_man,na.rm=T),
+  has_labbloodglu=max(has_labbloodglu,na.rm=T),
+  has_labogct=max(has_labogct,na.rm=T),
+  has_labfastbloodglu=max(has_labfastbloodglu,na.rm=T)
 ),keyby=.(
   bookorgname,
   bookyear,
@@ -222,10 +315,18 @@ each_woman <- longlab[!is.na(labgestage),.(
   labgestagecat,
   bookgluc,
   bookglucurine,
-  book_anemia
+  riskgestagecat,
+  mangestagecat
 )]
+length(unique(each_woman$bookevent))
 
+#getting rid of the infinites
+vars <- names(each_woman)
+for (v in vars){
+  each_woman[is.infinite(get(v)), (v):= NA]
+}
 
+sum(each_woman$has_labhb,na.rm=T)
 
 
 #did this before we did the loop that follows this code
@@ -270,7 +371,14 @@ vars <- c("0-7",
 # just cycle through this instead, which only requires ONE LOOP and therefore
 # simplifies everything
 overview <- expand.grid(
-  v=c("has_labhb", "has_labanemia", "has_labogct","has_labfastbloodglu","has_labbloodglu"),
+  v=c(
+    "has_labhb",
+    "has_labanemia", 
+    "has_labogct",
+    "has_labfastbloodglu",
+    "has_labbloodglu",
+    "has_labanemia_risk",
+    "has_labanemia_risk_man"),
   i=1:length(vars),
   stringsAsFactors=F
 )
@@ -279,40 +387,71 @@ overview <- expand.grid(
 # (otherwise they will be factors)
 # setDT turns it into data.table
 setDT(overview)
+overview[,ages:=vars[i]]
+overview[,gestage_var:="labgestagecat"]
+overview[v %in% c(
+  "has_labanemia_risk"
+),gestage_var:="riskgestagecat"]
+
+overview[v %in% c(
+  "has_labanemia_risk_man"
+),gestage_var:="mangestagecat"]
+
+
+# new variable to create
+overview[,has_x:=stringr::str_replace_all(sprintf("%s_%s",v,ages),"-","_")]
 overview
+
 # this here is a single loop over all combinations of v and i
 # this could replace the double loop below
-for(j in 1:ncol(overview)){
-  v = overview$v[j]
+for(j in 1:nrow(overview)){
+  has_x = overview$has_x[j]
+  gestage = overview$gestage_var[j]
   i = overview$i[j]
-
+  v = overview$v[j]
+  
+  #dt[(get, ():=get()]
+  #this is the format we use when we want to "get"    
+  #something or as assigning it into a variable (assignment
+  #). we use get either in row selection or on the right 
+  #side of assigning something to look inside 
+  
+  each_woman[bookgestagecat %in% vars[1:i], 
+             (has_x):=FALSE]
+  each_woman[bookgestagecat %in% vars[1:i] &
+               get(gestage) %in% vars[i] &
+               get(v)==1,
+             (has_x):=TRUE]
 }
 
+sum(each_woman$has_labanemia_0_7,na.rm=T)
 
-for(v in c("has_labhb", "has_labanemia", "has_labogct","has_labfastbloodglu","has_labbloodglu")){
-  for(i in 1:length(vars)){
-    #below we have a hyphen in the variable name
-    #has_labhb_x <- sprintf("has_labhb_%s", vars[i])
-    has_x <- sprintf("%s_%s",v, vars[i])
-    
-    #here we replace the hyphen with an underscore
-    has_x <- stringr::str_replace_all(has_x, "-"   ,"_")
-    
-    #dt[(get, ():=get()]
-    #this is the format we use when we want to "get"    
-    #something or as assigning it into a variable (assignment
-    #). we use get either in row selection or on the right 
-    #side of assigning something to look inside 
-    
-    each_woman[bookgestagecat %in% vars[1:i], 
-               (has_x):=FALSE]
-    each_woman[bookgestagecat %in% vars[1:i] &
-                 labgestagecat %in% vars[i] &
-                 get(v)==1,
-               (has_x):=TRUE]
-    
-  }
-}
+# 
+# for(v in c("has_labhb", "has_labanemia", "has_labogct","has_labfastbloodglu","has_labbloodglu")){
+#   for(i in 1:length(vars)){
+#     #below we have a hyphen in the variable name
+#     #has_labhb_x <- sprintf("has_labhb_%s", vars[i])
+#     has_x <- sprintf("%s_%s",v, vars[i])
+#     
+#     #here we replace the hyphen with an underscore
+#     has_x <- stringr::str_replace_all(has_x, "-"   ,"_")
+#     
+#     #dt[(get, ():=get()]
+#     #this is the format we use when we want to "get"    
+#     #something or as assigning it into a variable (assignment
+#     #). we use get either in row selection or on the right 
+#     #side of assigning something to look inside 
+#     
+#     each_woman[bookgestagecat %in% vars[1:i], 
+#                (has_x):=FALSE]
+#     each_woman[bookgestagecat %in% vars[1:i] &
+#                  labgestagecat %in% vars[i] &
+#                  get(v)==1,
+#                (has_x):=TRUE]
+#     
+#   }
+# }
+
 
 each_woman
 
@@ -350,8 +489,7 @@ each_woman <- each_woman[,
                            bookgestagecat,
                            bookhb,
                            bookgluc,
-                           bookglucurine,
-                           book_anemia
+                           bookglucurine
                          ),
                          .SDcols=c("has_labhb_0_7",
                                    "has_labhb_8_12",
@@ -367,6 +505,12 @@ each_woman <- each_woman[,
                                    "has_labanemia_24_28",
                                    "has_labanemia_31_33",
                                    "has_labanemia_34_38",
+                                   "has_labanemia_risk_24_28",
+                                   "has_labanemia_risk_31_33",
+                                   "has_labanemia_risk_34_38",
+                                   "has_labanemia_risk_man_24_28",
+                                   "has_labanemia_risk_man_31_33",
+                                   "has_labanemia_risk_man_34_38",
                                    "has_labfastbloodglu_0_7",
                                    "has_labfastbloodglu_8_12",
                                    "has_labfastbloodglu_13_14",
@@ -414,7 +558,6 @@ uglytable <- each_woman[,
                           N=.N,
 
                           book_hb_num=sum(bookhb, na.rm=T),
-                          book_anemia = sum(book_anemia, na.rm=T),
                           lab_hb_num_0_7= sum(has_labhb_0_7, na.rm = T),
                           labhb_num_8_12= sum(has_labhb_8_12, na.rm = T),
                           labhb_num_15_17= sum(has_labhb_15_17, na.rm = T),
@@ -423,14 +566,23 @@ uglytable <- each_woman[,
                           
                           labhb_num_24_28= sum(has_labhb_24_28, na.rm = T),
                           labanemia_num_24_28= sum(has_labanemia_24_28, na.rm = T),
+                          labanemia_risk_num_24_28= sum(has_labanemia_risk_24_28, na.rm = T),
+                          labanemia_risk_man_num_24_28= sum(has_labanemia_risk_man_24_28, na.rm = T),
+                          
                           
                           labhb_num_29_30= sum(has_labhb_29_30, na.rm = T),
                           
                           labhb_num_31_33= sum(has_labhb_31_33, na.rm = T),
                           labanemia_num_31_33= sum(has_labanemia_31_33, na.rm = T),
+                          labanemia_risk_num_31_33= sum(has_labanemia_risk_31_33, na.rm = T),
+                          labanemia_risk_man_num_31_33= sum(has_labanemia_risk_man_31_33, na.rm = T),
+                          
                           
                           labhb_num_34_38= sum(has_labhb_34_38, na.rm = T),
                           labanemia_num_34_38= sum(has_labanemia_34_38, na.rm = T),
+                          labanemia_risk_num_34_38= sum(has_labanemia_risk_34_38, na.rm = T),
+                          labanemia_risk_man_num_34_38= sum(has_labanemia_risk_man_34_38, na.rm = T),
+                          
                           
                           book_gluc_urine_num=sum(bookglucurine, na.rm=T),
                           labbloodglu_0_7= sum(has_labbloodglu_0_7, na.rm = T),
@@ -465,7 +617,7 @@ openxlsx::write.xlsx(uglytable,
                      file.path(
                        FOLDER_DROPBOX_RESULTS,
                        "trial_2",
-                       "LabScreenings_2.xlsx"))
+                       "LabScreenings_3.xlsx"))
 
 #####Ultrasound#####
 # attempt to make a long lab dataset
