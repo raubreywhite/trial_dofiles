@@ -604,7 +604,7 @@ uglytable <- each_woman[,
                         ),
                         keyby=
                           .(
-                            #bookyear,
+                            bookyear,
                             #bookorgname,
                             bookgestagecat
                           )
