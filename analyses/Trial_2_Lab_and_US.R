@@ -30,6 +30,9 @@ bookingtrial2 <- td[, .(
   bookyear
 )]
 
+td[,angestage_0:=bookgestage]
+td[,andate_0:=bookdate]
+td[,anevent_0:=bookevent]
 
 #OGCT and anemia screening
 #anc visits
