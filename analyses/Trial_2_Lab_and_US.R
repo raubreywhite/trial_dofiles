@@ -21,16 +21,23 @@ Setup(IS_GAZA = FALSE)
 #d <- LoadDataFileFromNetworkGaza()
 d <- LoadDataFileFromNetworkWB()
 
-td <- d[ident_dhis2_booking==1 & ident_TRIAL_2_and_3==T & bookyear %in% c(2018:2019)]
+td <- d[ident_dhis2_booking==1 & ident_TRIAL_2_and_3==T & bookyear=="2018"]
 bookingtrial2 <- td[, .(
   numBOOK=sum(ident_dhis2_booking==1, na.rm = T)
 ), keyby=.(
+  str_TRIAL_2_Cluster,
   bookorgname,
   bookyear
 )]
 
 
 #OGCT and anemia screening
+#anc visits
+a1 <- stringr::str_subset(names(td),"^angestage_")
+a2 <- stringr::str_subset(names(td),"^andate_")
+a3 <- stringr::str_subset(names(td),"^anevent_")
+
+
 # attempt to make a long lab dataset
 l1a <- stringr::str_subset(names(td),"^labgestage_")
 l1b <- stringr::str_subset(names(td),"^labdate_")
@@ -40,6 +47,14 @@ l4 <- stringr::str_subset(names(td),"^labbloodglu_")
 l5 <- stringr::str_subset(names(td),"^laburglu_")
 l6 <- stringr::str_subset(names(td),"^labfastbloodglu_")
 
+#ultrasound data sets
+us1 <- stringr::str_subset(names(td),"^usgestage_")
+us2 <- stringr::str_subset(names(td),"^usdate_")
+us3 <- stringr::str_subset(names(td),"^uspres_")
+us4 <- stringr::str_subset(names(td),"^usevent_")
+
+
+#risks
 r1a <- stringr::str_subset(names(td),"^riskgestage_")
 r1b <- stringr::str_subset(names(td),"^riskdate_")
 r2 <- stringr::str_subset(names(td),"^risktype_")
@@ -50,10 +65,7 @@ m3 <- stringr::str_subset(names(td),"^mangestage_")
 
 
 
-
-
-
-#blood glu
+#blood hb
 td[, bookhb:=FALSE]
 td[as.numeric(difftime(labdate_1,bookdate, units="days"))<14 &
      !is.na(labhb_1) &
@@ -91,13 +103,16 @@ td[as.numeric(difftime(labdate_1,bookdate, units="days"))<14 &
 # }
 # xtabs(~td$book_anemia_risk)
 
+#bloodglu
 td[, bookgluc:=FALSE]
 td[as.numeric(difftime(labdate_1,bookdate, units="days"))<14 &
      !is.na(labbloodglu_1) &
      labbloodglu_1>0,
    bookgluc:= TRUE]
 
-# alternative metho: td[,bookgluc:=as.numeric(difftime(labdate_1     #,bookdate, units=days))<14 &!is.na(labbloodglu_1) &
+
+
+# alternative method: td[,bookgluc:=as.numeric(difftime(labdate_1     #,bookdate, units=days))<14 &!is.na(labbloodglu_1) &
 # labbloodglu_1>0]
 
 td[, bookglucurine:=FALSE]
@@ -105,6 +120,13 @@ td[as.numeric(difftime(labdate_1,bookdate, units="days"))<14 &
      !is.na(laburglu_1) &
      laburglu_1>0,
    bookglucurine:= TRUE]
+#if bookglucurine_NEG is false, then at booking the value is true. Did it this way so 
+#we dont have to make another variable for the positive one
+td[as.numeric(difftime(labdate_1,bookdate, units="days"))<14 &
+     !is.na(laburglu_1) &
+     laburglu_1=="NEG",
+   bookglucurine_NEG:= TRUE]
+
 
 
 widelab <- td[,c("bookevent",
@@ -115,6 +137,11 @@ widelab <- td[,c("bookevent",
                  "bookgluc",
                  "bookglucurine",
                  "book_anemia",
+                 "bookglucurine_NEG",
+                 "str_TRIAL_2_Cluster",
+                 a1,
+                 a2,
+                 a3,
                  l1a,
                  l1b,
                  l2,
@@ -127,19 +154,28 @@ widelab <- td[,c("bookevent",
                  r2,
                  m1,
                  m2,
-                 m3),with=F]
+                 m3,
+                 us1,
+                 us2,
+                 us3,
+                 us4),with=F]
 
 
 #add labfasting blood glucose variable down here
 longlab <- melt(widelab, id.vars = c("bookevent",
                                      "bookgestage",
+                                     "str_TRIAL_2_Cluster",
                                      "bookorgname",
                                      "bookyear",
                                      "bookhb",
                                      "bookgluc",
                                      "bookglucurine",
-                                     "book_anemia"),
+                                     "book_anemia",
+                                     "bookglucurine_NEG"),
                 measure = patterns(
+                  "^angestage_",
+                  "^andate_",
+                  "^anevent_",
                   "^labgestage_",
                   "^labdate_",
                   "^labogct_",
@@ -147,14 +183,22 @@ longlab <- melt(widelab, id.vars = c("bookevent",
                   "^labbloodglu_",
                   "^laburglu_",
                   "^labfastbloodglu_",
+                  "^usgestage_",
+                  "^usdate_",
+                  "^uspres_",
+                  "^usevent_",
                   "^riskgestage_",
                   "^riskdate_",
                   "^risktype_",
                   "^mandate_",
                   "^mantypey_",
                   "^mangestage_"
+                 
                 ),
                 value.name=c(
+                  "angestage",
+                  "andate",
+                  "anevent",
                   "labgestage",
                   "labdate",
                   "labogct",
@@ -162,6 +206,10 @@ longlab <- melt(widelab, id.vars = c("bookevent",
                   "labbloodglu",
                   "laburglu",
                   "labfastbloodglu",
+                  "usgestage",
+                  "usdate",
+                  "uspres",
+                  "usevent",
                   "riskgestage",
                   "riskdate",
                   "risktype",
@@ -172,6 +220,22 @@ longlab <- melt(widelab, id.vars = c("bookevent",
 
 #since labgestage are in whole numbers we dont have to worry about the decimal places
 #if we had deciimals that we hve to take into consideration, we would have to either put a round paranthesis or use the round function around labgestage
+longlab[,angestagecat:=fancycut::fancycut(x=angestage,
+                                           "0-7"='[0,7]',
+                                           "8-12"='[8,12]',
+                                           "13-14"='[13,14]',
+                                           "15-17"='[15,17]',
+                                           "18-22"='[18,22]',
+                                           "23-23"='[23,23]',
+                                           "24-28"='[24,28]',
+                                           "29-30"='[29,30]',
+                                           "31-33"='[31,33]',
+                                           "34-38"='[34,38]',
+                                           "39-99"='[39,99]'
+)]
+xtabs(~longlab$angestagecat)
+
+
 longlab[,labgestagecat:=fancycut::fancycut(x=labgestage,
                                            "0-7"='[0,7]',
                                            "8-12"='[8,12]',
@@ -210,6 +274,22 @@ longlab[,bookgestagecat:=fancycut::fancycut(x=bookgestage,
                                             "34-38"='[34,38]',
                                             "39-99"='[39,99]'
 )]
+
+longlab[,usgestagecat:=fancycut::fancycut(x=usgestage,
+                                            "0-7"='[0,7]',
+                                            "8-12"='[8,12]',
+                                            "13-14"='[13,14]',
+                                            "15-17"='[15,17]',
+                                            "18-22"='[18,22]',
+                                            "23-23"='[23,23]',
+                                            "24-28"='[24,28]',
+                                            "29-30"='[29,30]',
+                                            "31-33"='[31,33]',
+                                            "34-38"='[34,38]',
+                                            "39-99"='[39,99]'
+)]
+sum(!is.na(longlab[is.na(usgestagecat)]$usgestage))
+
 
 longlab[,riskgestagecat:=fancycut::fancycut(x=riskgestage,
                                             "0-7"='[0,7]',
@@ -259,6 +339,8 @@ sum(!is.na(longlab[is.na(bookgestagecat)]$bookgestage))
 longlab[book_anemia==T,book_anemia_risk:=FALSE]
 
 ####### CREATING CLEAN DEFINITIONS FOR EACH ROW
+longlab[,has_anvisit:= !is.na(anevent) & angestage>0]
+
 longlab[,has_labhb:=!is.na(labhb) & labhb>0]
 longlab[,has_labanemia:=!is.na(labhb) & labhb>0 & labhb<11]
 
@@ -272,7 +354,7 @@ longlab[is.infinite(labgestage_first_anemia),labgestage_first_anemia:=NA]
 longlab[,labgestage_first_anemia:=mean(labgestage_first_anemia,na.rm=T),
         by=bookevent]
 longlab[!is.na(labgestage_first_anemia), has_labanemia_risk:=FALSE]
-longlab[!is.na(has_labanemia_risk) &
+longlab[!is.na(has_labanemia_risk==TRUE) &
           risktype %in% c(
             "MildAnemia",
             "ModerateAnemia",
@@ -290,14 +372,70 @@ longlab[,has_labanemia_risk_man:=!is.na(has_labanemia_risk) &
                                               
                                   ) ]
 
-longlab[,has_labbloodglu:=!is.na(labhb) & labbloodglu>0]
-longlab[,has_labogct:=!is.na(labogct) & labogct>0]
+###Making variables for management process
+longlab[,has_laburglu:=!is.na(laburglu)]
+longlab[,has_laburglu_neg:= !is.na(has_laburglu) & laburglu=="NEG"]
+longlab[,has_labbloodglu:=!is.na(has_laburglu) & !is.na(labbloodglu) & labbloodglu>0]
+longlab[,has_labbloodglu_105_139:=!is.na(has_labbloodglu) & 
+                                         labbloodglu>=105 & 
+                                         labbloodglu<140]
+longlab[,has_labbloodglu_140plus:=!is.na(has_labbloodglu) & labbloodglu>=140]
+
+longlab[,has_laburglu_pos_rbs140plus:=  (has_laburglu_neg==FALSE) &
+                                        (has_labbloodglu_140plus==TRUE)]
+
+
+longlab[,has_labogct:= (has_labbloodglu_105_139==T) & !is.na(labogct) & labogct>0 ]
+longlab[,has_labogct_140plus:=!is.na(has_labogct) & labogct>=140]
+
 longlab[,has_labfastbloodglu:=!is.na(labfastbloodglu) & labfastbloodglu>0]
 
+####diabetes risk and management
+longlab[,has_labDM:=(has_labogct_140plus==TRUE) |
+                    (has_labbloodglu_140plus==TRUE) |
+                    (has_laburglu_pos_rbs140plus==TRUE)]
 
-length(unique(each_woman$bookevent))
+# START HERE we need to figure out the first gestational age with anemia
+# so we can use this variable with the risk data
+longlab[,labgestage_first_DM:=NULL]
+longlab[has_labDM==TRUE,
+        labgestage_first_DM:=min(labgestage,na.rm=T),
+        by=bookevent]
+longlab[is.infinite(labgestage_first_DM),labgestage_first_DM:=NA]
+longlab[,labgestage_first_DM:=mean(labgestage_first_DM,na.rm=T),
+        by=bookevent]
+longlab[!is.na(labgestage_first_DM), has_labDM_risk:=FALSE]
+longlab[!is.na(has_labDM_risk) &
+          risktype %in% c(
+            "GDM",
+            "LikelyGDM",
+            "LDM"
+          ) &
+          riskgestage >= labgestage_first_DM, has_labDM_risk:=TRUE]
+
+longlab[,has_labDM_risk_man:=!is.na(has_labDM_risk) & 
+          mantypey%in%c("DiabetesCondSpec",
+                        "DiabetesDC",
+                        "DiabetesHR",
+                        "DiabetesRoutineBST",
+                        "DiabetesUrineStickPositiveBST",
+                        "GTTLikelyGDM",
+                        "LikelyDiabetes",
+                        "LikelyGDMLab",
+                        "ScreeningGDM",
+                        "ScreeningUrineGlucose"
+                        
+          ) ]
+
+length(unique(longlab$bookevent))
+
+#creating variables for ultrasound
+longlab[,has_us:=!is.na(usevent) & !is.na(usdate)]
+
+
 # aggregate this down to each woman
 each_woman <- longlab[,.(
+  has_anvisit=max(has_anvisit,na.rm=T),
   has_labhb=max(has_labhb,na.rm=T),
   has_labanemia=max(has_labanemia,na.rm=T),
   has_labanemia_risk=max(has_labanemia_risk,na.rm=T),
@@ -305,19 +443,30 @@ each_woman <- longlab[,.(
   has_labanemia_risk_man2=sum(has_labanemia_risk_man,na.rm=T),
   has_labbloodglu=max(has_labbloodglu,na.rm=T),
   has_labogct=max(has_labogct,na.rm=T),
-  has_labfastbloodglu=max(has_labfastbloodglu,na.rm=T)
-),keyby=.(
-  bookorgname,
-  bookyear,
-  bookevent,
-  bookgestagecat,
-  bookhb,
-  labgestagecat,
-  bookgluc,
-  bookglucurine,
-  riskgestagecat,
-  mangestagecat
-)]
+  has_labfastbloodglu=max(has_labfastbloodglu,na.rm=T),
+  has_laburglu_neg=max(has_laburglu_neg,na.rm=T),
+  has_labbloodglu_105_139=max(has_labbloodglu_105_139,na.rm=T),
+  has_labogct_140plus=max(has_labogct_140plus,na.rm=T),
+  has_labDM_risk=max(has_labDM_risk,na.rm=T),
+  has_labDM_risk_man=max(has_labDM_risk_man,na.rm=T),
+  has_us=max(has_us, na.rm=T)
+  
+  
+    ),keyby=.(
+          bookorgname,
+          str_TRIAL_2_Cluster,
+          bookyear,
+          bookevent,
+          bookgestagecat,
+          bookhb,
+          angestagecat,
+          labgestagecat,
+          usgestagecat,
+          bookgluc,
+          bookglucurine,
+          riskgestagecat,
+          mangestagecat
+  )]
 length(unique(each_woman$bookevent))
 
 #getting rid of the infinites
@@ -327,6 +476,8 @@ for (v in vars){
 }
 
 sum(each_woman$has_labhb,na.rm=T)
+sum(each_woman$has_us,na.rm=T)
+
 
 
 #did this before we did the loop that follows this code
@@ -372,15 +523,27 @@ vars <- c("0-7",
 # simplifies everything
 overview <- expand.grid(
   v=c(
+    "has_anvisit",
     "has_labhb",
     "has_labanemia", 
     "has_labogct",
     "has_labfastbloodglu",
     "has_labbloodglu",
     "has_labanemia_risk",
-    "has_labanemia_risk_man"),
-  i=1:length(vars),
-  stringsAsFactors=F
+    "has_labanemia_risk_man",
+    "has_labbloodglu",
+    "has_labogct",
+    "has_laburglu_neg",
+    "has_labfastbloodglu",
+    "has_laburglu_neg",
+    "has_labbloodglu_105_139",
+    "has_labogct_140plus",
+    "has_labDM_risk",
+    "has_labDM_risk_man",
+    "has_us"),
+  
+    i=1:length(vars),
+     stringsAsFactors=F
 )
 # overview is now a data.frame of all combinations of the above two variables
 # we use stringsAsFactors=F to make sure that all strings are STRINGS
@@ -390,11 +553,19 @@ setDT(overview)
 overview[,ages:=vars[i]]
 overview[,gestage_var:="labgestagecat"]
 overview[v %in% c(
-  "has_labanemia_risk"
+  "has_anvisit"
+),gestage_var:="angestagecat"]
+overview[v %in% c(
+  "has_us"
+),gestage_var:="usgestagecat"]
+overview[v %in% c(
+  "has_labanemia_risk",
+  "has_labDM_risk"
 ),gestage_var:="riskgestagecat"]
 
 overview[v %in% c(
-  "has_labanemia_risk_man"
+  "has_labanemia_risk_man",
+  "has_labDM_risk_man"
 ),gestage_var:="mangestagecat"]
 
 
@@ -425,6 +596,7 @@ for(j in 1:nrow(overview)){
 }
 
 sum(each_woman$has_labanemia_0_7,na.rm=T)
+
 
 # 
 # for(v in c("has_labhb", "has_labanemia", "has_labogct","has_labfastbloodglu","has_labbloodglu")){
@@ -484,6 +656,7 @@ each_woman <- each_woman[,
                          
                          keyby=.(
                            bookyear,
+                           str_TRIAL_2_Cluster,
                            bookorgname,
                            bookevent,
                            bookgestagecat,
@@ -491,7 +664,18 @@ each_woman <- each_woman[,
                            bookgluc,
                            bookglucurine
                          ),
-                         .SDcols=c("has_labhb_0_7",
+                         .SDcols=c("has_anvisit_0_7",
+                                   "has_anvisit_8_12",
+                                   "has_anvisit_13_14",
+                                   "has_anvisit_15_17",
+                                   "has_anvisit_18_22",
+                                   "has_anvisit_23_23",
+                                   "has_anvisit_24_28",
+                                   "has_anvisit_29_30",
+                                   "has_anvisit_31_33",
+                                   "has_anvisit_34_38",
+                                   "has_anvisit_39_99",
+                                   "has_labhb_0_7",
                                    "has_labhb_8_12",
                                    "has_labhb_13_14",
                                    "has_labhb_15_17",
@@ -533,7 +717,60 @@ each_woman <- each_woman[,
                                    "has_labbloodglu_31_33",
                                    "has_labbloodglu_34_38",
                                    "has_labbloodglu_39_99",
-                                   "has_labogct_24_28"
+                                   "has_labogct_24_28",
+                                   "has_labogct_29_30",
+                                   "has_labogct_31_33",
+                                   "has_labogct_34_38",
+                                   "has_labogct_39_99",
+                                   "has_laburglu_neg_0_7",
+                                   "has_laburglu_neg_8_12",
+                                   "has_laburglu_neg_13_14",
+                                   "has_laburglu_neg_13_14",
+                                   "has_laburglu_neg_15_17",
+                                   "has_laburglu_neg_18_22",
+                                   "has_laburglu_neg_23_23",
+                                   "has_laburglu_neg_24_28",
+                                   "has_laburglu_neg_29_30",
+                                   "has_laburglu_neg_31_33",
+                                   "has_laburglu_neg_34_38",
+                                   "has_laburglu_neg_39_99",
+                                   "has_labogct_140plus_29_30",
+                                   "has_labogct_140plus_31_33",
+                                   "has_labogct_140plus_34_38",
+                                   "has_labogct_140plus_39_99",
+                                   "has_labDM_risk_0_7",
+                                   "has_labDM_risk_8_12",
+                                   "has_labDM_risk_13_14",
+                                   "has_labDM_risk_15_17",
+                                   "has_labDM_risk_18_22",
+                                   "has_labDM_risk_23_23",
+                                   "has_labDM_risk_24_28",
+                                   "has_labDM_risk_29_30",
+                                   "has_labDM_risk_31_33",
+                                   "has_labDM_risk_34_38",
+                                   "has_labDM_risk_39_99",
+                                   "has_labDM_risk_man_0_7",
+                                   "has_labDM_risk_man_8_12",
+                                   "has_labDM_risk_man_13_14",
+                                   "has_labDM_risk_man_15_17",
+                                   "has_labDM_risk_man_18_22",
+                                   "has_labDM_risk_man_23_23",
+                                   "has_labDM_risk_man_24_28",
+                                   "has_labDM_risk_man_29_30",
+                                   "has_labDM_risk_man_31_33",
+                                   "has_labDM_risk_man_34_38",
+                                   "has_labDM_risk_man_39_99",
+                                   "has_us_0_7",
+                                   "has_us_8_12",
+                                   "has_us_13_14",
+                                   "has_us_15_17",
+                                   "has_us_18_22",
+                                   "has_us_23_23",
+                                   "has_us_24_28",
+                                   "has_us_29_30",
+                                   "has_us_31_33",
+                                   "has_us_34_38",
+                                   "has_us_39_99"
                                    
                                    
                          )
@@ -552,14 +789,29 @@ for (v in vars){
 #checking the information we have
 longlab[bookevent=="zzghXNIsTfM"]
 
-# making an ugly table
+# making an ugly table for lab screenings
 uglytable <- each_woman[,
                         .(
                           N=.N,
-
+                          
+                          anvisit_num_0_7= sum(has_anvisit_0_7, na.rm = T),
+                          anvisit_num_8_12= sum(has_anvisit_8_12, na.rm = T),
+                          anvisit_num_13_14= sum(has_anvisit_8_12, na.rm = T),
+                          anvisit_num_15_17= sum(has_anvisit_15_17, na.rm = T),
+                          anvisit_num_18_22= sum(has_anvisit_18_22, na.rm = T),
+                          anvisit_num_23_23= sum(has_anvisit_23_23, na.rm = T),
+                          anvisit_num_24_28= sum(has_anvisit_24_28, na.rm = T),
+                          anvisit_num_29_30= sum(has_anvisit_29_30, na.rm = T),
+                          anvisit_num_31_33= sum(has_anvisit_31_33, na.rm = T),
+                          anvisit_num_34_38= sum(has_anvisit_34_38, na.rm = T),
+                          anvisit_num_39_99= sum(has_anvisit_31_33, na.rm = T),
+                          
                           book_hb_num=sum(bookhb, na.rm=T),
-                          lab_hb_num_0_7= sum(has_labhb_0_7, na.rm = T),
+                          anvisit_num_0_7= sum(has_anvisit_0_7, na.rm = T),
+                          labhb_num_0_7= sum(has_labhb_0_7, na.rm = T),
+                          
                           labhb_num_8_12= sum(has_labhb_8_12, na.rm = T),
+                          labhb_num_13_14= sum(has_labhb_13_14, na.rm = T),
                           labhb_num_15_17= sum(has_labhb_15_17, na.rm = T),
                           labhb_num_18_22= sum(has_labhb_18_22, na.rm = T),
                           labhb_num_23_23= sum(has_labhb_23_23, na.rm = T),
@@ -585,27 +837,53 @@ uglytable <- each_woman[,
                           
                           
                           book_gluc_urine_num=sum(bookglucurine, na.rm=T),
-                          labbloodglu_0_7= sum(has_labbloodglu_0_7, na.rm = T),
+                          has_laburglu_neg_0_7_num=sum(has_laburglu_neg_0_7, na.rm=T),
+                          labbloodglu_num_0_7= sum(has_labbloodglu_0_7, na.rm = T),
+                          
+                          has_laburglu_neg_8_12_num=sum(has_laburglu_neg_8_12, na.rm=T),
                           labbloodglu_num_8_12= sum(has_labbloodglu_8_12, na.rm = T),
+                          
+                          has_laburglu_neg_13_14_num=sum(has_laburglu_neg_13_14, na.rm=T),
+                          
+                          has_laburglu_neg_15_17_num=sum(has_laburglu_neg_15_17, na.rm=T),
                           labbloodglu_num_15_17= sum(has_labbloodglu_15_17, na.rm = T),
+                          
+                          
+                          
+                          has_laburglu_neg_18_22_num=sum(has_laburglu_neg_18_22, na.rm=T),
                           labbloodglu_num_18_22= sum(has_labbloodglu_18_22, na.rm = T),
+                          
+                          
+                          has_laburglu_neg_23_23_num=sum(has_laburglu_neg_23_23, na.rm=T),
                           labbloodglu_num_23_23= sum(has_labbloodglu_23_23, na.rm = T),
+                          
+                          has_laburglu_neg_24_28_num=sum(has_laburglu_neg_24_28, na.rm=T),
                           labbloodglu_num_24_28= sum(has_labbloodglu_24_28, na.rm = T),
+                          
+                          ogct_num_24_28= sum(has_labogct_24_28, na.rm = T),
+                          
+                          has_laburglu_neg_29_30_num=sum(has_laburglu_neg_29_30, na.rm=T),
                           labbloodglu_num_29_30= sum(has_labbloodglu_29_30, na.rm = T),
+                          
+                          
+                          has_laburglu_neg_31_33_num=sum(has_laburglu_neg_31_33, na.rm=T),
                           labbloodglu_num_31_33= sum(has_labbloodglu_31_33, na.rm = T),
+                          
+                          
+                          has_laburglu_neg_34_38_num=sum(has_laburglu_neg_34_38, na.rm=T),
                           labbloodglu_num_34_38= sum(has_labbloodglu_34_38, na.rm = T),
-                          labbloodglu_num_39_99= sum(has_labbloodglu_39_99, na.rm = T),
                           
-                          book_gluc_num=sum(bookgluc, na.rm=T),
+                          has_laburglu_neg_39_99_num=sum(has_laburglu_neg_39_99, na.rm=T),
+                          labbloodglu_num_39_99= sum(has_labbloodglu_39_99, na.rm = T)
                           
-                          fastblogluc_num_24_28= sum(has_labfastbloodglu_24_28, na.rm = T),
+                      
                           
-                          ogct_num_24_28= sum(has_labogct_24_28, na.rm = T)
+                        
                         ),
                         keyby=
                           .(
                             bookyear,
-                            #bookorgname,
+                            str_TRIAL_2_Cluster,
                             bookgestagecat
                           )
                         
@@ -617,334 +895,44 @@ openxlsx::write.xlsx(uglytable,
                      file.path(
                        FOLDER_DROPBOX_RESULTS,
                        "trial_2",
-                       "LabScreenings_3.xlsx"))
+                       "LabScreenings_Anemia_GDM.xlsx"))
 
-#####Ultrasound#####
-# attempt to make a long lab dataset
-l1 <- stringr::str_subset(names(td),"^usgestage_")
-l2 <- stringr::str_subset(names(td),"^usdate_")
-l3 <- stringr::str_subset(names(td),"^usreason_")
-l4 <- stringr::str_subset(names(td),"^usamniquant_")
-l5 <- stringr::str_subset(names(td),"^uspres_")
-
-
-
-#book ultrasound
-td[, bookus:=FALSE]
-td[as.numeric(difftime(usdate_1,bookdate, units="days"))<14 &
-     !is.na(usdate_1),
-   bookus:= TRUE]
-
-# alternative method: td[,bookgluc:=as.numeric(difftime(labdate_1    #,bookdate, units=days))<14 &!is.na(labbloodglu_1) &
-# labbloodglu_1>0]
-
-
-
-wideUs<- td[,c("bookevent",
-                 "bookgestage",
-                 "bookorgname",
-                 "bookyear",
-                 "bookus",
-                 
-                 l1,
-                 l2,
-                 l3,
-                 l4,
-                 l5),with=F]
-
-
-#add labfasting blood glucose variable down here
-longus <- melt(wideUs, id.vars = c("bookevent",
-                                    "bookgestage",
-                                    "bookorgname",
-                                    "bookyear",
-                                    "bookus"),
-               measure = patterns(
-                 "^usgestage_",
-                 "^usdate_",
-                 "^usreason_",
-                 "^usamniquant_",
-                 "^uspres_"
-                 
-               ),
-               value.name=c(
-                 "usgestage",
-                 "usdate",
-                 "usreason",
-                 "usamniquant",
-                 "uspres"
-                 
-               ))
-
-#since labgestage are in whole numbers we dont have to worry about the decimal places
-#if we had deciimals that we hve to take into consideration, we would have to either put a round paranthesis or use the round function around labgestage
-longus[,usgestagecat:=fancycut::fancycut(x=usgestage,
-                                         "0-12"='[0,12]',
-                                         "13-14"='[13,14]',
-                                         "15-17"='[15,17]',
-                                         "18-22"='[18,22]',
-                                         "23-23"='[23,23]',
-                                         "24-28"='[24,28]',
-                                         "29-30"='[29,30]',
-                                         "31-33"='[31,33]',
-                                         "34-38"='[34,38]',
-                                         "39-99"='[39,99]'
-)]
-xtabs(~longus$usgestagecat)
-#after this step we see that there are alot that are missing, so we want to check the 
-#original labgestage to make sure that we arent losing them when we make our cats
-
-xtabs(~longus[is.na(usgestagecat)]$usgestage)
-#table of extent>0 was the result so most likely they dont have the actual gest age
-
-#here we are seeing how many arent missing of the ones we had before 
-#since the sum is 0, we know that they really dont exist so our code is correct
-sum(!is.na(longus[is.na(usgestagecat)]$usgestage))
-
-
-longus[,bookgestagecat:=fancycut::fancycut(x=bookgestage,
-                                           "0-12"='[0,12]',
-                                           "13-14"='[13,14]',
-                                           "15-17"='[15,17]',
-                                           "18-22"='[18,22]',
-                                           "23-23"='[23,23]',
-                                           "24-28"='[24,28]',
-                                           "29-30"='[29,30]',
-                                           "31-33"='[31,33]',
-                                           "34-38"='[34,38]',
-                                           "39-99"='[39,99]'
-)]
-
-sum(!is.na(longus[is.na(bookgestagecat)]$bookgestage))
-
-
-
-
-# fancycut(
-#   x = -10:10,
-#   Zero = 0,
-#   Small = '[0,2)',
-#   Medium = '[2,5]',
-#   Large = '(5,10]'
-#)
-
-
-# aggregate this down to each woman
-each_woman <- longus[!is.na(usgestage),.(
-  has_us=max(!is.na(usdate) & usreason==1),
-  has_usreason_routine=max(usreason==1),
-  has_usamniquant=max(!is.na(usamniquant)),
-  has_uspres=max(!is.na(uspres) & uspres!="Not checked"),
-  has_uspresnotchecked=max(uspres="Not checked"),
-  has_uspreschecked=max(!is.na(uspres) &
-                          uspres!="Not checked" &
-                          uspres!="")
-  
-),keyby=.(
-  bookorgname,
-  bookyear,
-  bookevent,
-  bookgestagecat,
-  usgestagecat,
-  bookus
-)]
-
-
-
-
-#did this before we did the loop that follows this code
-# each_woman[bookgestagecat=="0-7",has_labhb_0_7:=FALSE]
-# each_woman[bookgestagecat=="0-7" & 
-#              labgestagecat=="0-7" &
-#              has_labhb==1,
-#               has_labhb_0_7:=TRUE]
-# 
-# each_woman[bookgestagecat %in% c("0-7","8-12"), 
-#            has_labhb_8_12:=FALSE]
-# each_woman[bookgestagecat %in% c("0-7","8-12") &
-#              labgestagecat %in% c("0-7", "8-12") &
-#              has_labhb==1,
-#            has_labhb_8_12:=TRUE]
-# 
-# each_woman[bookgestagecat %in% c("0-7","8-12", "13-14"), 
-#            has_labhb_13_14:=FALSE]
-# each_woman[bookgestagecat %in% c("0-7","8-12", "13-14") &
-#              labgestagecat %in% c("0-7", "8-12", "13-14") &
-#              has_labhb==1,
-#            has_labhb_13_14:=TRUE]
-
-vars <- c("0-12",
-          "13-14",
-          "15-17",
-          "18-22",
-          "23-23",
-          "24-28",
-          "29-30",
-          "31-33",
-          "34-38",
-          "39-99")
-
-
-for(v in c("has_us", 
-           "has_usreason_routine",
-           "has_usamniquant",
-           "has_uspres", 
-           "has_uspresnotchecked", 
-           "has_uspreschecked")){
-  for(i in 1:length(vars)){
-    #below we have a hyphen in the variable name
-    #has_labhb_x <- sprintf("has_labhb_%s", vars[i])
-    has_x <- sprintf("%s_%s",v, vars[i])
-    
-    #here we replace the hyphen with an underscore
-    has_x <- stringr::str_replace_all(has_x, "-"   ,"_")
-    
-    #dt[(get, ():=get()]
-    #this is the format we use when we want to "get"    
-    #something or as assigning it into a variable (assignment
-    #). we use get either in row selection or on the right 
-    #side of assigning something to look inside 
-    
-    each_woman[bookgestagecat %in% vars[1:i], 
-               (has_x):=FALSE]
-    each_woman[bookgestagecat %in% vars[1:i] &
-                 usgestagecat %in% vars[i] &
-                 get(v)==1,
-               (has_x):=TRUE]
-    
-  }
-}
-
-each_woman
-
-#max vs sum
-#can have multiple 0s but can have multiple ones
-#because 
-#when you take the maximimum of nothing is negative infinity so get warning message.
-
-#would do this way if we want to aggregate manually but can use the 
-#lapply with .SD column function becuase its quicker
-# each_woman[,
-#            .(
-#               has_labhb_0_7= max(has_labhb_0_7, na.rm=T),
-#               has_labhb_8_12= max(has_labhb_8_12, na.rm=T),
-#               has_labhb_13_14= max(has_labhb_13_14, na.rm=T)
-#               ),
-#            keyby=.(
-#                   bookevent,
-#                   bookgestagecat
-#                   )
-#            
-#            ]
-
-
-# mtcars[order(gear, cyl), lapply(.SD, mean), by = .(gear, cyl), 
-#.SDcols = cols_chosen]
-
-each_woman <- each_woman[,
-                         lapply(.SD, max, na.rm=T),
-                         
-                         keyby=.(
-                           bookyear,
-                           bookorgname,
-                           bookevent,
-                           bookgestagecat,
-                           bookus
-                         ),
-                         .SDcols=c("has_us_0_12", 
-                                   "has_us_13_14",
-                                   "has_us_15_17",
-                                   "has_us_18_22",
-                                   "has_us_31_33",
-                                   "has_us_34_38",
-                                   "has_us_39_99",
-                                   "has_usreason_routine_0_12",
-                                   "has_usreason_routine_15_17",
-                                   "has_usreason_routine_18_22",
-                                   "has_usreason_routine_23_23",
-                                   "has_usreason_routine_24_28",
-                                   "has_usreason_routine_31_33",
-                                   "has_usreason_routine_34_38",
-                                   "has_usreason_routine_39_99",
-                                   "has_usamniquant_18_22",
-                                   "has_uspres_34_38",
-                                   "has_uspres_39_99",
-                                   "has_uspresnotchecked_34_38",
-                                   "has_uspresnotchecked_39_99",
-                                   "has_uspreschecked_34_38",
-                                   "has_uspreschecked_39_99"
-                                   
-                         )
-                         
-                         ]
-
-
-
-#getting rid of the infinites
-vars <- names(each_woman)
-
-for (v in vars){
-  each_woman[is.infinite(get(v)), (v):= NA]
-}
-
-#checking the information we have
-longus[bookevent=="nDRnoxFf3PZ"]
-
-
-
-# making an ugly table
+##### Table for US ######
 uglytable <- each_woman[,
                         .(
+                          N=.N,
                           
-                          numbooked_0_12=sum(bookgestagecat=="0-12"),
-                          us_0_12_denom=sum(!is.na(has_us_0_12)),
-                          us_0_12_num= sum(has_us_0_12, na.rm = T),
-                          us_0_12_perc= round(100*mean(has_us_0_12, na.rm = T),
-                                             digits=1),
+                          us_num_0_7= sum(has_us_0_7, na.rm = T),
+                          us_num_8_12= sum(has_us_8_12, na.rm = T),
+                          us_num_13_14= sum(has_us_13_14, na.rm = T),
+                          us_num_15_17= sum(has_us_15_17, na.rm = T),
+                          us_num_18_22= sum(has_us_18_22, na.rm = T),
+                          us_num_23_23= sum(has_us_23_23, na.rm = T),
+                          us_num_24_28= sum(has_us_24_28, na.rm = T),
+                          us_num_29_30= sum(has_us_29_30, na.rm = T),
+                          us_num_31_33= sum(has_us_31_33, na.rm = T),
+                          us_num_34_38= sum(has_us_34_38, na.rm = T)
                           
-                          numbooked_13_14=sum(bookgestagecat=="13_14"),
-                          us_13_14_denom=sum(!is.na(has_us_13_14)),
-                          us_13_14_num= sum(has_us_13_14, na.rm = T),
-                          us_13_14_perc= round(100*mean(has_us_13_14, na.rm = T),
-                                             digits=1),
                           
-                          numbooked_15_17=sum(bookgestagecat=="15-17"),
-                          us_15_17_denom=sum(!is.na(has_us_15_17)),
-                          us_15_17_num= sum(has_us_15_17, na.rm = T),
-                          us_15_17_perc= round(100*mean(has_us_15_17, na.rm = T),
-                                               digits=1),
                           
-                          numbooked_18_22=sum(bookgestagecat=="18-22"),
-                          us_18_22_denom=sum(!is.na(has_us_18_22)),
-                          us_18_22_num= sum(has_us_18_22, na.rm = T),
-                          us_18_22_perc= round(100*mean(has_us_18_22, na.rm = T),
-                                               digits=1),
                           
-                          numbooked_23_23=sum(bookgestagecat=="23-23"),
-                          numbooked_24_28=sum(bookgestagecat=="24-28"),
-                          numbooked_29_30=sum(bookgestagecat=="29-30"),
-                          numbooked_31_33=sum(bookgestagecat=="31-33"),
                           
-                          numbooked_34_38=sum(bookgestagecat=="34-38"),
-                          us_34_38_denom=sum(!is.na(has_us_34_38)),
-                          us_34_38_num= sum(has_us_34_38, na.rm = T),
-                          us_34_38_perc= round(100*mean(has_us_34_38, na.rm = T),
-                                               digits=1),  
-                          
-                          numbooked_39_99=sum(bookgestagecat=="39-99")
                           
                           
                         ),
                         keyby=
                           .(
                             bookyear,
-                            bookorgname
+                            str_TRIAL_2_Cluster,
+                            bookgestagecat
                           )
+                        
+                        
                         ]
+uglytable
 
 openxlsx::write.xlsx(uglytable, 
                      file.path(
                        FOLDER_DROPBOX_RESULTS,
                        "trial_2",
-                       "UsScreenings.xlsx"))
-
+                       "US_screenings.xlsx"))
