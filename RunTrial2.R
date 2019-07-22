@@ -307,6 +307,7 @@ timelyattendancetrial2 <- td[custo_bookgestagecat!="WAITING TO BE ASSIGNED", .(
   )
 ), keyby=.(
   bookyear,
+  bookorgname,
   str_TRIAL_2_Cluster
 )]
 
@@ -323,4 +324,52 @@ openxlsx::write.xlsx(timelyattendancetrial2,
 nrow(d[custo_bookgestagecat!="WAITING TO BE ASSIGNED" & 
         bookorgname=="almanshar" &
           (bookdate > andate_1)])
+
+
+#number of women for timely attendance:
+
+
+  resPalestine <- td[,.(
+    numerator=sum(custo_anvisit_timely_by_bookgestage,na.rm=T),
+    denominator=sum(!is.na(custo_anvisit_timely_by_bookgestage)),
+    TOTALNUMOFPEOPLEINCAT=.N
+  ),keyby=.(
+    custo_bookgestagecat,
+    bookorgname,
+    str_TRIAL_2_Cluster
+  )]
+  # setorder(resPalestine,custo_bookgestagecat)
+  # 
+  # resPalestine[,bookorgdistrict:="0Palestine"]
+  # 
+  # resDistrict <- d[,.(
+  #   numerator=sum(custo_anvisit_timely_by_bookgestage,na.rm=T),
+  #   denominator=sum(!is.na(custo_anvisit_timely_by_bookgestage)),
+  #   TOTALNUMOFPEOPLEINCAT=.N
+  # ),by=.(
+  #   custo_bookgestagecat, bookorgname, str_TRIAL_2_Cluster
+  # )]
+  # 
+  # row bind (put the two data sets on top of each other)
+  # res <- rbind(resPalestine,resDistrict)
+  
+  
+  
+  setcolorder(resPalestine, c(
+                     "bookorgname",
+                     "str_TRIAL_2_Cluster",
+                     "custo_bookgestagecat",
+                     "numerator" ,
+                     "denominator",
+                     "TOTALNUMOFPEOPLEINCAT"))
+  
+  
+  setorder(resPalestine,custo_bookgestagecat,bookorgname,str_TRIAL_2_Cluster)
+  res <- resPalestine[!is.na(str_TRIAL_2_Cluster)]
+  
+  openxlsx::write.xlsx(res, 
+                       file.path(FOLDER_DROPBOX_RESULTS,
+                                 "trial_2",
+                                 "anvisit_timely_by_bookgestage_trail2.xlsx"))
+
 

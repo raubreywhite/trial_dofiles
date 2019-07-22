@@ -18,7 +18,7 @@ CheckFilesAndVariables(folder="e.reg-intervention")
 ####################
 
 # make this TRUE if you want to include the PPC
-d <- CleanAllData(includePPC=T, IS_GAZA=TRUE)
+d <- CleanAllData(includePPC=F, IS_GAZA=TRUE)
 nrow(d)
 ####################
 #NOW run HBO stuff##
@@ -38,6 +38,12 @@ GazaAnalyses(d=LoadDataFileFromNetwork())
 # LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPORT
 d <- LoadDataFileFromNetwork()
 CreatingFurtherVariablesPNIPH(d)
+CreatingFurtherVariablesNormal(d)
+
+IndicatorsOsloANCVisits(d)
+IndicatorsOsloGenerate(d)
+IndicatorsOsloRandom(d)
+
 #### bookvisitspec shouldnt be known  pcnidnumber_1  amdmotherbirthdate_1
 ###previdnumber_1   manidnumber  riskidnumber   d$hbodaltidnum_1   hbodaltidnum_1
 ###anidnumber_1     labid     usid     

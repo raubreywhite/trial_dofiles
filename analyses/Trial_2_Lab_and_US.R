@@ -799,7 +799,7 @@ uglytable <- each_woman[,
                           
                           anvisit_num_0_7= sum(has_anvisit_0_7, na.rm = T),
                           anvisit_num_8_12= sum(has_anvisit_8_12, na.rm = T),
-                          anvisit_num_13_14= sum(has_anvisit_8_12, na.rm = T),
+                          anvisit_num_13_14= sum(has_anvisit_13_14, na.rm = T),
                           anvisit_num_15_17= sum(has_anvisit_15_17, na.rm = T),
                           anvisit_num_18_22= sum(has_anvisit_18_22, na.rm = T),
                           anvisit_num_23_23= sum(has_anvisit_23_23, na.rm = T),
@@ -807,7 +807,7 @@ uglytable <- each_woman[,
                           anvisit_num_29_30= sum(has_anvisit_29_30, na.rm = T),
                           anvisit_num_31_33= sum(has_anvisit_31_33, na.rm = T),
                           anvisit_num_34_38= sum(has_anvisit_34_38, na.rm = T),
-                          anvisit_num_39_99= sum(has_anvisit_31_33, na.rm = T),
+                          anvisit_num_39_99= sum(has_anvisit_39_99, na.rm = T),
                           
                           book_hb_num=sum(bookhb, na.rm=T),
                           anvisit_num_0_7= sum(has_anvisit_0_7, na.rm = T),
@@ -898,35 +898,55 @@ openxlsx::write.xlsx(uglytable,
                      file.path(
                        FOLDER_DROPBOX_RESULTS,
                        "trial_2",
-                       "LabScreenings_Anemia_GDM.xlsx"))
+                       "LabScreenings_Anemia_GDM_plusHR.xlsx"))
 
 ##### Table for US ######
 uglytable <- each_woman[,
                         .(
                           N=.N,
                           
+                          anvisit_num_0_7= sum(has_anvisit_0_7, na.rm = T),
                           us_num_0_7= sum(has_us_0_7, na.rm = T),
+                          
+                          anvisit_num_8_12= sum(has_anvisit_8_12, na.rm = T),
                           us_num_8_12= sum(has_us_8_12, na.rm = T),
+                          
+                          anvisit_num_13_14= sum(has_anvisit_13_14, na.rm = T),
                           us_num_13_14= sum(has_us_13_14, na.rm = T),
+                          
+                          anvisit_num_15_17= sum(has_anvisit_15_17, na.rm = T),
                           us_num_15_17= sum(has_us_15_17, na.rm = T),
+                          
+                          anvisit_num_18_22= sum(has_anvisit_18_22, na.rm = T),
                           us_num_18_22= sum(has_us_18_22, na.rm = T),
+                          
+                          anvisit_num_23_23= sum(has_anvisit_23_23, na.rm = T),
                           us_num_23_23= sum(has_us_23_23, na.rm = T),
+                          
+                          anvisit_num_24_28= sum(has_anvisit_24_28, na.rm = T),
                           us_num_24_28= sum(has_us_24_28, na.rm = T),
+                          
+                          anvisit_num_29_30= sum(has_anvisit_29_30, na.rm = T),
                           us_num_29_30= sum(has_us_29_30, na.rm = T),
+                          
+                          anvisit_num_31_33= sum(has_anvisit_31_33, na.rm = T),
                           us_num_31_33= sum(has_us_31_33, na.rm = T),
-                          us_num_34_38= sum(has_us_34_38, na.rm = T)
+                          
+                          anvisit_num_34_38= sum(has_anvisit_34_38, na.rm = T),
+                          us_num_34_38= sum(has_us_34_38, na.rm = T),
+                          
+                          anvisit_num_39_99= sum(has_anvisit_39_39, na.rm = T)
                           
                           
-                          
-                          
-                          
-                          
-                          
-                        ),
+                         
+                         
+                         
+                          ),
                         keyby=
                           .(
                             bookyear,
                             str_TRIAL_2_Cluster,
+                            bookorgname,
                             bookgestagecat
                           )
                         
@@ -938,4 +958,4 @@ openxlsx::write.xlsx(uglytable,
                      file.path(
                        FOLDER_DROPBOX_RESULTS,
                        "trial_2",
-                       "US_screenings.xlsx"))
+                       "US_screenings_plusHR.xlsx"))
