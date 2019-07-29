@@ -43,7 +43,7 @@ WBAnalyses(d=LoadDataFileFromNetwork())
 MissingHBO()
 
 
-####
+####LOAD d from Network####
 # PLACE OF DELIVERY INFORMATION CHECKING
 # LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPPORT
 d <- LoadDataFileFromNetwork()

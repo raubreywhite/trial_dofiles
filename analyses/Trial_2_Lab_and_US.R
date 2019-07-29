@@ -65,6 +65,7 @@ r2 <- stringr::str_subset(names(td),"^risktype_")
 m1 <- stringr::str_subset(names(td),"^mandate_")
 m2 <- stringr::str_subset(names(td),"^mantypey_")
 m3 <- stringr::str_subset(names(td),"^mangestage_")
+m4 <- stringr::str_subset(names(td),"^manperf_")
 
 
 
@@ -158,6 +159,7 @@ widelab <- td[,c("bookevent",
                  m1,
                  m2,
                  m3,
+                 m4,
                  us1,
                  us2,
                  us3,
@@ -195,7 +197,8 @@ longlab <- melt(widelab, id.vars = c("bookevent",
                   "^risktype_",
                   "^mandate_",
                   "^mantypey_",
-                  "^mangestage_"
+                  "^mangestage_",
+                  "^manperf_"
                  
                 ),
                 value.name=c(
@@ -218,7 +221,8 @@ longlab <- melt(widelab, id.vars = c("bookevent",
                   "risktype",
                   "mandate",
                   "mantypey",
-                  "mangestage"
+                  "mangestage",
+                  "manperf"
                 ))
 
 #since labgestage are in whole numbers we dont have to worry about the decimal places
@@ -373,7 +377,8 @@ longlab[,has_labanemia_risk_man:=!is.na(has_labanemia_risk) &
                                                 "ModAneTreatment",
                                                 "SevAne"
                                               
-                                  ) ]
+                                  ) & 
+                                    manperf==1]
 
 ###Making variables for management process
 longlab[,has_laburglu:=!is.na(laburglu)]
@@ -428,7 +433,8 @@ longlab[,has_labDM_risk_man:=!is.na(has_labDM_risk) &
                         "ScreeningGDM",
                         "ScreeningUrineGlucose"
                         
-          ) ]
+          ) &
+          manperf==1]
 
 length(unique(longlab$bookevent))
 

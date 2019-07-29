@@ -7,12 +7,12 @@ Setup <- function(IS_GAZA=FALSE){
   REF_WB_CLINIC_INTERVENTION_DATE <- "2019-03-04"
   REF_WB_CLINIC_CONTROL_DATE <- "2019-03-04"
   
-  # define ou r dates
+  # define our dates
   GAZA_CLINIC_INTERVENTION_DATE <- "2019-01-08"
   GAZA_CLINIC_CONTROL_DATE<- "2019-01-08"
 
-  WB_CLINIC_INTERVENTION_DATE <- "2019-05-06"
-  WB_CLINIC_CONTROL_DATE <- "2019-05-06"
+  WB_CLINIC_INTERVENTION_DATE <- "2019-07-07"
+  WB_CLINIC_CONTROL_DATE <- "2019-07-07"
   
   FOLDER_DATA_CLEAN_GAZA <<- file.path(getwd(),"../gaza_data_clean")
   FOLDER_DATA_CLEAN_WB <<- file.path(getwd(),"../data_clean")

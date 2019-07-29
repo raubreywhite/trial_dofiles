@@ -222,7 +222,7 @@ SaveCISMACDataBase<- function(){
     "bookevent",
     "booknum",
     #"booklmp",
-    #"booklmp_original",
+    "booklmp_original",
     "bookgestage",
     "bookprimi",
     "bookpprom",
@@ -630,6 +630,96 @@ SaveCISMACDataBase<- function(){
   
  
 }
+
+
+SaveTRIAL2DataSet<- function(){
+  rm("d", envir=.GlobalEnv)
+  d=LoadAnonDataFileFromNetwork()
+  
+  
+  d <-d[bookyear=="2018" &
+          !is.na(str_TRIAL_2_Cluster) &
+          isExpectedToHaveDelivered==TRUE]
+  
+  varsKeep <- c(
+    "bookdate",
+    "bookyearmonth",
+    "bookyear",
+    "bookgestage",
+    "str_TRIAL_2_Cluster",
+    
+    names(d)[stringr::str_detect(names(d),"^anevent_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^anorgunit_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^anbpsyst_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^anbpdiast_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^angestage_[0-9]*")],
+    
+    names(d)[stringr::str_detect(names(d),"^labevent_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^laborgunit_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labhb_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labbloodglu_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labfastbloodglu_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^laburglu_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labgestage_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^labogct_[0-9]*")],
+    
+    names(d)[stringr::str_detect(names(d),"^usevent_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usorgunit_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usegaweeks_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usegadays_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usnumberfetus_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usfh_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^uspres_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usiugr_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^uslga_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usamniquant_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usamnideeppoc_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usamniindex_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usgestsac_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usgestsacmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usgestsacweek_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^uscrlmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^uscrlweeks_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usbpdmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usbpdweeks_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usfemurmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usfemurweeks_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usacmm_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usacweeks_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usefw_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usgestage_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usreason_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usmultifetdesignation_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usanom_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^usanomspec_[0-9]*")],
+    
+    
+    names(d)[stringr::str_detect(names(d),"^riskevent_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^riskorgunit_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^risktype_[0-9]*")],
+    
+    names(d)[stringr::str_detect(names(d),"^manevent_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^manorgunit_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^mangestage_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^mandetail_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^manperf_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^mantypey_[0-9]*")],
+    names(d)[stringr::str_detect(names(d),"^mantypex_[0-9]*")],
+    
+    "isExpectedToHaveDelivered"
+    
+  )
+  
+
+  d <-d[,varsKeep,with=F]
+  
+  dir.create(file.path(FOLDER_DATA_CLEAN,
+                       "TRIAL2DataSet2018",
+                       lubridate::today()))
+  
+}
+
+
 
 SaveNamesOfVariables <- function(d){
   x <- data.frame(names=names(d))

@@ -725,7 +725,10 @@ class(d$mahima_gA_1_us)
     print(i)
     prevoutcome <-sprintf("prevoutcome_%s",i)
     prevdate <- sprintf("prevdate_%s",i)
-    d[!is.na(get(prevoutcome)) & get(prevoutcome)!="" & get(prevdate)<bookdate, gravida:=gravida+1]
+    d[!is.na(get(prevoutcome)) &
+        get(prevoutcome)!="" & 
+        get(prevdate)<bookdate, 
+        gravida:=gravida+1]
     
     
   
