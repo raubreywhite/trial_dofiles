@@ -629,6 +629,8 @@ SaveCISMACDataBase<- function(){
   }
   
  
+  return(d)
+  
 }
 
 
@@ -705,17 +707,16 @@ SaveTRIAL2DataSet<- function(){
     names(d)[stringr::str_detect(names(d),"^manperf_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^mantypey_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^mantypex_[0-9]*")],
-    
     "isExpectedToHaveDelivered"
+    
     
   )
   
 
   d <-d[,varsKeep,with=F]
+  openxlsx::write.xlsx(d,file.path(FOLDER_DATA_CLEAN,
+                                       "Trial2DataSet.xlsx"))
   
-  dir.create(file.path(FOLDER_DATA_CLEAN,
-                       "TRIAL2DataSet2018",
-                       lubridate::today()))
   
 }
 
