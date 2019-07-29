@@ -712,9 +712,9 @@ SaveTRIAL2DataSet<- function(){
     
   )
   
-
-  d <-d[,varsKeep,with=F]
-  openxlsx::write.xlsx(d,file.path(FOLDER_DATA_CLEAN,
+    t2 <-d[,varsKeep,with=F]
+        
+    openxlsx::write.xlsx(t2,file.path(FOLDER_DATA_CLEAN,
                                        "Trial2DataSet.xlsx"))
   
   
