@@ -46,6 +46,8 @@ Setup <- function(IS_GAZA=FALSE){
                        "fs",
                        "fancycut"
   )
+  
+  
   for(i in desiredPackages) if(!i %in% rownames(installed.packages())) install.packages(i)
   
   # MERETT/TAMARA CHECK OUT IF THIS IS ACTUALLY CORRECT

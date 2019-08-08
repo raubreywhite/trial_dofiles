@@ -3,17 +3,145 @@ sink(file.path(FOLDER_DROPBOX_RESULTS,
                "trial_1",
                "mahima_gA_us and hbo_dob(us_21wksAndBefore).txt"))
 
+d[,difference:= mahima_gestageatbirthwk_1-mahima_hospenteredgestage_1]
+
 analysisDatasetUSgA <- d[bookyearmonth<="2017-03" & 
                            ident_TRIAL_1==TRUE & 
                            !is.na(mahima_hospenteredgestage_1) &
                            !is.na(mahima_gestageatbirthwk_1) &
-                           !is.na(first_1_21_usedd_gA)&
-                           !is.na(first_1_21_usedd_gA_cats),
-                         c("mahima_dateofbirth_1",
+                           mahima_gestageatbirthwk_1<400,
+                         c("bookevent",
+                           "mahima_dateofbirth_1",
                            "first_1_21_usedd_gA",
                            "first_1_21_usedd_gA_cats",
                            "mahima_hospenteredgestage_1",
-                           "mahima_gestageatbirthwk_1")]
+                           "mahima_gestageatbirthwk_1",
+                           "mahima_gestageatbirthwk_1_cats",
+                           "mahima_hospenteredgestage_1_cats",
+                           "difference")]
+
+xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats)
+
+
+
+
+# tab <- xtabs(~mahima_gestageatbirthwk_1_cats+mahima_hospenteredgestage_1_cats, 
+#              data=analysisDatasetUSgA[mahima_gestageatbirthwk_1_cats=="(37.7,41.7]" &
+#                                         mahima_hospenteredgestage_1_cats =="(37,41)"
+#                                       ])
+
+
+                    
+
+#T/F variables to compare individual categories for each of the two data sets
+analysisDatasetUSgA[,has_0_24_hosp_cat:=(mahima_hospenteredgestage_1_cats=="(0,24]")]
+analysisDatasetUSgA[,has_25_32_hosp_cat:=(mahima_hospenteredgestage_1_cats=="(24,32]")]
+analysisDatasetUSgA[,has_33_37_hosp_cat:=(mahima_hospenteredgestage_1_cats=="(32,37]")]
+analysisDatasetUSgA[,has_38_41_hosp_cat:=(mahima_hospenteredgestage_1_cats=="(37,41]")]
+analysisDatasetUSgA[,has_42_44_hosp_cat:=(mahima_hospenteredgestage_1_cats=="(41,44]")]
+
+analysisDatasetUSgA[,has_0_24_calcul_cat:=(mahima_gestageatbirthwk_1_cats=="(0,24.7]")]
+analysisDatasetUSgA[,has_25_32_calcul_cat:=(mahima_gestageatbirthwk_1_cats=="(24.7,32.7]")]
+analysisDatasetUSgA[,has_33_37_calcul_cat:=(mahima_gestageatbirthwk_1_cats=="(32.7,37.7]")]
+analysisDatasetUSgA[,has_38_41_calcul_cat:=(mahima_gestageatbirthwk_1_cats=="(37.7,41.7]")]
+analysisDatasetUSgA[,has_42_44_calcul_cat:=(mahima_gestageatbirthwk_1_cats=="(41.7,44]")]
+
+
+tab <- xtabs(~mahima_gestageatbirthwk_1_cats+mahima_hospenteredgestage_1_cats, data=analysisDatasetUSgA, drop.unused.levels=T)
+
+chisq.test(xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats))
+
+
+#####t-tests for each interval
+t.test(analysisDatasetUSgA[has_0_24_calcul_cat==TRUE &
+                             has_0_24_hosp_cat==TRUE ]$difference)
+
+t.test(analysisDatasetUSgA[has_33_37_calcul_cat==TRUE]$difference)
+
+t.test(analysisDatasetUSgA[has_42_44_calcul_cat==TRUE]$difference)
+
+
+#####creating table of proportions for each of the important categories
+###abstract revision:August 8, 2019
+tab <- analysisDatasetUSgA[,.(
+                     N=.N,
+                     pop_mean_entered= mean(mahima_gestageatbirthwk_1, na.rm=TRUE),
+                     pop_mean_calculated= mean(mahima_hospenteredgestage_1, na.rm=TRUE),
+                     prop_24_32_entered = 100*mean(has_25_32_hosp_cat, na.rm=TRUE),
+                     prop_24_32_calculated= 100*mean(has_25_32_calcul_cat, na.rm=TRUE),
+                     prop_33_37_entered= 100*mean(has_33_37_hosp_cat, na.rm=TRUE),
+                     prop_33_37_calculated=100* mean(has_33_37_calcul_cat, na.rm=TRUE),
+                     prop_42_44_entered=100*mean(has_42_44_hosp_cat, na.rm=TRUE),
+                     prop_42_44_calculated= 100*mean(has_42_44_calcul_cat, na.rm=TRUE),
+                     conf_int=as.numeric(0.95),
+                     z_score=qt(1-0.95/2, df=(.N)-1),
+                     se_calculated=sd(analysisDatasetUSgA$mahima_gestageatbirthwk_1/sqrt(.N),                                     na.rm=TRUE),
+                     se_entered=sd(analysisDatasetUSgA$mahima_hospenteredgestage_1/sqrt(.N), 
+                                   na.rm=TRUE),
+                     ci_calculated=qt(1-0.95/2, df=(.N)-1)*sd(
+                                    analysisDatasetUSgA$mahima_gestageatbirthwk_1/sqrt(.N),                                     na.rm=TRUE),
+                     ci_entered=qt(1-0.95/2, df=(.N)-1)*sd(
+                                  analysisDatasetUSgA$mahima_hospenteredgestage_1/sqrt(.N), 
+                                              na.rm=TRUE)
+                     
+                     
+                     
+                      )]
+
+
+openxlsx::write.xlsx(tab,
+                     file.path(FOLDER_DROPBOX_RESULTS,
+                               "mahima",
+                               "trial_1",
+                               "GA_proportions_numbers.xlsx")
+)
+
+
+
+
+####making tables with percents
+# analysisDatasetUSgA[,id:=1:.N]
+# 
+# # reshape to long
+# long <- melt.data.table(analysisDatasetUSgA, id.vars="id")
+# 
+# tab <- long[,.(
+#         denom=.N
+# )]
+
+####Chisquare for each of the categories
+cat("\n0_24\n")
+##0-24
+tab <- xtabs(~has_0_24_hosp_cat+has_0_24_calcul_cat, data=analysisDatasetUSgA[mahima_gestageatbirthwk_1_cats], drop.unused.levels=T)
+chisq.test(tab)
+
+cat("\n25_32\n")
+##25-32
+tab <- xtabs(~has_25_32_hosp_cat+has_25_32_calcul_cat, data=analysisDatasetUSgA, drop.unused.levels=T)
+chisq.test(tab)
+
+cat("\n33_37\n")
+##33-37
+tab <- xtabs(~has_33_37_hosp_cat+has_33_37_calcul_cat, data=analysisDatasetUSgA, drop.unused.levels=T)
+chisq.test(tab)
+
+cat("\n38_41\n")
+##38-41
+tab <- xtabs(~has_38_41_hosp_cat+has_38_41_calcul_cat, data=analysisDatasetUSgA)
+chisq.test(tab)
+
+cat("\n42_44\n")
+##42-44
+tab <- xtabs(~has_42_44_hosp_cat+has_42_44_calcul_cat, data=analysisDatasetUSgA)
+chisq.test(tab)
+
+
+tab <- xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats)
+
+# fisher.test(tab)
+# 
+# fisher.test(tab, simulate.p.value=TRUE)
+
 
 # we pull ou thte 3 variables that we care about
 long <- analysisDatasetUSgA[,c(

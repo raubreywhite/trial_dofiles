@@ -5,7 +5,7 @@ sink(file.path(FOLDER_DROPBOX_RESULTS,
 
 
 analysisDatasetUSgA <- d[ ident_TRIAL_1==T &
-                            !is.na(mahima_hospenteredgestage_1),
+                            !is.na(mahima_hospenteredgestage_1), 
                          c("mahima_dateofbirth_1",
                            "first_1_21_usedd_gA",
                            "first_1_21_usedd_gA_cats",

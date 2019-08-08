@@ -751,8 +751,15 @@ class(d$mahima_gA_1_us)
   
   #3 ways to look inside get(variable)
   
+  #replacing gravida variable for control women with what was entered
+  d[ident_dhis2_control==T &
+      ident_TRIAL_1==T &
+      !is.na(congravida),
+    gravida:=congravida]
+  
   
 ###### Para variable######
+  
   # d[booknum==2, c("uniqueid")]
   # d[uniqueid=="bWg3AC74qIP", c("bookdate", 
   #                             "prevoutcome_1", 
@@ -798,7 +805,11 @@ class(d$mahima_gA_1_us)
                                vars1,
                                vars2), with=F]
   
-  
+  #replacing para variable with what was entered in control clinics
+  d[ident_dhis2_control==T &
+      ident_TRIAL_1==T &
+      !is.na(conpara),
+    para:=conpara]
   
   
   ####GestAge for control clinics calculation#####

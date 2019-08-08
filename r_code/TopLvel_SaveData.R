@@ -80,7 +80,7 @@ SaveAnonymousOslo <- function(d){
   d[,booklat:=NULL]
   d[,bookorgname:=NULL]
   d[,bookorgcode:=NULL]
-  d[,bookorgunit:=NULL]
+  #d[,bookorgunit:=NULL]
   d[,bookidnumber:=NULL]
   d[,demoorgname:=NULL]
   d[,demoorgunit:=NULL]
@@ -104,7 +104,7 @@ SaveAnonymousOslo <- function(d){
   d[,names(d)[stringr::str_detect(names(d),"city")]:=NULL]
   d[,names(d)[stringr::str_detect(names(d),"dateofbirth")]:=NULL]
   d[,names(d)[stringr::str_detect(names(d),"mobile")]:=NULL]
-  d[,names(d)[stringr::str_detect(names(d),"education")]:=NULL]
+  #d[,names(d)[stringr::str_detect(names(d),"education")]:=NULL]
   d[,names(d)[stringr::str_detect(names(d),"ageatmarriage")]:=NULL]
   d[,names(d)[stringr::str_detect(names(d),"ageatfirstpreg")]:=NULL]
   d[,names(d)[stringr::str_detect(names(d),"monthlyhouseholdincome")]:=NULL]
@@ -204,25 +204,25 @@ SaveCISMACDataBase<- function(){
   
   
   varsKeep <- c(
-    "bookdate",
+    #"bookdate",
     #"bookorgcode",
-    "bookorgdistrict",
+    "bookorgdistricthashed",
     "bookorgunit",
-    "demoorgunit",
+    #"demoorgunit",
     "agecat",
     "agemarriagecat",
     "agepregnancycat",
     "incomecat",
-    "education",
+    #"education",
     "educationcat",
-    "members",
+    #"members",
     "avicennanum",
     "motheridbooknum",
     "uniqueid",
     "bookevent",
     "booknum",
     #"booklmp",
-    "booklmp_original",
+    #"booklmp_original",
     "bookgestage",
     "bookprimi",
     "bookpprom",
@@ -300,6 +300,7 @@ SaveCISMACDataBase<- function(){
     #"ident_phase2clinic",
     #"ident_phase3clinic",
     "ident_TRIAL_1",
+    "ident_dhis2_control",
    "str_TRIAL_1_Cluster",
    #"ident_hr_clinic",
     "ident_TRIAL_1_clinics",
@@ -638,15 +639,13 @@ SaveTRIAL2DataSet<- function(){
   rm("d", envir=.GlobalEnv)
   d=LoadAnonDataFileFromNetwork()
   
-  
-  d <-d[bookyear=="2018" &
+    d <-d[bookyear=="2018" &
           !is.na(str_TRIAL_2_Cluster) &
+            ident_TRIAL_2_and_3==T &
           isExpectedToHaveDelivered==TRUE]
   
   varsKeep <- c(
-    "bookdate",
-    "bookyearmonth",
-    "bookyear",
+   
     "bookgestage",
     "str_TRIAL_2_Cluster",
     
@@ -714,9 +713,12 @@ SaveTRIAL2DataSet<- function(){
   
     t2 <-d[,varsKeep,with=F]
         
-    openxlsx::write.xlsx(t2,file.path(FOLDER_DATA_CLEAN,
-                                       "Trial2DataSet.xlsx"))
+    file <- file.path(FOLDER_DATA_CLEAN,
+                        "Trial2DataSet.xlsx")
+    print(file)
+    openxlsx::write.xlsx(t2,file)
   
+    
   
 }
 
@@ -757,6 +759,7 @@ SaveAllDataFiles <- function(d, IS_GAZA=FALSE){
   SaveFullFileToNetwork(d)
   Save2CasesPerMonthToNetwork(d)
   SaveAnonymousOslo(d)
+  SaveTRIAL2DataSet()
 
 
 }
