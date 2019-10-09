@@ -9,7 +9,8 @@ analysisDatasetUSgA <- d[bookyearmonth<="2017-03" &
                            ident_TRIAL_1==TRUE & 
                            !is.na(mahima_hospenteredgestage_1) &
                            !is.na(mahima_gestageatbirthwk_1) &
-                           mahima_gestageatbirthwk_1<400,
+                           mahima_gestageatbirthwk_1<=44 &
+                           mahima_gestageatbirthwk_1>0,
                          c("bookevent",
                            "mahima_dateofbirth_1",
                            "first_1_21_usedd_gA",
@@ -96,6 +97,44 @@ openxlsx::write.xlsx(tab,
                                "GA_proportions_numbers.xlsx")
 )
 
+
+#very preterm confidence intervals-entered
+binom.test(33,2001, 
+           0.5,
+           alternative="two.sided",
+           conf.level=0.95)
+
+
+#pre- term confidence intervals-entered
+binom.test(212,1924, 
+           0.5,
+           alternative="two.sided",
+           conf.level=0.95)
+
+#postterm confidence intervals-entered
+binom.test(23,1924, 
+           0.5,
+           alternative="two.sided",
+           conf.level=0.95)
+
+#very preterm confidence intervals-calculated
+binom.test(56,1924, 
+           0.5,
+           alternative="two.sided",
+           conf.level=0.95)
+
+
+#pre- term confidence intervals-calculated
+binom.test(236,1924, 
+           0.5,
+           alternative="two.sided",
+           conf.level=0.95)
+
+#postterm confidence intervals-calculated
+binom.test(108,1924, 
+           0.5,
+           alternative="two.sided",
+           conf.level=0.95)
 
 
 
@@ -188,6 +227,16 @@ cat("\nIQRcalculatedgestage\n")
 quantile(x=analysisDatasetUSgA$first_1_21_usedd_gA, 
          probs = seq(0, 1, 0.25), 
          na.rm = TRUE)
+
+quantile(x=analysisDatasetUSgA$mahima_gestageatbirthwk_1, 
+         probs = seq(0, 1, 0.25), 
+         na.rm = TRUE)
+
+quantile(x=analysisDatasetUSgA$mahima_hospenteredgestage_1, 
+         probs = seq(0, 1, 0.25), 
+         na.rm = TRUE)
+
+
 
 cat("\nTRIALcats\n")
 xtabs(~analysisDatasetUSgA$first_1_21_usedd_gA)

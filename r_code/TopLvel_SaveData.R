@@ -540,6 +540,8 @@ SaveCISMACDataBase<- function(){
     "mahima_gestageatbirthwk_1",
     "matching",
     "merged_is_hosp_gov",
+    "merged_bpsyst",
+    "merged_bpdiast",
     names(d)[stringr::str_detect(names(d),"^merged_namehospbirth_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^merged_pregoutcome_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^merged_abortion[0-9]*")],
@@ -549,6 +551,7 @@ SaveCISMACDataBase<- function(){
     names(d)[stringr::str_detect(names(d),"^merged_hbatadmission_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^merged_modeofdelivery_[0-9]*")],
     names(d)[stringr::str_detect(names(d),"^merged_fetalpresentation_[0-9]*")],
+   
     names(d)[stringr::str_detect(names(d),"^merged_indicationforcsection_[0-9]*")]
    
   )

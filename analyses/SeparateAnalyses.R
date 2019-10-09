@@ -308,7 +308,13 @@ analysisDataset <- d[bookyearmonth<="2017-03"&
                        !is.na(mahima_hospenteredgestage_1),
                      c("bookevent",
                        "mahima_hospenteredgestage_1",
-                       "mahima_gestageatbirthwk_1")]
+                       "mahima_hospenteredgestage_1_cats",
+                       "mahima_gestageatbirthwk_1",
+                       "mahima_gestageatbirthwk_1_cats")]
+
+
+
+
 
 cat('\n\n')
 print("IQRs for these variables")
@@ -324,6 +330,9 @@ quantile(x=analysisDataset$mahima_hospenteredgestage_1,
 
 
 sink()
+
+
+
 
 ###Kappa test for reliability
 ###Using intraclass correlation here because these are continuous variables

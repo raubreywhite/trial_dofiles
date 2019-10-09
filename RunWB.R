@@ -19,7 +19,7 @@ CheckFilesAndVariables(folder="e.reg-control")
 ####################
 
 # data base cleaning make this TRUE if you want to include the PPC
-d <- CleanAllData(includePPC=F, IS_GAZA=FALSE)
+d <- CleanAllData(includePPC=T, IS_GAZA=FALSE)
 xtabs(~d$matching, addNA=T)
 
 nrow(d)

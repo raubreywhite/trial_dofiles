@@ -99,6 +99,11 @@ DHIS2_BookingVisit <- function(isControl,
       ),
       encoding = "UTF-8"
     )
+    
+    print("TESTING")
+    print(d)
+    print(names(d))
+    
     setnames(d, 2, "programstageinstance")
     
     d[,confamilyhistoryofbronchialastma:=as.numeric(NA)]
@@ -138,7 +143,7 @@ DHIS2_BookingVisit <- function(isControl,
   }
 
   setnames(d, "event", "bookevent")
-  setnames(d, "programstageinstance", "uniqueid")
+  setnames(d, "programinstance", "uniqueid")
   setnames(d, "programstage", "bookprogstage")
   setnames(d, "eventdate", "bookdate")
   setnames(d, "longitude", "booklong")
