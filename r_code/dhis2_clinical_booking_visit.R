@@ -91,18 +91,51 @@ DHIS2_BookingVisit <- function(isControl,
     # capture tostring ancotherfamilyconcernspecified, replace
     # capture tostring ancpallor, replace
   } else {
+    print("CHECKINGCHECKING****")
+    print(FOLDERS)
+    # d <- fread(
+    #   sprintf(
+    #     "%s/%s Booking Visit.csv",
+    #     FOLDERS$FOLDER_DATA,
+    #     FOLDERS$CLINICAL_OR_CONTROL
+    #   ),
+    #   encoding = "UTF-8"
+    # )
+    # print(sprintf(
+    #   "%s/%s Booking Visit.csv",
+    #   FOLDERS$FOLDER_DATA,
+    #   FOLDERS$CLINICAL_OR_CONTROL
+    # ))
+    # print("TESTING")
+    # print(d)
+    # print(names(d))
+    
+    # 
+    # file_to_read_in <- sprintf(
+    #   "%s/%s Booking Visit.csv",
+    #   FOLDERS$FOLDER_DATA,
+    #   FOLDERS$CLINICAL_OR_CONTROL
+    # )
+    # print("FILE TO READ IN:")
+    # print(file_to_read_in)
+    # d <- fread(
+    #   file_to_read_in,
+    #   encoding = "UTF-8"
+    # )
+    
+    file_to_read_in <- sprintf(
+      "%s/%s Booking Visit.csv",
+      FOLDERS$FOLDER_DATA,
+      FOLDERS$CLINICAL_OR_CONTROL
+    )
+    print("FILE TO READ IN:")
+    print(file_to_read_in)
+    print(file.exists(file_to_read_in))
     d <- fread(
-      sprintf(
-        "%s/%s Booking Visit.csv",
-        FOLDERS$FOLDER_DATA,
-        FOLDERS$CLINICAL_OR_CONTROL
-      ),
+      file_to_read_in,
       encoding = "UTF-8"
     )
-    
-    print("TESTING")
-    print(d)
-    print(names(d))
+   
     
     setnames(d, 2, "programstageinstance")
     
