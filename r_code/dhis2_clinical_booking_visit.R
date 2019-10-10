@@ -408,19 +408,23 @@ DHIS2_BookingVisit <- function(isControl,
   #2017-09-10
   
   #
+  print("maybe")
   d[, bookdate := as.Date(bookdate)]
+  print("possibly")
   if(IS_GAZA){
   d[, booklmp := as.Date(booklmp,format="%d/%m/%Y")]
   } else{
   d[, booklmp := as.Date(booklmp)]
   }
+  print("here")
   if (length(unique(d$dob)) == 1) {
     d[, dob := NULL]
+    print("maybe DOB?")
     d[, dob := as.Date("1980-01-01")]
   } else {
     d[, dob := as.Date(dob)]
   }
-  
+   print("check")
 
   # drop women whose 2nd, 3rd, etc pregnancies
   # have LMPs before the first pregnancy's booking date
