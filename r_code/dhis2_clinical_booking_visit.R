@@ -405,13 +405,14 @@ DHIS2_BookingVisit <- function(isControl,
   # }
   
   if(IS_GAZA){
-    d[, bookdate := stringr::str_replace(bookdate, "/([0-9][0-9])$","/20\\1")]
+    d[,bookdate:=stringr::str_remove_all(bookdate," 12:00 AM$")]
+    d[,bookdate := stringr::str_replace(bookdate, "/([0-9][0-9])$","/20\\1")]
     str(d$bookdate)
-    unique(d$bookdate)[1:10]
+    print(unique(d$bookdate)[1:10])
     d[,bookdate:=as.Date(bookdate, "%d/%m/%Y")]
     d[is.na(bookevent), bookdate := as.Date(datecreated, "%d/%m/%Y")]
     str(d$bookdate)
-    unique(d$bookdate)[1:10]
+    print(unique(d$bookdate)[1:10])
   } else {
     d[is.na(bookevent), bookdate := datecreated]
   }
@@ -422,64 +423,30 @@ DHIS2_BookingVisit <- function(isControl,
   #d[uniqueid=="AqJL4IiVSJv"]
   #2017-09-10
   
-  # #
-  # print("maybe")
-  # d[, bookdate := as.Date(bookdate)]
-  # print("possibly")
-  # if(IS_GAZA){
-  # d[, booklmp := as.Date(booklmp,format="%d/%m/%Y")]
-  # } else{
-  # d[, booklmp := as.Date(booklmp)]
-  # }
-  # print("here")
-  # if (length(unique(d$dob)) == 1) {
-  #   d[, dob := NULL]
-  #   print("maybe DOB--checking format of DOB?")
-  #   d[, dob := as.Date(dob, format="%m/%d/%Y")]
-  # } else {
-  #   print(unique(d$dob)[1:30])
-  #   d[, dob := as.Date(dob)]
-  # }
-  #  print("check")
-  #  
-   
-   # if(IS_GAZA){
-   #   d[, booklmp := as.Date(booklmp,format="%m/%d/%Y")]
-   # } else{
-   #   d[, booklmp := as.Date(booklmp)]
-   # }
-   # 
   
   if(IS_GAZA){
     d[, booklmp := stringr::str_replace(booklmp, "/([0-9][0-9])$","/20\\1")]
-    str(d$booklmp)
-    print(unique(d$booklmp)[1:10])
     d[, booklmp := as.Date(booklmp,format="%m/%d/%Y")]
-    str(d$booklmp)
-    print(unique(d$booklmp)[1:10])
+    #str(d$booklmp)
+    #print(unique(d$booklmp)[1:10])
   } else{
     d[, booklmp := as.Date(booklmp)]
   }
-   print("here")
    if (length(unique(d$dob)) == 1) {
      d[, dob := NULL]
-     print("maybe DOB?")
      d[, dob := as.Date("1980-01-01")]
    } else {
-     print(unique(d$dob)[1:30])
+     #print(unique(d$dob)[1:30])
      if(IS_GAZA){
        d[, dob := as.Date(dob, format="%m/%d/%Y")]
      } else {
        d[, dob := as.Date(dob)]
      }
    }
-   print("check")
-
-
+  
   # drop women whose 2nd, 3rd, etc pregnancies
   # have LMPs before the first pregnancy's booking date
   setorder(d, bookdate)
-  print("now what?")
   d[, booking_number := 1:.N, by = .(uniqueid)]
   
   warning("check this")
