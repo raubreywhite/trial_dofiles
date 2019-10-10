@@ -4,11 +4,12 @@ Removeduplicate <- function(d,tag,isControl,maxObsPerWomanDate=1){
   if(tag=="demobook"){
     d[,eventdate:=bookdate]
   }
+  
   names(d)
  d[,n:=.N, by=.(uniqueid,eventdate)] 
   xtabs(~d$n)
   d[,numMissing:=0]
-  
+
   n=names(d)
   for (i in n){
     if(i %in% c("n", "minNumMissing", "isDuplicate", "numMissing")){
@@ -17,54 +18,62 @@ Removeduplicate <- function(d,tag,isControl,maxObsPerWomanDate=1){
     }
   # i is not a variable in this data set, we need tolook at the value of i
     #d[is.na(ancvaginalbleeding), numMissing:=numMissing+1]
-    
     d[is.na(get(i)), numMissing:=numMissing+1]
   }
   
-  xtabs(~d$numMissing) 
-  d[,minNumMissing:=min(numMissing), by=.(uniqueid,eventdate)] 
-  
+  print("tryingagainA")
+  xtabs(~d$numMissing)
+  print("tryingagainA1")
+  d[,minNumMissing:=min(numMissing), by=.(uniqueid,eventdate)]
+  print("tryingagainA2")
   d[,isDuplicate:=F] 
+  print("tryingagainA3")
   d[numMissing!=minNumMissing,isDuplicate:=T]
-  
+  print("tryingagainA4")
   xtabs(~d$isDuplicate)
+  print("tryingagainA5")
   
   # getting rid of rows with lots of zereos
-  
+  print("tryingagainA6")
   d[isDuplicate==F,n:=.N, by=.(uniqueid,eventdate)] 
+  print("tryingagainA7")
 
   d[,numMissing:=0]
-  
+  print("tryingagainA8")
   n=names(d)
   for (i in n){
     if(i %in% c("n", "minNumMissing", "isDuplicate", "numMissing")){
       next
       # next means jump up to line 31, that means dont do the codes for 
     }
-    
-    
+    print("tryingAgain9")
     # i is not a variable in this data set, we need tolook at the value of i
     #d[is.na(ancvaginalbleeding), numMissing:=numMissing+1]
     
     d[isDuplicate==F & get(i)==0, numMissing:=numMissing+1]
+    print("tryingAgain10")
+    
   }
   
-  d[isDuplicate==F,minNumMissing:=min(numMissing), by=.(uniqueid,eventdate)] 
   
+  print("tryingagainA1")
+  d[isDuplicate==F,minNumMissing:=min(numMissing), by=.(uniqueid,eventdate)] 
+  print("tryingagainA2")
   
   d[isDuplicate==F & numMissing!=minNumMissing,isDuplicate:=T]
-  
+  print("tryingagainA3")
   xtabs(~d$isDuplicate)
-  
+  print("tryingagainA4")
   if(!is.null(maxObsPerWomanDate)){
     #now we are trying to see if there are still any duplicates
     #if there are still duplicates, take the first maxObsPerWomanDate obs
-    
+    print("tryingagainA5")
     #1:.N THAT MEANS 1 UNTIL THE TOTAL NUMBER OF ROWS THAT WE HAVE FOR EVERY WOMAN-DATE
     d[isDuplicate==F,rownum:=1:.N, by=.(uniqueid,eventdate)] 
-    
+    print("tryingagainA6")
     d[isDuplicate==F & rownum>maxObsPerWomanDate,isDuplicate:=T]
   }
+  print("tryingagainA7")
   xtabs(~d$isDuplicate)
   
   tab <- d[,.(

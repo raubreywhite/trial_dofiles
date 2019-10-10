@@ -162,38 +162,24 @@ DHIS2_BookingVisit <- function(isControl,
       d[,identificationdocumentnumber:=1:.N]
     }
     
-    print("Hi")
     setnames(d,"ancgestationalageatvisitweeks","ancgestationalageatvisitweeks")
   }
   
-  print("how")
   setnames(d, "event", "bookevent")
-  
-  print ("you")
   setnames(d, "programinstance", "uniqueid")
-  
-  print("doin")
   setnames(d, "programstage", "bookprogstage")
-  print("where")
   setnames(d, "eventdate", "bookdate")
-  print("is")
   setnames(d, "longitude", "booklong")
-  print("possible")
   setnames(d, "latitude", "booklat")
-  print("problem")
   setnames(d, "organisationunitname", "bookorgname")
   setnames(d, "organisationunitcode", "bookorgcode")
   setnames(d, "organisationunit", "bookorgunit")
   setnames(d, "identificationdocumentnumber", "bookidnumber")
   setnames(d, "ancdiastolicbloodpressuremmhg", "bookbpdiast")
   setnames(d, "anceclampticconvulsions", "bookeclamp")
-  print("could")
   setnames(d, "ancpallor", "bookpallor")
-  print("be next")
   setnames(d, "anclmpdate", "booklmp")
-  print("look")
   setnames(d, "ancsuspectedpretermprematureruptureofmembranesprom", "bookpprom")
-  print("herrr")
   setnames(d, "ancsuspectedprematureruptureofmembranesprom", "bookprom")
   setnames(d, "ancsystolicbloodpressuremmhg", "bookbpsyst")
 
@@ -407,12 +393,12 @@ DHIS2_BookingVisit <- function(isControl,
   if(IS_GAZA){
     d[,bookdate:=stringr::str_remove_all(bookdate," 12:00 AM$")]
     d[,bookdate := stringr::str_replace(bookdate, "/([0-9][0-9])$","/20\\1")]
-    str(d$bookdate)
-    print(unique(d$bookdate)[1:10])
+    #str(d$bookdate)
+    #print(unique(d$bookdate)[1:10])
     d[,bookdate:=as.Date(bookdate, "%d/%m/%Y")]
     d[is.na(bookevent), bookdate := as.Date(datecreated, "%d/%m/%Y")]
-    str(d$bookdate)
-    print(unique(d$bookdate)[1:10])
+    #str(d$bookdate)
+    #print(unique(d$bookdate)[1:10])
   } else {
     d[is.na(bookevent), bookdate := datecreated]
   }
@@ -465,35 +451,26 @@ DHIS2_BookingVisit <- function(isControl,
   
   # Calculate EDD based on LMP
   d[, expecteddateofdelivery := booklmp + 280]
-  print("this is ridiculous")
   d[, ident_expected_delivered:= expecteddateofdelivery < min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)]
-  print("this is ridiculous2")
   # Create a new variable for gestational age
   d[, age := floor(as.numeric(difftime(bookdate, dob, units = "days")) / 365)]
-  print("this is ridiculous3")
   # small cleaning
   d[,bookevent:=as.character(bookevent)]
-  print("this is ridiculous4")
   # generating some important analysis variables
   d[,ident_dhis2_control:=isControl]
-  print("this is ridiculous5")
   d[,ident_dhis2_b4_2017_01_15:= bookdate<as.Date("2017-01-15")]
-  print("this is ridiculous6")
   d[,bookorgname:=unlist(ExtractOnlyEnglishLetters(bookorgname))]
-  print("this is ridiculous7")
   ConvertAllFactorsToChar(d)
   
   if(file.exists(file.path(FOLDER_DATA_RAW,"structural_data/remove_from_dhis2.xlsx"))){
     toremove <- readxl::read_excel(file.path(FOLDER_DATA_RAW,"structural_data/remove_from_dhis2.xlsx"))
     setDT(toremove)
-    print("this is ridiculous8")
     warning("make sure this actually works")
     d <- d[!(
       bookevent %in% na.omit(toremove$bookevent) |
         uniqueid %in% na.omit(toremove$uniqueid)
     )]
   }
-  print("this is ridiculous9")
   #### data extractor
   d[,dataextractor:=unlist(ExtractOnlyEnglishLetters(dataextractor))]
   xtabs(~d$dataextractor)
@@ -552,7 +529,6 @@ DHIS2_BookingVisit <- function(isControl,
   
   xtabs(~d$dataextractor)
   
-  print("this is ridiculous10")
   if(!keepDoubleBookings){
     # drop if there are multiple bookings for the same personid on the same date
     d[,keep:=TRUE]
