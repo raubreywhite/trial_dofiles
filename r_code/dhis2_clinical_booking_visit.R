@@ -397,12 +397,24 @@ DHIS2_BookingVisit <- function(isControl,
   
   #
   setorder(d, bookevent)
+  # if(IS_GAZA){
+  #   d[,bookdate:=as.Date(bookdate, "%d/%m/%Y")]
+  #   d[is.na(bookevent), bookdate := as.Date(datecreated, "%d/%m/%Y")]
+  # } else {
+  #   d[is.na(bookevent), bookdate := datecreated]
+  # }
+  
   if(IS_GAZA){
+    str(d$bookdate)
+    unique(d$bookdate)[1:10]
     d[,bookdate:=as.Date(bookdate, "%d/%m/%Y")]
     d[is.na(bookevent), bookdate := as.Date(datecreated, "%d/%m/%Y")]
+    str(d$bookdate)
+    unique(d$bookdate)[1:10]
   } else {
     d[is.na(bookevent), bookdate := datecreated]
   }
+  
   d[is.na(bookevent), bookevent := sprintf("%s%s", ifelse(isControl,"CON","INT"), 1:.N)]
 
   #d[demoidnumber==852188531]
@@ -430,11 +442,22 @@ DHIS2_BookingVisit <- function(isControl,
   #  print("check")
   #  
    
-   if(IS_GAZA){
-     d[, booklmp := as.Date(booklmp,format="%m/%d/%Y")]
-   } else{
-     d[, booklmp := as.Date(booklmp)]
-   }
+   # if(IS_GAZA){
+   #   d[, booklmp := as.Date(booklmp,format="%m/%d/%Y")]
+   # } else{
+   #   d[, booklmp := as.Date(booklmp)]
+   # }
+   # 
+  
+  if(IS_GAZA){
+    str(d$booklmp)
+    print(unique(d$booklmp)[1:10])
+    d[, booklmp := as.Date(booklmp,format="%m/%d/%Y")]
+    str(d$booklmp)
+    print(unique(d$booklmp)[1:10])
+  } else{
+    d[, booklmp := as.Date(booklmp)]
+  }
    print("here")
    if (length(unique(d$dob)) == 1) {
      d[, dob := NULL]
@@ -576,6 +599,7 @@ DHIS2_BookingVisit <- function(isControl,
     d[,keep:=NULL]
   } else {
     setorder(d,demoidnumber,bookdate)
+    print("00000")
     d[,numberbookings:=.N,by=.(demoidnumber,bookdate)]
     xtabs(~d$numberbookings)
     d <- d[numberbookings>1]
@@ -588,10 +612,14 @@ DHIS2_BookingVisit <- function(isControl,
   #d[ident_dhis2_booking==TRUE,booknumber:=1:.N,by=demoidnumber]
   #xtabs(~d$booknumber)
   
+  print(names(d))
+ 
+  print(d[1,])
+  
   #d[demoidnumber==401404496,c("demoidnumber","uniqueid","bookevent","bookdate")]
 
   d<- Removeduplicate(d=d,tag="demobook",isControl=isControl)
-  print("00000")
+  print("000000")
   
   
   return(d)
