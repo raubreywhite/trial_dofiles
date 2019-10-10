@@ -405,6 +405,7 @@ DHIS2_BookingVisit <- function(isControl,
   # }
   
   if(IS_GAZA){
+    d[, bookdate := stringr::str_replace(bookdate, "/([0-9][0-9])$","/20\\1")]
     str(d$bookdate)
     unique(d$bookdate)[1:10]
     d[,bookdate:=as.Date(bookdate, "%d/%m/%Y")]
@@ -450,6 +451,7 @@ DHIS2_BookingVisit <- function(isControl,
    # 
   
   if(IS_GAZA){
+    d[, booklmp := stringr::str_replace(booklmp, "/([0-9][0-9])$","/20\\1")]
     str(d$booklmp)
     print(unique(d$booklmp)[1:10])
     d[, booklmp := as.Date(booklmp,format="%m/%d/%Y")]
