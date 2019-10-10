@@ -110,18 +110,7 @@ DHIS2_BookingVisit <- function(isControl,
     # print(d)
     # print(names(d))
     
-    # 
-    # file_to_read_in <- sprintf(
-    #   "%s/%s Booking Visit.csv",
-    #   FOLDERS$FOLDER_DATA,
-    #   FOLDERS$CLINICAL_OR_CONTROL
-    # )
-    # print("FILE TO READ IN:")
-    # print(file_to_read_in)
-    # d <- fread(
-    #   file_to_read_in,
-    #   encoding = "UTF-8"
-    # )
+   
     
     file_to_read_in <- sprintf(
       "%s/%s Booking Visit.csv",
@@ -172,22 +161,35 @@ DHIS2_BookingVisit <- function(isControl,
       message("no identification document number -- we create one")
       d[,identificationdocumentnumber:=1:.N]
     }
-    setnames(d,"ancgestationaageatvisitweeks","ancgestationalageatvisitweeks")
+    
+    print("Hi")
+    setnames(d,"ancgestationalageatvisitweeks","ancgestationalageatvisitweeks")
   }
-
+  
+  print("how")
   setnames(d, "event", "bookevent")
+  
+  print ("you")
   setnames(d, "programinstance", "uniqueid")
+  
+  print("doin")
   setnames(d, "programstage", "bookprogstage")
+  print("where")
   setnames(d, "eventdate", "bookdate")
+  print("is")
   setnames(d, "longitude", "booklong")
+  print("possible")
   setnames(d, "latitude", "booklat")
+  print("problem")
   setnames(d, "organisationunitname", "bookorgname")
   setnames(d, "organisationunitcode", "bookorgcode")
   setnames(d, "organisationunit", "bookorgunit")
   setnames(d, "identificationdocumentnumber", "bookidnumber")
   setnames(d, "ancdiastolicbloodpressuremmhg", "bookbpdiast")
   setnames(d, "anceclampticconvulsions", "bookeclamp")
+  print("could")
   setnames(d, "ancpallor", "bookpallor")
+  print("be next")
   setnames(d, "anclmpdate", "booklmp")
   setnames(d, "ancsuspectedpretermprematureruptureofmembranesprom", "bookpprom")
   setnames(d, "ancsuspectedprematureruptureofmembranesprom", "bookprom")
