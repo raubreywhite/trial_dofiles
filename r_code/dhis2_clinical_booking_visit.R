@@ -532,14 +532,14 @@ DHIS2_BookingVisit <- function(isControl,
   if(!keepDoubleBookings){
     # drop if there are multiple bookings for the same personid on the same date
     d[,keep:=TRUE]
-    print("0")
+    #print("0")
     setorder(d,demoidnumber,bookdate)
     d[,shiftdate:=shift(bookdate),by=demoidnumber]
-    print("00")
+    #print("00")
     d[shiftdate==bookdate,keep:=FALSE]
-    print("000")
+    #print("000")
     d <- d[keep==TRUE]
-    print("0000")
+    #print("0000")
     d[,shiftdate:=NULL]
     d[,keep:=NULL]
   } else {
@@ -557,9 +557,9 @@ DHIS2_BookingVisit <- function(isControl,
   #d[ident_dhis2_booking==TRUE,booknumber:=1:.N,by=demoidnumber]
   #xtabs(~d$booknumber)
   
-  print(names(d))
+  #print(names(d))
  
-  print(d[1,])
+  #print(d[1,])
   
   #d[demoidnumber==401404496,c("demoidnumber","uniqueid","bookevent","bookdate")]
 
