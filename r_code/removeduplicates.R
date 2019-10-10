@@ -33,7 +33,7 @@ Removeduplicate <- function(d,tag,isControl,maxObsPerWomanDate=1){
   d[,numMissing:=0]
   n=names(d)
   for (i in n){
-    print(i)
+    #print(i)
     if(i %in% c("n", "minNumMissing", "isDuplicate", "numMissing")){
       next
       # next means jump up to line 31, that means dont do the codes for 

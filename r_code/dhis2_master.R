@@ -120,7 +120,7 @@ DHIS2_Master <- function(
   
   nrow(data_DHIS2_Booking)
   data_DHIS2_Booking <- merge(data_DHIS2_Booking,sData,by=c("bookorgname"),all.x=T)
-  nrow(data_DHIS2_Booking)
+  print(nrow(data_DHIS2_Booking))
   
   # changing the structural indicators to include additional data
   # e.g. trial 1 needs to also include dates
@@ -159,7 +159,7 @@ DHIS2_Master <- function(
       con,
       int)
   }
-  nrow(data_DHIS2_Antenatal)
+  print(nrow(data_DHIS2_Antenatal))
   
   ####
   # DHIS2 LAB
@@ -171,7 +171,7 @@ DHIS2_Master <- function(
       con,
       int)
   }
-  nrow(data_DHIS2_Lab)
+  print(nrow(data_DHIS2_Lab))
   
   ####
   # DHIS2 ULTRASOUND
@@ -183,7 +183,7 @@ DHIS2_Master <- function(
       con,
       int)
   }
-  nrow(data_DHIS2_Ultrasound)
+  print(nrow(data_DHIS2_Ultrasound))
   
   ####
   # DHIS2 RISK
@@ -202,13 +202,13 @@ DHIS2_Master <- function(
        int
     )
   }
-  nrow(data_DHIS2_Management)
+  print(nrow(data_DHIS2_Management))
   
   ####
   # DHIS2 RISK
   print("CLEANING DHIS2 NNCRISK")
   data_DHIS2_NNCRiskFactors <- DHIS2_NNCRiskFactors(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
-  nrow(data_DHIS2_NNCRiskFactors)
+  print(nrow(data_DHIS2_NNCRiskFactors))
   
   ####
   # DHIS2 MANAGEMENTS
@@ -226,7 +226,7 @@ DHIS2_Master <- function(
       con,
       int)
   }
-  nrow(data_DHIS2_PreviousPregnancies)
+ print(nrow(data_DHIS2_PreviousPregnancies))
   
   ####
   # HOSPITAL BIRTH OUTCOMES
@@ -239,7 +239,7 @@ DHIS2_Master <- function(
   data_DHIS2_CurrentPregnancyOutcomes <- DHIS2_CurrentPregnancyOutcomes(isControl=F,
                                                                         earlyData = earlyData,
                                                                         booklmp = booklmp,
-                                                                        data_ident_dhis2_booking = data_ident_dhis2_booking,
+                                              data_ident_dhis2_booking = data_ident_dhis2_booking,
                                                                         IS_GAZA=IS_GAZA)
   nrow(data_DHIS2_CurrentPregnancyOutcomes)
   ####
@@ -249,7 +249,7 @@ DHIS2_Master <- function(
                                                                         earlyData = earlyData,
                                                                         booklmp = booklmp,
                                                                   IS_GAZA=IS_GAZA)
-  nrow(data_DHIS2_PregnancyClosingNotes)
+  print(nrow(data_DHIS2_PregnancyClosingNotes))
   ####
   #
   print("POSTPARTUM CARE")
@@ -257,12 +257,12 @@ DHIS2_Master <- function(
                                                           earlyData = earlyData,
                                                           booklmp = booklmp,
                                                           IS_GAZA=IS_GAZA)
-  nrow(data_DHIS2_PostPartumCare)
+  print(nrow(data_DHIS2_PostPartumCare))
   if(!keepDoubleBookings){
     nrow(data_DHIS2_PostPartumCare)
     data_DHIS2_PostPartumCare <- merge(x=data_DHIS2_PostPartumCare,y=pData,
                                        by="ppcorgname",all.x=T)
-    nrow(data_DHIS2_PostPartumCare)
+    print(nrow(data_DHIS2_PostPartumCare))
     sum(is.na(data_DHIS2_PostPartumCare$ppcorgdistrict))
     sum(is.na(data_DHIS2_PostPartumCare$ppcorgname))
     # print the ppcorgnames for people who are missing ppcorgdistrict
@@ -280,7 +280,7 @@ DHIS2_Master <- function(
                                                           booklmp = booklmp,
                                               IS_GAZA=IS_GAZA)
   if(!keepDoubleBookings & IS_GAZA==FALSE){
-    nrow(data_DHIS2_NewbornCare)
+    print(nrow(data_DHIS2_NewbornCare))
     data_DHIS2_NewbornCare <- merge(x=data_DHIS2_NewbornCare,y=nData,
                                        by="nbcorgname",all.x=T)
   }
@@ -316,8 +316,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
   
   print("RESHAPE TO WIDE AND MERGE DHIS2 ULTRASOUND")
@@ -331,8 +331,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
   
   print("RESHAPE TO WIDE AND MERGE DHIS2 RISK FACTORS")
@@ -346,8 +346,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
   
   print("RESHAPE TO WIDE AND MERGE DHIS2 MANAGEMENT")
@@ -362,7 +362,7 @@ DHIS2_Master <- function(
   length(d$bookevent)
   length(unique(d$bookevent))
   nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(d))
   ncol(d)
   
   print("RESHAPE TO WIDE AND MERGE DHIS2 NNCRISKFACTORS")
@@ -376,8 +376,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
   
   print("RESHAPE TO WIDE AND MERGE DHIS2 MANAGEMENT")
@@ -391,8 +391,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
   
   
@@ -408,8 +408,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
    
   if(!IS_GAZA){
@@ -424,8 +424,8 @@ DHIS2_Master <- function(
     )
     length(d$bookevent)
     length(unique(d$bookevent))
-    nrow(data_DHIS2_Booking)
-    nrow(d)
+    print(nrow(data_DHIS2_Booking))
+    print(nrow(d))
     ncol(d)
   }
   
@@ -440,8 +440,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
   
   print("RESHAPE TO WIDE AND MERGE data_DHIS2_PregnancyClosingNotes")
@@ -455,8 +455,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
   
   print("RESHAPE TO WIDE AND MERGE data_DHIS2_PostPartumCare")
@@ -470,8 +470,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
   
   print("RESHAPE TO WIDE AND MERGE data_DHIS2_NewbornCare")
@@ -485,8 +485,8 @@ DHIS2_Master <- function(
   )
   length(d$bookevent)
   length(unique(d$bookevent))
-  nrow(data_DHIS2_Booking)
-  nrow(d)
+  print(nrow(data_DHIS2_Booking))
+  print(nrow(d))
   ncol(d)
   
   
@@ -497,28 +497,44 @@ DHIS2_Master <- function(
   d[is.na(calc_expected_due_delivery),
     calc_expected_due_delivery:=usdate_1-usgestage_1*7+280]
   d[,isExpectedToHaveDelivered:=expecteddateofdelivery < min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)]
-  xtabs(~d$isExpectedToHaveDelivered)
+  print(xtabs(~d$isExpectedToHaveDelivered))
+  print(nrow(d))
   
   setnames(d,"demoidnumber","motheridno")
   
   setorderv(d,cols=c("motheridno","bookdate"))
+  print(nrow(d))
   d[,motheridbooknum:=1:.N,by=.(motheridno)]
   # the start date of matching with avicenna
   d[,motheridbook_earlyDate:=bookdate]
+  print(nrow(d))
+  
   # the end date of matching with avicenna
   d[,motheridbook_lateDate:=bookdate+31*10]
+  print(nrow(d))
+  
   # make sure that the "late date" doesnt overlap with a new pregnancy booking
   d[,temp:=shift(motheridbook_earlyDate,type = "lead"),by=.(motheridno)]
   d[motheridbook_lateDate>temp,motheridbook_lateDate:=temp-1]
   d[,temp:=NULL]
+  
+  print(nrow(d))
+  
   
   d[,bookyearmonth:=YearMonth(bookdate)]
   d[,bookyear:=lubridate::year(bookdate)]
   d[,bookmonth:=lubridate::month(bookdate)]
   d[,bookmonth:=formatC(bookmonth,flag="0",width=2)]
 
+  print(nrow(d))
+  
+  print("bookorgdistrict hashed")
   d[,bookorgdistricthashed:=openssl::md5(bookorgdistrict)]
+  
+  print(nrow(d))
+  print("replacingbookorgdishashed")
   d[,bookorgdistricthashed:=stringr::str_sub(bookorgdistricthashed,1,6)]
+  print(nrow(d))
   
   #####################
   #####################
@@ -529,12 +545,14 @@ DHIS2_Master <- function(
   if(!includePPC){
     d <- d[ident_dhis2_booking==1]
   }
+  print(nrow(d))
   
   if(!keepDoubleBookings){
     #duplication problems///remove duplicated demographic sheets which deosent have booking or ppc or nbc
     
     duplicated_demographic_cases <- d[ident_dhis2_demo==1 & ident_dhis2_booking==0
         & is.na(ident_dhis2_ppc)& is.na(ident_dhis2_nbc)]
+    print(nrow(d))
     
     
     openxlsx::write.xlsx(duplicated_demographic_cases,file.path( FOLDER_DATA_RESULTS,
@@ -543,6 +561,8 @@ DHIS2_Master <- function(
     
     d <- d[!(ident_dhis2_demo==1 & ident_dhis2_booking==0
                & is.na(ident_dhis2_ppc)& is.na(ident_dhis2_nbc))]
+    print(nrow(d))
+    
   }
   
   # fixing trial 1 indicator

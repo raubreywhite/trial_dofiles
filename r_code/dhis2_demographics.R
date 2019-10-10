@@ -137,6 +137,7 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
   d[is.na(demoidnumber), demoidnumber:=c(1:.N)]
   d[,demoorgname:=ExtractOnlyEnglishLetters(stringr::str_to_lower(demoorgname))]
   
+  
   d[,ident_dhis2_demo:=1]
   
   

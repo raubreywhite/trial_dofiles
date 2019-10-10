@@ -562,7 +562,9 @@ DHIS2_BookingVisit <- function(isControl,
   #print(d[1,])
   
   #d[demoidnumber==401404496,c("demoidnumber","uniqueid","bookevent","bookdate")]
-
+  str(d$demoorgname)
+  print(unique(d$demoorgname)[1:10])
+  
   d<- Removeduplicate(d=d,tag="demobook",isControl=isControl)
   print("000000")
   
