@@ -191,7 +191,9 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "ancpallor", "bookpallor")
   print("be next")
   setnames(d, "anclmpdate", "booklmp")
+  print("look")
   setnames(d, "ancsuspectedpretermprematureruptureofmembranesprom", "bookpprom")
+  print("herrr")
   setnames(d, "ancsuspectedprematureruptureofmembranesprom", "bookprom")
   setnames(d, "ancsystolicbloodpressuremmhg", "bookbpsyst")
 
@@ -407,29 +409,54 @@ DHIS2_BookingVisit <- function(isControl,
   #d[uniqueid=="AqJL4IiVSJv"]
   #2017-09-10
   
-  #
-  print("maybe")
-  d[, bookdate := as.Date(bookdate)]
-  print("possibly")
-  if(IS_GAZA){
-  d[, booklmp := as.Date(booklmp,format="%d/%m/%Y")]
-  } else{
-  d[, booklmp := as.Date(booklmp)]
-  }
-  print("here")
-  if (length(unique(d$dob)) == 1) {
-    d[, dob := NULL]
-    print("maybe DOB?")
-    d[, dob := as.Date("1980-01-01")]
-  } else {
-    d[, dob := as.Date(dob)]
-  }
+  # #
+  # print("maybe")
+  # d[, bookdate := as.Date(bookdate)]
+  # print("possibly")
+  # if(IS_GAZA){
+  # d[, booklmp := as.Date(booklmp,format="%d/%m/%Y")]
+  # } else{
+  # d[, booklmp := as.Date(booklmp)]
+  # }
+  # print("here")
+  # if (length(unique(d$dob)) == 1) {
+  #   d[, dob := NULL]
+  #   print("maybe DOB--checking format of DOB?")
+  #   d[, dob := as.Date(dob, format="%m/%d/%Y")]
+  # } else {
+  #   print(unique(d$dob)[1:30])
+  #   d[, dob := as.Date(dob)]
+  # }
+  #  print("check")
+  #  
+   
+   if(IS_GAZA){
+     d[, booklmp := as.Date(booklmp,format="%m/%d/%Y")]
+   } else{
+     d[, booklmp := as.Date(booklmp)]
+   }
+   print("here")
+   if (length(unique(d$dob)) == 1) {
+     d[, dob := NULL]
+     print("maybe DOB?")
+     d[, dob := as.Date("1980-01-01")]
+   } else {
+     print(unique(d$dob)[1:30])
+     if(IS_GAZA){
+       d[, dob := as.Date(dob, format="%m/%d/%Y")]
+     } else {
+       d[, dob := as.Date(dob)]
+     }
+   }
    print("check")
+
 
   # drop women whose 2nd, 3rd, etc pregnancies
   # have LMPs before the first pregnancy's booking date
   setorder(d, bookdate)
+  print("now what?")
   d[, booking_number := 1:.N, by = .(uniqueid)]
+  
   warning("check this")
   for (i in 1:max(d$booking_number)) {
     d[, min_event_date := ifelse(booking_number == i, as.Date(bookdate), as.Date("1970-01-01"))]
@@ -443,35 +470,38 @@ DHIS2_BookingVisit <- function(isControl,
   d[, booking_number := 1:.N, by = .(uniqueid)]
   d[, min_event_date := NULL]
 
+  
   # Calculate EDD based on LMP
   d[, expecteddateofdelivery := booklmp + 280]
+  print("this is ridiculous")
   d[, ident_expected_delivered:= expecteddateofdelivery < min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)]
-
+  print("this is ridiculous2")
   # Create a new variable for gestational age
   d[, age := floor(as.numeric(difftime(bookdate, dob, units = "days")) / 365)]
-
+  print("this is ridiculous3")
   # small cleaning
   d[,bookevent:=as.character(bookevent)]
-  
+  print("this is ridiculous4")
   # generating some important analysis variables
   d[,ident_dhis2_control:=isControl]
+  print("this is ridiculous5")
   d[,ident_dhis2_b4_2017_01_15:= bookdate<as.Date("2017-01-15")]
-  
+  print("this is ridiculous6")
   d[,bookorgname:=unlist(ExtractOnlyEnglishLetters(bookorgname))]
-  
+  print("this is ridiculous7")
   ConvertAllFactorsToChar(d)
   
   if(file.exists(file.path(FOLDER_DATA_RAW,"structural_data/remove_from_dhis2.xlsx"))){
     toremove <- readxl::read_excel(file.path(FOLDER_DATA_RAW,"structural_data/remove_from_dhis2.xlsx"))
     setDT(toremove)
-    
+    print("this is ridiculous8")
     warning("make sure this actually works")
     d <- d[!(
       bookevent %in% na.omit(toremove$bookevent) |
         uniqueid %in% na.omit(toremove$uniqueid)
     )]
   }
-  
+  print("this is ridiculous9")
   #### data extractor
   d[,dataextractor:=unlist(ExtractOnlyEnglishLetters(dataextractor))]
   xtabs(~d$dataextractor)
@@ -530,13 +560,18 @@ DHIS2_BookingVisit <- function(isControl,
   
   xtabs(~d$dataextractor)
   
+  print("this is ridiculous10")
   if(!keepDoubleBookings){
     # drop if there are multiple bookings for the same personid on the same date
     d[,keep:=TRUE]
+    print("0")
     setorder(d,demoidnumber,bookdate)
     d[,shiftdate:=shift(bookdate),by=demoidnumber]
+    print("00")
     d[shiftdate==bookdate,keep:=FALSE]
+    print("000")
     d <- d[keep==TRUE]
+    print("0000")
     d[,shiftdate:=NULL]
     d[,keep:=NULL]
   } else {
@@ -556,10 +591,12 @@ DHIS2_BookingVisit <- function(isControl,
   #d[demoidnumber==401404496,c("demoidnumber","uniqueid","bookevent","bookdate")]
 
   d<- Removeduplicate(d=d,tag="demobook",isControl=isControl)
-  
+  print("00000")
   
   
   return(d)
+  
+  print("d has been returned")
 }
 
 

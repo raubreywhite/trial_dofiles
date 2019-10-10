@@ -47,6 +47,8 @@ DHIS2_Master <- function(
     if(!IS_GAZA){
       con <- DHIS2_BookingVisit(isControl=TRUE)
       
+      print("A")
+      
       names(con)[!names(con) %in% names(int)]
       names(int)[!names(int) %in% names(con)]
       con[,programinstancex:=NULL]
@@ -57,24 +59,34 @@ DHIS2_Master <- function(
         int, fill=T)
     }
   }
+  
+  print("B")
+  
   # restrict bookdate
   data_DHIS2_Booking <- data_DHIS2_Booking[bookdate>=minBookDate & bookdate<=maxBookDate]
+  
+  print("C")
+  
   
   # here we load in "bookorgname" and give a bunch of indicators
   # i.e. trial 1 indicators
   sData <- readxl::read_excel(file.path(FOLDER_DATA_RAW,"structural_data/bookorgname.xlsx"))
+  print("D")
   setDT(sData)
+  print("E")
   sData[is.na(NEW_bookorgname),NEW_bookorgname:=bookorgname]
+  print("F")
   
   toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
   for(i in toChangeToBool) sData[[i]] <- !is.na(sData[[i]])
   
   # compare list of raw clinic names to structural data
   names_from_structural_data <- unique(sData[,c("bookorgname","NEW_bookorgname")])
+  print("G")
   names_from_structural_data[,structural:=bookorgname]
   names_from_structural_data[NEW_bookorgname==structural,NEW_bookorgname:=""]
   setnames(names_from_structural_data,"NEW_bookorgname","NEW_structural_bookorgname")
-  
+  print("H")
   names_from_raw_data <- data_DHIS2_Booking[,.(
     num_rows=.N
     ),
