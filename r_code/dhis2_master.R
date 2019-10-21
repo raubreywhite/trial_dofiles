@@ -497,7 +497,7 @@ DHIS2_Master <- function(
   d[is.na(calc_expected_due_delivery),
     calc_expected_due_delivery:=usdate_1-usgestage_1*7+280]
   d[,isExpectedToHaveDelivered:=expecteddateofdelivery < min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)]
-  print(xtabs(~d$isExpectedToHaveDelivered))
+  print(xtabs(~d$isExpectedToHaveDelivered, addNA = TRUE))
   print(nrow(d))
   
   setnames(d,"demoidnumber","motheridno")

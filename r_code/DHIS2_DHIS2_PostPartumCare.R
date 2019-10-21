@@ -11,6 +11,7 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp, IS_GAZA=FA
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
     d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
   } else {
     d[,eventdate:=as.Date(eventdate)]

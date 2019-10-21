@@ -2002,7 +2002,9 @@ tab <- d[ident_dhis2_control==FALSE,
                       .(
                          Bookings=sum(ident_dhis2_booking==TRUE, na.rm=TRUE),
                          ANCVisits= sum(anevent_x, na.rm=TRUE),
-                         PPCVisits=sum(ppcevent_x, na.rm=TRUE)
+                         PPCVisits=sum(ppcevent_x, na.rm=TRUE),
+                         ANC_and_PPC=sum(ident_dhis2_an== TRUE &
+                                         ident_dhis2_ppc==TRUE, na.rm=TRUE)
                          
                         ),keyby=.(bookyear)
          
@@ -2014,4 +2016,486 @@ openxlsx::write.xlsx(tab,
                                "buthaina",
                                sprintf("%s_NumANCPPCVisits.xlsx",lubridate::today())))
 
+#Demographics of registry from 2017 and onwards
+
+demo <- d[bookyear>=2017 & bookgestage<40, c("age",
+                            "income",
+                            "bookgestage",
+                            "bookyear",
+                            "bookorgdistrict")]
+tab <- demo[,.(
+              "meanAge"=mean(age, na.rm=TRUE),
+              "medianAge"=median(age, na.rm=TRUE),
+              "meanIncome"=mean(income, na.rm=TRUE),
+              "medianIncome"=median(income, na.rm=TRUE),
+              "meanBookgA"=mean(bookgestage, na.rm=TRUE),
+              "medianBookgA"=mean(bookgestage, na.rm=TRUE)
+            ),
+            keyby=.(bookyear, bookorgdistrict)]
+
+openxlsx::write.xlsx(tab,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "buthaina",
+                               sprintf("%s_Demographics.xlsx",lubridate::today())))
+
+#Puerpural sepsis
+vars_cpopostpartumhemorrhage <- names(d)[stringr::str_detect(names(d),"^cpopostpartumhemorrhage_")]
+vars_cpopuerpalsepsis <- names(d)[stringr::str_detect(names(d),"^cpopuerpalsepsis_")]
+vars_cpoevent <-names(d)[stringr::str_detect(names(d), "^cpoevent_")]
+
+
+# everyone starts off as false
+d[,exposure_postpartumhemorrhage:=FALSE]
+# go through all the visits. if any visit=1
+# then the variable = TRUE
+for(i in vars_cpopostpartumhemorrhage){
+  d[get(i)==1,exposure_postpartumhemorrhage:=TRUE]
+}
+
+# everyone starts off as false
+d[,exposure_puerpalsepsis:=FALSE]
+# go through all the visits. if any visit=1
+# then the variable = TRUE
+for(i in vars_cpopuerpalsepsis){
+  d[get(i)==1,exposure_puerpalsepsis:=TRUE]
+}
+
+
+
+# THESE ARE VARIABLES THAT YOU CAN USE TO CREATE MORE COLUMNS
+vars_for_columns <- c(
+  "exposure_postpartumhemorrhage",
+  "exposure_puerpalsepsis",
+  "cpopregoutcome_1"
+)
+
+smallD <- d[ident_dhis2_control==F &
+              bookyear>=2017 &
+              ident_dhis2_booking==TRUE & 
+              ident_dhis2_an==TRUE & 
+              ident_dhis2_cpo==TRUE & 
+              ident_dhis2_ppc==TRUE,
+            
+            c("bookyear",
+              "bookorgdistrict",
+              vars_for_columns,
+              "ident_hr_clinic"
+            
+            ),with=F]
+checkingD <- copy(smallD)
+
+
+# duplicate the dataset
+# make one of them have a district of palestine
+# then put them on top of each other
+smallDPalestine <- copy(smallD)
+smallDPalestine[,bookorgdistrict:="0PALESTINE"]
+
+smallD <- rbind(smallD,smallDPalestine)
+smallD[,id:=1:.N]
+
+long <- melt.data.table(smallD, id.vars=c(
+  "id",
+  vars_for_columns,
+  "bookyear",
+  "bookorgdistrict"
+),variable.factor = F, value.factor = F)
+
+long[,variable:=sprintf("%s=%s",variable,value)]
+
+# THIS IS WHERE YOU MAKE YOUR TABLE
+uglytable <- long[,
+                  .(
+                    NoHemorr_NoSepsis=sum(exposure_postpartumhemorrhage==F & 
+                                            exposure_puerpalsepsis==F,na.rm=T),
+                    NoHemorr_YESSepsis=sum(exposure_postpartumhemorrhage==F & 
+                                             exposure_puerpalsepsis==T,na.rm=T),
+                    YESHemorr_NoSepsis=sum(exposure_postpartumhemorrhage==T & 
+                                             exposure_puerpalsepsis==F,na.rm=T),
+                    YESHemorr_YESSepsis=sum(exposure_postpartumhemorrhage==T & 
+                                              exposure_puerpalsepsis==T,na.rm=T),
+                    NumAbortions=sum(cpopregoutcome_1=="XXXXX")
+                  ),
+                  keyby=.(bookyear,
+                    bookorgdistrict,
+                    variable
+                  )
+                  ]
+
+setorder(uglytable, bookyear,bookorgdistrict, variable)
+
+openxlsx::write.xlsx(uglytable,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "buthaina",
+                               sprintf("%s_CPO.xlsx",lubridate::today())))
+
+# do these numbers match up?
+# with districts, you can check districts
+f <- checkingD[bookorgdistrict=="Y" &
+                 exposure_postpartumhemorrhage==F & 
+                 exposure_puerpalsepsis==F
+               ]
+nrow(f) #12
+# do these numbers match up?
+# with palestine, dont include district
+f <- checkingD[exposure_postpartumhemorrhage==F & 
+                 exposure_puerpalsepsis==T
+               ]
+nrow(f) #4
+
+
+######Reason for closing file#####
+#replacing empty "" with NA
+d[pcnfileclosurereason_1=="",pcnfileclosurereason_1:=NA]
+d[pcnfileclosurereason_2=="",pcnfileclosurereason_2:=NA]
+d[pcnfileclosurereason_3=="",pcnfileclosurereason_3:=NA]
+d[pcnfileclosurereason_4=="",pcnfileclosurereason_4:=NA]
+d[pcnfileclosurereason_5=="",pcnfileclosurereason_5:=NA]
+d[pcnfileclosurereason_6=="",pcnfileclosurereason_6:=NA]
+d[pcnfileclosurereason_7=="",pcnfileclosurereason_7:=NA]
+d[pcnfileclosurereason_8=="",pcnfileclosurereason_8:=NA]
+
+
+
+
+###FIX THE EMPTY STRINGS####
+vars<-names(d)[stringr::str_detect(names(d),"^pcnfileclosurereason_")]
+# everyone starts off as false
+d[,pcnclosurereason_abnormal:=FALSE]
+for(i in vars){
+  d[get(i)=="Abnormal",pcnclosurereason_abnormal:=TRUE]
+}
+
+d[,pcnclosurereason_complete:=FALSE]
+for(i in vars){
+  d[get(i)=="Complete",pcnclosurereason_complete:=TRUE]
+}
+
+d[,pcnclosurereason_lost:=FALSE]
+for(i in vars){
+  d[get(i)=="Lost",pcnclosurereason_lost:=TRUE]
+}
+
+d[,pcnclosurereason_missing:=FALSE]
+# go through all the visits. if any visit=1
+# then the variable = TRUE
+for(i in vars){
+  d[is.na(get(i)) &
+      get(i)!="Abnormal" |
+      get(i)!="Lost"|
+      get(i)!="Complete",pcnclosurereason_missing:=TRUE]
+}
+
+
+
+smallD<- d[bookyear>=2017,c("bookyear",
+                            "pcnclosurereason_complete",
+                            "pcnclosurereason_abnormal",
+                            "pcnclosurereason_missing",
+                            "pcnclosurereason_lost",
+                            "ident_dhis2_an",
+                            "ident_dhis2_ppc",
+                            "ident_dhis2_booking",
+                            "ident_dhis2_cpo")]
+
+
+
+
+#booked, booked and didnt come back, an and ppc, do analysis below
+
+smallD <- smallD[,.( N=.N,
+                    "BookedANC"= sum(ident_dhis2_booking==TRUE, na.rm=TRUE),
+                    "BookedandANC"=sum(ident_dhis2_booking==TRUE & 
+                                      ident_dhis2_an==TRUE, na.rm=TRUE),
+                    "ANConly"=sum(ident_dhis2_an==TRUE, na.rm=TRUE),
+                    "ANCandPPC"=sum(ident_dhis2_an==TRUE & ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                    "BookingVisitandPPC"=sum(ident_dhis2_booking==TRUE & 
+                                               ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                    "PPConly"=sum(ident_dhis2_booking==FALSE & ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                    "Complete"= sum(pcnclosurereason_complete==TRUE, na.rm=TRUE),
+                    "BookingANCPPC"=sum(ident_dhis2_booking==TRUE &
+                                          ident_dhis2_an==TRUE &
+                                          ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                    "CPOTotal"=sum(ident_dhis2_cpo==TRUE, na.rm==TRUE),
+                    "CPO_Booking"=sum(ident_dhis2_booking==TRUE &
+                                        ident_dhis2_cpo==TRUE,na.rm=TRUE),
+                    "CPO_Booking_AN"=sum(ident_dhis2_booking==TRUE &
+                                           ident_dhis2_an==TRUE &
+                                           ident_dhis2_cpo==TRUE, na.rm=TRUE),
+                    "CPO_AN"=sum(ident_dhis2_an==TRUE &
+                                   ident_dhis2_cpo==TRUE, na.rm=TRUE),
+                    "CPO_Booking_AN_PPC"=sum(ident_dhis2_booking==TRUE &
+                                               ident_dhis2_an==TRUE &
+                                               ident_dhis2_cpo==TRUE &
+                                               ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                    "CPO_Booking_PPC"=sum(ident_dhis2_booking==TRUE &
+                                            ident_dhis2_cpo==TRUE &
+                                            ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                    "CPO_PPC"=sum(ident_dhis2_cpo==TRUE &
+                                    ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                    "Abnormal"=sum(pcnclosurereason_abnormal==TRUE,na.rm=T),
+                    "Lost"=sum(pcnclosurereason_lost==TRUE,na.rm=T),
+                    "Missing"=sum(pcnclosurereason_missing==TRUE,na.rm=T)
+                    
+                ),
+                keyby=.(bookyear)
+                
+              ]
+
+openxlsx::write.xlsx(smallD, 
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "buthaina",
+                       sprintf("%s_ClosingFileReasons_wideformat.xlsx",lubridate::today())))
+
+
+long <- melt.data.table(smallD, id.vars=c(
+       "bookyear"
+),variable.factor = F, value.factor = F)
+
+openxlsx::write.xlsx(long, 
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "buthaina",
+                      sprintf("%s_ClosingFileReasons.xlsx",lubridate::today())))
+
+
+###Primi vs para status at booking###
+smalld<- d[bookyear>=2017 & ident_dhis2_ppc==TRUE, 
+                            c("bookprimi",
+                             "bookparity",
+                             "ident_dhis2_an",
+                             "ident_dhis2_ppc",
+                             "bookyear",
+                             "bookorgdistrict")]
+
+sink()
+sink(file.path(FOLDER_DATA_RESULTS,
+               "buthaina",
+               sprintf("%s_Chisq_bookprimi_anvisit.txt",lubridate::today())))
+#For women who have a ppc, how likely are they to have booked as a primi and have anc visits?
+xtabs(~bookprimi+ident_dhis2_an,data=smalld, addNA=TRUE)
+chisq.test(xtabs(~bookprimi+ident_dhis2_an,data=smalld, addNA=TRUE))
+sink()
+
+smalld<- d[bookyear>=2017, 
+                    c("bookprimi",
+                      "bookparity",
+                      "ident_dhis2_an",
+                      "ident_dhis2_ppc",
+                      "bookyear",
+                      "bookorgdistrict")]
+smalld<- smalld[,.(N=.N,
+                   Booked_primi=sum(bookprimi==TRUE, na.rm=TRUE),
+                   Booked_primi_False=sum(bookprimi==FALSE, na.rm=TRUE),
+                   Booked_para=sum(bookparity, na.rm=TRUE)),
+                  keyby=.(bookyear)]
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "buthaina",
+                       sprintf("%s_Primi_para_bookings.xlsx",lubridate::today())))
+
+###CPO(PPC), birth outcomes and percentages possibly do chisquare based on district
+#likely cs with ANC, or with ppc, type of outcome where give birth?
+#cpogestage_1    1-13
+d[cpomodedelivery_1=="", cpomodedelivery_1:=NA]
+d[cpomodedelivery_2=="", cpomodedelivery_2:=NA]
+d[cpomodedelivery_3=="", cpomodedelivery_3:=NA]
+d[cpomodedelivery_4=="", cpomodedelivery_4:=NA]
+d[cpomodedelivery_5=="", cpomodedelivery_5:=NA]
+d[cpomodedelivery_6=="", cpomodedelivery_6:=NA]
+d[cpomodedelivery_7=="", cpomodedelivery_7:=NA]
+d[cpomodedelivery_8=="", cpomodedelivery_8:=NA]
+d[cpomodedelivery_9=="", cpomodedelivery_9:=NA]
+d[cpomodedelivery_10=="", cpomodedelivery_10:=NA]
+d[cpomodedelivery_11=="", cpomodedelivery_11:=NA]
+d[cpomodedelivery_12=="", cpomodedelivery_12:=NA]
+d[cpomodedelivery_13=="", cpomodedelivery_13:=NA]
+
+
+
+
+d[,has_cs:=FALSE]
+vars_cpomod <-names(d)[stringr::str_detect(names(d),"^cpomodedelivery_")]
+###to make all of the strings missing. Do loop instead of doing all 13 individually.
+# for(i in vars_cpomod){
+#   
+#   d[get(i)=="", (vars_cpomod):=NA]
+#   
+# }
+
+
+for(i in vars_cpomod){
+  
+  d[get(i)=="Caesarian section", has_cs:=TRUE]
+
+}
+
+
+#private hospital
+vars<-names(d)[stringr::str_detect(names(d),"^cpoplaceofbirth_")]
+d[,cpo_podpriv:=FALSE]
+for(i in vars){
+  d[get(i)=="PH", cpo_podpriv==TRUE]
+  
+}
+
+
+#abortions
+d[,is_abortion:=FALSE]
+vars <- names(d)[stringr::str_detect(names(d),"^cpopregoutcome_")]
+for(i in vars){
+  d[get(i)=="ABO", is_abortion:=TRUE]
+}
+
+
+smalld <- d[bookyear>=2017 & 
+            ident_dhis2_cpo==TRUE,
+                  c("ident_dhis2_ppc",
+                    "ident_dhis2_an",
+                    "has_cs",
+                    "is_abortion",
+                    "cpo_podpriv",
+                    "bookyear")
+            ]
+
+smalld <-smalld[,.(
+                    N_CPO=.N,
+                    PPC_CPO=sum(ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                    ANC_CPO=sum(ident_dhis2_an==TRUE, na.rm=TRUE),
+                    ANC_PPC_CPO=sum(ident_dhis2_an==TRUE &
+                                    ident_dhis2_ppc==TRUE, na.rm=TRUE)
+                  ),
+                keyby=.(bookyear)
+  
+]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "buthaina",
+                       sprintf("%s_ANC_CPO_PPC.xlsx",lubridate::today())))
+
+
+smalld <- d[bookyear>=2017 & ident_dhis2_cpo==TRUE,
+                            c("ident_dhis2_ppc",
+                              "ident_dhis2_an",
+                              "cpo_podpriv",
+                              "has_cs",
+                              "is_abortion",
+                              "bookyear",
+                              "bookorgdistrict")]
+sink()
+sink(file.path(FOLDER_DATA_RESULTS,
+               "buthaina",
+               sprintf("%s_ChisqTests_.txt",lubridate::today())))
+print(xtabs(~has_cs+ident_dhis2_an,data=smalld, addNA=TRUE))
+chisq.test(xtabs(~has_cs+ident_dhis2_an,data=smalld, addNA=TRUE))
+
+print(xtabs(~cpo_podpriv+ident_dhis2_an,data=smalld, addNA=TRUE))
+chisq.test(xtabs(~cpo_podpriv+ident_dhis2_an,data=smalld, addNA=TRUE))
+
+print(xtabs(~has_cs+ident_dhis2_ppc,data=smalld, addNA=TRUE))
+chisq.test(xtabs(~has_cs+ident_dhis2_ppc,data=smalld, addNA=TRUE))
+
+print(xtabs(~cpo_podpriv+ident_dhis2_ppc,data=smalld, addNA=TRUE))
+chisq.test(xtabs(~cpo_podpriv+ident_dhis2_ppc,data=smalld, addNA=TRUE))
+sink()
+
+
+smalld <- smalld[,.(
+                    Num_women_CPO=.N,
+                    Has_PPC=sum(ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                    Has_PPCwithoutequalstrue=sum(ident_dhis2_ppc, na.rm=TRUE),
+                    Has_ANC=sum(ident_dhis2_an, na.rm=TRUE),
+                    Has_ANCandPPC=sum(ident_dhis2_an &
+                                      ident_dhis2_ppc, na.rm=TRUE),
+                    Has_ABO=sum(is_abortion==TRUE, na.rm=TRUE),
+                    Has_ABOandANC=sum(is_abortion==TRUE &
+                                      ident_dhis2_an, na.rm=TRUE),
+                    Has_ABOandPPC=sum(is_abortion==TRUE &
+                                        ident_dhis2_ppc, na.rm=TRUE),
+                    
+                    Has_ABO_AN_PPC=sum(is_abortion &
+                                       ident_dhis2_ppc &
+                                       ident_dhis2_an, na.rm=TRUE)
+                    
+                    ),
+                 keyby=.(bookyear, bookorgdistrict)]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "buthaina",
+                       sprintf("%s_ANC_CPO_PPC.xlsx",lubridate::today())))
+
+#BF (artificial, mixed, etc)
+
+####PPC-anemia, timely (1-7 days, 40 days, any days)
+#num of women who have ppc alone, ppc and anc, of those who have ppc, how many come on time on the #first visit, how many come on time on the second visit, how many visits total
+
+
+d[,num_ppc_visits:=0]
+vars <- names(d)[stringr::str_detect(names(d),"ppcevent")]
+for(i in vars){
+  d[!is.na(get(i)),num_ppc_visits:=num_ppc_visits+1]
+}
+xtabs(~d$num_ppc_visits, addNA=T)
+
+
+d[,ppcdaysafterdeliv0_7:=FALSE]
+vars <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
+for(i in vars){
+  d[get(i)>0 & get(i)<=7,ppcdaysafterdeliv0_7:=TRUE]
+}
+
+d[,ppcdaysafterdeliv28_44:=FALSE]
+vars <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
+for(i in vars){
+  d[get(i)>=28 & get(i)<=44,ppcdaysafterdeliv28_44:=TRUE]
+}
+
+d[,ppcdaysafterdeliv42daysonly:=FALSE]
+vars <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
+for(i in vars){
+  d[get(i)==42,ppcdaysafterdeliv42daysonly:=TRUE]
+}
+
+
+checkingppc<-d[ident_dhis2_ppc==TRUE & is.na(ppcorgdistrict_1), c("ppcorgname_1",
+                                                    "ppcorgname_2",
+                                                    "ppcorgname_3",
+                                                    "bookorgname")]
+
+# openxlsx::write.xlsx(checkingppc, 
+#                      file.path(
+#                        FOLDER_DATA_RESULTS,
+#                        "quality_control",
+#                        sprintf("%s_PPC_missing_orgdistricts.xlsx",DATA_DATE)))
+
+
+
+smalld<-d[bookyear>=2017, c("num_ppc_visits",
+                            "ppcdaysafterdeliv0_7",
+                            "ppcdaysafterdeliv42daysonly",
+                            "ppcdaysafterdeliv28_44",
+                            "ppcorgdistrict_1")]
+
+smalld <- smalld[,.(
+                    Total_PPC_Visits =sum(num_ppc_visits==TRUE, na.rm=TRUE),
+                    Visits_0_to_7_days=sum(ppcdaysafterdeliv0_7==TRUE, na.rm=TRUE),
+                    Visits_at_42_days=sum(ppcdaysafterdeliv42daysonly==TRUE, na.rm=TRUE),
+                    Visits_28_to_44_days=sum(ppcdaysafterdeliv28_44==TRUE, na.rm=TRUE)
+                   ), 
+                 keyby=.(ppcorgdistrict_1)]
+
+ openxlsx::write.xlsx(checkingppc, 
+                      file.path(
+                        FOLDER_DATA_RESULTS,
+                        "buthaina",
+                        sprintf("%s_PPC_Visit_Data.xlsx",DATA_DATE)))
 
