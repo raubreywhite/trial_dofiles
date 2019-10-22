@@ -2338,7 +2338,7 @@ for(i in vars_cpomod){
 vars<-names(d)[stringr::str_detect(names(d),"^cpoplaceofbirth_")]
 d[,cpo_podpriv:=FALSE]
 for(i in vars){
-  d[get(i)=="PH", cpo_podpriv==TRUE]
+  d[get(i)=="PH", cpo_podpriv:=TRUE]
   
 }
 
@@ -2395,6 +2395,11 @@ sink(file.path(FOLDER_DATA_RESULTS,
 print(xtabs(~has_cs+ident_dhis2_an,data=smalld, addNA=TRUE))
 chisq.test(xtabs(~has_cs+ident_dhis2_an,data=smalld, addNA=TRUE))
 
+
+#logistic regression model to get OR, use this instead of oddsratio function
+fit <- glm(has_cs ~ !is.na(ident_dhis2_an), data = smalld, family ="binomial")
+summary(fit)
+
 print(xtabs(~cpo_podpriv+ident_dhis2_an,data=smalld, addNA=TRUE))
 chisq.test(xtabs(~cpo_podpriv+ident_dhis2_an,data=smalld, addNA=TRUE))
 
@@ -2403,6 +2408,10 @@ chisq.test(xtabs(~has_cs+ident_dhis2_ppc,data=smalld, addNA=TRUE))
 
 print(xtabs(~cpo_podpriv+ident_dhis2_ppc,data=smalld, addNA=TRUE))
 chisq.test(xtabs(~cpo_podpriv+ident_dhis2_ppc,data=smalld, addNA=TRUE))
+
+
+
+
 sink()
 
 
