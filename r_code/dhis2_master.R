@@ -61,12 +61,13 @@ DHIS2_Master <- function(
   }
   
   print("B")
+  print(nrow(data_DHIS2_Booking))
   
   # restrict bookdate
   data_DHIS2_Booking <- data_DHIS2_Booking[bookdate>=minBookDate & bookdate<=maxBookDate]
   
   print("C")
-  
+  print(nrow(data_DHIS2_Booking))
   
   # here we load in "bookorgname" and give a bunch of indicators
   # i.e. trial 1 indicators
@@ -74,9 +75,10 @@ DHIS2_Master <- function(
   print("D")
   setDT(sData)
   print("E")
-  
+  print(nrow(sData))
   sData[is.na(NEW_bookorgname),NEW_bookorgname:=bookorgname]
   print("F")
+  print(nrow(sData))
 
   toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
   for(i in toChangeToBool) sData[[i]] <- !is.na(sData[[i]])
