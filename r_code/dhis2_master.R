@@ -74,9 +74,10 @@ DHIS2_Master <- function(
   print("D")
   setDT(sData)
   print("E")
+  
   sData[is.na(NEW_bookorgname),NEW_bookorgname:=bookorgname]
   print("F")
-  
+
   toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
   for(i in toChangeToBool) sData[[i]] <- !is.na(sData[[i]])
   
@@ -118,7 +119,7 @@ DHIS2_Master <- function(
   missingNames <- data.table("bookorgname"=unique(data_DHIS2_Booking$bookorgname)[!unique(data_DHIS2_Booking$bookorgname) %in% sData$bookorgname])
   openxlsx::write.xlsx(missingNames,file.path(FOLDER_DATA_RAW,"structural_data/to_be_processed_bookorgname.xlsx"))
   
-  nrow(data_DHIS2_Booking)
+  print(nrow(data_DHIS2_Booking))
   data_DHIS2_Booking <- merge(data_DHIS2_Booking,sData,by=c("bookorgname"),all.x=T)
   print(nrow(data_DHIS2_Booking))
   

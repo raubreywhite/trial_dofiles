@@ -395,8 +395,8 @@ DHIS2_BookingVisit <- function(isControl,
     d[,bookdate := stringr::str_replace(bookdate, "/([0-9][0-9])$","/20\\1")]
     #str(d$bookdate)
     #print(unique(d$bookdate)[1:10])
-    d[,bookdate:=as.Date(bookdate, "%d/%m/%Y")]
-    d[is.na(bookevent), bookdate := as.Date(datecreated, "%d/%m/%Y")]
+    d[,bookdate:=as.Date(bookdate, "%m/%d/%Y")]
+    d[is.na(bookevent), bookdate := as.Date(datecreated, "%m/%d/%Y")]
     #str(d$bookdate)
     #print(unique(d$bookdate)[1:10])
   } else {

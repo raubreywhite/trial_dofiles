@@ -8,7 +8,7 @@ DHIS2_NNCRiskFactors <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
-    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+    d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
     d[,eventdate:=as.Date(eventdate)]
   }

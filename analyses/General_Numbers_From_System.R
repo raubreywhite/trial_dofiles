@@ -2395,21 +2395,38 @@ sink(file.path(FOLDER_DATA_RESULTS,
 print(xtabs(~has_cs+ident_dhis2_an,data=smalld, addNA=TRUE))
 chisq.test(xtabs(~has_cs+ident_dhis2_an,data=smalld, addNA=TRUE))
 
-
 #logistic regression model to get OR, use this instead of oddsratio function
-fit <- glm(has_cs ~ !is.na(ident_dhis2_an), data = smalld, family ="binomial")
+fit <- glm(!is.na(ident_dhis2_an) ~ has_cs, data = smalld, family ="binomial"(link=log))
 summary(fit)
 
+#podPrivHosp~anvisits
 print(xtabs(~cpo_podpriv+ident_dhis2_an,data=smalld, addNA=TRUE))
 chisq.test(xtabs(~cpo_podpriv+ident_dhis2_an,data=smalld, addNA=TRUE))
+fit <- glm(cpo_podpriv ~ !is.na(ident_dhis2_an), data = smalld, family ="binomial")
+summary(fit)
+#RR=exp(-1.108484)
+#
 
+#hasCs~ppcvisits
 print(xtabs(~has_cs+ident_dhis2_ppc,data=smalld, addNA=TRUE))
-chisq.test(xtabs(~has_cs+ident_dhis2_ppc,data=smalld, addNA=TRUE))
+chisq.test
+fit <- glm(has_cs ~ !is.na(ident_dhis2_ppc), data = smalld, family ="binomial")
+summary(fit)
+#RR: exp( 0.63326), 1.883742
+#exp( 1.96*.06679)
+# exp( -1.96*.06679)
+
 
 print(xtabs(~cpo_podpriv+ident_dhis2_ppc,data=smalld, addNA=TRUE))
 chisq.test(xtabs(~cpo_podpriv+ident_dhis2_ppc,data=smalld, addNA=TRUE))
-
-
+fit <- glm(cpo_podpriv ~ !is.na(ident_dhis2_ppc), data = smalld, family ="binomial")
+summary(fit)
+#exp(0.90298)
+#RR: 2.466944
+#exp(1.96*0.05953)
+#1.123758
+#exp(-1.96*0.05953)
+#0.889871
 
 
 sink()

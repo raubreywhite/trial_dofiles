@@ -112,7 +112,7 @@ DHIS2_Ultrasound <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"usrecommendationscomments","uscomments")
   
   if(IS_GAZA){
-    d[,usedd:=as.Date(usedd, "%d/%m/%Y")]
+    d[,usedd:=as.Date(usedd, "%m/%d/%Y")]
   } else {
     newdates<-as.Date(d$usedd, "%Y-%m-%d")
     unique(d[is.na(newdates) & !is.na(usedd)]$usedd)
