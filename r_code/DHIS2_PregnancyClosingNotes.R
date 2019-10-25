@@ -9,6 +9,7 @@ DHIS2_PregnancyClosingNotes <- function(isControl, earlyData, booklmp, IS_GAZA=F
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
     d[,eventdate:=as.Date(eventdate)]
@@ -38,6 +39,7 @@ DHIS2_PregnancyClosingNotes <- function(isControl, earlyData, booklmp, IS_GAZA=F
   setnames(d,"event","pcnevent")
   #setnames(d,"programstageinstance","uniqueid")
   setnames(d,"programstage","pcnprogstage")
+  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
   setnames(d,"eventdate","pcndate")
   
   setnames(d,"longitude","pcnlong")

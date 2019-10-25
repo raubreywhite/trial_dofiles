@@ -168,6 +168,7 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "event", "bookevent")
   setnames(d, "programinstance", "uniqueid")
   setnames(d, "programstage", "bookprogstage")
+  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
   setnames(d, "eventdate", "bookdate")
   setnames(d, "longitude", "booklong")
   setnames(d, "latitude", "booklat")
@@ -349,19 +350,24 @@ DHIS2_BookingVisit <- function(isControl,
   
   
   # delete people with duplicate eventdates (these are obvious duplicates)
-  nrow(d)
+  print("CB1")
+  print(nrow(d))
   d <- unique(d, by = c("uniqueid", "bookdate"))
-  nrow(d)
+  print("CB2")
+  print(nrow(d))
 
   # delete people with duplicae LMPs (again, duplicate pregnancies(
   nrow(d)
   d <- unique(d, by = c("uniqueid", "booklmp"))
+  print("CB3")
   nrow(d)
 
 
   data_DHIS2_Demographics <- DHIS2_Demographics(isControl = isControl, IS_GAZA=IS_GAZA)
+  print("CB4")
   nrow(d)
   d <- merge(d, data_DHIS2_Demographics, by = c("uniqueid"), all = T)
+  print("CB5")
   nrow(d)
   
   # if control and dont have booking, then delete
@@ -441,8 +447,10 @@ DHIS2_BookingVisit <- function(isControl,
     d[, min_event_date := as.Date(max(min_event_date), origin = "1970-01-01"), by = .(uniqueid)]
     d[, keep := ifelse(booklmp < min_event_date & !is.na(booklmp) & booking_number > i, FALSE, TRUE)]
     print(i)
+    print("CB6")
     print(nrow(d))
     d <- d[keep == TRUE]
+    print("CB7")
     print(nrow(d))
   }
   d[, booking_number := 1:.N, by = .(uniqueid)]

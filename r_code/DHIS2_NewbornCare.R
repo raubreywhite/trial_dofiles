@@ -50,6 +50,7 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp, IS_GAZA=IS_GAZA) {
   
   setnames(d,"event","nbcevent")
   setnames(d,"programstage","nbcprogstage")
+  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
   setnames(d,"eventdate","nbcdate")
   setnames(d,"longitude","nbclong")
   setnames(d,"latitude","nbclat")

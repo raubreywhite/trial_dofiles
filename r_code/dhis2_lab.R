@@ -53,6 +53,7 @@ DHIS2_Lab <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"event","labevent")
   #setnames(d,"programstageinstance","uniqueid")
   setnames(d,"programstage","labprogstage")
+  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
   setnames(d,"eventdate","labdate")
   setnames(d,"longitude","lablong")
   setnames(d,"latitude","lablat")
