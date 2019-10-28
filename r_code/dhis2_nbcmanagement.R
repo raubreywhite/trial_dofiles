@@ -9,6 +9,7 @@ DHIS2_NBManagement <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
     d[,eventdate:=as.Date(eventdate)]
@@ -36,6 +37,7 @@ DHIS2_NBManagement <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   #setnames(d,"programstageinstance","uniqueid")
   setnames(d,"programstage","nbmanprogstage")
   d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+  d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
   setnames(d,"eventdate","nbmandate")
   setnames(d,"longitude","nbmanlong")
   setnames(d,"latitude","nbmanlat")

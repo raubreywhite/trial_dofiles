@@ -9,6 +9,7 @@ DHIS2_NNCRiskFactors <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
     d[,eventdate:=as.Date(eventdate)]
@@ -36,6 +37,7 @@ DHIS2_NNCRiskFactors <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   #setnames(d,"programstageinstance","uniqueid")
   setnames(d,"programstage","nncriskprogstage")
   d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+  d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
   setnames(d,"eventdate","nncriskdate")
   setnames(d,"longitude","nncrisklong")
   setnames(d,"latitude","nncrisklat")

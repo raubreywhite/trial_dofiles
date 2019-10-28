@@ -168,7 +168,6 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "event", "bookevent")
   setnames(d, "programinstance", "uniqueid")
   setnames(d, "programstage", "bookprogstage")
-  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
   setnames(d, "eventdate", "bookdate")
   setnames(d, "longitude", "booklong")
   setnames(d, "latitude", "booklat")
@@ -398,12 +397,13 @@ DHIS2_BookingVisit <- function(isControl,
   
   if(IS_GAZA){
     d[,bookdate:=stringr::str_remove_all(bookdate," 12:00 AM$")]
+    d[,bookdate:=stringr::str_remove_all(bookdate," 0:00$")]
     d[,bookdate := stringr::str_replace(bookdate, "/([0-9][0-9])$","/20\\1")]
-    #str(d$bookdate)
-    #print(unique(d$bookdate)[1:10])
+    str(d$bookdate)
+    print(unique(d$bookdate)[1:40])
     d[,bookdate:=as.Date(bookdate, "%m/%d/%Y")]
     d[is.na(bookevent), bookdate := as.Date(datecreated, "%m/%d/%Y")]
-    #str(d$bookdate)
+    str(d$bookdate)
     #print(unique(d$bookdate)[1:10])
   } else {
     d[is.na(bookevent), bookdate := datecreated]
@@ -419,8 +419,8 @@ DHIS2_BookingVisit <- function(isControl,
   if(IS_GAZA){
     d[, booklmp := stringr::str_replace(booklmp, "/([0-9][0-9])$","/20\\1")]
     d[, booklmp := as.Date(booklmp,format="%m/%d/%Y")]
-    #str(d$booklmp)
-    #print(unique(d$booklmp)[1:10])
+    str(d$booklmp)
+    print(unique(d$booklmp)[1:10])
   } else{
     d[, booklmp := as.Date(booklmp)]
   }
@@ -460,6 +460,7 @@ DHIS2_BookingVisit <- function(isControl,
   # Calculate EDD based on LMP
   d[, expecteddateofdelivery := booklmp + 280]
   d[, ident_expected_delivered:= expecteddateofdelivery < min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)]
+
   # Create a new variable for gestational age
   d[, age := floor(as.numeric(difftime(bookdate, dob, units = "days")) / 365)]
   # small cleaning
@@ -479,6 +480,7 @@ DHIS2_BookingVisit <- function(isControl,
         uniqueid %in% na.omit(toremove$uniqueid)
     )]
   }
+
   #### data extractor
   d[,dataextractor:=unlist(ExtractOnlyEnglishLetters(dataextractor))]
   xtabs(~d$dataextractor)
@@ -575,7 +577,7 @@ DHIS2_BookingVisit <- function(isControl,
   
   d<- Removeduplicate(d=d,tag="demobook",isControl=isControl)
   print("000000")
-  
+  print(nrow(d))
   
   return(d)
   

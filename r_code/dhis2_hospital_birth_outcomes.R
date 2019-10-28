@@ -5,6 +5,8 @@ DHIS2_HospitalBirthOutcomes <- function(isControl, earlyData, booklmp) {
     controlName = "Hospital Birth Outcome.csv",
     clinicName = "",
     isControl=isControl)
+  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+  d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
   d[,eventdate:=as.Date(eventdate)]
   setnames(d, 2, "uniqueid")
   

@@ -10,6 +10,7 @@ DHIS2_PreviousPregnancies <- function(isControl, earlyData, booklmp, IS_GAZA=FAL
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 0:00 AM$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
     d[,eventdate:=as.Date(eventdate)]
@@ -30,6 +31,7 @@ DHIS2_PreviousPregnancies <- function(isControl, earlyData, booklmp, IS_GAZA=FAL
   #setnames(d,"programstageinstance","uniqueid")
   setnames(d,"programstage","prevprogstage")
   d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+  d[,eventdate:=stringr::str_remove_all(eventdate," 0:00 AM$")]
   setnames(d,"eventdate","prevdate")
   setnames(d,"longitude","prevlong")
   setnames(d,"latitude","prevlat")

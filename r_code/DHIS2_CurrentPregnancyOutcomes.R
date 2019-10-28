@@ -11,6 +11,8 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 0:00 AM$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
     d[,eventdate:=as.Date(eventdate)]

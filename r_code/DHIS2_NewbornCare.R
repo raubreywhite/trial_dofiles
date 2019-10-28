@@ -9,6 +9,8 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp, IS_GAZA=IS_GAZA) {
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
     d[,eventdate:=as.Date(eventdate)]
@@ -51,6 +53,7 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp, IS_GAZA=IS_GAZA) {
   setnames(d,"event","nbcevent")
   setnames(d,"programstage","nbcprogstage")
   d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+  d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
   setnames(d,"eventdate","nbcdate")
   setnames(d,"longitude","nbclong")
   setnames(d,"latitude","nbclat")

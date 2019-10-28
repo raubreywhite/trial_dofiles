@@ -62,12 +62,13 @@ DHIS2_Master <- function(
   
   print("B")
   print(nrow(data_DHIS2_Booking))
-  
+  print(unique(data_DHIS2_Booking$bookdate))
   # restrict bookdate
-  data_DHIS2_Booking <- data_DHIS2_Booking[bookdate>=minBookDate & bookdate<=maxBookDate]
+  #data_DHIS2_Booking <- data_DHIS2_Booking[bookdate>=minBookDate & bookdate<=maxBookDate]
   
   print("C")
   print(nrow(data_DHIS2_Booking))
+  print(unique(data_DHIS2_Booking$bookdate))
   
   # here we load in "bookorgname" and give a bunch of indicators
   # i.e. trial 1 indicators
