@@ -18,7 +18,7 @@ CheckFilesAndVariables(folder="e.reg-intervention")
 ####################
 
 # make this TRUE if you want to include the PPC
-d <- CleanAllData(includePPC=FALSE, IS_GAZA=TRUE)
+d <- CleanAllData(includePPC=TRUE, IS_GAZA=TRUE)
 nrow(d)
 ####################
 #NOW run HBO stuff##

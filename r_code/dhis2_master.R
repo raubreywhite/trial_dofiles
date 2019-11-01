@@ -62,23 +62,32 @@ DHIS2_Master <- function(
   
   print("B")
   print(nrow(data_DHIS2_Booking))
-  print(unique(data_DHIS2_Booking$bookdate))
+  
+  print("num missing bookdate")
+  print(nrow(data_DHIS2_Booking[is.na(bookdate)]))
+
+  print("num bookdate>=minbookdate")
+  print(nrow(data_DHIS2_Booking[bookdate>=minBookDate]))
+  
+  print("num bookdate<=maxbookdate")
+  print(nrow(data_DHIS2_Booking[bookdate<=maxBookDate]))
+  
+  
+  
   # restrict bookdate
-  #data_DHIS2_Booking <- data_DHIS2_Booking[bookdate>=minBookDate & bookdate<=maxBookDate]
+  data_DHIS2_Booking <- data_DHIS2_Booking[bookdate>=minBookDate & bookdate<=maxBookDate]
   
   print("C")
   print(nrow(data_DHIS2_Booking))
-  print(unique(data_DHIS2_Booking$bookdate))
-  
+  print("num missing bookdate")
+  print(nrow(data_DHIS2_Booking[is.na(bookdate)]))
+
   # here we load in "bookorgname" and give a bunch of indicators
   # i.e. trial 1 indicators
   sData <- readxl::read_excel(file.path(FOLDER_DATA_RAW,"structural_data/bookorgname.xlsx"))
-  print("D")
   setDT(sData)
-  print("E")
   print(nrow(sData))
   sData[is.na(NEW_bookorgname),NEW_bookorgname:=bookorgname]
-  print("F")
   print(nrow(sData))
 
   toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
@@ -86,7 +95,6 @@ DHIS2_Master <- function(
   
   # compare list of raw clinic names to structural data
   names_from_structural_data <- unique(sData[,c("bookorgname","NEW_bookorgname")])
-  print("G")
   names_from_structural_data[,structural:=bookorgname]
   names_from_structural_data[NEW_bookorgname==structural,NEW_bookorgname:=""]
   setnames(names_from_structural_data,"NEW_bookorgname","NEW_structural_bookorgname")

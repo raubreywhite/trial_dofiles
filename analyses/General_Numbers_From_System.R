@@ -348,7 +348,7 @@ longlab[book_anemia==T,book_anemia_risk:=FALSE]
 ####### CREATING CLEAN DEFINITIONS FOR EACH ROW
 longlab[,has_anvisit:= !is.na(anevent) & angestage>0]
 longlab[,has_labhb:=!is.na(labhb) & labhb>0]
-longlab[,has_labanemia:=!is.na(labhb) & labhb>0 & labhb<11]
+longlab[,has_labanemia:=!is.na(labhb) & labhb>1 & labhb<11]
 longlab[,has_mildanemia:=!is.na(labhb) & labhb>9 & labhb<11]
 longlab[,has_moderateanemia:=!is.na(labhb) & labhb>7 & labhb<9]
 longlab[,has_severeanemia:=!is.na(labhb)&(labhb<=7)&labhb>0]
@@ -816,6 +816,18 @@ each_woman <- each_woman[,
                                    "has_labhb_34_38",
                                    "has_labhb_39_99",
                                    
+                                   "has_labanemia_0_7",
+                                   "has_labanemia_8_12",
+                                   "has_labanemia_13_14",
+                                   "has_labanemia_15_17",
+                                   "has_labanemia_18_22",
+                                   "has_labanemia_23_23",
+                                   "has_labanemia_24_28",
+                                   "has_labanemia_29_30",
+                                   "has_labanemia_31_33",
+                                   "has_labanemia_34_38",
+                                   "has_labanemia_39_99",
+                           
                                    "has_noanemia_0_7",
                                    "has_noanemia_8_12",
                                    "has_noanemia_13_14",
@@ -1177,8 +1189,9 @@ uglytable <- pd[,.(
 
 
 p <- ggplot(uglytable, aes(x= bookTrimestert, y=N, fill=bookTrimestert))
-p <- p + geom_col(position="dodge", alpha=0.75)
-p <- p + scale_fill_brewer("Booking by Trimester", palette="Set1")
+#remove legend when we first create the graph by using show.legend=FALSE with slctn of graphtype
+p <- p + geom_col(position="dodge", alpha=0.75, show.legend = FALSE)
+#p <- p + scale_fill_brewer("Booking by Trimester", palette="Set1")
 #p <- p + scale_fill_discrete(name="Percents" ,labels=round((uglytable$percentage),digits=2))
 p <- p + scale_x_discrete("Trimester")
 p <- p + scale_y_continuous("Number of Women")
@@ -1188,7 +1201,8 @@ p <- p + geom_text(aes(label = N),
                    size=6.5,
                    vjust = -0.5,
                    position=position_dodge(width=1))
-p <- p + theme(text = element_text(size=44))
+p <- p + theme(text = element_text(size=44),
+                      legend.position ="none")
 p <- p + theme_gray(22)
 p 
 ggsave(file.path(
@@ -1200,11 +1214,10 @@ ggsave(file.path(
 #attendance
 uglytable <- each_woman[bookyear>=2017,
                         .(
-                          "Booked"=.N,
-                          "Booked_Before 16 weeks"=sum(has_anvisit_0_7==1|
-                                                has_anvisit_8_12==1|
-                                                has_anvisit_13_14==1,na.rm=TRUE),
-                          "16 Week Visit"= sum(has_anvisit_15_17==1, na.rm=TRUE),
+                          N=.N,
+                          "Booked_Before_14_weeks"=sum(bookgestagecat=="0-7"|
+                                                         bookgestagecat=="8-12"|
+                                                         bookgestagecat=="13-14",na.rm=TRUE),
                           "2"= sum(has_anvisit_15_17 &                                                                           has_anvisit_18_22,  na.rm=TRUE),
                           "3"= sum(has_anvisit_15_17 &                                                                             has_anvisit_18_22 &
                                      has_anvisit_24_28,na.rm=TRUE),                                                     "4"= sum(has_anvisit_15_17 &                                                                            has_anvisit_18_22 &
@@ -1234,46 +1247,11 @@ openxlsx::write.xlsx(uglytable,
 
 
 
-#attendance table for graphs
-uglytable <- each_woman[bookyear>=2017,
-                        .(
-                          "Before 16 weeks"=sum(has_anvisit_0_7==1,
-                                                has_anvisit_8_12==1,
-                                                has_anvisit_13_14==1, na.rm=TRUE),
-                          "16 Week Visit"= sum(has_anvisit_15_17==1, na.rm=TRUE),
-                          "2"= sum(has_anvisit_15_17 &                                                                           has_anvisit_18_22,  na.rm=TRUE),
-                          "3"= sum(has_anvisit_15_17 &                                                                             has_anvisit_18_22 &
-                                     has_anvisit_24_28,na.rm=TRUE),                                                     "4"= sum(has_anvisit_15_17 &                                                                            has_anvisit_18_22 &
-                                    has_anvisit_24_28 &
-                                    has_anvisit_31_33,na.rm=TRUE),                                                                                         
-                          "5"= sum( has_anvisit_15_17 &                                                                           has_anvisit_18_22 &
-                                    has_anvisit_24_28 &
-                                    has_anvisit_31_33 &
-                                    has_anvisit_34_38,na.rm=TRUE),
-                          "18_22wksonly"=sum(has_anvisit_18_22, na.rm=TRUE),
-                          "24_28 weeksonly"=sum(has_anvisit_24_28, na.rm=TRUE),
-                          "31_33wksonly"=sum(has_anvisit_31_33, na.rm=TRUE),
-                          "34_38wkonly"=sum(has_anvisit_34_38, na.rm=TRUE)
-                          
-                          
-                        ),
-                        keyby=
-                          .(
-                            bookyear
-                          )]
-
-
-openxlsx::write.xlsx(uglytable,
-                     file.path(FOLDER_DATA_RESULTS,
-                               "buthaina",
-                               sprintf("%s_Attendance Table.xlsx",lubridate::today())))
-
 plotdata <- melt.data.table(
   uglytable,
   id.vars="bookyear", 
   measure.vars=c(
-    "Before 16 weeks",
-    "16 Week Visit", 
+    "Booked_Before_14_weeks", 
     "2",
     "3",
     "4",
@@ -1289,7 +1267,7 @@ pd <- plotdata[,.(
 keyby=.(variable)
 ]
 
-#maxYVAL <- max(uglytable$Booked)
+maxYVAL <- max(uglytable$Booked_Before_14_weeks)
 labelAdjust <- maxYVAL*0.01
 
 q <- ggplot(pd, aes(x=variable, 
@@ -1299,18 +1277,18 @@ q <- ggplot(pd, aes(x=variable,
 
 q <- q + geom_col()
 
-q <- q + labs(title="Attendance of Essential ANC Visits ",
+q <- q + labs(title="Timely Adherence to Essential ANC Visits ",
               subtitle = "January 2017 to July 2019") +
                xlab("ANC Visits Attended") +
                ylab("Women")
 #centers title 
-q <- q + theme(plot.title = element_text(size=18, hjust = 0.5),
-               plot.subtitle = element_text(size=16, hjust = 0.5))
+q <- q + theme(plot.title = element_text(size=24, hjust = 0.5),
+               plot.subtitle = element_text(size=20, hjust = 0.5))
 q <- q + theme(text = element_text(size=16))
 #q <- q + labs(fill="Gestational Age at Visit")
 q <- q + scale_fill_brewer( palette="Spectral",
                             name="Attendance of Essential Visits up Until", 
-                             labels=c("Women Registered before 16 Weeks",
+                             labels=c("Women Registered before 15 Weeks",
                                                      "15-17 Weeks",
                                                      "18-22 Weeks",
                                                      "24-28 Weeks",
@@ -1323,8 +1301,8 @@ q
 
 q <- q + theme(plot.title = element_text(size = 20, face = "bold"),
                axis.text.x = element_blank(),
-               legend.title=element_text(size=10), 
-               legend.text=element_text(size=9))
+               legend.title=element_text(size=12), 
+               legend.text=element_text(size=10))
 # q <- q + theme(axis.text.x = element_text(angle = 90,
 #                                            hjust = 1,
 #                                           vjust = 0.5))
@@ -1336,6 +1314,20 @@ ggsave(file.path(
   sprintf("%s_Essential ANC Visits.png", lubridate::today())), 
   plot = q, width = 297, height = 210, units = "mm")
 
+uglytable <- each_woman[bookyear>=2017,
+                        .(AnemiaTotal=sum(has_labanemia_0_7|
+                                             has_labanemia_8_12|
+                                             has_labanemia_13_14|
+                                             has_labanemia_15_17|
+                                             has_labanemia_18_22|
+                                             has_labanemia_23_23|
+                                             has_labanemia_24_28|
+                                             has_labanemia_29_30|
+                                             has_labanemia_31_33|
+                                             has_labanemia_34_38, na.rm=TRUE
+                                             
+                                             )),
+                           keyby=.(bookyear)]
 
 
 #LabHB_screenings and types of anemia
@@ -1363,6 +1355,7 @@ uglytable <- each_woman[,
                                                      has_labanemia_31_33==0, na.rm=TRUE),
                             
                           Mild_anemia_total=sum( has_mildanemia_0_7|
+                                                  has_mildanemia_8_12 |
                                                   has_mildanemia_13_14|
                                                   has_mildanemia_15_17|
                                                   has_mildanemia_18_22|
@@ -1967,10 +1960,10 @@ vars <- c(
 d[,anevent_x:=0]
 
 for(i in vars){
-  d[!is.na(get(i)), anevent_x:=anevent_x + 1]
+  d[!is.na(get(i)), anevent_x:=anevent_x]
 }
 
-#sum(d[ident_dhis2_control==F& bookyear>=2017]$anevent_x,na.rm=T)
+sum(d[bookyear>=2017]$anevent_x,na.rm=T)
 
 #NBC
 cat("\nNumNBC\n")
@@ -1998,7 +1991,7 @@ for(i in vars){
 
 #sum(d[ident_dhis2_control==F & bookyear==2018]$ppcevent_x,na.rm=T)
 
-tab <- d[ident_dhis2_control==FALSE,
+tab <- d[bookyear>=2017,
                       .(
                          Bookings=sum(ident_dhis2_booking==TRUE, na.rm=TRUE),
                          ANCVisits= sum(anevent_x, na.rm=TRUE),
@@ -2017,9 +2010,16 @@ openxlsx::write.xlsx(tab,
                                sprintf("%s_NumANCPPCVisits.xlsx",lubridate::today())))
 
 #Demographics of registry from 2017 and onwards
-
-demo <- d[bookyear>=2017 & bookgestage<40, c("age",
+#cleaning income
+d[,cleanincome:=abs(income)]
+d[cleanincome>=10000, cleanincome:=cleanincome*0.1]
+unique(d$cleanincome)
+demo <- d[bookyear>=2017 & 
+            ident_dhis2_booking==TRUE &
+            bookgestage<40 &
+            cleanincome>100, c("age",
                             "income",
+                            "cleanincome",
                             "bookgestage",
                             "bookyear",
                             "bookorgdistrict")]
@@ -2028,6 +2028,7 @@ tab <- demo[,.(
               "medianAge"=median(age, na.rm=TRUE),
               "meanIncome"=mean(income, na.rm=TRUE),
               "medianIncome"=median(income, na.rm=TRUE),
+              "meanCleanIncome"=mean(cleanincome, na.rm=TRUE),
               "meanBookgA"=mean(bookgestage, na.rm=TRUE),
               "medianBookgA"=mean(bookgestage, na.rm=TRUE)
             ),
@@ -2188,7 +2189,8 @@ for(i in vars){
 
 
 
-smallD<- d[bookyear>=2017,c("bookyear",
+smallD<- d[bookyear>=2017,
+                            c("bookyear",
                             "pcnclosurereason_complete",
                             "pcnclosurereason_abnormal",
                             "pcnclosurereason_missing",
@@ -2202,63 +2204,61 @@ smallD<- d[bookyear>=2017,c("bookyear",
 
 
 #booked, booked and didnt come back, an and ppc, do analysis below
-
-smallD <- smallD[,.( N=.N,
-                    "BookedANC"= sum(ident_dhis2_booking==TRUE, na.rm=TRUE),
-                    "BookedandANC"=sum(ident_dhis2_booking==TRUE & 
-                                      ident_dhis2_an==TRUE, na.rm=TRUE),
-                    "ANConly"=sum(ident_dhis2_an==TRUE, na.rm=TRUE),
-                    "ANCandPPC"=sum(ident_dhis2_an==TRUE & ident_dhis2_ppc==TRUE, na.rm=TRUE),
-                    "BookingVisitandPPC"=sum(ident_dhis2_booking==TRUE & 
-                                               ident_dhis2_ppc==TRUE, na.rm=TRUE),
-                    "PPConly"=sum(ident_dhis2_booking==FALSE & ident_dhis2_ppc==TRUE, na.rm=TRUE),
-                    "Complete"= sum(pcnclosurereason_complete==TRUE, na.rm=TRUE),
-                    "BookingANCPPC"=sum(ident_dhis2_booking==TRUE &
-                                          ident_dhis2_an==TRUE &
-                                          ident_dhis2_ppc==TRUE, na.rm=TRUE),
-                    "CPOTotal"=sum(ident_dhis2_cpo==TRUE, na.rm==TRUE),
-                    "CPO_Booking"=sum(ident_dhis2_booking==TRUE &
-                                        ident_dhis2_cpo==TRUE,na.rm=TRUE),
-                    "CPO_Booking_AN"=sum(ident_dhis2_booking==TRUE &
-                                           ident_dhis2_an==TRUE &
-                                           ident_dhis2_cpo==TRUE, na.rm=TRUE),
-                    "CPO_AN"=sum(ident_dhis2_an==TRUE &
-                                   ident_dhis2_cpo==TRUE, na.rm=TRUE),
-                    "CPO_Booking_AN_PPC"=sum(ident_dhis2_booking==TRUE &
-                                               ident_dhis2_an==TRUE &
-                                               ident_dhis2_cpo==TRUE &
-                                               ident_dhis2_ppc==TRUE, na.rm=TRUE),
-                    "CPO_Booking_PPC"=sum(ident_dhis2_booking==TRUE &
-                                            ident_dhis2_cpo==TRUE &
-                                            ident_dhis2_ppc==TRUE, na.rm=TRUE),
-                    "CPO_PPC"=sum(ident_dhis2_cpo==TRUE &
-                                    ident_dhis2_ppc==TRUE, na.rm=TRUE),
-                    "Abnormal"=sum(pcnclosurereason_abnormal==TRUE,na.rm=T),
-                    "Lost"=sum(pcnclosurereason_lost==TRUE,na.rm=T),
-                    "Missing"=sum(pcnclosurereason_missing==TRUE,na.rm=T)
-                    
-                ),
-                keyby=.(bookyear)
-                
-              ]
-
-openxlsx::write.xlsx(smallD, 
-                     file.path(
-                       FOLDER_DATA_RESULTS,
-                       "buthaina",
-                       sprintf("%s_ClosingFileReasons_wideformat.xlsx",lubridate::today())))
-
-
-long <- melt.data.table(smallD, id.vars=c(
-       "bookyear"
-),variable.factor = F, value.factor = F)
-
-openxlsx::write.xlsx(long, 
-                     file.path(
-                       FOLDER_DATA_RESULTS,
-                       "buthaina",
-                      sprintf("%s_ClosingFileReasons.xlsx",lubridate::today())))
-
+#fix this code
+ smallD <- smallD[,.( N=.N,
+                    "BookedANC"=sum(ident_dhis2_booking==1),
+                    "BookedandANC"=sum(ident_dhis2_booking==1 &
+                                          ident_dhis2_an==TRUE, na.rm=TRUE),
+                     "ANConly"=sum(ident_dhis2_an==TRUE, na.rm=TRUE),
+                     "ANCandPPC"=sum(ident_dhis2_an==TRUE & ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                     "BookingVisitandPPC"=sum(ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                     "PPConly"=sum(ident_dhis2_booking==0 & ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                     "Complete"= sum(ident_dhis2_booking==1 &
+                                       pcnclosurereason_complete==TRUE, na.rm=TRUE),
+                     "BookingANCPPC"=sum(ident_dhis2_an==TRUE &
+                                           ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                     "CPOTotal"=sum(ident_dhis2_cpo==TRUE, na.rm=TRUE),
+                     "CPO_Booking"=sum(ident_dhis2_cpo==TRUE,na.rm=TRUE),
+                     "CPO_Booking_AN"=sum(ident_dhis2_an==TRUE &
+                                            ident_dhis2_cpo==TRUE, na.rm=TRUE),
+                     "CPO_AN"=sum(ident_dhis2_an==TRUE &
+                                    ident_dhis2_cpo==TRUE, na.rm=TRUE),
+                     "CPO_Booking_AN_PPC"=sum(ident_dhis2_an==TRUE &
+                                                ident_dhis2_cpo==TRUE &
+                                                ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                     "CPO_Booking_PPC"=sum(ident_dhis2_booking==1 &
+                                             ident_dhis2_cpo==TRUE &
+                                             ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                     "CPO_PPC"=sum(ident_dhis2_cpo==TRUE &
+                                     ident_dhis2_ppc==TRUE, na.rm=TRUE),
+                     "Abnormal"=sum(ident_dhis2_booking==1 &
+                                      pcnclosurereason_abnormal==TRUE,na.rm=T),
+                     "Lost"=sum(ident_dhis2_booking==1 &
+                                  pcnclosurereason_lost==TRUE,na.rm=T),
+                     "Missing"=sum(pcnclosurereason_missing==TRUE,na.rm=T)
+                     
+                 ),
+                 keyby=.(bookyear)
+                 
+               ]
+ 
+ openxlsx::write.xlsx(smallD, 
+                      file.path(
+                        FOLDER_DATA_RESULTS,
+                        "buthaina",
+                        sprintf("%s_ClosingFileReasons_wideformat.xlsx",lubridate::today())))
+ 
+ 
+ long <- melt.data.table(smallD, id.vars=c(
+        "bookyear"
+ ),variable.factor = F, value.factor = F)
+ 
+ openxlsx::write.xlsx(long, 
+                      file.path(
+                        FOLDER_DATA_RESULTS,
+                        "buthaina",
+                       sprintf("%s_ClosingFileReasons.xlsx",lubridate::today())))
+ 
 
 ###Primi vs para status at booking###
 smalld<- d[bookyear>=2017 & ident_dhis2_ppc==TRUE, 
@@ -2398,6 +2398,7 @@ chisq.test(xtabs(~has_cs+ident_dhis2_an,data=smalld, addNA=TRUE))
 #logistic regression model to get OR, use this instead of oddsratio function
 fit <- glm(!is.na(ident_dhis2_an) ~ has_cs, data = smalld, family ="binomial"(link=log))
 summary(fit)
+#exp(-.02111)=0.979 p>.05
 
 #podPrivHosp~anvisits
 print(xtabs(~cpo_podpriv+ident_dhis2_an,data=smalld, addNA=TRUE))
@@ -2427,6 +2428,7 @@ summary(fit)
 #1.123758
 #exp(-1.96*0.05953)
 #0.889871
+
 
 
 sink()
@@ -2465,63 +2467,119 @@ openxlsx::write.xlsx(smalld,
 #num of women who have ppc alone, ppc and anc, of those who have ppc, how many come on time on the #first visit, how many come on time on the second visit, how many visits total
 
 
-d[,num_ppc_visits:=0]
-vars <- names(d)[stringr::str_detect(names(d),"ppcevent")]
-for(i in vars){
-  d[!is.na(get(i)),num_ppc_visits:=num_ppc_visits+1]
-}
-xtabs(~d$num_ppc_visits, addNA=T)
+# d[,num_ppc_visits:=0]
+# vars <- names(d)[stringr::str_detect(names(d),"ppcevent")]
+# for(i in vars){
+#   d[!is.na(get(i)),num_ppc_visits:=num_ppc_visits+1]
+# }
+# xtabs(~d$num_ppc_visits, addNA=T)
+# 
+# 
+# d[,ppcdaysafterdeliv0_7:=FALSE]
+# vars <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
+# for(i in vars){
+#   d[get(i)>0 & get(i)<=7,ppcdaysafterdeliv0_7:=TRUE]
+# }
+# 
+# d[,ppcdaysafterdeliv28_44:=FALSE]
+# vars <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
+# for(i in vars){
+#   d[get(i)>=28 & get(i)<=44,ppcdaysafterdeliv28_44:=TRUE]
+# }
+# 
+# d[,ppcdaysafterdeliv42daysonly:=FALSE]
+# vars <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
+# for(i in vars){
+#   d[get(i)==42,ppcdaysafterdeliv42daysonly:=TRUE]
+# }
+# 
+# 
+# checkingppc<-d[ident_dhis2_ppc==TRUE & is.na(ppcorgdistrict_1), c("ppcorgname_1",
+#                                                     "ppcorgname_2",
+#                                                     "ppcorgname_3",
+#                                                     "bookorgname")]
+# 
+# # openxlsx::write.xlsx(checkingppc, 
+# #                      file.path(
+# #                        FOLDER_DATA_RESULTS,
+# #                        "quality_control",
+# #                        sprintf("%s_PPC_missing_orgdistricts.xlsx",DATA_DATE)))
+# 
+# 
+# 
+# smalld<-d[bookyear>=2017, c("num_ppc_visits",
+#                             "ppcdaysafterdeliv0_7",
+#                             "ppcdaysafterdeliv42daysonly",
+#                             "ppcdaysafterdeliv28_44",
+#                             "ppcorgdistrict_1")]
+# 
+# smalld <- smalld[,.(
+#                     Total_PPC_Visits =sum(num_ppc_visits==TRUE, na.rm=TRUE),
+#                     Visits_0_to_7_days=sum(ppcdaysafterdeliv0_7==TRUE, na.rm=TRUE),
+#                     Visits_at_42_days=sum(ppcdaysafterdeliv42daysonly==TRUE, na.rm=TRUE),
+#                     Visits_28_to_44_days=sum(ppcdaysafterdeliv28_44==TRUE, na.rm=TRUE)
+#                    ), 
+#                  keyby=.(ppcorgdistrict_1)]
+# 
+#  openxlsx::write.xlsx(checkingppc, 
+#                       file.path(
+#                         FOLDER_DATA_RESULTS,
+#                         "buthaina",
+#                         sprintf("%s_PPC_Visit_Data.xlsx",DATA_DATE)))
+# 
+
+ ##############TEST##############
+###anc visits
+ #vars <- names(d)[stringr::str_detect(names(d),"^anevent_[0-9]*")]
+#d[,anevent_0:=bookevent]
+ vars <- names(d)[stringr::str_detect(names(d),"^anevent_[0-9]+")]
+ d[,anevent_x:=0]
+ 
+ for(i in vars){
+   d[!is.na(get(i)), anevent_x:=anevent_x+1]
+ }
+ 
+ sum(d[bookyear>=2017]$anevent_x,na.rm=T)
+ 
+ ###ppc visits
+ vars <- names(d)[stringr::str_detect(names(d),"^ppcevent_[0-9]+")]
+ d[,ppcevent_x:=0]
+ 
+ for(i in vars){
+   d[!is.na(get(i)), ppcevent_x:=ppcevent_x+1]
+ }
+ 
+ sum(d[bookyear>=2017]$ppcevent_x,na.rm=T)
+ 
+ table<-d[bookyear>=2017,
+          c("ident_dhis2_booking",
+            "ident_dhis2_an",
+            "ident_dhis2_ppc",
+            "ppcevent_x",
+            "anevent_x",
+            "bookyear")]
+ 
+tab<-table[,.("Booked"=sum(ident_dhis2_booking, na.rm=TRUE),
+              "ANCFollowupVisits"=sum(anevent_x, na.rm=TRUE),
+              "PPCVisits"=sum(ppcevent_x, na.rm=TRUE),
+              "NumWomenBookedandNOANc"=sum(ident_dhis2_booking & 
+                                             is.na(ident_dhis2_an), na.rm=TRUE),
+              "NumWomenBookedandANC"=sum(ident_dhis2_booking &
+                                            ident_dhis2_an, na.rm=TRUE),
+              "NumWomenANCTotal"=sum(ident_dhis2_an, na.rm=TRUE),
+              "NumWomenPPC"=sum(ident_dhis2_ppc, na.rm=TRUE),
+              "NumWomenBOokedandPPC"=sum(ident_dhis2_booking==1 & 
+                                           ident_dhis2_ppc==TRUE, na.rm=TRUE),
+              "NumPPCOnly"=sum(ident_dhis2_booking==0 &
+                                 ident_dhis2_ppc==TRUE, na.rm=TRUE)),
+                keyby=.(bookyear)]
 
 
-d[,ppcdaysafterdeliv0_7:=FALSE]
-vars <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
-for(i in vars){
-  d[get(i)>0 & get(i)<=7,ppcdaysafterdeliv0_7:=TRUE]
-}
+openxlsx::write.xlsx(tab,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "buthaina",
+              sprintf("%s_ANC_PPC_Booking_Table.xlsx",lubridate::today())))
 
-d[,ppcdaysafterdeliv28_44:=FALSE]
-vars <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
-for(i in vars){
-  d[get(i)>=28 & get(i)<=44,ppcdaysafterdeliv28_44:=TRUE]
-}
-
-d[,ppcdaysafterdeliv42daysonly:=FALSE]
-vars <- names(d)[stringr::str_detect(names(d),"^ppcdaysafterdelivery_")]
-for(i in vars){
-  d[get(i)==42,ppcdaysafterdeliv42daysonly:=TRUE]
-}
-
-
-checkingppc<-d[ident_dhis2_ppc==TRUE & is.na(ppcorgdistrict_1), c("ppcorgname_1",
-                                                    "ppcorgname_2",
-                                                    "ppcorgname_3",
-                                                    "bookorgname")]
-
-# openxlsx::write.xlsx(checkingppc, 
-#                      file.path(
-#                        FOLDER_DATA_RESULTS,
-#                        "quality_control",
-#                        sprintf("%s_PPC_missing_orgdistricts.xlsx",DATA_DATE)))
-
-
-
-smalld<-d[bookyear>=2017, c("num_ppc_visits",
-                            "ppcdaysafterdeliv0_7",
-                            "ppcdaysafterdeliv42daysonly",
-                            "ppcdaysafterdeliv28_44",
-                            "ppcorgdistrict_1")]
-
-smalld <- smalld[,.(
-                    Total_PPC_Visits =sum(num_ppc_visits==TRUE, na.rm=TRUE),
-                    Visits_0_to_7_days=sum(ppcdaysafterdeliv0_7==TRUE, na.rm=TRUE),
-                    Visits_at_42_days=sum(ppcdaysafterdeliv42daysonly==TRUE, na.rm=TRUE),
-                    Visits_28_to_44_days=sum(ppcdaysafterdeliv28_44==TRUE, na.rm=TRUE)
-                   ), 
-                 keyby=.(ppcorgdistrict_1)]
-
- openxlsx::write.xlsx(checkingppc, 
-                      file.path(
-                        FOLDER_DATA_RESULTS,
-                        "buthaina",
-                        sprintf("%s_PPC_Visit_Data.xlsx",DATA_DATE)))
-
+#missing variables
+#sum(!is.na(d$variable))
+ 

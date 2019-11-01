@@ -449,9 +449,16 @@ DHIS2_BookingVisit <- function(isControl,
     print(i)
     print("CB6")
     print(nrow(d))
+    
+    print("CB6 Missing Bookdates")
+    print(nrow(d[is.na(bookdate)]))
+    
     d <- d[keep == TRUE]
     print("CB7")
     print(nrow(d))
+    
+    print("CB7 Missing Bookdates")
+    print(nrow(d[is.na(bookdate)]))
   }
   d[, booking_number := 1:.N, by = .(uniqueid)]
   d[, min_event_date := NULL]

@@ -36,21 +36,10 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
     #if("mobilenumber" %in% names(d)) setnames(d, "mobilenumber(withareacode)", "education")
     NamesToChange(d,badname =c("mobilenumber","mobilenumberwithareacode"), 
                   goodname = "mobile")
-    #if("educationinyears" %in% names(d)) setnames(d, "educationinyears", "education")
-    #if(!"education" %in% names(d)) stop("cant find education")
-    
-    #if("ageatmarriage" %in% names(d)) setnames(d, "ageatmarriage", "agemarriage")
-    #if(!"agemarriage" %in% names(d)) stop("cant find agemarriage")
-    
+   
     #if("ageatfirstpregnancy" %in% names(d)) setnames(d, "ageatfirstpregnancy", "agepregnancy")
     #if(!"agepregnancy" %in% names(d)) stop("cant find agepregnancy")
-    
-    #if("monthlyhouseholdincomeils" %in% names(d)) setnames(d, "monthlyhouseholdincomeils", "income")
-    #if(!"income" %in% names(d)) stop("cant find income")
-    
-    #if("numberofmembersinhousehold" %in% names(d)) setnames(d, "numberofmembersinhousehold", "members")
-    #if(!"members" %in% names(d)) stop("cant find members")
-    
+
     NamesToChange(d,"educationinyears","education")
     NamesToChange(d,"ageatmarriage","agemarriage")
     NamesToChange(d,"ageatfirstpregnancy","agepregnancy")
@@ -130,7 +119,7 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
     setnames(d,"emailaddress","email")
     
     d[,dataextractor:=""]
-    d[,"doyouwanttoreceivesms":=""]
+    #setnames(d,"areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits", "doyouwanttoreceivesms")
     
   }
   

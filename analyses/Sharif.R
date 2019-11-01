@@ -10,32 +10,61 @@ Setup(IS_GAZA=FALSE)
 CheckFilesAndVariables(folder="e.reg-intervention")
 CheckFilesAndVariables(folder="e.reg-control")
 
-###### SETUP ENDS ######
+
 
 ####LOAD d from Network####
 # PLACE OF DELIVERY INFORMATION CHECKING
 # LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPPORT
 d <- LoadDataFileFromNetwork()
-#### bookvisitspec shouldnt be known  pcnidnumber_1  amdmotherbirthdate_1
+#### bookvisitspec shouldnt be known  pcnidnumber_1  (amdmotherbirthdate_1
 ###previdnumber_1   manidnumber  riskidnumber   d$hbodaltidnum_1   hbodaltidnum_1
 ###anidnumber_1     labid     usid
 
+library(janitor)
+
+###### SETUP ENDS ######
+
+
+####################################################################################################################
+####################################################################################################################
+####################################################################################################################
+####################################################################################################################
+####################################################################################################################
+####################################################################################################################
+####################################################################################################################
+####################################################################################################################
+
+##########################
+########ANC vs PPC########
+##########################
+
+nrow(d[bookyearmonth>=2017 & ident_dhis2_booking==TRUE])
+
+nrow(d[bookyearmonth>=2017 & ident_dhis2_ppc==TRUE])
+
+nrow(d[bookyearmonth>=2017 & ident_dhis2_booking==TRUE & ident_dhis2_ppc==TRUE])
+
 ############END###########
 
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
+##########################
+####Monthly Attendance####
+##########################
 
-d[is.na(ident_dhis2_ppc), ident_dhis2_ppc:=FALSE]
+sd <-d[,c("bookyearmonth",
+          "ident_dhis2_booking")]
+
+tab <- sd[,.(numbooked=sum(ident_dhis2_booking==1)),
+          keyby=.(bookyearmonth)]
+
+tab
+
+############END###########
 
 ##########################
 ######Diabetes vs PPC#####
 ##########################
+
+d[is.na(ident_dhis2_ppc), ident_dhis2_ppc:=FALSE]
 
 ###Create labogctxxx which containts all labogct strings above 49###
 d[,labogctxxx:=as.numeric()]
@@ -44,7 +73,7 @@ for(i in vars){d[get(i)>49,labogctxxx:=get(i)]}
 #Create Binary Variable for if LABOGCTXXX >140, set all to FALSE except >140
 d[,labogctbinary:=FALSE]
 d[labogctxxx>140,labogctbinary:=TRUE]
-PPC_OGCT<-(d[ident_dhis2_an==TRUE & !is.na(labogctxxx),
+PPC_OGCT<-(d[ident_dhis2_booking==TRUE & !is.na(labogctxxx),
               c("ident_dhis2_ppc",
                 "labogctxxx",
                 "labogctbinary")])
@@ -59,6 +88,8 @@ chisq.test(xtabs(~ident_dhis2_ppc+labogctbinary,data=PPC_OGCT,addNA = TRUE))
 ######Anemia vs PPC#######
 ##########################
 
+d[is.na(ident_dhis2_ppc), ident_dhis2_ppc:=FALSE]
+
 ###Create labhbxxx which containts all labhb strings below 17###
 d[,labhbxxx:=as.numeric()]
 vars <- names(d)[stringr::str_detect(names(d),"^labhb_")]
@@ -72,7 +103,7 @@ for(i in vars){d[(get(i)>1),labhbxy:=get(i)]}
 #Create Binary Variable for if LABHBXXX <11, set all to FALSE except <11
 d[,labhbbinary:=FALSE]
 d[labhbxy<11,labhbbinary:=TRUE]
-PPC_HB<-(d[ident_dhis2_an==TRUE & !is.na(labhbxy),
+PPC_HB<-(d[bookyear>=2017 & ident_dhis2_booking==TRUE & !is.na(labhbxy),
               c("ident_dhis2_ppc",
                 "labhbxy",
                 "labhbbinary")])
@@ -85,6 +116,8 @@ chisq.test(xtabs(~ident_dhis2_ppc+labhbbinary,data=PPC_HB,addNA = TRUE))
 ##########################
 ####Hypertension vs PPC###
 ##########################
+
+d[is.na(ident_dhis2_ppc), ident_dhis2_ppc:=FALSE]
 
 ##Create labhtbinary
       ##Create anbpsystSSS
@@ -108,7 +141,7 @@ chisq.test(xtabs(~ident_dhis2_ppc+labhbbinary,data=PPC_HB,addNA = TRUE))
 
 d[,labhtbinary:=FALSE]
 d[,labhtbinary:=anbpdiastDDD>90 | anbpsystSSS>140]                
-PPC_HT<-(d[ident_dhis2_an==TRUE & !is.na(labhtbinary),
+PPC_HT<-(d[bookyearmonth>=2017 & ident_dhis2_booking==TRUE & !is.na(labhtbinary),
              c("ident_dhis2_ppc",
                "anbpdiastDDD",
                "anbpsystSSS",
@@ -243,3 +276,116 @@ percent((sum(XTBSHT$Avail))/(sum(XTBSHT$Tot)))
 
 ############END###########
 
+
+############END###########
+
+tiz18<-d$anevent_18
+tiz17<-d$anevent_17
+tiz16<-d$anevent_16
+tiz15<-d$anevent_15
+tiz14<-d$anevent_14
+tiz13<-d$anevent_13
+tiz12<-d$anevent_12
+tiz11<-d$anevent_11
+tiz10<-d$anevent_10
+tiz09<-d$anevent_9
+tiz08<-d$anevent_8
+tiz07<-d$anevent_7
+tiz06<-d$anevent_6
+tiz05<-d$anevent_5
+tiz04<-d$anevent_4
+tiz03<-d$anevent_3
+tiz02<-d$anevent_2
+tiz01<-d$anevent_1
+
+tizz18<-(!is.na(tiz18))
+tizz17<-(!is.na(tiz17))
+tizz16<-(!is.na(tiz16))
+tizz15<-(!is.na(tiz15))
+tizz14<-(!is.na(tiz14))
+tizz13<-(!is.na(tiz13))
+tizz12<-(!is.na(tiz12))
+tizz11<-(!is.na(tiz11))
+tizz10<-(!is.na(tiz10))
+tizz09<-(!is.na(tiz09))
+tizz08<-(!is.na(tiz08))
+tizz07<-(!is.na(tiz07))
+tizz06<-(!is.na(tiz06))
+tizz05<-(!is.na(tiz05))
+tizz04<-(!is.na(tiz04))
+tizz03<-(!is.na(tiz03))
+tizz02<-(!is.na(tiz02))
+tizz01<-(!is.na(tiz01))
+
+nrow(d[bookyearmonth>=2017 & tizz18==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz17==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz16==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz15==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz14==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz13==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz12==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz11==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz10==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz09==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz08==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz07==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz06==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz05==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz04==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz03==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz02==TRUE])
+nrow(d[bookyearmonth>=2017 & tizz01==TRUE])
+
+d$Visits<-(tizz18+tizz17+tizz16+tizz15+tizz14+tizz13+tizz12
+         +tizz11+tizz10+tizz09+tizz08+tizz07+tizz06+tizz05
+         +tizz04+tizz03+tizz02+tizz01)
+sum(d$Visits,a.rm = TRUE)
+sum(d[bookyear>=2017]$Visits,na.rm=T)
+
+bigd<-d[,c("uniqueid","Visits")]
+bigd<-bigd[,.(N=.N),keyby=.(Visits)]
+bigd
+
+d[education>0 & education <50,educationaccu:=education]
+smalld<-d[,c("uniqueid","educationaccu")]
+smalld<-smalld[,.(N=.N),keyby=.(educationaccu)]
+smalld <- smalld[-c(12,14,17,19,21,25,26,27,28,29,30,31,32,33,34,35,36),]
+smalld
+
+
+d$Visits<-(tizz18+tizz17+tizz16+tizz15+tizz14+tizz13+tizz12
+           +tizz11+tizz10+tizz09+tizz08+tizz07+tizz06+tizz05
+           +tizz04+tizz03+tizz02+tizz01)
+bigd<-d[,c("uniqueid","Visits")]
+d[education>0 & education <50,educationaccu:=education]
+smalld<-d[,c("uniqueid","educationaccu")]
+newed<-merge(smalld,bigd,by=c("uniqueid"),all.y=T)
+newed<-newed[,.(N=.N,numvisits=sum(Visits)),keyby=.(educationaccu)]
+newed <- newed[-c(1,12,14,17,19,21,25,26,27,28,29,30,31,32,33,34,35,36),]
+newed<-newed[,.(N=.N,numvisits=sum(Visits)),keyby=.(educationaccu)]
+AVG<-(newed$numvisits/newed$N)
+newed$AVG<-(newed$numvisits/newed$N)
+
+####################################################################################################################
+
+d[agemarriage>=14 & agemarriage<=38,agemarriageaccu:=agemarriage]
+smalld2<-d[,c("uniqueid","agemarriageaccu")]
+smalld2<-smalld2[,.(N=.N),keyby=.(agemarriageaccu)]
+d$Visits<-(tizz18+tizz17+tizz16+tizz15+tizz14+tizz13+tizz12
+           +tizz11+tizz10+tizz09+tizz08+tizz07+tizz06+tizz05
+           +tizz04+tizz03+tizz02+tizz01)
+smalld2<-d[,c("uniqueid","agemarriageaccu")]
+bigd2<-d[,c("uniqueid","Visits")]
+newed2<-merge(smalld2,bigd2,by=c("uniqueid"),all.y=T)
+newed2<-newed2[,.(N=.N,numvisits=sum(Visits)),keyby=.(agemarriageaccu)]
+newed2$AVG<-(newed2$numvisits/newed2$N)
+tabyl(d$agemarriageaccu)
+Hell<-newed2[,c("AVG","agemarriageaccu")]
+Hell
+
+
+
+
+### TRANSFER TO EXCEL ###
+
+### openxlsx::write.xlsx(dAtAsEt*,file.path(FOLDER_DATA_RESULTS,"nAmE*.xlsx")) ###
