@@ -2580,6 +2580,11 @@ openxlsx::write.xlsx(tab,
                                "buthaina",
               sprintf("%s_ANC_PPC_Booking_Table.xlsx",lubridate::today())))
 
-#missing variables
-#sum(!is.na(d$variable))
- 
+# d[,id:=1:.N]
+# 
+# long <- melt.data.table(d, id.vars=c(
+#   "id"
+# ),variable.factor = F, value.factor = F)
+# 
+# sum(!is.na(d$value))
+

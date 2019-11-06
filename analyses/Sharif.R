@@ -87,6 +87,14 @@ chisq.test(xtabs(~ident_dhis2_ppc+labogctbinary,data=PPC_OGCT,addNA = TRUE))
 ##########################
 ######Anemia vs PPC#######
 ##########################
+d[,labhbxxx:=0]
+vars <- stringr::str_subset(names(d),"^labhb_[0-9]+")
+for(i in vars) d[(get(i)<17),labhbxxx:=labhbxxx+1]
+
+
+
+
+
 
 d[is.na(ident_dhis2_ppc), ident_dhis2_ppc:=FALSE]
 
@@ -100,7 +108,7 @@ d[,labhbxy:=as.numeric()]
 vars <- names(d)[stringr::str_detect(names(d),"labhbxxx")]
 for(i in vars){d[(get(i)>1),labhbxy:=get(i)]}
 
-#Create Binary Variable for if LABHBXXX <11, set all to FALSE except <11
+#Create Binary Variable for if LABHBXY <11, set all to FALSE except <11
 d[,labhbbinary:=FALSE]
 d[labhbxy<11,labhbbinary:=TRUE]
 PPC_HB<-(d[bookyear>=2017 & ident_dhis2_booking==TRUE & !is.na(labhbxy),
