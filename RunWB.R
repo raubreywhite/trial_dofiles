@@ -7,8 +7,15 @@ sapply(fileSources, source, .GlobalEnv)
 
 Setup(IS_GAZA=FALSE)
 
-CheckFilesAndVariables(folder="e.reg-intervention")
-CheckFilesAndVariables(folder="e.reg-control")
+#CheckFilesAndVariables(folder="e.reg-intervention")
+#CheckFilesAndVariables(folder="e.reg-control")
+CheckFilesAndVariables(folder="e.reg-intervention", 
+                       REF_DATE = REF_CLINIC_INTERVENTION_DATE, 
+                       CHECK_DATE = CLINIC_INTERVENTION_DATE)
+CheckFilesAndVariables(folder="e.reg-control", 
+                       REF_DATE = REF_CLINIC_CONTROL_DATE, 
+                       CHECK_DATE = CLINIC_CONTROL_DATE)
+
 
 ###### SETUP ENDS ######
 

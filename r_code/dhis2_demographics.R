@@ -135,6 +135,10 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
  d[,datecreated:=stringr::str_sub(datecreated,1,10)]
  d[, c( "uniqueid","datecreated")]
  unique( d[, c( "demoidnumber","datecreated")])
+ # d[, datecreated := stringr::str_replace(datecreated, "/([0-9][0-9])$","/20\\1")]
+ # d[, datecreated := as.Date(datecreated,format="%m/%d/%Y")]
+ # str(d$datecreated)
+ # print(unique(d$datecreated)[1:10])
 
  #d[,rownum:=1:.N,by=.(demoidnumber,datecreated)]
  #xtabs(~d$rownum)

@@ -126,7 +126,7 @@ DHIS2_BookingVisit <- function(isControl,
     )
    
     
-    setnames(d, 2, "programstageinstance")
+    setnames(d, 2, "uniqueid")
     
     d[,confamilyhistoryofbronchialastma:=as.numeric(NA)]
     d[,confamilyhistoryofcardiacdisease:=as.numeric(NA)]
@@ -164,9 +164,10 @@ DHIS2_BookingVisit <- function(isControl,
     
     setnames(d,"ancgestationalageatvisitweeks","ancgestationalageatvisitweeks")
   }
+  setnames(d, 2, "uniqueid")
   
   setnames(d, "event", "bookevent")
-  setnames(d, "programinstance", "uniqueid")
+  #setnames(d, "programinstance", "uniqueid")
   setnames(d, "programstage", "bookprogstage")
   setnames(d, "eventdate", "bookdate")
   setnames(d, "longitude", "booklong")
@@ -588,7 +589,6 @@ DHIS2_BookingVisit <- function(isControl,
   
   return(d)
   
-  print("d has been returned")
 }
 
 

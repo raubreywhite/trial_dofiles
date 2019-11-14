@@ -504,7 +504,10 @@ longlab[,has_labbloodglu:=!is.na(has_laburglu) & !is.na(labbloodglu) & labbloodg
 longlab[,has_labbloodglu_105_139:=!is.na(has_labbloodglu) & 
           labbloodglu>=105 & 
           labbloodglu<140]
+longlab[is.infinite(has_labbloodglu_105_139),has_labbloodglu_105_139:=NA]
+
 longlab[,has_labbloodglu_140plus:=!is.na(has_labbloodglu) & labbloodglu>=140]
+longlab[is.infinite(has_labbloodglu_140plus),has_labbloodglu_140plus:=NA]
 
 longlab[,has_laburglu_pos_rbs140plus:=(has_laburglu_neg==FALSE) &
           (has_labbloodglu_140plus==TRUE)]
@@ -519,6 +522,8 @@ longlab[,has_labfastbloodglu_95_125:=!is.na(labfastbloodglu) &
                                     labfastbloodglu>=95 & 
                                     labfastbloodglu<126]
 longlab[,has_labfastbloodglu_126plus:=!is.na(labfastbloodglu) & labfastbloodglu>=140]
+longlab[is.infinite(has_labfastbloodglu_95_125),has_labfastbloodglu_95_125:=NA]
+
 
 
 ####diabetes risk and management
@@ -593,6 +598,7 @@ each_woman <- longlab[,.(
   has_labfastbloodglu=max(has_labfastbloodglu,na.rm=TRUE),
   has_labfastbloodglu_95_125=max(has_labfastbloodglu_95_125,na.rm=TRUE),
   has_labfastbloodglu_126plus=max(has_labfastbloodglu_126plus,na.rm=TRUE),
+  has_labbloodglu_140plus=max( has_labbloodglu_140plus, na.rm=TRUE),
   has_laburglu_neg=max(has_laburglu_neg,na.rm=TRUE),
   has_labbloodglu_105_139=max(has_labbloodglu_105_139,na.rm=TRUE),
   has_labogctany=max(has_labogctany, na.rm=TRUE),
@@ -681,6 +687,7 @@ overview <- expand.grid(
     "has_laburglu_pos",
     "has_labfastbloodglu",
     "has_labfastbloodglu_126plus",
+    "has_labbloodglu_140plus",
     "has_labogctany",
     "has_laburglu_neg",
     "has_labfastbloodglu_95_125",
@@ -1053,6 +1060,18 @@ each_woman <- each_woman[,
                                    "has_labbloodglu_31_33",
                                    "has_labbloodglu_34_38",
                                    "has_labbloodglu_39_99",
+                                   
+                                   "has_labbloodglu_140plus_0_7",
+                                   "has_labbloodglu_140plus_8_12",
+                                   "has_labbloodglu_140plus_13_14",
+                                   "has_labbloodglu_140plus_15_17",
+                                   "has_labbloodglu_140plus_18_22",
+                                   "has_labbloodglu_140plus_23_23",
+                                   "has_labbloodglu_140plus_24_28",
+                                   "has_labbloodglu_140plus_29_30",
+                                   "has_labbloodglu_140plus_31_33",
+                                   "has_labbloodglu_140plus_34_38",
+                                   
                                    
                                    "has_labogctany_0_7",
                                    "has_labogctany_8_12",
@@ -1915,10 +1934,76 @@ uglytable <- each_woman[,
                                          has_labogct_31_33,
                                          has_labogct_34_38, na.rm=TRUE),
                     
-                    FBS_likely_GDM=sum(has_labfastbloodglu_126plus_24_28,
+                    LabfastbloodgluposTotal=sum(has_labfastbloodglu_95_125_0_7,
+                                           has_labfastbloodglu_95_125_8_12,
+                                           has_labfastbloodglu_95_125_13_14,
+                                           has_labfastbloodglu_95_125_15_17,
+                                           has_labfastbloodglu_95_125_18_22,
+                                           has_labfastbloodglu_95_125_23_23,
+                                           has_labfastbloodglu_95_125_24_28,
+                                           has_labfastbloodglu_95_125_29_30,
+                                           has_labfastbloodglu_95_125_31_33,
+                                           has_labfastbloodglu_95_125_34_38,na.rm=TRUE),
+                    labbloodgluposTotal=sum(has_labbloodglu_105_139_0_7,
+                                       has_labbloodglu_105_139_8_12,
+                                       has_labbloodglu_105_139_13_14,
+                                       has_labbloodglu_105_139_15_17,
+                                       has_labbloodglu_105_139_18_22,
+                                       has_labbloodglu_105_139_23_23,
+                                       has_labbloodglu_105_139_24_28,
+                                       has_labbloodglu_105_139_29_30,
+                                       has_labbloodglu_105_139_31_33,
+                                       has_labbloodglu_105_139_34_38,na.rm=TRUE),
+                  
+                    
+                    
+                    FBS_likely_GDMTotal=sum(has_labfastbloodglu_126plus_0_7,
+                                       has_labfastbloodglu_126plus_8_12,
+                                       has_labfastbloodglu_126plus_13_14,
+                                       has_labfastbloodglu_126plus_15_17,
+                                       has_labfastbloodglu_126plus_18_22,
+                                       has_labfastbloodglu_126plus_23_23,
+                                       has_labfastbloodglu_126plus_24_28,
                                        has_labfastbloodglu_126plus_29_30,
                                        has_labfastbloodglu_126plus_31_33,
                                        has_labfastbloodglu_126plus_34_38, na.rm=TRUE),
+                    
+                    RBGlucose140plusTotal=sum(has_labbloodglu_140plus_0_7,
+                                          has_labbloodglu_140plus_8_12,
+                                          has_labbloodglu_140plus_13_14,
+                                          has_labbloodglu_140plus_15_17,
+                                          has_labbloodglu_140plus_18_22,
+                                          has_labbloodglu_140plus_23_23,
+                                          has_labbloodglu_140plus_24_28,
+                                          has_labbloodglu_140plus_29_30,
+                                          has_labbloodglu_140plus_31_33,
+                                          has_labbloodglu_140plus_34_38,na.rm=TRUE),
+                    
+                    
+                    RBGlucose140plusTotallessthan24wk= sum(has_labbloodglu_140plus_0_7,
+                                                            has_labbloodglu_140plus_8_12,
+                                                            has_labbloodglu_140plus_13_14,
+                                                            has_labbloodglu_140plus_15_17,
+                                                            has_labbloodglu_140plus_18_22,
+                                                            has_labbloodglu_140plus_23_23,na.mr=TRUE),
+                    RBGGluc140plusafter24wks=sum( has_labbloodglu_140plus_24_28,
+                                                  has_labbloodglu_140plus_29_30,
+                                                  has_labbloodglu_140plus_31_33,
+                                                  has_labbloodglu_140plus_34_38,na.rm=TRUE),
+                    
+                    
+                    FBS_likely_GDMbefore24wk=sum(has_labfastbloodglu_126plus_0_7,
+                                            has_labfastbloodglu_126plus_8_12,
+                                            has_labfastbloodglu_126plus_13_14,
+                                            has_labfastbloodglu_126plus_15_17,
+                                            has_labfastbloodglu_126plus_18_22,
+                                            has_labfastbloodglu_126plus_23_23, na.rm=TRUE),
+                    
+                    FBS_likely_GDMafter24wk=sum(has_labfastbloodglu_126plus_24_28,
+                                            has_labfastbloodglu_126plus_29_30,
+                                            has_labfastbloodglu_126plus_31_33,
+                                            has_labfastbloodglu_126plus_34_38, na.rm=TRUE),
+
              
                       OGCT_LikelyDM=sum(has_labogct_24_28,
                                             has_labogct_140plus_29_30,
@@ -2016,7 +2101,7 @@ d[cleanincome>=10000, cleanincome:=cleanincome*0.1]
 unique(d$cleanincome)
 demo <- d[bookyear>=2017 & 
             ident_dhis2_booking==TRUE &
-            bookgestage<40 &
+            #bookgestage<40 &
             cleanincome>100, c("age",
                             "income",
                             "cleanincome",
@@ -2030,9 +2115,22 @@ tab <- demo[,.(
               "medianIncome"=median(income, na.rm=TRUE),
               "meanCleanIncome"=mean(cleanincome, na.rm=TRUE),
               "meanBookgA"=mean(bookgestage, na.rm=TRUE),
-              "medianBookgA"=mean(bookgestage, na.rm=TRUE)
+              "medianBookgA"=median(bookgestage, na.rm=TRUE)
             ),
             keyby=.(bookyear, bookorgdistrict)]
+
+tab <- demo[,.(
+              "meanAge"=mean(age, na.rm=TRUE),
+              "medianAge"=median(age, na.rm=TRUE),
+              "meanIncome"=mean(income, na.rm=TRUE),
+              "medianIncome"=median(income, na.rm=TRUE),
+              "meanCleanIncome"=mean(cleanincome, na.rm=TRUE),
+              "meanBookgA"=mean(bookgestage, na.rm=TRUE),
+              "medianBookgA"=median(bookgestage, na.rm=TRUE)
+          ),
+          keyby=.(bookyear)]
+
+
 
 openxlsx::write.xlsx(tab,
                      file.path(FOLDER_DATA_RESULTS,
