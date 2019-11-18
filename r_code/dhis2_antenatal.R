@@ -42,7 +42,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   
   if (isControl) {
     # read in ANC followup, keep the first obs per pregnancy
-    #setnames(d, 2, "programstageinstance")
+    setnames(d, 2, "uniqueid")
     setorder(d, uniqueid, eventdate)
     d[, visitNum := 1:.N, by = .(uniqueid)]
     d <- d[visitNum != 1]
@@ -92,8 +92,9 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
    # nothing
   }
   
+  setnames(d,2,"uniqueid")
   setnames(d,"event","anevent")
-  #setnames(d,"programstageinstance","uniqueid")
+  #setnames(d," programstageinstance","uniqueid")
   setnames(d,"programstage","anprogstage")
   setnames(d,"eventdate","andate")
   setnames(d,"longitude","anlong")
@@ -116,7 +117,8 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"ancfetalheartsoundfhs","anexamfh")
   setnames(d,"ancfundalheightmeasurement","anexamsfh")
   
-  #setnames(d,which(stringr::str_detect(names(d),"^anchypertensioncerebralorvisuals")),"anhisthtnsymp")
+  #setnames(d,which(stringr::str_detect(names(d),"^anchypertensioncerebralorvisuals"
+  #)),"anhisthtnsymp")
   
   setnames(d,which(stringr::str_detect(names(d),"^ancfetalpresentationcheckedbypalpation")),"anexampalp")
   setnames(d,which(stringr::str_detect(names(d),"^whichancvisitisthis")),"anvisitweeks")

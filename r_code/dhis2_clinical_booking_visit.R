@@ -14,9 +14,9 @@ DHIS2_BookingVisit <- function(isControl,
       ),
       encoding = "UTF-8"
     )
-    setnames(d, 2, "programstageinstance")
-    setorder(d, programstageinstance, `Event date`)
-    d[, visitNum := 1:.N, by = .(programstageinstance)]
+    setnames(d, 2, "uniqueid")
+    setorder(d, uniqueid, `Event date`)
+    d[, visitNum := 1:.N, by = .(uniqueid)]
     firstObsPerPreg <- d[visitNum == 1]
     firstObsPerPreg[, visitNum := NULL]
 
@@ -42,11 +42,12 @@ DHIS2_BookingVisit <- function(isControl,
       ),
       encoding = "UTF-8"
     )
-    setnames(d, 2, "programstageinstance")
+    setnames(d, 2, "uniqueid")
     nrow(d)
-    d <- merge(d, firstObsPerPreg, by = "programstageinstance", all.x = T)
+    d <- merge(d, firstObsPerPreg, by = "uniqueid", all.x = T)
     nrow(d)
-
+    setcolorder(d, c("Event", "uniqueid"))
+    
     d[, identificationdocumentnumber := as.character(NA)]
     d[, ancallergiesdrugsandorseverefood := as.numeric(NA)]
     d[, ancallergiesdrugsandorseverefood := as.numeric(NA)]
@@ -167,6 +168,7 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, 2, "uniqueid")
   
   setnames(d, "event", "bookevent")
+  print(names(d))
   #setnames(d, "programinstance", "uniqueid")
   setnames(d, "programstage", "bookprogstage")
   setnames(d, "eventdate", "bookdate")

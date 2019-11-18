@@ -64,11 +64,11 @@ DHIS2_Master <- function(
   print("B")
   print(nrow(data_DHIS2_Booking))
   
-  print(sum(!is.na(bookdate)))
+  #print(sum(!is.na(bookdate)))
   
   print("num missing bookdate")
   print(nrow(data_DHIS2_Booking[is.na(bookdate)]))
-  print(sum(!is.na(bookdate)))
+ #print(sum(!is.na(bookdate)))
 
   print("num bookdate>=minbookdate")
   print(nrow(data_DHIS2_Booking[bookdate>=minBookDate]))
