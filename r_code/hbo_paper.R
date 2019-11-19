@@ -52,24 +52,26 @@ paperhbo<- function(src="original",tagWithPaperHBO=FALSE){
     d[,birthdate:=as.Date(birthdate,format="%d-%m-%Y")]
     d[,booknum:=as.numeric(booknum)]
   }
-  
-  ###after we ran the data and got the "aggregate function missing"
-  ###function went to length instead and numbered the rows 1, 2,3, etc
-  ###based on if theyre duplicates, etc
-  ###because of the duplicates, did: nrow(d[paperhbo_birthdate_1==2])
-  ###to get the number of duplicate cases
-    # openxlsx::write.xlsx(d[paperhbo_birthdate_1>=2, 
-    #                        c("bookevent",
-    #                          "motheridno",
-    #                          "bookdate",
-    #                          "bookorgname",
-    #                          "firstname",
-    #                          "fathersname",
-    #                          "familyname1")],
-    #                      file=file.path(
-    #                        FOLDER_DATA_RESULTS_WB,
-    #                        sprintf("%s_Duplicate_paperhbos.xlsx",lubridate::today())))
-    # 
+  # 
+  # d[,duplicates:=.N,keyby=.(bookevent,booknum,eventnum)]
+  # d[duplicates>1]
+  # ###after we ran the data and got the "aggregate function missing"
+  # ###function went to length instead and numbered the rows 1, 2,3, etc
+  # ###based on if theyre duplicates, etc
+  # ###because of the duplicates, did: nrow(d[paperhbo_birthdate_1==2])
+  # ###to get the number of duplicate cases
+  #   openxlsx::write.xlsx(d[duplicates>1,
+  #                          c("bookevent",
+  #                            "motheridno",
+  #                            "bookdate",
+  #                            "bookorgname",
+  #                            "firstname",
+  #                            "fathersname",
+  #                            "familyname1")],
+  #                        file=file.path(
+  #                          FOLDER_DATA_RESULTS_WB,
+  #                          sprintf("%s_Duplicate_paperhbos.xlsx",lubridate::today())))
+
   if(tagWithPaperHBO){
     d <- d[is.na(removebecausetwins)]
     for(n in names(d)){

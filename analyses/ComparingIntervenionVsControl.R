@@ -705,13 +705,14 @@ d$uslga_1
 
 #gA at referal to clinics
 
-
 ##Man details
 d$mantypex_1
 d$mandetail_1
 d$mantypey_1
 
-#Prev preg outcomes???
+##medical history
+
+smalld<-d[]
 
 
 

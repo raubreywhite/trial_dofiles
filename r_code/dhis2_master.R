@@ -252,19 +252,21 @@ DHIS2_Master <- function(
   ####
   #
   print("CLINICAL CURRENT PREG OUTCOMES")
-  data_DHIS2_CurrentPregnancyOutcomes <- DHIS2_CurrentPregnancyOutcomes(isControl=F,
-                                                                        earlyData = earlyData,
-                                                                        booklmp = booklmp,
-                                              data_ident_dhis2_booking = data_ident_dhis2_booking,
-                                                                        IS_GAZA=IS_GAZA)
+  data_DHIS2_CurrentPregnancyOutcomes <- DHIS2_CurrentPregnancyOutcomes(
+    isControl=F,
+    earlyData = earlyData,
+    booklmp = booklmp,
+    data_ident_dhis2_booking = data_ident_dhis2_booking,
+    IS_GAZA=IS_GAZA)
   nrow(data_DHIS2_CurrentPregnancyOutcomes)
   ####
   #
   print("CLINICAL CURRENT PREG OUTCOMES")
-  data_DHIS2_PregnancyClosingNotes <- DHIS2_PregnancyClosingNotes(isControl=F,
-                                                                        earlyData = earlyData,
-                                                                        booklmp = booklmp,
-                                                                  IS_GAZA=IS_GAZA)
+  data_DHIS2_PregnancyClosingNotes <- DHIS2_PregnancyClosingNotes(
+    isControl=F,
+    earlyData = earlyData,
+    booklmp = booklmp,
+    IS_GAZA=IS_GAZA)
   print(nrow(data_DHIS2_PregnancyClosingNotes))
   ####
   #
@@ -504,8 +506,6 @@ DHIS2_Master <- function(
   print(nrow(data_DHIS2_Booking))
   print(nrow(d))
   ncol(d)
-  
-  
   
   
   

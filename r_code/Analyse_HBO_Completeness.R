@@ -124,11 +124,13 @@ Analyse_HBO_Completeness <-function(d){
       merged_presentationdeliv_notmiss=sum(!is.na(merged_presentationdeliv)),
       merged_indic_csection_notmiss=sum(!is.na(merged_indic_csection))
       
-    ),by=.(bookyearmonth,
-           ident_dhis2_control,
-           matching)]
+    ),by=.(#bookyearmonth,
+          #matching,
+           ident_dhis2_control
+           )]
     
-    setorder(results,bookyearmonth,matching)
+ 
+    #setorder(results,bookyearmonth,matching)
     
     openxlsx::write.xlsx(x=results,file=file.path(
       FOLDER_DATA_RESULTS,
@@ -140,6 +142,7 @@ Analyse_HBO_Completeness <-function(d){
       "hbo_completeness",
       sprintf("%s_HBO_Completeness.xlsx",DATA_DATE)))
     
+
     
 #####HBO detailed report#####
 ###place of delivery (priv, gov, out of country, home)

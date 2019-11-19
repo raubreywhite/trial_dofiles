@@ -409,7 +409,8 @@ DHIS2_BookingVisit <- function(isControl,
     str(d$bookdate)
     #print(unique(d$bookdate)[1:10])
   } else {
-    d[is.na(bookevent), bookdate := datecreated]
+    d[is.na(bookevent), bookdate:=datecreated]
+    d[,bookdate:=as.Date(bookdate)]
   }
   
   d[is.na(bookevent), bookevent := sprintf("%s%s", ifelse(isControl,"CON","INT"), 1:.N)]
