@@ -138,6 +138,10 @@ DHIS2_Master <- function(
   data_DHIS2_Booking <- merge(data_DHIS2_Booking,sData,by=c("bookorgname"),all.x=T)
   print(nrow(data_DHIS2_Booking))
   
+  
+  xtabs(~data_DHIS2_Booking$ident_TRIAL_1, addNA=T)
+  
+  
   # changing the structural indicators to include additional data
   # e.g. trial 1 needs to also include dates
   data_DHIS2_Booking[,ident_TRIAL_1_clinics:=ident_TRIAL_1]

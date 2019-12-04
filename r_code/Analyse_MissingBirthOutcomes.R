@@ -54,6 +54,97 @@ Analyse_MissingBirthOutcomes <- function(d){
                          sprintf("%s_matched_report.xlsx",DATA_DATE)))
   
   
+  ###analyze data points per woman
+  ##variables per woman and total of combinations
+  #
+  
+  tokeep <- d[
+    ident_dhis2_booking==1 &
+      #isExpectedToHaveDelivered==TRUE &
+      ident_TRIAL_1==TRUE &
+      bookdate >= "2017-01-15"&
+      bookdate<="2017-09-15",]
+  
+  setorder(tokeep,bookorgname,bookdate)
+  
+  
+  results <- tokeep[,.(
+    denominator=.N,
+    NoneMissing=sum(!is.na(merged_pregoutcome) &
+                      (!is.na(merged_gestagedeliv)|
+                         !is.na(merged_datedeliv) ) &
+                      !is.na(merged_pregbweight) &
+                      !is.na(merged_birthhemo) &
+                      !is.na(merged_modedeliv) &
+                      (!is.na(merged_bpsyst) | !is.na(merged_bpdiast)) &
+                      !is.na(merged_presentationdeliv), na.rm=TRUE),
+    MissingGABDONLY=sum((is.na(merged_gestagedeliv)|
+                           is.na(merged_datedeliv)) &
+                          !is.na(merged_pregoutcome) &
+                          !is.na(merged_pregbweight) &
+                          !is.na(merged_birthhemo) &
+                          !is.na(merged_modedeliv) &
+                          (!is.na(merged_bpsyst)|!is.na(merged_bpdiast)) &
+                          !is.na(merged_presentationdeliv), na.rm=TRUE),
+    BWMissingOnly=sum(is.na(merged_pregbweight) &
+                        (!is.na(merged_gestagedeliv)|
+                           !is.na(merged_datedeliv)) &
+                        !is.na(merged_pregoutcome) &
+                        !is.na(merged_birthhemo) &
+                        !is.na(merged_modedeliv) &
+                        (!is.na(merged_bpsyst)|!is.na(merged_bpdiast)) &
+                        !is.na(merged_presentationdeliv), na.rm=TRUE),
+    HBGMissingOnly=sum(is.na(merged_birthhemo) &
+                         (!is.na(merged_gestagedeliv)|
+                            !is.na(merged_datedeliv)) &
+                         !is.na(merged_pregoutcome) &
+                         !is.na(merged_pregbweight) &
+                         !is.na(merged_modedeliv) &
+                         (!is.na(merged_bpsyst)|!is.na(merged_bpdiast)) &
+                         !is.na(merged_presentationdeliv), na.rm=TRUE),
+    MissingMODOnly=sum(is.na(merged_modedeliv) &
+                         (!is.na(merged_gestagedeliv)|
+                            !is.na(merged_datedeliv)) &
+                         !is.na(merged_pregoutcome) &
+                         !is.na(merged_pregbweight) &
+                         !is.na(merged_birthhemo) &
+                         (!is.na(merged_bpsyst)|!is.na(merged_bpdiast)) &
+                         !is.na(merged_presentationdeliv), na.rm=TRUE),
+    MissingBPONLY=sum((is.na(merged_bpsyst)|
+                         is.na(merged_bpdiast)) &
+                        (!is.na(merged_gestagedeliv)|
+                           !is.na(merged_datedeliv)) &
+                        !is.na(merged_pregoutcome) &
+                        !is.na(merged_pregbweight) &
+                        !is.na(merged_birthhemo) &
+                        !is.na(merged_modedeliv) &
+                        !is.na(merged_presentationdeliv), na.rm=TRUE),
+    MissingPresONLY=sum(is.na(merged_modedeliv) &
+                          (!is.na(merged_gestagedeliv)|
+                             !is.na(merged_datedeliv)) &
+                          !is.na(merged_pregoutcome) &
+                          !is.na(merged_pregbweight) &
+                          !is.na(merged_birthhemo) &
+                          (!is.na(merged_bpsyst)|!is.na(merged_bpdiast)) &
+                          !is.na(merged_presentationdeliv), na.rm=TRUE),
+    MergedModeCS=sum(merged_modedeliv=="Cesarean Section (with General Anesthesia)"|
+                       merged_modedeliv=="C.S"|
+                       merged_modedeliv=="C.S."|
+                       merged_modedeliv=="Caesarian section"|
+                       merged_modedeliv=="Cesarean Section (with Local Anesthesia)"|
+                       merged_modedeliv=="CS"|
+                       merged_modedeliv=="C/S"|
+                       merged_modedeliv=="C/S/",
+                       na.rm=TRUE)
+  ),by=.(ident_dhis2_control)]
+  
+  openxlsx::write.xlsx(results,
+                       file=file.path(
+                         FOLDER_DATA_RESULTS,
+                         "hbo_completeness",
+                         sprintf("%s_birth_outcomes_per_woman.xlsx",lubridate::today())))
+ 
+  
   ### maybe you want this, maybe you dont??
   
   phbo <- paperhbo(

@@ -712,9 +712,160 @@ d$mantypey_1
 
 ##medical history
 
-smalld<-d[]
+###Baseline Charachteristics Tables
+#make columns yes, no, and missing
+vars_for_columns<-c("prettyExposure",
+                    "bookhistdm",
+                    "bookhisthtn",
+                    "bookhistgdm",
+                    "bookhistcs",
+                    "bookhistperi")
 
 
+# with=f just formatting with the fuction to make the code run
+
+smallD<-d[bookdate >= "2017-01-15"&
+          bookdate<="2017-09-15" &
+          ident_TRIAL_1==T,
+                vars_for_columns,
+                with=F
+        ]
+
+long <- melt.data.table(smallD, id.vars=c(
+  "prettyExposure"
+),variable.factor = F, value.factor = F)
+
+
+
+uglytable <- long[,
+                  .(
+                    not_NA=sum(!is.na(value)),
+                    value0=sum(value==0,na.rm=T),
+                    value1=sum(value==1, na.rm=TRUE),
+                    Missing=sum(is.na(value))
+                    
+                  ),
+                  keyby=.(
+                    variable,
+                    prettyExposure)
+                  ]
+
+openxlsx::write.xlsx(uglytable, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("ObstetricHistory_%s.xlsx", lubridate::today())))
+
+
+#Cleaning Variables
+
+
+# Body mass index
+# <18.5
+# 18.5-24.9
+# 25-29.9
+# ≥30
+# Height missing
+# Weight missing
+# BMI missing
+# Fetal presentation at term
+# Cephalic
+# Breech
+# Missing data 
+# Missing visit
+# Blood pressure at booking visit
+# Normal (<140/<90)
+# Mild hypertension (140-149/90-99)
+# Moderate hypertension (150-159/100-109)
+# Severe hypertension (≥160/≥110)
+# BP missing
+# Hemoglobin at booking visit
+# Normal (≥11)
+# Mild anemia (10-10.9)
+# Moderate anemia (7-8.9)
+# Severe anemia (<7)
+# Hemoglobin missing
+# Urine stick results for glucose at booking visit
+# Positive
+# Negative
+# Urine stick missing
+
+#demoraphic variables
+Background variables
+
+
+Maternal age (years)
+≤20
+21–25
+26–30
+31–35
+36–40
+Greater than 40 
+Missing
+
+
+Parity
+Para 0
+Multiparous 1-4
+Multiparous >4
+Missing
+
+Average monthly household income (Israeli new shekel)
+avgincomecat
+≤200
+201-900
+901-1824
+1825-3054
+>3055
+Missing
+
+Years of education
+educationcat
+<10
+10-13
+>13
+Missing
+
+Age at first pregnancy (years)
+≤20
+21–25
+26–30
+31–35
+36–40
+Greater than 40
+Missing
+
+Body mass index
+
+d[,bookbmicat]
+<18.5
+18.5-24.9
+25-29.9
+≥30
+Height missing
+Weight missing
+BMI missing
+Fetal presentation at term
+Cephalic
+Breech
+Missing data 
+Missing visit
+Blood pressure at booking visit
+Normal (<140/<90)
+Mild hypertension (140-149/90-99)
+Moderate hypertension (150-159/100-109)
+Severe hypertension (≥160/≥110)
+BP missing
+Hemoglobin at booking visit
+Normal (≥11)
+Mild anemia (10-10.9)
+Moderate anemia (7-8.9)
+Severe anemia (<7)
+Hemoglobin missing
+Urine stick results for glucose at booking visit
+Positive
+Negative
+Urine stick missing
 
 
 

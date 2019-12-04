@@ -30,7 +30,7 @@ d[mobile!="",has_mobilephone:=TRUE]
 
 smalld <- d[ident_dhis2_booking==TRUE & 
               ident_hr_clinic==FALSE &
-              bookyearmonth%in%c("2019-06","2019-07") &
+              bookyear>=2019 &
               ident_TRIAL_2_and_3==TRUE,
                   c("SMSyes",
                     "bookgestage",
@@ -99,8 +99,7 @@ openxlsx::write.xlsx(smsbookingA,
 
 ###all clinics
 smalld <- d[ident_dhis2_booking==TRUE & 
-              bookyearmonth%in%c("2019-06","2019-07") &
-              ident_TRIAL_2_and_3==TRUE,
+              bookyear>=2019,
             c("SMSyes",
               "ident_dhis2_booking",
               "ident_dhis2_an",
@@ -123,6 +122,7 @@ smsqcheck <- smalld[,.(
   WantSMS=sum(SMSyes, na.rm=TRUE)
 ),
 keyby=.(ident_TRIAL_2_3_Control,
+        ident_TRIAL_2,
         str_TRIAL_2_Cluster,
         bookorgname, 
         bookyearmonth, 
@@ -132,7 +132,9 @@ keyby=.(ident_TRIAL_2_3_Control,
 openxlsx::write.xlsx(smsqcheck, 
                      file.path(
                        FOLDER_DATA_RESULTS,
-                       sprintf("%s_SMS_quality_check_ALL_clinics.xlsx",lubridate::today())))
+                       "sms_monitoring",
+                       sprintf("%s_SMS_quality_check_ALL_clinics.xlsx",
+                               lubridate::today())))
 
 
 #xtabs(~bookorgname + areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits, data=smalld)

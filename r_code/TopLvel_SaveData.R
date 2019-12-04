@@ -200,7 +200,7 @@ SaveCISMACDataBase<- function(){
   d[ident_dhis2_control==T,bookhisthtn:=confamilyhistoryofhypertension]
 
 #gravida, para, abo can get from prev pregnancies, no need to keep control variables for them
-   
+   d[bookweight>140|bookweight<35, bookweight:=as.numeric(NA)]
   
   
   varsKeep <- c(
@@ -215,6 +215,7 @@ SaveCISMACDataBase<- function(){
     "incomecat",
     #"education",
     "educationcat",
+    "paracat",
     #"members",
     "avicennanum",
     "motheridbooknum",
@@ -224,6 +225,7 @@ SaveCISMACDataBase<- function(){
     #"booklmp",
     #"booklmp_original",
     "bookgestage",
+    "booklabhb",
     "bookprimi",
     "bookpprom",
     "bookprom",

@@ -1,16 +1,30 @@
 CreatingFurtherVariablesNormal <- function(d){
   d[,nbcdateofdelivery_1:=as.Date(nbcdateofdelivery_1)]
   
+  #cleaning
+  ##age
+  #d[age<14, age:=NA]
+  #d[age>45, age:=NA]
   d[,agecat:=cut(age,
-                  breaks=c(0,20,25,30,35,40,45,50,100),
+                  breaks=c(0,20,25,30,35,40,100),
                   include.lowest=T)]
+  
+  ##age @ marriage
+  #d[agemarriage<14, agemarriage:=NA]
+  #d[agemarriage>45, agemarriage:=NA]
   d[,agemarriagecat:=cut(agemarriage,
                                     breaks=c(0,20,25,30,35,40,100),
                                     include.lowest=T)]
+  
+  ##agepreg
+  #d[agepregnancy<14, agepregnancy:=NA]
+  #d[agepregnancy>45, agepregnancy:=NA]
   d[,agepregnancycat:=cut(agepregnancy,
                                      breaks=c(0,20,25,30,35,40,100),
                                      include.lowest=T)]
-  
+
+  ##education is already less than 0 or missing
+  d[education<0, education:=NA]
   d[,educationcat:=cut(education,
                                   breaks=c(0,9,13,100),
                                   include.lowest=T)]
@@ -18,6 +32,8 @@ CreatingFurtherVariablesNormal <- function(d){
   xtabs(~d$agemarriagecat)
   xtabs(~d$agepregnancycat)
   xtabs(~d$educationcat)
+  
+  #d[income<150, income:=NA]
   
   d[,avgincome := income/members]
   
@@ -29,6 +45,25 @@ CreatingFurtherVariablesNormal <- function(d){
                                include.lowest=T)]
   
   xtabs(~d$avgincomecat)
+  # 
+  # #clean these only for trial 1 then get rid of them
+  # ##bookweight
+  # d[bookweight<=35, bookweight:=NA]
+  # d[bookweight>=140, bookweight:=NA]
+  # 
+  # ##bookbpsyst
+  # d[bookbpsyst<60, bookbpsyst:=NA]
+  # d[bookbpsyst>170, bookbpsyst:=NA]
+  # 
+  # ##bookbpdiast
+  # d[bookbpdiast<40, bookbpdiast:=NA]
+  # 
+  # 
+  # #Hemoglobin at booking visit		If <3 OR >17, set to missing
+  # d[,booklabhb:=as.numeric(NA)]
+  # d[abs(bookgestage-labgestage_1)<=1, booklabhb:=labhb_1]
+  
+
  
 }
 
@@ -345,9 +380,16 @@ class(d$mahima_gA_1_us)
   d[bookheight!=0 & 
     bookweight!=0,
     bookbmi:=10000*bookweight/(bookheight^2)]
+  d[,bookbmicat:=cut(bookbmi,
+                     breaks=c(0,18.4,24.9,29.9,99999),
+                     include.lowest=T)]
   
-  #d[!is.na(bookweight) & !is.na(bookheight),
-   # bookbmi:=((bookweight/bookheight/bookheight)*10000)]
+ #paraCat
+ # d[,paracat:=cut(para,
+ #                 breaks=c(0,0.9,4,15),
+ #                 include.lowest=T)]
+  
+  
   
   # MERVET FILL IN HERE
   
