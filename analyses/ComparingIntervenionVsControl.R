@@ -30,7 +30,10 @@ d[ident_dhis2_control==T, prettyExposure:="Trial Arm A"]
 smallD <- d[bookdate >= "2017-01-15"&
             bookdate<="2017-09-15" &
             ident_TRIAL_1==T,]
-
+smallx<-d[bookdate >= "2017-01-15"&
+            bookdate<="2017-09-15" &
+            ident_TRIAL_1==T,
+            c("firstname","bookevent", "andate_1","prevoutcome_1")]
 
 ##making a table for data we want to analyze from the analysis data set
 ##for things like parity, make an ugly table because its not a box plot
@@ -758,93 +761,111 @@ openxlsx::write.xlsx(uglytable,
 
 
 #Cleaning Variables
-
-
-# Body mass index
-# <18.5
-# 18.5-24.9
-# 25-29.9
-# ≥30
-# Height missing
-# Weight missing
-# BMI missing
-# Fetal presentation at term
-# Cephalic
-# Breech
-# Missing data 
-# Missing visit
-# Blood pressure at booking visit
-# Normal (<140/<90)
-# Mild hypertension (140-149/90-99)
-# Moderate hypertension (150-159/100-109)
-# Severe hypertension (≥160/≥110)
-# BP missing
-# Hemoglobin at booking visit
-# Normal (≥11)
-# Mild anemia (10-10.9)
-# Moderate anemia (7-8.9)
-# Severe anemia (<7)
-# Hemoglobin missing
-# Urine stick results for glucose at booking visit
-# Positive
-# Negative
-# Urine stick missing
+#making parity variable for para cats so it can be included in the small data sets
+d[,paracat:=cut(para,
+                breaks=c(0,0.9,4,15),
+                include.lowest=T)]
+smallD <- d[bookdate >= "2017-01-15"&
+            bookdate<="2017-09-15" &
+            ident_TRIAL_1==T,]
 
 #demoraphic variables
-Background variables
+#ageCat
+smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                  TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+                  
+                  keyby=.(agecat)]
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("agecats_%s.xlsx", lubridate::today())))
+
+#parity
+#paraCat
+smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                  TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+               
+               keyby=.(paracat)]
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("paracat_%s.xlsx", lubridate::today())))
+
+#avgincomecat
+smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                  TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+               
+               keyby=.(avgincomecat)]
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("avgincomecat_%s.xlsx", lubridate::today())))
+
+#educat
+smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                  TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+               
+               keyby=.(educationcat)]
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("educationcat_%s.xlsx", lubridate::today())))
+
+#agepreg
+smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                  TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+               
+               keyby=.(agepregnancycat)]
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("agepregcat_%s.xlsx", lubridate::today())))
+
+#bmicat
+smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                  TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+               
+               keyby=.(bookbmicat)]
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("bookbmicat_%s.xlsx", lubridate::today())))
 
 
-Maternal age (years)
-≤20
-21–25
-26–30
-31–35
-36–40
-Greater than 40 
-Missing
+#baseline characteristics
+#bookweight
+smallD[bookweight>140|bookweight<35, bookweight:=as.numeric(NA)]
+smalld<-smallD[,.(missingBookheight=sum(is.na(bookheight)),
+                  missingBookweight=sum(is.na(bookweight)),
+                  Height0=sum(bookheight==0, na.rm=TRUE),
+                  Weight0=sum(bookweight==0, na.rm=TRUE),
+                  missingBookbmi=sum(is.na(bookbmi))),
+               keyby=.(ident_dhis2_control)]
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("missing_bookweight__bookheight_bookbmi%s.xlsx", 
+                               lubridate::today())))
 
 
-Parity
-Para 0
-Multiparous 1-4
-Multiparous >4
-Missing
+#fetal presentation at term
+#bmicat
+# smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+#                   TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+#                
+#                keyby=.(presatterm)]
 
-Average monthly household income (Israeli new shekel)
-avgincomecat
-≤200
-201-900
-901-1824
-1825-3054
->3055
-Missing
-
-Years of education
-educationcat
-<10
-10-13
->13
-Missing
-
-Age at first pregnancy (years)
-≤20
-21–25
-26–30
-31–35
-36–40
-Greater than 40
-Missing
-
-Body mass index
-
-d[,bookbmicat]
-<18.5
-18.5-24.9
-25-29.9
-≥30
-Height missing
-Weight missing
-BMI missing
 Fetal presentation at term
 Cephalic
 Breech
@@ -856,12 +877,22 @@ Mild hypertension (140-149/90-99)
 Moderate hypertension (150-159/100-109)
 Severe hypertension (≥160/≥110)
 BP missing
-Hemoglobin at booking visit
-Normal (≥11)
-Mild anemia (10-10.9)
-Moderate anemia (7-8.9)
-Severe anemia (<7)
-Hemoglobin missing
+
+#Hemoglobin at booking visit
+smallD[,booklabhbcat:=cut(booklabhb,
+                   breaks=c(0,6.9,8.9,10.9,16,20,200),
+                   include.lowest=T)]
+#booklabhbcat
+smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                  TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+               
+               keyby=.(booklabhbcat)]
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("booklabhbcat_%s.xlsx", lubridate::today())))
+
 Urine stick results for glucose at booking visit
 Positive
 Negative

@@ -384,12 +384,7 @@ class(d$mahima_gA_1_us)
                      breaks=c(0,18.4,24.9,29.9,99999),
                      include.lowest=T)]
   
- #paraCat
- # d[,paracat:=cut(para,
- #                 breaks=c(0,0.9,4,15),
- #                 include.lowest=T)]
-  
-  
+
   
   # MERVET FILL IN HERE
   

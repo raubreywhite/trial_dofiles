@@ -200,8 +200,12 @@ SaveCISMACDataBase<- function(){
   d[ident_dhis2_control==T,bookhisthtn:=confamilyhistoryofhypertension]
 
 #gravida, para, abo can get from prev pregnancies, no need to keep control variables for them
-   d[bookweight>140|bookweight<35, bookweight:=as.numeric(NA)]
+  d[bookweight>140|bookweight<35, bookweight:=as.numeric(NA)]
   
+  #paraCat
+  d[,paracat:=cut(para,
+                  breaks=c(0,0.9,4,15),
+                  include.lowest=T)]
   
   varsKeep <- c(
     #"bookdate",
