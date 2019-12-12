@@ -37,7 +37,7 @@ for(i in vars){
   d[!is.na(get(i)), ppcevent_x:=ppcevent_x + 1]
 }
 
-sum(d[ ident_dhis2_ppc==T]$ppcevent_x,na.rm=T)
+sum(d[ident_dhis2_control==F]$ppcevent_x,na.rm=T)
 
 
 #making variable for total nbc visits
@@ -354,12 +354,8 @@ nrow(d[labgestage_22_30=="0-91"])
 sink()
 sink(file.path(FOLDER_DATA_RESULTS,
             "SystemUpdatedNumbers.txt"))
-
-#cat("\nNumber of women in trial\n")
-#nrow(d[ident_TRIAL_1==T &
-#         ident_dhis2_control==T &
-#         ident_dhis2_booking==T ])
-#nrow(d[ident_dhis2_control==F &ident_dhis2_booking==T])
+#Booking
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"]$bookevent,na.rm=T)
 
 
 #ANC
@@ -377,13 +373,11 @@ for(i in vars){
   d[!is.na(get(i)), anevent_x:=anevent_x + 1]
 }
 
-sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
-        bookdate<="2017-12-31"]$anevent_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"]$anevent_x,na.rm=T)
 
 #NBC
 cat("\nNumNBC\n")
-nrow(d[ident_dhis2_control==F &ident_dhis2_nbc==T& bookdate>="2017-01-01"&
-         bookdate<="2017-12-31"])
+nrow(d[ident_dhis2_control==F &ident_dhis2_nbc==T& bookdate>="2017-01-01"])
 cat("\nNumNBCvisits\n")
 vars <- names(d)[stringr::str_detect(names(d),"^nbcevent_[0-9]*")]
 d[,nbcevent_x:=0]
@@ -392,8 +386,7 @@ for(i in vars){
   d[!is.na(get(i)), nbcevent_x:=nbcevent_x + 1]
 }
 
-sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
-        bookdate<="2017-12-31"]$nbcevent_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"]$nbcevent_x,na.rm=T)
 
 ###Anemia
 cat("\nNumber of anemia tests on system\n")
@@ -404,8 +397,7 @@ for(i in vars){
   d[!is.na(get(i))& get(i)>0, labhb_x:=labhb_x + 1]
 }
 
-sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
-        bookdate<="2017-12-31"]$labhb_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"]$labhb_x,na.rm=T)
 
 
 
@@ -418,8 +410,7 @@ for(i in vars){
   d[!is.na(get(i)), usevent_x:=usevent_x + 1]
 }
 
-sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
-        bookdate<="2017-12-31"]$usevent_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"]$usevent_x,na.rm=T)
 
 #HYPERTENTION
 cat("\nNumber of antenatal blood pressure tests on system\n")
@@ -429,8 +420,7 @@ d[,anbpsyst_x:=0]
 for(i in vars){
   d[!is.na(get(i))& get(i)>0, anbpsyst_x:=anbpsyst_x + 1]
 }
-sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
-        bookdate<="2017-12-31"]$anbpsyst_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"]$anbpsyst_x,na.rm=T)
 
 # 
 
@@ -459,8 +449,7 @@ for(i in vars){
   d[!is.na(get(i))& get(i)>0, labbloodglu_x:=labbloodglu_x + 1]
 }
 
-sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
-        bookdate<="2017-12-31"]$labbloodglu_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"]$labbloodglu_x,na.rm=T)
 
 ###FBS
 cat("\nNumber of FBS tests on system\n")
@@ -502,8 +491,7 @@ for(i in vars){
   d[!is.na(get(i))& get(i)>0, laburuti_x:=laburuti_x + 1]
 }
 
-sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"&
-        bookdate<="2017-12-31"]$laburuti_x,na.rm=T)
+sum(d[ident_dhis2_control==F& bookdate>="2017-01-01"]$laburuti_x,na.rm=T)
 #we can trust in sink
 sink()
 

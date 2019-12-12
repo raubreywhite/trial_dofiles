@@ -30,10 +30,7 @@ d[ident_dhis2_control==T, prettyExposure:="Trial Arm A"]
 smallD <- d[bookdate >= "2017-01-15"&
             bookdate<="2017-09-15" &
             ident_TRIAL_1==T,]
-smallx<-d[bookdate >= "2017-01-15"&
-            bookdate<="2017-09-15" &
-            ident_TRIAL_1==T,
-            c("firstname","bookevent", "andate_1","prevoutcome_1")]
+
 
 ##making a table for data we want to analyze from the analysis data set
 ##for things like parity, make an ugly table because its not a box plot
@@ -841,42 +838,32 @@ openxlsx::write.xlsx(smalld,
                        "demographics_and_history",
                        sprintf("bookbmicat_%s.xlsx", lubridate::today())))
 
-
-#baseline characteristics
-#bookweight
-smallD[bookweight>140|bookweight<35, bookweight:=as.numeric(NA)]
-smalld<-smallD[,.(missingBookheight=sum(is.na(bookheight)),
-                  missingBookweight=sum(is.na(bookweight)),
-                  Height0=sum(bookheight==0, na.rm=TRUE),
-                  Weight0=sum(bookweight==0, na.rm=TRUE),
-                  missingBookbmi=sum(is.na(bookbmi))),
-               keyby=.(ident_dhis2_control)]
-openxlsx::write.xlsx(smalld, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "demographics_and_history",
-                       sprintf("missing_bookweight__bookheight_bookbmi%s.xlsx", 
-                               lubridate::today())))
+smallD[,hasus36plusweeks:=FALSE]
+vars <- stringr::str_subset(names(smallD),"^usgestage_")
+for (i in vars){
+  smallD[get(vars)>=36 & get(vars)<=40, hasus36plusweeks:=TRUE]
+  
+}
 
 
 #fetal presentation at term
-#bmicat
-# smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
-#                   TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
-#                
-#                keyby=.(presatterm)]
+smallD[,presatterm:=as.character(NA)]
 
-Fetal presentation at term
-Cephalic
-Breech
-Missing data 
-Missing visit
-Blood pressure at booking visit
-Normal (<140/<90)
-Mild hypertension (140-149/90-99)
-Moderate hypertension (150-159/100-109)
-Severe hypertension (≥160/≥110)
-BP missing
+vars <- stringr::str_subset(names(smallD),"^uspres_")
+
+for (i in vars){
+  smallD[hasus36plusweeks==TRUE, presatterm:=get(i)]
+}
+
+ smalld<-smallD[,
+                .(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                  TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+                                keyby=.(presatterm)]
+
+
+
+
+
 
 #Hemoglobin at booking visit
 smallD[,booklabhbcat:=cut(booklabhb,
@@ -893,12 +880,84 @@ openxlsx::write.xlsx(smalld,
                        "demographics_and_history",
                        sprintf("booklabhbcat_%s.xlsx", lubridate::today())))
 
-Urine stick results for glucose at booking visit
-Positive
-Negative
-Urine stick missing
 
 
+# cleaning bookbp
+smallD[bookbpsyst<60, bookbpsyst:=as.numeric(NA)]
+smallD[bookbpsyst>170, bookbpsyst:=as.numeric(NA)]
+smallD[bookbpdiast<40, bookbpdiast:=as.numeric(NA)]
+
+
+smallD[,bookbpsystcat:=cut(booklabhb,
+                          breaks=c(0,139,149,159,200),
+                          include.lowest=T)]
+smallD[,bookbpdiastcat:=cut(booklabhb,
+                           breaks=c(0,89,99,109,150),
+                           include.lowest=T)]
+
+
+
+smalld<-smallD[,.(NormalHtn=sum(bookbpsystcat=="[0,139]" &
+                                bookbpdiastcat=="[0,89]", na.rm=TRUE),
+                  MildHtn=sum(bookbpsystcat=="(139,149]" &
+                              bookbpdiastcat=="(89,99]", na.rm=TRUE),
+                  ModHtn=sum(bookbpsystcat== "(149,159]" &
+                             bookbpdiastcat=="(99,109]", na.rm=TRUE),
+                  SevHtn=sum(bookbpsystcat=="(159,200]" &
+                             bookbpdiastcat=="(109,150]", na.rm=TRUE),
+                  Missing=sum(is.na(bookbpsystcat) & is.na(bookbpdiastcat))),
+                  
+               keyby=.(prettyExposure)]
+          
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("bookHTN_%s.xlsx", lubridate::today())))
+
+smalld<-smallD[,.(
+                  TrialArmA=sum(prettyExposure==T, na.rm=TRUE),
+                  TrialArmB=sum(prettyExposure==F, na.rm=TRUE)),
+               
+               keyby=.(bookbpsystcat)]
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("bookbpsystcats_%s.xlsx", lubridate::today())))
+
+
+smallD[,booklaburglu:=as.character(NA)]
+smallD[abs(as.numeric(bookgestage)-labgestage_1)<=1, booklaburglu:=laburglu_1]
+smalld<-smallD[,.(
+                  MissingBooklabur=sum(is.na(booklaburglu)),
+                  NegBooklabur=sum(booklaburglu=="NEG",na.rm=TRUE),
+                  PosBooklabur=sum(booklaburglu=="POS", na.rm=TRUE),
+                  EmptyStringsBooklabur=sum(booklaburglu=="", na.rm=TRUE)),
+                  keyby=.(prettyExposure)] 
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("booklaburglu_%s.xlsx", lubridate::today())))
+
+
+#baseline characteristics
+#bookweight
+smallD[bookweight>140|bookweight<35, bookweight:=as.numeric(NA)]
+smalld<-smallD[,.(missingBookheight=sum(is.na(bookheight)),
+                  missingBookweight=sum(is.na(bookweight)),
+                  Height0=sum(bookheight==0, na.rm=TRUE),
+                  Weight0=sum(bookweight==0, na.rm=TRUE),
+                  missingBookbmi=sum(is.na(bookbmi))),
+               keyby=.(ident_dhis2_control)]
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("missing_bookweight__bookheight_bookbmi%s.xlsx", 
+                               lubridate::today())))
 
 
 
