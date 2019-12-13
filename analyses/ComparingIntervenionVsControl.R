@@ -52,8 +52,40 @@ smallD[,
         ProportionofWeightsis0= mean(bookweight==0, na.rm=T),
         ProportionofWeightsOver100kg= mean(bookweight>100, na.rm=T),
         ProportionofParity= mean(bookparity, na.rm=T),
+        MIssingConpara=sum(is.na(conpara)),
         meanbookgestage= mean(bookgestage, na.rm=T),
-        ProportionofPrimi=mean(bookprimi, na.rm=T)
+        ProportionofPrimi=mean(bookprimi, na.rm=T),
+        ProportionBookparity=mean(bookparity, na.rm=T),
+        meanbookgestage=mean(bookgestage, na.rm=T),
+        ProportionBookparity=mean(bookparity, na.rm=T),
+        ProportionBookbookhistperi=mean(bookhistperi, na.rm=T),
+        ProportionBookbookhistutesur=mean(bookhistutesur, na.rm=T),
+        ProportionBookbookhistcs=mean(bookhistcs, na.rm=T),
+        ProportionBookbookhistcscompl=mean(bookhistcscompl, na.rm=T),
+        ProportionBookbookhistpreterm=mean(bookhistpreterm, na.rm=T),
+        ProportionBookbookhistute=mean(bookhistute, na.rm=T),
+        ProportionBookbookhistabort=mean(bookhistabort, na.rm=T),
+        ProportionBookparity=mean(bookparity, na.rm=T),
+        ProportionBookparity=mean(bookparity, na.rm=T),
+        ProportionBookparity=mean(bookparity, na.rm=T),
+        ProportionBookparity=mean(bookparity, na.rm=T),
+        
+      
+      
+        
+        
+        
+        
+        
+        bookhistaph
+        bookhistpph
+        bookhistblood
+        bookhistbloodspec
+        
+        bookfammeta
+        bookfetalmove
+        bookvagbleed
+        
     
       
       ), 
@@ -655,11 +687,6 @@ ggsave(filename=file.path(
   width=297,
   units="mm")
 
-###Counseling IFA
-##counseled and if given or not?
-d$ancounsifa_1
-d$a
-
 ###Risks in current pregnancy
 unique(d$risktype_1)
 
@@ -712,6 +739,7 @@ d$mantypey_1
 
 ##medical history
 
+
 ###Baseline Charachteristics Tables
 #make columns yes, no, and missing
 vars_for_columns<-c("prettyExposure",
@@ -719,7 +747,16 @@ vars_for_columns<-c("prettyExposure",
                     "bookhisthtn",
                     "bookhistgdm",
                     "bookhistcs",
-                    "bookhistperi")
+                    "bookhistperi",
+                    "bookparity",
+                    "bookhistutesur",
+                    "bookhistcscompl",
+                    "bookhistpreterm",
+                    "bookhistute",
+                    "bookhistabort",
+                    "bookhistaph",
+                    "bookhistpph"
+)
 
 
 # with=f just formatting with the fuction to make the code run
@@ -733,7 +770,7 @@ smallD<-d[bookdate >= "2017-01-15"&
 
 long <- melt.data.table(smallD, id.vars=c(
   "prettyExposure"
-),variable.factor = F, value.factor = F)
+),variable.factor = F)
 
 
 
@@ -755,16 +792,88 @@ openxlsx::write.xlsx(uglytable,
                        FOLDER_DATA_RESULTS_WB,
                        "demographics_and_history",
                        sprintf("ObstetricHistory_%s.xlsx", lubridate::today())))
+d#baseline (character formats)
 
+smallD <- d[bookdate >= "2017-01-15"&
+              bookdate<="2017-09-15" &
+              ident_TRIAL_1==T,]
+
+
+#bookfetalmove
+smalld <- smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                    TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+                 
+                 keyby=.(bookfetalmove)]
+
+smalld <- smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                    TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+                 
+                 keyby=.(bookvagbleed)]
 
 #Cleaning Variables
-#making parity variable for para cats so it can be included in the small data sets
-d[,paracat:=cut(para,
+
+smallD[,paracat:=cut(para,
                 breaks=c(0,0.9,4,15),
                 include.lowest=T)]
-smallD <- d[bookdate >= "2017-01-15"&
-            bookdate<="2017-09-15" &
-            ident_TRIAL_1==T,]
+
+#checking control for para
+smallD[,conparacat:=cut(conpara,
+                breaks=c(0,0.9,4,15),
+                include.lowest=T)]
+
+
+smalld <- smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                    TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+                 
+                 keyby=.(paracat)]
+
+#check control on its own
+smalld <- smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                    TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+                 
+                 keyby=.(conparacat)]
+
+
+#new para variable so its calculated
+smallD[,paraCalculatedAll:=0]
+vars <- stringr::str_subset(names(smallD), "^prevoutcome_")
+
+#delete prevoutcome_ from it to get the actual number
+vars <- stringr::str_remove(vars, "prevoutcome_")
+
+
+for(i in vars){
+  print(i)
+  prevoutcome <-sprintf("prevoutcome_%s",i)
+  prevdate <- sprintf("prevdate_%s",i)
+  smallD[!is.na(get(prevoutcome)) & 
+      get(prevoutcome)!="" & 
+      get(prevoutcome)=="LIVE" |get(prevoutcome)=="STILL" &
+      get(prevdate)<bookdate, paraCalculatedAll:=paraCalculatedAll+1]
+}
+
+smallD[,paraCalculatedAllcat:=cut(paraCalculatedAll,
+                     breaks=c(0,0.9,4,15),
+                     include.lowest=T)]
+
+
+
+
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+                 keyby=.(paraCalculatedAllcat)]
+
+############
+smalld <- smallD[,.(
+                  bookprimiYes=sum(bookprimi==1, na.rm=TRUE),
+                  bookprimiNo=sum(bookprimi==0, na.rm=TRUE),
+                  bookprimiNA=sum(is.na(bookprimi))),
+              
+                 keyby=.(prettyExposure)]
+
+
+
+
 
 #demoraphic variables
 #ageCat
@@ -838,28 +947,70 @@ openxlsx::write.xlsx(smalld,
                        "demographics_and_history",
                        sprintf("bookbmicat_%s.xlsx", lubridate::today())))
 
-smallD[,hasus36plusweeks:=FALSE]
-vars <- stringr::str_subset(names(smallD),"^usgestage_")
+
+
+
+
+#### Pres at term 36+ #####
+smallD <- d[ident_TRIAL_1==T,]
+smallD[,hasan36plusweeks:=FALSE]
+#smallD[,hasanexampalp36:= FALSE]
+vars <- stringr::str_subset(names(smallD),"^angestage_")
 for (i in vars){
-  smallD[get(vars)>=36 & get(vars)<=40, hasus36plusweeks:=TRUE]
+  print(i)
+  smallD[get(i)>=36 & get(i)<=40, hasan36plusweeks:=TRUE]
   
 }
-
 
 #fetal presentation at term
 smallD[,presatterm:=as.character(NA)]
 
 vars <- stringr::str_subset(names(smallD),"^uspres_")
 
-for (i in vars){
-  smallD[hasus36plusweeks==TRUE, presatterm:=get(i)]
+
+for (var_pres in vars){
+  
+  vargestage <-stringr::str_replace(var_pres,"uspres", "usgestage")
+  
+  smallD[hasan36plusweeks==TRUE &
+           get(vargestage)>=36 &
+           get(vargestage)<=40 &
+           !is.na(get(var_pres)) &
+           get(var_pres)!="",
+           presatterm:=get(var_pres)]
 }
 
- smalld<-smallD[,
-                .(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
-                  TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
-                                keyby=.(presatterm)]
+smalld <- smallD[ ,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                     ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                  keyby=.(presatterm)]
 
+
+### TO DO: Fix this one#####
+####anexampalp
+
+#use hasanexampalp36 from previous us, no need to make it again
+#fetal presentation at term by anexampalp
+smallD[,anexampalp36:=as.character(NA)]
+
+vars <- stringr::str_subset(names(smallD),"^angestage")
+vars_exampalp <- stringr::str_subset(names(smallD),"^anexampalp")
+
+
+for (vars_exampalp in vars){
+  
+  vargestage <-stringr::str_replace(vars_exampalp,"anexampalp", "angestage")
+  
+  smallD[hasan36plusweeks==TRUE &
+           get(vargestage)>=36 &
+           get(vargestage)<=40 &
+           !is.na(get(vars_exampalp)) &
+           get(vars_exampalp)!="",
+         anexampalp36:=get(vars_exampalp)]
+}
+
+smalld <- smallD[ ,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                     ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                  keyby=.(anexampalp36)]
 
 
 
@@ -888,22 +1039,22 @@ smallD[bookbpsyst>170, bookbpsyst:=as.numeric(NA)]
 smallD[bookbpdiast<40, bookbpdiast:=as.numeric(NA)]
 
 
-smallD[,bookbpsystcat:=cut(booklabhb,
+smallD[,bookbpsystcat:=cut(bookbpsyst,
                           breaks=c(0,139,149,159,200),
                           include.lowest=T)]
-smallD[,bookbpdiastcat:=cut(booklabhb,
+smallD[,bookbpdiastcat:=cut(bookbpdiast,
                            breaks=c(0,89,99,109,150),
                            include.lowest=T)]
 
 
 
-smalld<-smallD[,.(NormalHtn=sum(bookbpsystcat=="[0,139]" &
+smalld<-smallD[,.(NormalHtn=sum(bookbpsystcat=="[0,139]" |
                                 bookbpdiastcat=="[0,89]", na.rm=TRUE),
-                  MildHtn=sum(bookbpsystcat=="(139,149]" &
+                  MildHtn=sum(bookbpsystcat=="(139,149]" |
                               bookbpdiastcat=="(89,99]", na.rm=TRUE),
-                  ModHtn=sum(bookbpsystcat== "(149,159]" &
+                  ModHtn=sum(bookbpsystcat== "(149,159]" |
                              bookbpdiastcat=="(99,109]", na.rm=TRUE),
-                  SevHtn=sum(bookbpsystcat=="(159,200]" &
+                  SevHtn=sum(bookbpsystcat=="(159,200]" |
                              bookbpdiastcat=="(109,150]", na.rm=TRUE),
                   Missing=sum(is.na(bookbpsystcat) & is.na(bookbpdiastcat))),
                   
@@ -930,11 +1081,9 @@ openxlsx::write.xlsx(smalld,
 smallD[,booklaburglu:=as.character(NA)]
 smallD[abs(as.numeric(bookgestage)-labgestage_1)<=1, booklaburglu:=laburglu_1]
 smalld<-smallD[,.(
-                  MissingBooklabur=sum(is.na(booklaburglu)),
-                  NegBooklabur=sum(booklaburglu=="NEG",na.rm=TRUE),
-                  PosBooklabur=sum(booklaburglu=="POS", na.rm=TRUE),
-                  EmptyStringsBooklabur=sum(booklaburglu=="", na.rm=TRUE)),
-                  keyby=.(prettyExposure)] 
+                  TrialArmA=sum(ident_dhis2_control==T, na.rm=T),
+                  TrialArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                  keyby=.(booklaburglu)] 
 
 openxlsx::write.xlsx(smalld, 
                      file.path(
@@ -942,6 +1091,17 @@ openxlsx::write.xlsx(smalld,
                        "demographics_and_history",
                        sprintf("booklaburglu_%s.xlsx", lubridate::today())))
 
+#bookprimi
+smalld<-smallD[,.(
+  TrialArmA=sum(ident_dhis2_control==T, na.rm=T),
+  TrialArmB=sum(ident_dhis2_control==F, na.rm=T)),
+  keyby=.(bookprimi)] 
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("bookprimi_%s.xlsx", lubridate::today())))
 
 #baseline characteristics
 #bookweight

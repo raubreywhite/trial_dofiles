@@ -548,61 +548,58 @@ bigd
 
 incomer<-na.omit(d$income)
 
-incomeac<-(!is.na(d$income))
-smalld<-d[,c("uniqueid","incomer")]
-smalld<-smalld[,.(N=.N),keyby=.(incomer)]
+d[,incomercca:=as.numeric()]
+d[incomer<1000, incomercca:="1000"]
+d[incomer>=1000 & incomer<1500 , incomercca:="1015"]
+d[incomer>=1500 & incomer<2000 , incomercca:="1520"]
+d[incomer>=2000 & incomer<2500 , incomercca:="2025"]
+d[incomer>=2500 & incomer<3000 , incomercca:="2530"]
+d[incomer>=3000 & incomer<3500 , incomercca:="3035"]
+d[incomer>=3500 & incomer<4000 , incomercca:="3540"]
+d[incomer>=4000 & incomer<4500 , incomercca:="4045"]
+d[incomer>=4500 & incomer<5000 , incomercca:="4550"]
+d[incomer>=5000 & incomer<5500 , incomercca:="5055"]
+d[incomer>=5500 & incomer<6000 , incomercca:="5560"]
+d[incomer>=6000 & incomer<6500 , incomercca:="6065"]
+d[incomer>=6500 & incomer<7000 , incomercca:="6570"]
+d[incomer>=7000 & incomer<7500 , incomercca:="7075"]
+d[incomer>=7500 & incomer<8000 , incomercca:="7580"]
+d[incomer>=8000 & incomer<8500 , incomercca:="8085"]
+d[incomer>=8500 & incomer<9000 , incomercca:="8590"]
+d[incomer>=9000 & incomer<9500 , incomercca:="9095"]
+d[incomer>=9500 & incomer<10000 , incomercca:="95100"]
+d[incomer>=10000 & incomer<100000 , incomercca:="10000"]
+sort(unique(d$incomercca))
+
+smalld<-d[,c("uniqueid","incomercca")]
+smalld<-smalld[,.(N=.N),keyby=.(incomercca)]
 smalld
 
+smalld2<-d[,c("uniqueid","incomercca")]
+smalld2<-smalld2[,.(N=.N),keyby=.(incomercca)]
 d$Visits<-(tizz18+tizz17+tizz16+tizz15+tizz14+tizz13+tizz12
            +tizz11+tizz10+tizz09+tizz08+tizz07+tizz06+tizz05
            +tizz04+tizz03+tizz02+tizz01)
-bigd<-d[,c("uniqueid","Visits")]
-
-smalld2<-d[,c("uniqueid","incomer")]
-smalld2<-smalld2[,.(N=.N),keyby=.(incomer)]
-d$Visits<-(tizz18+tizz17+tizz16+tizz15+tizz14+tizz13+tizz12
-           +tizz11+tizz10+tizz09+tizz08+tizz07+tizz06+tizz05
-           +tizz04+tizz03+tizz02+tizz01)
-smalld2<-d[,c("uniqueid","incomer")]
+smalld2<-d[,c("uniqueid","incomercca")]
 bigd2<-d[,c("uniqueid","Visits")]
 newed2<-merge(smalld2,bigd2,by=c("uniqueid"),all.y=T)
-newed2<-newed2[,.(N=.N,numvisits=sum(Visits)),keyby=.(incomer)]
+newed2<-newed2[,.(N=.N,numvisits=sum(Visits)),keyby=.(incomercca)]
 newed2$AVG<-(newed2$numvisits/newed2$N)
-tabyl(d$incomer)
-Hell<-newed2[,c("AVG","incomer")]
+tabyl(d$incomercca)
+Hell<-newed2[,c("AVG","incomercca")]
 Hell
 
 ############END###############
 
+d[agemarriage>=14 & agemarriage<=38,agemarriageaccu:=agemarriage]
+d[education>0 & education <50,educationaccu:=education]
+HELL<-aggregate(d[,educationaccu,], list(d$agemarriageaccu), mean , na.rm=TRUE)
+HELL
+cor.test(d$agemarriageaccu, d$educationaccu)
 
-d[,incomercca:=as.numeric()]
-d[incomer>1000, incomercca:="1000"]
-d[incomer>=1000 & incomer<1500 , incomercca:="1015"]
-d[incomer>=1500 & incomer<2000 , incomercca:="1520"]
-d[incomer>=2000 & incomer<2500 , incomercca:="2025"]
-d[incomer>=2500 & incomer<3000 , incomercca:="25002000"]
-d[incomer>=3000 & incomer<3500 , incomercca:="15002000"]
-d[incomer>=3500 & incomer<4000 , incomercca:="15002000"]
-d[incomer>=4000 & incomer<4500 , incomercca:="15002000"]
-d[incomer>=4500 & incomer<5000 , incomercca:="15002000"]
-d[incomer>=5000 & incomer<5500 , incomercca:="15002000"]
-d[incomer>=5500 & incomer<6000 , incomercca:="15002000"]
-d[incomer>=3000 & incomer<3500 , incomercca:="15002000"]
-d[incomer>=3500 & incomer<4000 , incomercca:="15002000"]
-d[incomer>=4000 & incomer<4500 , incomercca:="15002000"]
-d[incomer>=4500 & incomer<5000 , incomercca:="15002000"]
-d[incomer>=5000 & incomer<5500 , incomercca:="15002000"]
-d[incomer>=5500 & incomer<6000 , incomercca:="15002000"]
-d[incomer>=6000 & incomer<6500 , incomercca:="15002000"]
-d[incomer>=6500 & incomer<7000 , incomercca:="15002000"]
-d[incomer>=7000 & incomer<7500 , incomercca:="15002000"]
-d[incomer>=7500 & incomer<8000 , incomercca:="15002000"]
-d[incomer>=8000 & incomer<8500 , incomercca:="15002000"]
-d[incomer>=8500 & incomer<9000 , incomercca:="15002000"]
-d[incomer>=9000 & incomer<9500 , incomercca:="15002000"]
-d[incomer>=9500 & incomer<10000 , incomercca:="15002000"]
-d[incomer>10000 & incomer<100000 , incomercca:="10000"]
 
 ### TRANSFER TO EXCEL ###
 
 ### openxlsx::write.xlsx(dAtAsEt*,file.path(FOLDER_DATA_RESULTS,"nAmE*.xlsx")) ###
+
+d$educationca
