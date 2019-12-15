@@ -68,26 +68,7 @@ smallD[,
         ProportionBookparity=mean(bookparity, na.rm=T),
         ProportionBookparity=mean(bookparity, na.rm=T),
         ProportionBookparity=mean(bookparity, na.rm=T),
-        ProportionBookparity=mean(bookparity, na.rm=T),
-        
-      
-      
-        
-        
-        
-        
-        
-        bookhistaph
-        bookhistpph
-        bookhistblood
-        bookhistbloodspec
-        
-        bookfammeta
-        bookfetalmove
-        bookvagbleed
-        
-    
-      
+        ProportionBookparity=mean(bookparity, na.rm=T)
       ), 
       keyby=.(prettyExposure)
         

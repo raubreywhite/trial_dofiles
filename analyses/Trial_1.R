@@ -8,92 +8,6 @@ smallD <- smallD <- d[bookdate >= "2017-01-15"&
 d[ident_dhis2_control==F, prettyExposure:="Trial Arm B"]
 d[ident_dhis2_control==T, prettyExposure:="Trial Arm A"]
 
-
-#changing lastusedd to days
-#TO DO: make sure we get the 87 women who are missing an lmp or bookdate
-smallD[,usedddays:=lastusedd - as.difftime(280, unit="days")]
-
-smallD[,USorLMPdate:=booklmp]
-smallD[!is.na(usedddays),USorLMPdate:=usedddays]
-#smallD[is.na(USorLMPdate), USorLMPdate:=]
-
-
-#recalculating bookgestational age into days
-smallD[,bookgestagedays:=round(as.numeric(difftime(bookdate,USorLMPdate, units="days")))]
-
-bookgestagearms<-smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
-                           ArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
-                          
-                          keyby=.(bookgestagedays)]
-
-openxlsx::write.xlsx(bookgestagearms, 
-                     file.path(
-                       FOLDER_DATA_RESULTS,
-                       "demographics_and_history",
-                       sprintf("%s_bookgestagearms.xlsx",lubridate::today())))
-
-
-
-#recalculating angestational age into days
-nam <- names(smallD)[stringr::str_detect(names(smallD),"^andate_[0-9]*$")]
-num <- stringr::str_replace(nam,"andate_","")
-for(i in num){
-  print(i)
-  smallD[,(sprintf("angestagedays_%s",i)):=round(as.numeric(difftime(
-    get(sprintf("andate_%s", i)),
-    USorLMPdate,
-    units="days")),digits=1)]
-}
-
-# TO DO: get distributions of gestational ages for an, lab, us, etc.
-
-#recalculating labgestational age into days
-#floor instead of round because we want to round down
-nam <- names(smallD)[stringr::str_detect(names(smallD),"^labdate_[0-9]*$")]
-num <- stringr::str_replace(nam,"labdate_","")
-for(i in num){
-  print(i)
-  smallD[,(sprintf("labgestagedays_%s",i)):=floor(as.numeric(difftime(
-    get(sprintf("labdate_%s", i)),
-    USorLMPdate,
-    units="days")))]
-}
-
-#recalculating usgestational age into days
-nam <- names(smallD)[stringr::str_detect(names(smallD),"^usdate_[0-9]*$")]
-num <- stringr::str_replace(nam,"usdate_","")
-for(i in num){
-  print(i)
-  smallD[,(sprintf("usgestagedays_%s",i)):=round(as.numeric(difftime(
-    get(sprintf("usdate_%s", i)),
-    USorLMPdate,
-    units="days")),digits=1)]
-}
-
-
-#recalculating mangestational age into days
-nam <- names(smallD)[stringr::str_detect(names(smallD),"^mandate_[0-9]*$")]
-num <- stringr::str_replace(nam,"mandate_","")
-for(i in num){
-  print(i)
-  smallD[,(sprintf("mangestagedays_%s",i)):=floor(as.numeric(difftime(
-    get(sprintf("mandate_%s", i)),
-    USorLMPdate,
-    units="days")))]
-}
-
-
-#recalculating riskgestational age into days
-nam <- names(smallD)[stringr::str_detect(names(smallD),"^riskdate_[0-9]*$")]
-num <- stringr::str_replace(nam,"riskdate_","")
-for(i in num){
-  print(i)
-  smallD[,(sprintf("riskgestagedays_%s",i)):=floor(as.numeric(difftime(
-    get(sprintf("riskdate_%s", i)),
-    USorLMPdate,
-    units="days")))]
-}
-
 ##making categories
 
   #booking
@@ -104,25 +18,15 @@ smallD[,bookgestagedays_cats:=cut(bookgestagedays,
                                 216,231,244,259),
                        include.lowest=T)]
 
-#15 weeks=105 days
-#17 weeks= 119 days
-#18 weeks= 126 days
-#22 weeks=154 days
-#24 weeks= 168 days
-#28 weeks=196 days
-#31 weeks=217 days
-#33 weeks= 231 days
-#35 weeks= 245 days
-#37 weeks= 259 days
 
 #need to create a dummy gestational age variable
 
 # MAKE BOOK VISIT FOR ANEMIA
 smallD[,booklabhb:=as.numeric(NA)]
-smallD[abs(labgestagedays_1-bookgestage)<7,booklabhb:=labhb_1]
+smallD[abs(labgestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
 
 smallD[,bookanexamsfh:=as.numeric(NA)]
-smallD[abs(labgestagedays_1-bookgestage)<7,bookanexamsfh:=anexamsfh_1]
+smallD[abs(labgestagedays_1-bookgestagedays)<7,bookanexamsfh:=anexamsfh_1]
 
 
 VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterestPattern,TruevaluesMin=NULL,TruevaluesMax=NULL,TruevaluesDiscrete=NULL,gestagedaysVariable="angestagedays" ){
@@ -137,13 +41,10 @@ VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterest
   smallD[,angestagedays_0:=bookgestagedays]
   smallD[,anbpdiast_0:=bookbpdiast]
   smallD[,anbpsyst_0:=bookbpsyst]
+  smallD[,anexamsfh_0:=bookexamsfh]
+  smallD[,labhb_0:=booklabhb]
   
-  # MAKE BOOK VISIT FOR ANEMIA
-  smallD[,labhb_0:=as.numeric(NA)]
-  smallD[abs(labgestagedays_1-bookgestage)<7,labhb_0:=labhb_1]
   
-  smallD[,anexamsfh_0:=as.numeric(NA)]
-  smallD[abs(labgestagedays_1-bookgestage)<7,anexamsfh_0:=anexamsfh_1]
   
   # pull out a list of all of the gestage variables
   
@@ -241,6 +142,17 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "angestagedays")
 
+# BP Syst MOd/Sev HTN
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="anbpsyst_sevHTN",
+  variableOfInterestPattern="anbpsyst",
+  TruevaluesMin=140,
+  TruevaluesMax=170,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "angestagedays")
+
 ###ANC Anemia ####
 # lab hb exists
 VisitVariables(
@@ -259,7 +171,7 @@ VisitVariables(
   days=days,
   variableOfInterestName="labhb_anemia_sev",
   variableOfInterestPattern="labhb",
-  TruevaluesMin=3,
+  TruevaluesMin=1,
   TruevaluesMax=6.9,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labgestagedays")
@@ -274,6 +186,8 @@ VisitVariables(
   TruevaluesMax=10.9,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labgestagedays")
+
+
 
 
 ### Lab RBS Normal ####
@@ -292,7 +206,7 @@ VisitVariables(
 VisitVariables(
   smallD=smallD,
   days=days,
-  variableOfInterestName="labbloodglu_normal",
+  variableOfInterestName="labbloodglu_exists",
   variableOfInterestPattern="labbloodglu",
   TruevaluesMin=50,
   TruevaluesMax=500,
@@ -307,10 +221,10 @@ VisitVariables(
   variableOfInterestPattern="labbloodglu",
   TruevaluesMin=140,
   TruevaluesMax=500,
-  TruevaluesDiscrete = Null,
+  TruevaluesDiscrete =NULL,
   gestagedaysVariable = "labgestagedays")
 
-### Lab FBS Normal ####
+# Lab FBS Normal 
 VisitVariables(
   smallD=smallD,
   days=days,
@@ -322,8 +236,8 @@ VisitVariables(
   gestagedaysVariable = "labgestagedays")
 
 
-### US visits ###
-### Has US visit####
+#### US visits ####
+# Has US visit
 VisitVariables(
   smallD=smallD,
   days=days,
@@ -345,6 +259,53 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "angestagedays")
 
+#US expected IUGR
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="us_iugrSuspected",
+  variableOfInterestPattern="usiugr",
+  TruevaluesMin=1,
+  TruevaluesMax=1,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "usgestagedays")
+
+#US expected LGA
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="us_lgaSuspected",
+  variableOfInterestPattern="uslga",
+  TruevaluesMin=1,
+  TruevaluesMax=1,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "usgestagedays")
+
+####Referrals ####
+#Ref to HR
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="refHR",
+  variableOfInterestPattern="mantypex",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete ="RefHighRisk",
+  gestagedaysVariable = "mangestagedays")
+
+#Ref to Hosp
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="refHosp",
+  variableOfInterestPattern="mantypex",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete ="RefHosp",
+  gestagedaysVariable = "mangestagedays")
+
+############################# TABLES ##################################
+
 #Booking visits by categories
 bookings<- smallD[,.(ArmA=sum(ident_dhis2_control==T),
                      ArmB=sum(ident_dhis2_control==F)),
@@ -359,7 +320,308 @@ openxlsx::write.xlsx(bookings,
 
 #An visits
 
+anvisits <- smallD[,.(BookedBefore15wks=sum(TrialOne_anvisitnew_00_14==T,na.rm=TRUE),
+                     Visits_15_17=sum(TrialOne_anvisitnew_15_17,na.rm=TRUE),
+                     Visits_17_18=sum(TrialOne_anvisitnew_17_18,na.rm=TRUE),
+                     Visits_18_22=sum(TrialOne_anvisitnew_18_22,na.rm=TRUE),
+                     Visits_23_23=sum(TrialOne_anvisitnew_23_23,na.rm=TRUE),
+                     Visits_24_28=sum(TrialOne_anvisitnew_24_28,na.rm=TRUE),
+                     Visits_29_30=sum(TrialOne_anvisitnew_29_30,na.rm=TRUE),
+                     Visits_31_33=sum(TrialOne_anvisitnew_31_33,na.rm=TRUE),
+                     Visits_34_34=sum(TrialOne_anvisitnew_34_34,na.rm=TRUE),
+                     Visits_35_37=sum(TrialOne_anvisitnew_35_37,na.rm=TRUE)),
+                      keyby=.(ident_dhis2_control)]
 
+openxlsx::write.xlsx(anvisits, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("Anvisits_and_Bookings_combined_%s.xlsx", 
+                               lubridate::today())))
+
+
+#BP
+
+bpsyst<- smallD[,.(BpBefore15wks=sum(TrialOne_anbpsyst_present_00_14==T,
+                                            na.rm=TRUE),
+                Screened_15_17=sum(TrialOne_anbpsyst_present_15_17,
+                                 na.rm=TRUE),
+                      Screened_17_18=sum(TrialOne_anbpsyst_present_17_18,na.rm=TRUE),
+                      Screened_18_22=sum(TrialOne_anbpsyst_present_18_22,na.rm=TRUE),
+                      Screened_23_23=sum(TrialOne_anbpsyst_present_23_23,na.rm=TRUE),
+                      Screened_24_28=sum(TrialOne_anbpsyst_present_24_28,na.rm=TRUE),
+                      Screened_29_30=sum(TrialOne_anbpsyst_present_29_30,na.rm=TRUE),
+                      Screened_31_33=sum(TrialOne_anbpsyst_present_31_33,na.rm=TRUE),
+                      Screened_34_34=sum(TrialOne_anbpsyst_present_34_34,na.rm=TRUE),
+                      Screened_35_37=sum(TrialOne_anbpsyst_present_35_37,na.rm=TRUE)),
+                   keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(bpsyst, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("BP_Screened_Visits_%s.xlsx", 
+                               lubridate::today())))
+
+#LabHb and Anemia
+labhb<- smallD[,.(screenedlabhb15wks=sum(TrialOne_labhb_exists_00_14==T,
+                                         na.rm=TRUE),
+                   screenedlabhb_15_17=sum(TrialOne_labhb_exists_15_17,
+                                    na.rm=TRUE),
+                   screenedlabhb_17_18=sum(TrialOne_labhb_exists_17_18,na.rm=TRUE),
+                   screenedlabhb_18_22=sum(TrialOne_labhb_exists_18_22,na.rm=TRUE),
+                   screenedlabhb_23_23=sum(TrialOne_labhb_exists_23_23,na.rm=TRUE),
+                   screenedlabhb_24_28=sum(TrialOne_labhb_exists_24_28,na.rm=TRUE),
+                   screenedlabhb_29_30=sum(TrialOne_labhb_exists_29_30,na.rm=TRUE),
+                   screenedlabhb_31_33=sum(TrialOne_labhb_exists_31_33,na.rm=TRUE),
+                   screenedlabhb_34_34=sum(TrialOne_labhb_exists_34_34,na.rm=TRUE),
+                   screenedlabhb_35_37=sum(TrialOne_labhb_exists_35_37,na.rm=TRUE)),
+                keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(labhb, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("Anemia_Screened_%s.xlsx", 
+                               lubridate::today())))
+
+labhb_sev<- smallD[,.(sev_anemia_15wks=sum(TrialOne_labhb_anemia_sev_00_14==T,
+                                         na.rm=TRUE),
+                  sev_anemia_15_17=sum(TrialOne_labhb_anemia_sev_15_17,
+                                          na.rm=TRUE),
+                  sev_anemia_17_18=sum(TrialOne_labhb_anemia_sev_17_18,na.rm=TRUE),
+                  sev_anemia_18_22=sum(TrialOne_labhb_anemia_sev_18_22,na.rm=TRUE),
+                  sev_anemia_23_23=sum(TrialOne_labhb_anemia_sev_23_23,na.rm=TRUE),
+                  sev_anemia_24_28=sum(TrialOne_labhb_anemia_sev_24_28,na.rm=TRUE),
+                  sev_anemia_29_30=sum(TrialOne_labhb_anemia_sev_29_30,na.rm=TRUE),
+                  sev_anemia_31_33=sum(TrialOne_labhb_anemia_sev_31_33,na.rm=TRUE),
+                  sev_anemia_34_34=sum(TrialOne_labhb_anemia_sev_34_34,na.rm=TRUE),
+                  sev_anemia_35_37=sum(TrialOne_labhb_anemia_sev_35_37,na.rm=TRUE)),
+               keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(labhb_sev, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("Sev_anemia_%s.xlsx", 
+                               lubridate::today())))
+
+labhb_mild_mod<- smallD[,.(
+  mild_mod_anemia_15wks=sum(TrialOne_labhb_anemia_mild_mod_00_14==T,na.rm=TRUE),
+  mild_mod_anemia_15_17=sum(TrialOne_labhb_anemia_mild_mod_15_17,na.rm=TRUE),
+  mild_mod_anemia_17_18=sum(TrialOne_labhb_anemia_mild_mod_17_18,na.rm=TRUE),
+  mild_mod_anemia_18_22=sum(TrialOne_labhb_anemia_mild_mod_18_22, na.rm=TRUE),
+  mild_mod_anemia_23_23=sum(TrialOne_labhb_anemia_mild_mod_23_23,na.rm=TRUE),
+  mild_mod_anemia_24_28=sum(TrialOne_labhb_anemia_mild_mod_24_28, na.rm=TRUE),
+  mild_mod_anemia_29_30=sum(TrialOne_labhb_anemia_mild_mod_29_30,na.rm=TRUE),
+  mild_mod_anemia_31_33=sum(TrialOne_labhb_anemia_mild_mod_31_33,na.rm=TRUE),
+  mild_mod_anemia_34_34=sum(TrialOne_labhb_anemia_mild_mod_34_34,na.rm=TRUE),
+  mild_mod_anemia_35_37=sum(TrialOne_labhb_anemia_mild_mod_35_37,na.rm=TRUE)),
+                   keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(labhb_mild_mod, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("mild_mod_anemia_%s.xlsx", 
+                               lubridate::today())))
+
+
+#Lab urglu
+has_laburglu<- smallD[,.(
+  has_labbloodglu_15wks=sum(TrialOne_laburglu_exists_00_14==T,na.rm=TRUE),
+  has_labbloodglu_15_17=sum(TrialOne_laburglu_exists_15_17,na.rm=TRUE),
+  has_labbloodglu_17_18=sum(TrialOne_laburglu_exists_17_18,na.rm=TRUE),
+  has_labbloodglu_18_22=sum(TrialOne_laburglu_exists_18_22, na.rm=TRUE),
+  has_labbloodglu_23_23=sum(TrialOne_laburglu_exists_23_23,na.rm=TRUE),
+  has_labbloodglu_24_28=sum(TrialOne_laburglu_exists_24_28, na.rm=TRUE),
+  has_labbloodglu_29_30=sum(TrialOne_laburglu_exists_29_30,na.rm=TRUE),
+  has_labbloodglu_31_33=sum(TrialOne_laburglu_exists_31_33,na.rm=TRUE),
+  has_labbloodglu_34_34=sum(TrialOne_laburglu_exists_34_34,na.rm=TRUE),
+  has_labbloodglu_35_37=sum(TrialOne_laburglu_exists_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(has_laburglu, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("Urglu_screenings_%s.xlsx", 
+                               lubridate::today())))
+
+
+
+
+
+#Lab bloodglu
+
+has_labbloodglu<- smallD[,.(
+ has_labbloodglu_15wks=sum(TrialOne_labbloodglu_exists_00_14==T,na.rm=TRUE),
+ has_labbloodglu_15_17=sum(TrialOne_labbloodglu_exists_15_17,na.rm=TRUE),
+ has_labbloodglu_17_18=sum(TrialOne_labbloodglu_exists_17_18,na.rm=TRUE),
+ has_labbloodglu_18_22=sum(TrialOne_labbloodglu_exists_18_22, na.rm=TRUE),
+ has_labbloodglu_23_23=sum(TrialOne_labbloodglu_exists_23_23,na.rm=TRUE),
+ has_labbloodglu_24_28=sum(TrialOne_labbloodglu_exists_24_28, na.rm=TRUE),
+ has_labbloodglu_29_30=sum(TrialOne_labbloodglu_exists_29_30,na.rm=TRUE),
+ has_labbloodglu_31_33=sum(TrialOne_labbloodglu_exists_31_33,na.rm=TRUE),
+ has_labbloodglu_34_34=sum(TrialOne_labbloodglu_exists_34_34,na.rm=TRUE),
+ has_labbloodglu_35_37=sum(TrialOne_labbloodglu_exists_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(has_labbloodglu, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("bloodglu_screenings_%s.xlsx", 
+                               lubridate::today())))
+#high labbloodglu values
+has_High_bloodglu<- smallD[,.(
+  has_highbloodglu_15wks=sum(TrialOne_labbloodglu_high_00_14==T,na.rm=TRUE),
+  has_highbloodglu_15_17=sum(TrialOne_labbloodglu_high_15_17,na.rm=TRUE),
+  has_highbloodglu_17_18=sum(TrialOne_labbloodglu_high_17_18,na.rm=TRUE),
+  has_highbloodglu_18_22=sum(TrialOne_labbloodglu_high_18_22, na.rm=TRUE),
+  has_highbloodglu_23_23=sum(TrialOne_labbloodglu_high_23_23,na.rm=TRUE),
+  has_highbloodglu_24_28=sum(TrialOne_labbloodglu_high_24_28, na.rm=TRUE),
+  has_highbloodglu_29_30=sum(TrialOne_labbloodglu_high_29_30,na.rm=TRUE),
+  has_highbloodglu_31_33=sum(TrialOne_labbloodglu_high_31_33,na.rm=TRUE),
+  has_highbloodglu_34_34=sum(TrialOne_labbloodglu_high_34_34,na.rm=TRUE),
+  has_highbloodglu_35_37=sum(TrialOne_labbloodglu_high_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(has_High_bloodglu, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("High_bloodglu_screenings_%s.xlsx", 
+                               lubridate::today())))
+#US exists
+
+us_exists<- smallD[,.(
+  us_exists_15wks=sum(TrialOne_us_exists_00_14==T,na.rm=TRUE),
+  has_us_15_17=sum(TrialOne_us_exists_15_17,na.rm=TRUE),
+  has_us_17_18=sum(TrialOne_us_exists_17_18,na.rm=TRUE),
+  has_us_18_22=sum(TrialOne_us_exists_18_22, na.rm=TRUE),
+  has_us_23_23=sum(TrialOne_us_exists_23_23,na.rm=TRUE),
+  has_us_24_28=sum(TrialOne_us_exists_24_28, na.rm=TRUE),
+  has_us_29_30=sum(TrialOne_us_exists_29_30,na.rm=TRUE),
+  has_us_31_33=sum(TrialOne_us_exists_31_33,na.rm=TRUE),
+  has_us_34_34=sum(TrialOne_us_exists_34_34,na.rm=TRUE),
+  has_us_35_37=sum(TrialOne_us_exists_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(us_exists, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("Us_screenings_%s.xlsx", 
+                               lubridate::today())))
+
+
+
+#US IUGR
+us_iugrSusp<- smallD[,.(
+  iugrsuspected_15wks=sum(TrialOne_us_iugrSuspected_00_14==T,na.rm=TRUE),
+  iugrsuspected_15_17=sum(TrialOne_us_iugrSuspected_15_17,na.rm=TRUE),
+  iugrsuspected_17_18=sum(TrialOne_us_iugrSuspected_17_18,na.rm=TRUE),
+  iugrsuspected_18_22=sum(TrialOne_us_iugrSuspected_18_22, na.rm=TRUE),
+  iugrsuspected_23_23=sum(TrialOne_us_iugrSuspected_23_23,na.rm=TRUE),
+  iugrsuspected_24_28=sum(TrialOne_us_iugrSuspected_24_28, na.rm=TRUE),
+  iugrsuspected_29_30=sum(TrialOne_us_iugrSuspected_29_30,na.rm=TRUE),
+  iugrsuspected_31_33=sum(TrialOne_us_iugrSuspected_31_33,na.rm=TRUE),
+  iugrsuspected_34_34=sum(TrialOne_us_iugrSuspected_34_34,na.rm=TRUE),
+  iugrsuspected_35_37=sum(TrialOne_us_iugrSuspected_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(us_iugrSusp, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("Suspected_IUGR_%s.xlsx", 
+                               lubridate::today())))
+#US LGA
+us_lgaSusp<- smallD[,.(
+  lgaSuspected_15wks=sum(TrialOne_anexamsfh_exists_00_14==T,na.rm=TRUE),
+  lgaSuspected_15_17=sum(TrialOne_anexamsfh_exists_15_17,na.rm=TRUE),
+  lgaSuspected_17_18=sum(TrialOne_anexamsfh_exists_17_18,na.rm=TRUE),
+  lgaSuspected_18_22=sum(TrialOne_anexamsfh_exists_18_22, na.rm=TRUE),
+  lgaSuspected_23_23=sum(TrialOne_anexamsfh_exists_23_23,na.rm=TRUE),
+  lgaSuspected_24_28=sum(TrialOne_anexamsfh_exists_24_28, na.rm=TRUE),
+  lgaSuspected_29_30=sum(TrialOne_anexamsfh_exists_29_30,na.rm=TRUE),
+  lgaSuspected_31_33=sum(TrialOne_anexamsfh_exists_31_33,na.rm=TRUE),
+  lgaSuspected_34_34=sum(TrialOne_anexamsfh_exists_34_34,na.rm=TRUE),
+  lgaSuspected_35_37=sum(TrialOne_anexamsfh_exists_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(us_lgaSusp, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("Suspected_LGA_%s.xlsx", 
+                               lubridate::today()))) 
+
+
+# anexamsfh
+anexamsfh<- smallD[,.(
+  anexamsfh_exists_15wks=sum(TrialOne_anexamsfh_exists_00_14==T,na.rm=TRUE),
+  anexamsfh_exists_15_17=sum(TrialOne_anexamsfh_exists_15_17,na.rm=TRUE),
+  anexamsfh_exists_17_18=sum(TrialOne_anexamsfh_exists_17_18,na.rm=TRUE),
+  anexamsfh_exists_18_22=sum(TrialOne_anexamsfh_exists_18_22, na.rm=TRUE),
+  anexamsfh_exists_23_23=sum(TrialOne_anexamsfh_exists_23_23,na.rm=TRUE),
+  anexamsfh_exists_24_28=sum(TrialOne_anexamsfh_exists_24_28, na.rm=TRUE),
+  anexamsfh_exists_29_30=sum(TrialOne_anexamsfh_exists_29_30,na.rm=TRUE),
+  anexamsfh_exists_31_33=sum(TrialOne_anexamsfh_exists_31_33,na.rm=TRUE),
+  anexamsfh_exists_34_34=sum(TrialOne_anexamsfh_exists_34_34,na.rm=TRUE),
+  anexamsfh_exists_35_37=sum(TrialOne_anexamsfh_exists_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(anexamsfh, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("anexamsfh_%s.xlsx", 
+                               lubridate::today()))) 
+
+####Referrals####
+#ref to HR
+refHR<- smallD[,.(
+  refHR_15wks=sum(TrialOne_refHR_00_14==T,na.rm=TRUE),
+  refHR_15_17=sum(TrialOne_refHR_15_17,na.rm=TRUE),
+  refHR_17_18=sum(TrialOne_refHR_17_18,na.rm=TRUE),
+  refHR_18_22=sum(TrialOne_refHR_18_22, na.rm=TRUE),
+  refHR_23_23=sum(TrialOne_refHR_23_23,na.rm=TRUE),
+  refHR_24_28=sum(TrialOne_refHR_24_28, na.rm=TRUE),
+  refHR_29_30=sum(TrialOne_refHR_29_30,na.rm=TRUE),
+  refHR_31_33=sum(TrialOne_refHR_31_33,na.rm=TRUE),
+  refHR_34_34=sum(TrialOne_refHR_34_34,na.rm=TRUE),
+  refHR_35_37=sum(TrialOne_refHR_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(refHR, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("refHR_%s.xlsx", 
+                               lubridate::today())))
+
+#refHosp
+refHosp<- smallD[,.(
+  refHosp_15wks=sum(TrialOne_refHosp_00_14==T,na.rm=TRUE),
+  refHosp_15_17=sum(TrialOne_refHosp_15_17,na.rm=TRUE),
+  refHosp_17_18=sum(TrialOne_refHosp_17_18,na.rm=TRUE),
+  refHosp_18_22=sum(TrialOne_refHosp_18_22, na.rm=TRUE),
+  refHosp_23_23=sum(TrialOne_refHosp_23_23,na.rm=TRUE),
+  refHosp_24_28=sum(TrialOne_refHosp_24_28, na.rm=TRUE),
+  refHosp_29_30=sum(TrialOne_refHosp_29_30,na.rm=TRUE),
+  refHosp_31_33=sum(TrialOne_refHosp_31_33,na.rm=TRUE),
+  refHosp_34_34=sum(TrialOne_refHosp_34_34,na.rm=TRUE),
+  refHosp_35_37=sum(TrialOne_refHosp_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(refHosp, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("refHosp_%s.xlsx", 
+                               lubridate::today())))
 
 ##visits by 
 #TO DO: managements and laburglu in a different code , referral to HR or refhosp 
@@ -435,7 +697,7 @@ smallD[,gAatBirth_mostGAs_cats:=cut(((7*mahima_gestageatbirthwk_1)),
 #45 weeks=315 days
 
 ######### HTN at Birth ##########
-#cleaning diastolic bp, move to top level cleaning sheet
+#cleaning systolic bp, move to top level cleaning sheet
 smallD[,merged_bpdiast := stringr::str_replace(as.numeric(merged_bpdiast), 
                                                "[0-9][0-9][0-9]/$","")]
 
@@ -449,6 +711,16 @@ smallD[(merged_bpsyst>=160 & merged_bpsyst<=300) |
 smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
                     ArmB=sum(ident_dhis2_control==F, na.rm=T)),
                  keyby=.(sevHTNatBirth)]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("SevHTNatBirth_%s.xlsx", 
+                               lubridate::today())))
+
+
 
 ######### HBG at Birth ##########
 unique(smallD$merged_birthhemo)
@@ -465,6 +737,15 @@ smallD[merged_birthhemo>=3 &
 smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
                     ArmB=sum(ident_dhis2_control==F, na.rm=T)),
                  keyby=.(SevOrModHbatBirth)]
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("SevModHBG_%s.xlsx", 
+                               lubridate::today())))
+
+
 
 ######### Birth Weight ##########
 unique(smallD$merged_pregbweight)
@@ -523,7 +804,6 @@ nrow(smallD[is.na(mahima_gestageatbirthwk_1)])
 nrow(smallD[is.na(mahima_hospenteredgestage_1)])
 
 
-
 # Deliveries by gestational age category
 # we should include outcome with this
 
@@ -575,6 +855,8 @@ openxlsx::write.xlsx(sgaLga,
                        FOLDER_DATA_RESULTS_WB,
                        "demographics_and_history",
                        sprintf("SgaLgaDataSet_%s.xlsx", lubridate::today())))
+
+
 
 
 ######### Indication for CS ##########
