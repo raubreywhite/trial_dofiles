@@ -45,25 +45,7 @@ CreatingFurtherVariablesNormal <- function(d){
                                include.lowest=T)]
   
   xtabs(~d$avgincomecat)
-  # 
-  # #clean these only for trial 1 then get rid of them
-  # ##bookweight
-  # d[bookweight<=35, bookweight:=NA]
-  # d[bookweight>=140, bookweight:=NA]
-  # 
-  # ##bookbpsyst
-  # d[bookbpsyst<60, bookbpsyst:=NA]
-  # d[bookbpsyst>170, bookbpsyst:=NA]
-  # 
-  # ##bookbpdiast
-  # d[bookbpdiast<40, bookbpdiast:=NA]
-  # 
-  # 
-  # #Hemoglobin at booking visit		If <3 OR >17, set to missing
-  # d[,booklabhb:=as.numeric(NA)]
-  # d[abs(bookgestage-labgestage_1)<=1, booklabhb:=labhb_1]
   
-
  
 }
 
@@ -899,74 +881,74 @@ class(d$mahima_gA_1_us)
                          "demographics_and_history",
                          sprintf("%s_bookgestagearms.xlsx",lubridate::today())))
   
-  
-  
-  #recalculating angestational age into days as they are from the syste
-  nam <- names(d)[stringr::str_detect(names(d),"^andate_[0-9]*$")]
-  num <- stringr::str_replace(nam,"andate_","")
-  for(i in num){
-    print(i)
-    d[,(sprintf("angestagedays_%s",i)):=round(as.numeric(difftime(
-      get(sprintf("andate_%s", i)),
-      USorLMPdate,
-      units="days")),digits=1)]
-  }
-  
-  # TO DO: get distributions of gestational ages for an, lab, us, etc.
-  
-  #recalculating labgestational age into days
-  #floor instead of round because we want to round down
-  nam <- names(d)[stringr::str_detect(names(d),"^labdate_[0-9]*$")]
-  num <- stringr::str_replace(nam,"labdate_","")
-  for(i in num){
-    print(i)
-    d[,(sprintf("labgestagedays_%s",i)):=floor(as.numeric(difftime(
-      get(sprintf("labdate_%s", i)),
-      USorLMPdate,
-      units="days")))]
-  }
-  
-  #recalculating usgestational age into days
-  nam <- names(d)[stringr::str_detect(names(d),"^usdate_[0-9]*$")]
-  num <- stringr::str_replace(nam,"usdate_","")
-  for(i in num){
-    print(i)
-    d[,(sprintf("usgestagedays_%s",i)):=round(as.numeric(difftime(
-      get(sprintf("usdate_%s", i)),
-      USorLMPdate,
-      units="days")),digits=1)]
-  }
-  
-  
-  #recalculating mangestational age into days
-  nam <- names(d)[stringr::str_detect(names(d),"^mandate_[0-9]*$")]
-  num <- stringr::str_replace(nam,"mandate_","")
-  for(i in num){
-    print(i)
-    d[,(sprintf("mangestagedays_%s",i)):=floor(as.numeric(difftime(
-      get(sprintf("mandate_%s", i)),
-      USorLMPdate,
-      units="days")))]
-  }
-  
-  
-  #recalculating riskgestational age into days
-  nam <- names(d)[stringr::str_detect(names(d),"^riskdate_[0-9]*$")]
-  num <- stringr::str_replace(nam,"riskdate_","")
-  for(i in num){
-    print(i)
-    d[,(sprintf("riskgestagedays_%s",i)):=floor(as.numeric(difftime(
-      get(sprintf("riskdate_%s", i)),
-      USorLMPdate,
-      units="days")))]
-  }
-
-
-
 
 
 
 }
+  
+#recalculating angestational age into days as they are from the syste
+# nam <- names(d)[stringr::str_detect(names(d),"^andate_[0-9]*$")]
+# num <- stringr::str_replace(nam,"andate_","")
+# for(i in num){
+#   print(i)
+#   d[,(sprintf("angestagedays_%s",i)):=round(as.numeric(difftime(
+#     get(sprintf("andate_%s", i)),
+#     USorLMPdate,
+#     units="days")),digits=1)]
+# }
+# 
+# # TO DO: get distributions of gestational ages for an, lab, us, etc.
+# 
+# #recalculating labgestational age into days
+# #floor instead of round because we want to round down
+# nam <- names(d)[stringr::str_detect(names(d),"^labdate_[0-9]*$")]
+# num <- stringr::str_replace(nam,"labdate_","")
+# for(i in num){
+#   print(i)
+#   d[,(sprintf("labgestagedays_%s",i)):=floor(as.numeric(difftime(
+#     get(sprintf("labdate_%s", i)),
+#     USorLMPdate,
+#     units="days")))]
+# }
+# 
+# #recalculating usgestational age into days
+# nam <- names(d)[stringr::str_detect(names(d),"^usdate_[0-9]*$")]
+# num <- stringr::str_replace(nam,"usdate_","")
+# for(i in num){
+#   print(i)
+#   d[,(sprintf("usgestagedays_%s",i)):=round(as.numeric(difftime(
+#     get(sprintf("usdate_%s", i)),
+#     USorLMPdate,
+#     units="days")),digits=1)]
+# }
+# 
+# 
+# #recalculating mangestational age into days
+# nam <- names(d)[stringr::str_detect(names(d),"^mandate_[0-9]*$")]
+# num <- stringr::str_replace(nam,"mandate_","")
+# for(i in num){
+#   print(i)
+#   d[,(sprintf("mangestagedays_%s",i)):=floor(as.numeric(difftime(
+#     get(sprintf("mandate_%s", i)),
+#     USorLMPdate,
+#     units="days")))]
+# }
+# 
+# 
+# #recalculating riskgestational age into days
+# nam <- names(d)[stringr::str_detect(names(d),"^riskdate_[0-9]*$")]
+# num <- stringr::str_replace(nam,"riskdate_","")
+# for(i in num){
+#   print(i)
+#   d[,(sprintf("riskgestagedays_%s",i)):=floor(as.numeric(difftime(
+#     get(sprintf("riskdate_%s", i)),
+#     USorLMPdate,
+#     units="days")))]
+# }
+
+
+
+
 
 
   

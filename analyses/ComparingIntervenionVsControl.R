@@ -998,6 +998,7 @@ smalld <- smallD[ ,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
 
 
 #Hemoglobin at booking visit
+## Do not want to include 0 because its missing so include.lowest=F
 smallD[,booklabhbcat:=cut(booklabhb,
                    breaks=c(0,6.9,8.9,10.9,16,20,200),
                    include.lowest=F)]

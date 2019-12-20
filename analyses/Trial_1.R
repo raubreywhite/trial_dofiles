@@ -1,17 +1,105 @@
 ###Trial 1 Outcomes###
+# renaming arms
+d[ident_dhis2_control==F, prettyExposure:="Trial Arm B"]
+d[ident_dhis2_control==T, prettyExposure:="Trial Arm A"]
 
  # defining dataset
 smallD <- smallD <- d[bookdate >= "2017-01-15"&
                         bookdate<="2017-09-15" &
                         ident_TRIAL_1==T,]
- # renaming arms
-d[ident_dhis2_control==F, prettyExposure:="Trial Arm B"]
-d[ident_dhis2_control==T, prettyExposure:="Trial Arm A"]
 
-##making categories
+### making gestational ages based on usedd=<20, then lmp, then us>20 ###
+# + means repeat, $ means the end of the entire string
+smallD[,lmpT1:=as.Date(NA)]
+us_gestages <- stringr::str_subset(names(smallD), "^usgestage_[0-9]+")
+us_date <- stringr::str_subset(names(smallD), "^usdate_[0-9]+")
 
-  #booking
-  #TO DO: check lower cut off
+
+#seq_along identical to 1:lenth()
+for(i in seq_along(us_gestages)){
+  var_us_gestage <- us_gestages[i]
+  var_us_date<- us_date[i]
+  
+  smallD[is.na(lmpT1) & 
+           get(var_us_gestage)<= 20, 
+         
+         lmpT1:=get(var_us_date)-get(var_us_gestage)*7]
+
+}
+
+smallD[is.na(lmpT1) & !is.na(booklmp), lmpT1:=booklmp]
+
+for(i in seq_along(us_gestages)){
+  var_us_gestage <- us_gestages[i]
+  var_us_date<- us_date[i]
+  
+  smallD[is.na(lmpT1) & get(var_us_gestage)>=20 & get(vars_us_gestage)<40,
+         
+         lmpT1:=get(var_us_date)-get(var_us_gestage)*7]
+  
+  
+}
+
+#qc new variables
+smallD[is.na(lmpT1), c("booklmp",us_gestages, us_date), with=F]
+
+
+
+##looping through to make gestages for each of the program stages
+#Us gAs
+us_date <- stringr::str_subset(names(smallD), "^usdate_[0-9]+")
+usT1_gA <- stringr::str_replace(us_date, "usdate","usT1gestagedays")
+
+for(i in seq_along(us_date)){
+  var_us_gestage <- usT1_gA[i]
+  var_us_date<- us_date[i] 
+  
+  smallD[,(var_us_gestage):=as.numeric(difftime(get(var_us_date),lmpT1, units="days"))]
+  
+}
+
+
+#ANC gAs
+an_date <- stringr::str_subset(names(smallD), "^andate_[0-9]+")
+anT1_gA <- stringr::str_replace(an_date, "andate","anT1gestagedays")
+
+for(i in seq_along(an_date)){
+  var_an_gestage <- anT1_gA[i]
+  var_an_date<- an_date[i] 
+  
+  smallD[,(var_an_gestage):=as.numeric(difftime(get(var_an_date),lmpT1, units="days"))]
+  
+}
+
+#Lab gAs
+##NEED TO ROUND OR USE FLOOR
+lab_date <- stringr::str_subset(names(smallD), "^labdate_[0-9]+")
+labT1_gA <- stringr::str_replace(lab_date, "labdate","labT1gestagedays")
+
+for(i in seq_along(lab_date)){
+  var_lab_gestage <- labT1_gA[i]
+  var_lab_date<- lab_date[i] 
+  
+  smallD[,(var_lab_gestage):=as.numeric(difftime(get(var_lab_date),lmpT1, units="days"))]
+  
+}
+
+#Man gAs
+man_date <- stringr::str_subset(names(smallD), "^mandate_[0-9]+")
+manT1_gA <- stringr::str_replace(man_date, "mandate","manT1gestagedays")
+
+for(i in seq_along(man_date)){
+  var_man_gestage <- manT1_gA[i]
+  var_man_date<- man_date[i] 
+  
+  smallD[,(var_man_gestage):=as.numeric(difftime(get(var_man_date),lmpT1, units="days"))]
+  
+}
+
+
+
+##making categories of days for booking
+
 smallD[,bookgestagedays_cats:=cut(bookgestagedays,
                        breaks=c(-500,104,119,
                                 125,154,167, 196,
@@ -25,11 +113,8 @@ smallD[,bookgestagedays_cats:=cut(bookgestagedays,
 smallD[,booklabhb:=as.numeric(NA)]
 smallD[abs(labgestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
 
-smallD[,bookanexamsfh:=as.numeric(NA)]
-smallD[abs(labgestagedays_1-bookgestagedays)<7,bookanexamsfh:=anexamsfh_1]
 
-
-VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterestPattern,TruevaluesMin=NULL,TruevaluesMax=NULL,TruevaluesDiscrete=NULL,gestagedaysVariable="angestagedays" ){
+VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterestPattern,TruevaluesMin=NULL,TruevaluesMax=NULL,TruevaluesDiscrete=NULL,gestagedaysVariable="anT1gestagedays" ){
 
   if(!is.null(TruevaluesMin) & !is.null(TruevaluesMax) & !is.null(TruevaluesDiscrete)){
     stop ("ALL TRUE VALUES NOT NULL")
@@ -106,7 +191,7 @@ VisitVariables(
   variableOfInterestPattern="angestagedays",
   TruevaluesMin=-500,
   TruevaluesMax=260,
-  gestagedaysVariable="angestagedays")
+  gestagedaysVariable="anT1gestagedays")
 
 ###ANC BP SYT ####
 
@@ -118,7 +203,7 @@ VisitVariables(
   variableOfInterestPattern="anbpsyst",
   TruevaluesMin=60,
   TruevaluesMax=170,
-  gestagedaysVariable = "angestagedays")
+  gestagedaysVariable = "anT1gestagedays")
 
 # BP Diast Present
 VisitVariables(
@@ -128,7 +213,7 @@ VisitVariables(
   variableOfInterestPattern="anbpdiast",
   TruevaluesMin=40,
   TruevaluesMax=170,
-  gestagedaysVariable = "angestagedays")
+  gestagedaysVariable = "anT1gestagedays")
 
 # BP Syst High
 VisitVariables(
@@ -139,7 +224,7 @@ VisitVariables(
   TruevaluesMin=140,
   TruevaluesMax=170,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "angestagedays")
+  gestagedaysVariable = "anT1gestagedays")
 
 # BP Syst MildHTN
 VisitVariables(
@@ -150,7 +235,7 @@ VisitVariables(
   TruevaluesMin=140,
   TruevaluesMax=149,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "angestagedays")
+  gestagedaysVariable = "anT1gestagedays")
 
 # BP Syst ModSevHTN
 VisitVariables(
@@ -161,7 +246,7 @@ VisitVariables(
   TruevaluesMin=150,
   TruevaluesMax=170,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "angestagedays")
+  gestagedaysVariable = "anT1gestagedays")
 
 
 
@@ -174,7 +259,7 @@ VisitVariables(
   TruevaluesMin=90,
   TruevaluesMax=200,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "angestagedays")
+  gestagedaysVariable = "anT1gestagedays")
 
 # BP Diast MildHTN
 VisitVariables(
@@ -185,7 +270,7 @@ VisitVariables(
   TruevaluesMin=90,
   TruevaluesMax=99,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "angestagedays")
+  gestagedaysVariable = "anT1gestagedays")
 
 # BP Diast Mod/SevHTN
 VisitVariables(
@@ -196,7 +281,7 @@ VisitVariables(
   TruevaluesMin=100,
   TruevaluesMax=200,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "angestagedays")
+  gestagedaysVariable = "anT1gestagedays")
 
 
 
@@ -211,7 +296,7 @@ VisitVariables(
   TruevaluesMin=4,
   TruevaluesMax=20,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labgestagedays")
+  gestagedaysVariable = "labT1gestagedays")
 
 # sev anemia
 VisitVariables(
@@ -222,7 +307,7 @@ VisitVariables(
   TruevaluesMin=1,
   TruevaluesMax=6.9,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labgestagedays")
+  gestagedaysVariable = "labT1gestagedays")
 
 # mild and moderate anemia
 VisitVariables(
@@ -233,7 +318,7 @@ VisitVariables(
   TruevaluesMin=7,
   TruevaluesMax=10.9,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labgestagedays")
+  gestagedaysVariable = "labT1gestagedays")
 
 
 
@@ -248,9 +333,9 @@ VisitVariables(
   TruevaluesMin=NULL,
   TruevaluesMax=NULL,
   TruevaluesDiscrete = c("POS", "NEG"),
-  gestagedaysVariable = "labgestagedays")
+  gestagedaysVariable = "labT1gestagedays")
 
-#normal bloodglu values
+# normal bloodglu values
 VisitVariables(
   smallD=smallD,
   days=days,
@@ -259,7 +344,7 @@ VisitVariables(
   TruevaluesMin=50,
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labgestagedays")
+  gestagedaysVariable = "labT1gestagedays")
 
 # high blood glucose
 VisitVariables(
@@ -270,7 +355,7 @@ VisitVariables(
   TruevaluesMin=140,
   TruevaluesMax=500,
   TruevaluesDiscrete =NULL,
-  gestagedaysVariable = "labgestagedays")
+  gestagedaysVariable = "labT1gestagedays")
 
 # Lab FBS Normal 
 VisitVariables(
@@ -281,7 +366,7 @@ VisitVariables(
   TruevaluesMin=50,
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labgestagedays")
+  gestagedaysVariable = "labT1gestagedays")
 
 
 #### US visits ####
@@ -294,7 +379,7 @@ VisitVariables(
   TruevaluesMin=10,
   TruevaluesMax=300,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "usgestagedays")
+  gestagedaysVariable = "usT1gestagedays")
 
 #US AN SFH measurements
 VisitVariables(
@@ -305,9 +390,9 @@ VisitVariables(
   TruevaluesMin=5,
   TruevaluesMax=44,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "angestagedays")
+  gestagedaysVariable = "anT1gestagedays")
 
-#US expected IUGR
+# US expected IUGR
 VisitVariables(
   smallD=smallD,
   days=days,
@@ -316,9 +401,9 @@ VisitVariables(
   TruevaluesMin=1,
   TruevaluesMax=1,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "usgestagedays")
+  gestagedaysVariable = "usT1gestagedays")
 
-#US expected LGA
+# US expected LGA
 VisitVariables(
   smallD=smallD,
   days=days,
@@ -327,10 +412,10 @@ VisitVariables(
   TruevaluesMin=1,
   TruevaluesMax=1,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "usgestagedays")
+  gestagedaysVariable = "usT1gestagedays")
 
 ####Referrals ####
-#Ref to HR
+# Ref to HR
 VisitVariables(
   smallD=smallD,
   days=days,
@@ -339,9 +424,9 @@ VisitVariables(
   TruevaluesMin=NULL,
   TruevaluesMax=NULL,
   TruevaluesDiscrete ="RefHighRisk",
-  gestagedaysVariable = "mangestagedays")
+  gestagedaysVariable = "manT1gestagedays")
 
-#Ref to Hosp
+# Ref to Hosp
 VisitVariables(
   smallD=smallD,
   days=days,
@@ -350,18 +435,72 @@ VisitVariables(
   TruevaluesMin=NULL,
   TruevaluesMax=NULL,
   TruevaluesDiscrete ="RefHosp",
-  gestagedaysVariable = "mangestagedays")
+  gestagedaysVariable = "manT1gestagedays")
 
 
 
 ######## Making Variavles for managment ###############
-TrialOne_labhb_anemia_sev_00_14
-TrialOne_RefHighRisk_00_14
+
+## SevAnemia
+
+# 00_14
 smallD[,TrialOne_man_sev_anemia:=NA]
 smallD[TrialOne_labhb_anemia_sev_00_14==T,TrialOne_man_sev_anemia_00_14:=FALSE]
 smallD[TrialOne_labhb_anemia_sev_00_14==T &
-         TrialOne_RefHighRisk_00_14==T,
+         TrialOne_refHosp_00_14==T,
        TrialOne_man_sev_anemia_00_14:=TRUE]
+
+# 15_17
+smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[TrialOne_labhb_anemia_sev_15_17==T,TrialOne_man_sev_anemia_15_17:=FALSE]
+smallD[TrialOne_labhb_anemia_sev_15_17==T &
+         TrialOne_refHosp_15_17==T,
+       TrialOne_man_sev_anemia_15_17:=TRUE]
+
+# 18_22
+smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[TrialOne_labhb_anemia_sev_18_22==T,TrialOne_man_sev_anemia_18_22:=FALSE]
+smallD[TrialOne_labhb_anemia_sev_18_22==T &
+         TrialOne_refHosp_18_22==T,
+       TrialOne_man_sev_anemia_18_22:=TRUE]
+
+
+# 24_28
+smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[TrialOne_labhb_anemia_sev_24_28==T,TrialOne_man_sev_anemia_24_28:=FALSE]
+smallD[TrialOne_labhb_anemia_sev_24_28==T &
+         TrialOne_refHosp_24_28==T,
+       TrialOne_man_sev_anemia_24_28:=TRUE]
+
+# 29_30
+smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[TrialOne_labhb_anemia_sev_29_30==T,TrialOne_man_sev_anemia_29_30:=FALSE]
+smallD[TrialOne_labhb_anemia_sev_29_30==T &
+         TrialOne_refHosp_29_30==T,
+       TrialOne_man_sev_anemia_29_30:=TRUE]
+
+# 31_33
+smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[TrialOne_labhb_anemia_sev_31_33==T,TrialOne_man_sev_anemia_31_33:=FALSE]
+smallD[TrialOne_labhb_anemia_sev_31_33==T &
+         TrialOne_refHosp_31_33==T,
+       TrialOne_man_sev_anemia_31_33:=TRUE]
+
+# 34_34
+smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[TrialOne_labhb_anemia_sev_34_34==T,TrialOne_man_sev_anemia_34_34:=FALSE]
+smallD[TrialOne_labhb_anemia_sev_34_34==T &
+         TrialOne_refHosp_34_34==T,
+       TrialOne_man_sev_anemia_34_34:=TRUE]
+
+# 35_37
+smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[TrialOne_labhb_anemia_sev_35_37==T,TrialOne_man_sev_anemia_35_37:=FALSE]
+smallD[TrialOne_labhb_anemia_sev_35_37==T &
+         TrialOne_refHosp_35_37==T,
+       TrialOne_man_sev_anemia_35_37:=TRUE]
+
+
 
 
 ###### random samples
