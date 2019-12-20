@@ -853,7 +853,8 @@ class(d$mahima_gA_1_us)
   unique(d$conancgestationaageatvisitweeks)
   
   #replace this with the booking gestage
-  d[ident_TRIAL_1==T & ident_dhis2_control==T,bookgestage:=conancgestationaageatvisitweeks]  
+  d[ident_TRIAL_1==T & 
+      ident_dhis2_control==T, bookgestage:=conancgestationaageatvisitweeks]  
   
   vars<- stringr::str_subset(names(d), "^andate_")
   vars <- stringr::str_remove(vars, "andate_")
@@ -900,7 +901,7 @@ class(d$mahima_gA_1_us)
   
   
   
-  #recalculating angestational age into days
+  #recalculating angestational age into days as they are from the syste
   nam <- names(d)[stringr::str_detect(names(d),"^andate_[0-9]*$")]
   num <- stringr::str_replace(nam,"andate_","")
   for(i in num){

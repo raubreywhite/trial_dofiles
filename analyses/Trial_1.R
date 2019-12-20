@@ -87,15 +87,14 @@ VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterest
 
 days <- list(
   "00_14"=c(-500:104),
-  "15_17"=c(105:119),
-  "17_18"=c(120:125),
-  "18_22"=c(126:154),
-  "23_23"=c(155:167),
-  "24_28"=c(168:196),
-  "29_30"=c(197:210),
-  "31_33"=c(217:231),
-  "34_34"=c(232:244),
-  "35_37"=c(245:259)
+  "15_17"=c(105:125),
+  "18_22"=c(126:160),
+  "23_23"=c(161:167),
+  "24_28"=c(168:202),
+  "29_30"=c(203:216),
+  "31_33"=c(217:237),
+  "34_34"=c(238:244),
+  "35_37"=c(245:265)
 )
 
 ###ANC Visits####
@@ -142,16 +141,65 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "angestagedays")
 
-# BP Syst MOd/Sev HTN
+# BP Syst MildHTN
 VisitVariables(
   smallD=smallD,
   days=days,
-  variableOfInterestName="anbpsyst_sevHTN",
+  variableOfInterestName="anbpsyst_mildHTN",
   variableOfInterestPattern="anbpsyst",
   TruevaluesMin=140,
+  TruevaluesMax=149,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "angestagedays")
+
+# BP Syst ModSevHTN
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="anbpsyst_modSevHTN",
+  variableOfInterestPattern="anbpsyst",
+  TruevaluesMin=150,
   TruevaluesMax=170,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "angestagedays")
+
+
+
+# BP Diast High
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="anbpdiast_high",
+  variableOfInterestPattern="anbpdiast",
+  TruevaluesMin=90,
+  TruevaluesMax=200,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "angestagedays")
+
+# BP Diast MildHTN
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="anbpdiast_mildHTN",
+  variableOfInterestPattern="anbpdiast",
+  TruevaluesMin=90,
+  TruevaluesMax=99,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "angestagedays")
+
+# BP Diast Mod/SevHTN
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="anbpdiast_modSevHTN",
+  variableOfInterestPattern="anbpdiast",
+  TruevaluesMin=100,
+  TruevaluesMax=200,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "angestagedays")
+
+
+
 
 ###ANC Anemia ####
 # lab hb exists
@@ -304,6 +352,22 @@ VisitVariables(
   TruevaluesDiscrete ="RefHosp",
   gestagedaysVariable = "mangestagedays")
 
+
+
+######## Making Variavles for managment ###############
+TrialOne_labhb_anemia_sev_00_14
+TrialOne_RefHighRisk_00_14
+smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[TrialOne_labhb_anemia_sev_00_14==T,TrialOne_man_sev_anemia_00_14:=FALSE]
+smallD[TrialOne_labhb_anemia_sev_00_14==T &
+         TrialOne_RefHighRisk_00_14==T,
+       TrialOne_man_sev_anemia_00_14:=TRUE]
+
+
+###### random samples
+set.seed(7)
+randomsample <- smallD[!is.na(TrialOne_labhb_anemia_sev_00_14)==T][sample(1:.N,5)]
+#export this
 ############################# TABLES ##################################
 
 #Booking visits by categories
@@ -363,6 +427,29 @@ openxlsx::write.xlsx(bpsyst,
                        sprintf("BP_Screened_Visits_%s.xlsx", 
                                lubridate::today())))
 
+# BP/HTN
+###fix this
+bpsyst<- smallD[,.(ChronicHTN=sum(TrialOne_anbpsyst_present_00_14==T,
+                                     na.rm=TRUE),
+                   Screened_15_17=sum(TrialOne_anbpsyst_present_15_17,
+                                      na.rm=TRUE),
+                   Screened_17_18=sum(TrialOne_anbpsyst_present_17_18,na.rm=TRUE),
+                   Screened_18_22=sum(TrialOne_anbpsyst_present_18_22,na.rm=TRUE),
+                   Screened_23_23=sum(TrialOne_anbpsyst_present_23_23,na.rm=TRUE),
+                   Screened_24_28=sum(TrialOne_anbpsyst_present_24_28,na.rm=TRUE),
+                   Screened_29_30=sum(TrialOne_anbpsyst_present_29_30,na.rm=TRUE),
+                   Screened_31_33=sum(TrialOne_anbpsyst_present_31_33,na.rm=TRUE),
+                   Screened_34_34=sum(TrialOne_anbpsyst_present_34_34,na.rm=TRUE),
+                   Screened_35_37=sum(TrialOne_anbpsyst_present_35_37,na.rm=TRUE)),
+                keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(bpsyst, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("BP_Screened_Visits_%s.xlsx", 
+                               lubridate::today())))
+
 #LabHb and Anemia
 labhb<- smallD[,.(screenedlabhb15wks=sum(TrialOne_labhb_exists_00_14==T,
                                          na.rm=TRUE),
@@ -389,7 +476,6 @@ labhb_sev<- smallD[,.(sev_anemia_15wks=sum(TrialOne_labhb_anemia_sev_00_14==T,
                                          na.rm=TRUE),
                   sev_anemia_15_17=sum(TrialOne_labhb_anemia_sev_15_17,
                                           na.rm=TRUE),
-                  sev_anemia_17_18=sum(TrialOne_labhb_anemia_sev_17_18,na.rm=TRUE),
                   sev_anemia_18_22=sum(TrialOne_labhb_anemia_sev_18_22,na.rm=TRUE),
                   sev_anemia_23_23=sum(TrialOne_labhb_anemia_sev_23_23,na.rm=TRUE),
                   sev_anemia_24_28=sum(TrialOne_labhb_anemia_sev_24_28,na.rm=TRUE),
@@ -622,6 +708,20 @@ openxlsx::write.xlsx(refHosp,
                        "booking_and_visits",
                        sprintf("refHosp_%s.xlsx", 
                                lubridate::today())))
+
+
+
+
+########## Managements #########
+
+  
+  
+  
+  
+  
+  
+  
+)]
 
 ##visits by 
 #TO DO: managements and laburglu in a different code , referral to HR or refhosp 

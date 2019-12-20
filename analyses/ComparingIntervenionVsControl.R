@@ -973,34 +973,34 @@ smalld <- smallD[ ,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
 #fetal presentation at term by anexampalp
 smallD[,anexampalp36:=as.character(NA)]
 
-vars <- stringr::str_subset(names(smallD),"^angestage")
-vars_exampalp <- stringr::str_subset(names(smallD),"^anexampalp")
+vars_gestage <- stringr::str_subset(names(smallD),"^angestage_[0-9]+")
 
 
-for (vars_exampalp in vars){
+
+for (var_gestage in vars_gestage){
   
-  vargestage <-stringr::str_replace(vars_exampalp,"anexampalp", "angestage")
+  var_exampalp <-stringr::str_replace(var_gestage,"angestage", "anexampalp")
   
   smallD[hasan36plusweeks==TRUE &
-           get(vargestage)>=36 &
-           get(vargestage)<=40 &
-           !is.na(get(vars_exampalp)) &
-           get(vars_exampalp)!="",
-         anexampalp36:=get(vars_exampalp)]
+           get(var_gestage)>=36 &
+           get(var_gestage)<=40 &
+           !is.na(get(var_exampalp)) &
+           get(var_exampalp)!="",
+         anexampalp36:=get(var_exampalp)]
 }
 
 smalld <- smallD[ ,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
                      ArmB=sum(ident_dhis2_control==F, na.rm=T)),
                   keyby=.(anexampalp36)]
 
-
+#export this table
 
 
 
 #Hemoglobin at booking visit
 smallD[,booklabhbcat:=cut(booklabhb,
                    breaks=c(0,6.9,8.9,10.9,16,20,200),
-                   include.lowest=T)]
+                   include.lowest=F)]
 #booklabhbcat
 smalld<-smallD[,.(TrialArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
                   TrialArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
