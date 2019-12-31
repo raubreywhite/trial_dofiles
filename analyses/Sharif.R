@@ -591,12 +591,70 @@ Hell
 
 ############END###############
 
+##############################
+##Education vs. MarriageAge###
+##############################
+
 d[agemarriage>=14 & agemarriage<=38,agemarriageaccu:=agemarriage]
 d[education>0 & education <50,educationaccu:=education]
 HELL<-aggregate(d[,educationaccu,], list(d$agemarriageaccu), mean , na.rm=TRUE)
 HELL
 cor.test(d$agemarriageaccu, d$educationaccu)
 
+############END###############
+
+##############################
+############Other#############
+##############################
+
+#Para#
+tabyl(d[ident_dhis2_booking==TRUE]$para)
+
+#Gravida#
+tabyl(d[ident_dhis2_booking==TRUE]$gravida)
+
+#Age#
+tabyl(d[ident_dhis2_booking==TRUE]$age)
+
+############END###############
+
+##############################
+#########Para Vs Age##########
+##############################
+
+d[age>=16 & age<=41,ageaccu:=age]
+d[para>=1 & para <=50,paraaccu:=para]
+HELL4<-aggregate(d[,paraaccu,], list(d$ageaccu), mean , na.rm=TRUE)
+HELL4
+cor.test(d$ageaccu, d$paraaccu)
+
+############END###############
+
+##############################
+########Para Vs income########
+##############################
+
+d[para>=1 & para <=50,paraaccu:=para]
+HELL5<-aggregate(d[,paraaccu,], list(d$incomercca), mean , na.rm=TRUE)
+HELL5
+cor.test(d$incomercca, d$paraaccu)
+
+############END###############
+
+##############################
+######Para Vs education#######
+##############################
+
+d[para>=1 & para <=50,paraaccu:=para]
+HELL6<-aggregate(d[,paraaccu,], list(d$educationaccu), mean , na.rm=TRUE)
+HELL6
+cor.test(d$educationaccu, d$paraaccu)
+
+############END###############
+
+
+############END###############
+############END###############
 
 ### TRANSFER TO EXCEL ###
 

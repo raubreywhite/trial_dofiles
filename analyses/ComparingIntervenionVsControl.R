@@ -993,8 +993,12 @@ smalld <- smallD[ ,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
                      ArmB=sum(ident_dhis2_control==F, na.rm=T)),
                   keyby=.(anexampalp36)]
 
-#export this table
 
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("PresAtTerm_%s.xlsx", lubridate::today())))
 
 
 #Hemoglobin at booking visit

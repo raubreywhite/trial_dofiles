@@ -1,4 +1,7 @@
 ###Trial 1 Outcomes###
+#Load data in
+d <- LoadDataFileFromNetwork()
+
 # renaming arms
 d[ident_dhis2_control==F, prettyExposure:="Trial Arm B"]
 d[ident_dhis2_control==T, prettyExposure:="Trial Arm A"]
@@ -97,7 +100,6 @@ for(i in seq_along(man_date)){
 }
 
 
-
 ##making categories of days for booking
 
 smallD[,bookgestagedays_cats:=cut(bookgestagedays,
@@ -107,11 +109,20 @@ smallD[,bookgestagedays_cats:=cut(bookgestagedays,
                        include.lowest=T)]
 
 
-#need to create a dummy gestational age variable
 
 # MAKE BOOK VISIT FOR ANEMIA
 smallD[,booklabhb:=as.numeric(NA)]
-smallD[abs(labgestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
+
+# Discrepancy Variable Calculated
+smallD[,sfhDiscrep_1:=as.numeric(NA)]
+smallD[!is.na(angestage_1) &
+       !is.na(anexamsfh_1)]
+
+
+
+
+
 
 
 VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterestPattern,TruevaluesMin=NULL,TruevaluesMax=NULL,TruevaluesDiscrete=NULL,gestagedaysVariable="anT1gestagedays" ){
@@ -249,7 +260,6 @@ VisitVariables(
   gestagedaysVariable = "anT1gestagedays")
 
 
-
 # BP Diast High
 VisitVariables(
   smallD=smallD,
@@ -321,8 +331,6 @@ VisitVariables(
   gestagedaysVariable = "labT1gestagedays")
 
 
-
-
 ### Lab RBS Normal ####
 # normal blood glucose
 VisitVariables(
@@ -333,6 +341,17 @@ VisitVariables(
   TruevaluesMin=NULL,
   TruevaluesMax=NULL,
   TruevaluesDiscrete = c("POS", "NEG"),
+  gestagedaysVariable = "labT1gestagedays")
+
+# lab urglu pos
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="laburglu_pos",
+  variableOfInterestPattern="laburglu",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete ="POS",
   gestagedaysVariable = "labT1gestagedays")
 
 # normal bloodglu values
@@ -364,6 +383,17 @@ VisitVariables(
   variableOfInterestName="labfastbloodglu_exists",
   variableOfInterestPattern="labfastbloodglu",
   TruevaluesMin=50,
+  TruevaluesMax=500,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "labT1gestagedays")
+
+# Lab FBS High 
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="labfastbloodglu_high",
+  variableOfInterestPattern="labfastbloodglu",
+  TruevaluesMin=105,
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
@@ -439,26 +469,26 @@ VisitVariables(
 
 
 
-######## Making Variavles for managment ###############
+######## Making Variables for managment ###############
 
 ## SevAnemia
 
 # 00_14
-smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[,TrialOne_man_sev_anemia_00_14:=NA]
 smallD[TrialOne_labhb_anemia_sev_00_14==T,TrialOne_man_sev_anemia_00_14:=FALSE]
 smallD[TrialOne_labhb_anemia_sev_00_14==T &
          TrialOne_refHosp_00_14==T,
        TrialOne_man_sev_anemia_00_14:=TRUE]
 
 # 15_17
-smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[,TrialOne_man_sev_anemia_15_17:=NA]
 smallD[TrialOne_labhb_anemia_sev_15_17==T,TrialOne_man_sev_anemia_15_17:=FALSE]
 smallD[TrialOne_labhb_anemia_sev_15_17==T &
          TrialOne_refHosp_15_17==T,
        TrialOne_man_sev_anemia_15_17:=TRUE]
 
 # 18_22
-smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[,TrialOne_man_sev_anemia_18_22:=NA]
 smallD[TrialOne_labhb_anemia_sev_18_22==T,TrialOne_man_sev_anemia_18_22:=FALSE]
 smallD[TrialOne_labhb_anemia_sev_18_22==T &
          TrialOne_refHosp_18_22==T,
@@ -466,47 +496,155 @@ smallD[TrialOne_labhb_anemia_sev_18_22==T &
 
 
 # 24_28
-smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[,TrialOne_man_sev_anemia_24_28:=NA]
 smallD[TrialOne_labhb_anemia_sev_24_28==T,TrialOne_man_sev_anemia_24_28:=FALSE]
 smallD[TrialOne_labhb_anemia_sev_24_28==T &
          TrialOne_refHosp_24_28==T,
        TrialOne_man_sev_anemia_24_28:=TRUE]
 
 # 29_30
-smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[,TrialOne_man_sev_anemia_29_30:=NA]
 smallD[TrialOne_labhb_anemia_sev_29_30==T,TrialOne_man_sev_anemia_29_30:=FALSE]
 smallD[TrialOne_labhb_anemia_sev_29_30==T &
          TrialOne_refHosp_29_30==T,
        TrialOne_man_sev_anemia_29_30:=TRUE]
 
 # 31_33
-smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[,TrialOne_man_sev_anemia_31_33:=NA]
 smallD[TrialOne_labhb_anemia_sev_31_33==T,TrialOne_man_sev_anemia_31_33:=FALSE]
 smallD[TrialOne_labhb_anemia_sev_31_33==T &
          TrialOne_refHosp_31_33==T,
        TrialOne_man_sev_anemia_31_33:=TRUE]
 
 # 34_34
-smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[,TrialOne_man_sev_anemia_34_34:=NA]
 smallD[TrialOne_labhb_anemia_sev_34_34==T,TrialOne_man_sev_anemia_34_34:=FALSE]
 smallD[TrialOne_labhb_anemia_sev_34_34==T &
          TrialOne_refHosp_34_34==T,
        TrialOne_man_sev_anemia_34_34:=TRUE]
 
 # 35_37
-smallD[,TrialOne_man_sev_anemia:=NA]
+smallD[,TrialOne_man_sev_anemia_35_37:=NA]
 smallD[TrialOne_labhb_anemia_sev_35_37==T,TrialOne_man_sev_anemia_35_37:=FALSE]
 smallD[TrialOne_labhb_anemia_sev_35_37==T &
          TrialOne_refHosp_35_37==T,
-       TrialOne_man_sev_anemia_35_37:=TRUE]
+       TrialOne_man_modSev_HTN_35_37:=TRUE]
 
 
+## Moderate/SevereHTN 
+ # Chronic Mod/Sev Htn
+# 00_14
+smallD[,TrialOne_man_modSev_HTN_00_14:=NA]
+smallD[TrialOne_anbpdiast_modSevHTN_00_14==T,TrialOne_man_modSev_HTN_00_14:=FALSE]
+smallD[TrialOne_anbpdiast_modSevHTN_00_14==T &
+         TrialOne_refHosp_00_14==T,
+       TrialOne_man_modSev_HTN_00_14:=TRUE]
+
+# 15_17
+smallD[,TrialOne_man_modSev_HTN_15_17:=NA]
+smallD[TrialOne_anbpdiast_modSevHTN_15_17==T,TrialOne_man_modSev_HTN_15_17:=FALSE]
+smallD[TrialOne_anbpdiast_modSevHTN_15_17==T &
+         TrialOne_refHosp_15_17==T,
+       TrialOne_man_modSev_HTN_15_17:=TRUE]
+
+# 18_22
+smallD[,TrialOne_man_modSev_HTN_18_22:=NA]
+smallD[TrialOne_anbpdiast_modSevHTN_18_22==T,TrialOne_man_modSev_HTN_18_22:=FALSE]
+smallD[TrialOne_anbpdiast_modSevHTN_18_22==T &
+         TrialOne_refHosp_18_22==T,
+       TrialOne_man_modSev_HTN_18_22:=TRUE]
+
+ # Mod/Sev Gestational HTN
+# 24_28
+smallD[,TrialOne_man_modSev_HTN_24_28:=NA]
+smallD[TrialOne_anbpdiast_modSevHTN_24_28==T,TrialOne_man_modSev_HTN_24_28:=FALSE]
+smallD[TrialOne_anbpdiast_modSevHTN_24_28==T &
+         TrialOne_refHosp_24_28==T,
+       TrialOne_man_modSev_HTN_24_28:=TRUE]
+
+# 29_30
+smallD[,TrialOne_man_modSev_HTN_29_30:=NA]
+smallD[TrialOne_anbpdiast_modSevHTN_29_30==T,TrialOne_man_modSev_HTN_29_30:=FALSE]
+smallD[TrialOne_anbpdiast_modSevHTN_29_30==T &
+         TrialOne_refHosp_29_30==T,
+       TrialOne_man_modSev_HTN_29_30:=TRUE]
+
+# 31_33
+smallD[,TrialOne_man_modSev_HTN_31_33:=NA]
+smallD[TrialOne_anbpdiast_modSevHTN_31_33==T,TrialOne_man_modSev_HTN_31_33:=FALSE]
+smallD[TrialOne_anbpdiast_modSevHTN_31_33==T &
+         TrialOne_refHosp_31_33==T,
+       TrialOne_man_modSev_HTN_31_33:=TRUE]
+# 34_34
+smallD[,TrialOne_man_modSev_HTN_34_34:=NA]
+smallD[TrialOne_anbpdiast_modSevHTN_34_34==T,TrialOne_man_modSev_HTN_34_34:=FALSE]
+smallD[TrialOne_anbpdiast_modSevHTN_34_34==T &
+         TrialOne_refHosp_34_34==T,
+       TrialOne_man_modSev_HTN_34_34:=TRUE]
+
+# 35_37
+smallD[,TrialOne_man_modSev_HTN_35_37:=NA]
+smallD[TrialOne_anbpdiast_modSevHTN_35_37==T,TrialOne_man_modSev_HTN_35_37:=FALSE]
+smallD[TrialOne_anbpdiast_modSevHTN_35_37==T &
+         TrialOne_refHosp_35_37==T,
+       TrialOne_man_modSev_HTN_35_37:=TRUE]
+
+## DM managements
+#TO DO: should the laburglu=="POS" or should it just exist
+#24_28
+smallD[,TrialOne_man_gdm_24_28:=NA]
+smallD[TrialOne_laburglu_pos_24_28==T & 
+         (TrialOne_labbloodglu_high_24_28==T |
+         TrialOne_labfastbloodglu_high_24_28==T),
+         TrialOne_man_gdm_24_28:=FALSE]
+smallD[TrialOne_laburglu_pos_24_28==T &
+         TrialOne_refHR_24_28==T,
+       TrialOne_man_gdm_24_28:=TRUE]
+#29_30
+smallD[,TrialOne_man_gdm_29_30:=NA]
+smallD[TrialOne_laburglu_pos_29_30==T & 
+         (TrialOne_labbloodglu_high_29_30==T |
+            TrialOne_labfastbloodglu_high_29_30==T),
+       TrialOne_man_gdm_29_30:=FALSE]
+smallD[TrialOne_laburglu_pos_29_30==T &
+         TrialOne_refHR_29_30==T,
+       TrialOne_man_gdm_29_30:=TRUE]
+#31_33
+smallD[,TrialOne_man_gdm_31_33:=NA]
+smallD[TrialOne_laburglu_pos_31_33==T & 
+         (TrialOne_labbloodglu_high_31_33==T |
+            TrialOne_labfastbloodglu_high_31_33==T),
+       TrialOne_man_gdm_31_33:=FALSE]
+smallD[TrialOne_laburglu_pos_31_33==T &
+         TrialOne_refHR_31_33==T,
+       TrialOne_man_gdm_31_33:=TRUE]
+
+#34_34
+smallD[,TrialOne_man_gdm_34_34:=NA]
+smallD[TrialOne_laburglu_pos_34_34==T & 
+         (TrialOne_labbloodglu_high_34_34==T |
+            TrialOne_labfastbloodglu_high_34_34==T),
+       TrialOne_man_gdm_34_34:=FALSE]
+smallD[TrialOne_laburglu_pos_34_34==T &
+         TrialOne_refHR_34_34==T,
+       TrialOne_man_gdm_34_34:=TRUE]
+
+#35_37
+smallD[,TrialOne_man_gdm_35_37:=NA]
+smallD[TrialOne_laburglu_pos_35_37==T & 
+         (TrialOne_labbloodglu_high_35_37==T |
+            TrialOne_labfastbloodglu_high_35_37==T),
+       TrialOne_man_gdm_35_37:=FALSE]
+smallD[TrialOne_laburglu_pos_35_37==T &
+         TrialOne_refHR_35_37==T,
+       TrialOne_man_gdm_35_37:=TRUE]
 
 
-###### random samples
+###### random samples **** QC **** #######
 set.seed(7)
 randomsample <- smallD[!is.na(TrialOne_labhb_anemia_sev_00_14)==T][sample(1:.N,5)]
 #export this
+
 ############################# TABLES ##################################
 
 #Booking visits by categories
@@ -674,11 +812,7 @@ openxlsx::write.xlsx(has_laburglu,
                                lubridate::today())))
 
 
-
-
-
 #Lab bloodglu
-
 has_labbloodglu<- smallD[,.(
  has_labbloodglu_15wks=sum(TrialOne_labbloodglu_exists_00_14==T,na.rm=TRUE),
  has_labbloodglu_15_17=sum(TrialOne_labbloodglu_exists_15_17,na.rm=TRUE),
@@ -718,6 +852,51 @@ openxlsx::write.xlsx(has_High_bloodglu,
                        "booking_and_visits",
                        sprintf("High_bloodglu_screenings_%s.xlsx", 
                                lubridate::today())))
+
+#Lab fastbloodglu
+
+has_labfastbloodglu<- smallD[,.(
+  has_labfastbloodglu_15wks=sum(TrialOne_labfastbloodglu_exists_00_14==T,na.rm=TRUE),
+  has_labfastbloodglu_15_17=sum(TrialOne_labfastbloodglu_exists_15_17,na.rm=TRUE),
+  has_labfastbloodglu_17_18=sum(TrialOne_labfastbloodglu_exists_17_18,na.rm=TRUE),
+  has_labfastbloodglu_18_22=sum(TrialOne_labfastbloodglu_exists_18_22, na.rm=TRUE),
+  has_labfastbloodglu_23_23=sum(TrialOne_labfastbloodglu_exists_23_23,na.rm=TRUE),
+  has_labfastbloodglu_24_28=sum(TrialOne_labfastbloodglu_exists_24_28, na.rm=TRUE),
+  has_labfastbloodglu_29_30=sum(TrialOne_labfastbloodglu_exists_29_30,na.rm=TRUE),
+  has_labfastbloodglu_31_33=sum(TrialOne_labfastbloodglu_exists_31_33,na.rm=TRUE),
+  has_labfastbloodglu_34_34=sum(TrialOne_labfastbloodglu_exists_34_34,na.rm=TRUE),
+  has_labfastbloodglu_35_37=sum(TrialOne_labfastbloodglu_exists_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(has_labbloodglu, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("bloodfastglu_screenings_%s.xlsx", 
+                               lubridate::today())))
+#high labfastbloodglu values
+has_High_bloodglu<- smallD[,.(
+  has_highfastbloodglu_15wks=sum(TrialOne_labfastbloodglu_high_00_14==T,na.rm=TRUE),
+  has_highfastbloodglu_15_17=sum(TrialOne_labfastbloodglu_high_15_17,na.rm=TRUE),
+  has_highfastbloodglu_17_18=sum(TrialOne_labfastbloodglu_high_17_18,na.rm=TRUE),
+  has_highfastbloodglu_18_22=sum(TrialOne_labfastbloodglu_high_18_22, na.rm=TRUE),
+  has_highfastbloodglu_23_23=sum(TrialOne_labfastbloodglu_high_23_23,na.rm=TRUE),
+  has_highfastbloodglu_24_28=sum(TrialOne_labfastbloodglu_high_24_28, na.rm=TRUE),
+  has_highfastbloodglu_29_30=sum(TrialOne_labfastbloodglu_high_29_30,na.rm=TRUE),
+  has_highfastbloodglu_31_33=sum(TrialOne_labfastbloodglu_high_31_33,na.rm=TRUE),
+  has_highfastbloodglu_34_34=sum(TrialOne_labfastbloodglu_high_34_34,na.rm=TRUE),
+  has_highbloodglu_35_37=sum(TrialOne_labfastbloodglu_high_35_37,na.rm=TRUE)),
+  keyby=.(ident_dhis2_control)]
+
+openxlsx::write.xlsx(has_High_bloodglu, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "booking_and_visits",
+                       sprintf("High_bloodglu_screenings_%s.xlsx", 
+                               lubridate::today())))
+
+
+
 #US exists
 
 us_exists<- smallD[,.(
@@ -854,14 +1033,6 @@ openxlsx::write.xlsx(refHosp,
 ########## Managements #########
 
   
-  
-  
-  
-  
-  
-  
-)]
-
 ##visits by 
 #TO DO: managements and laburglu in a different code , referral to HR or refhosp 
 #has to be onewith in one week after a lab test 
@@ -1030,6 +1201,8 @@ nrow(smallD[is.na(merged_gestagedeliv)])
 
 ######### GA ##########
 
+##LmpT1 for the new LMP that we calculated
+
 #cleaning
 unique(smallD$merged_datedeliv)
 nrow(smallD[is.na(merged_datedeliv)])
@@ -1140,4 +1313,5 @@ smallD[stringr::str_detect(merged_indic_csection_lowercase,"breehch"),
 #in strings that we want we use the %in%
 #smallD[merged_indic_csection %in% c("Breech","TWINS , BOTH BREECH IN LABOUR"#,"breach", "transverse"), var:=true
 
-
+#### Anonymize Data Set ####
+#### Choose Variables Data Set ####

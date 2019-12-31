@@ -24,8 +24,8 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     d[,conabortion:=NULL] 
     d[,ancvaccinatedforttaccordingtoguidelines:=NULL] 
     d[,ancbodyheightm:=NULL] 
-    d[,conancgestationaageatvisitweeks:=NULL] 
-    d[,conancgestationaageatvisitsize:=NULL] 
+    #d[,conancgestationaageatvisitweeks:=NULL] 
+    #d[,conancgestationaageatvisitsize:=NULL] 
     d[,usrecommendationscomments:=NULL] 
     d[,consupplementsyesno:=NULL] 
     d[,conancsupplementprescription:=NULL]
@@ -147,11 +147,15 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   
   if(isControl){
     setnames(d,"v42","anhistchronicspec")
-    #setnames(d,"conancgestationaageatvisitsize","anexamsfh")
     setnames(d,"ancreferralneededforotherchronic","anrefchronic")
+    d[,anexamsfh:=conancgestationaageatvisitsize]
+    d[,conancgestationaageatvisitsize:=NULL] 
+    
   } else {
     d[,anhistchronicspec:=as.character(NA)]
     d[,anrefchronic:=as.character(NA)]
+    d[,conancgestationaageatvisitweeks:=as.numeric(NA)]
+    
   }
   
   tryCatch({
