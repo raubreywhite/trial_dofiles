@@ -155,6 +155,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     d[,anhistchronicspec:=as.character(NA)]
     d[,anrefchronic:=as.character(NA)]
     d[,conancgestationaageatvisitweeks:=as.numeric(NA)]
+   
     
   }
   

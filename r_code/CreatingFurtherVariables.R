@@ -908,7 +908,7 @@ class(d$mahima_gA_1_us)
     var_us_gestage <- us_gestages[i]
     var_us_date<- us_date[i]
     
-    d[is.na(lmpT1) & get(var_us_gestage)>=20 & get(vars_us_gestage)<40,
+    d[is.na(lmpT1) & get(var_us_gestage)>=20 & get(var_us_gestage)<40,
       
       lmpT1:=get(var_us_date)-get(var_us_gestage)*7]
     

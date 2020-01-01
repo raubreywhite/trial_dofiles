@@ -36,7 +36,7 @@ for(i in seq_along(us_gestages)){
   var_us_gestage <- us_gestages[i]
   var_us_date<- us_date[i]
   
-  smallD[is.na(lmpT1) & get(var_us_gestage)>=20 & get(vars_us_gestage)<40,
+  smallD[is.na(lmpT1) & get(var_us_gestage)>=20 & get(var_us_gestage)<40,
          
          lmpT1:=get(var_us_date)-get(var_us_gestage)*7]
   
@@ -114,13 +114,11 @@ smallD[,bookgestagedays_cats:=cut(bookgestagedays,
 smallD[,booklabhb:=as.numeric(NA)]
 smallD[abs(labT1gestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
 
+
 # Discrepancy Variable Calculated
 smallD[,sfhDiscrep_1:=as.numeric(NA)]
 smallD[!is.na(angestage_1) &
-       !is.na(anexamsfh_1)]
-
-
-
+       !is.na(anexamsfh_1), sfhDiscrep_1:=abs(anexamsfh_1-angestage_1)]
 
 
 
