@@ -150,11 +150,11 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     setnames(d,"ancreferralneededforotherchronic","anrefchronic")
     d[,anexamsfh:=conancgestationaageatvisitsize]
     d[,conancgestationaageatvisitsize:=NULL] 
-    
+    setnames(d,"conancgestationaageatvisitweeks", "anconancgestationaageatvisitweeks")
   } else {
     d[,anhistchronicspec:=as.character(NA)]
     d[,anrefchronic:=as.character(NA)]
-    d[,conancgestationaageatvisitweeks:=as.numeric(NA)]
+    d[,anconancgestationaageatvisitweeks:=as.numeric(NA)]
    
     
   }

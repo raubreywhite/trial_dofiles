@@ -661,3 +661,28 @@ cor.test(d$educationaccu, d$paraaccu)
 ### openxlsx::write.xlsx(dAtAsEt*,file.path(FOLDER_DATA_RESULTS,"nAmE*.xlsx")) ###
 
 d$educationca
+
+#######################^
+d[,laburgluxxx:=as.numeric()]
+vars <- names(d)[stringr::str_detect(names(d),"^laburglu_")]
+for(i in vars){d[is.na(get(i)),laburgluxxx:=0]}
+for(i in vars){d[get(i) %in% c("POS","NEG"),laburgluxxx:=1]}
+
+d[laburgluxxx==0, laburgluTF1:="Miss"]
+d[laburgluxxx==1, laburgluTF1:="Avail"]
+
+Accu_URGLU<-(d[!is.na(bookorgname),
+               c("bookorgname",
+                 "laburgluTF1", "bookyearmonth")])
+
+
+XTBSU<-as.data.frame.matrix(xtabs(~bookorgname+laburgluTF1,data=Accu_URGLU,addNA = TRUE))
+
+library(scales)
+
+XTBSU$Tot<-(XTBSU$Avail+XTBSU$Miss)
+XTBSU$XPer<-(percent(XTBSU$Avail/XTBSU$Tot))
+XTBSU$Miss=NULL
+XTBSU
+percent((sum(XTBSU$Avail))/(sum(XTBSU$Tot)))
+sum(XTBSU$Tot)

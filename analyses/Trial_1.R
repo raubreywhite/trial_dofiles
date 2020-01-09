@@ -115,10 +115,54 @@ smallD[,booklabhb:=as.numeric(NA)]
 smallD[abs(labT1gestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
 
 
-# Discrepancy Variable Calculated
-smallD[,sfhDiscrep_1:=as.numeric(NA)]
-smallD[!is.na(angestage_1) &
-       !is.na(anexamsfh_1), sfhDiscrep_1:=abs(anexamsfh_1-angestage_1)]
+
+# Discrepancy Variable anexamsfh variable
+smallD[,anexamsfh_0:=bookexamsfh]
+smallD[,angestage_0:=bookgestage]
+vars <- stringr::str_subset(names(smallD), "^anexamsfh_")
+
+vars <- stringr::str_remove(vars, "anexamsfh_")
+
+
+for(i in vars){
+  print(i)
+  anexamsfh <-sprintf("anexamsfh_%s",i)
+  angestage <- sprintf("angestage_%s",i)
+  sfhDiscrep <-  sprintf("sfhDiscrep_%s",i)
+  
+  smallD[,(sfhDiscrep):=as.numeric(NA)]
+  
+  smallD[!is.na(get(angestage)) &
+           !is.na(get(anexamsfh)), (sfhDiscrep):=abs(get(anexamsfh)-get(angestage))]
+  
+}
+
+# SFH discrepancy with ancongestagesizevisitweek
+
+vars <- stringr::str_subset(names(smallD), "^anconancgestationaageatvisitweeks_")
+vars <- stringr::str_remove(vars, "anconancgestationaageatvisitweeks_")
+
+
+for(i in vars){
+  print(i)
+  anconangestageweeks <-sprintf("anconancgestationaageatvisitweeks_%s",i)
+  angestage <- sprintf("angestage_%s",i)
+  sfhDiscrepCon <-  sprintf("sfhDiscrepCon_%s",i)
+  
+  smallD[,(sfhDiscrepCon):=as.numeric(NA)]
+  
+  smallD[!is.na(get(angestage)) &
+           !is.na(get(anconangestageweeks)), 
+              (sfhDiscrepCon):=abs(get(anconangestageweeks)-get(angestage))]
+  
+}
+
+
+openxlsx::write.xlsx(smallD[,c("bookgestage","anconancgestationaageatvisitweeks_1")], 
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "booking_and_visits",
+                       sprintf("%s_bookgA_ancongA.xlsx", lubridate::today())))
 
 
 
@@ -409,16 +453,6 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "usT1gestagedays")
 
-#US AN SFH measurements
-VisitVariables(
-  smallD=smallD,
-  days=days,
-  variableOfInterestName="anexamsfh_exists",
-  variableOfInterestPattern="anexamsfh",
-  TruevaluesMin=5,
-  TruevaluesMax=44,
-  TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "anT1gestagedays")
 
 # US expected IUGR
 VisitVariables(
@@ -442,7 +476,40 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "usT1gestagedays")
 
-####Referrals ####
+####SFH Discrepancies####
+#AN SFH measurements
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="anexamsfh_exists",
+  variableOfInterestPattern="anexamsfh",
+  TruevaluesMin=5,
+  TruevaluesMax=44,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "anT1gestagedays")
+
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="sfhDiscrep",
+  variableOfInterestPattern="sfhDiscrepExists",
+  TruevaluesMin=2.1,
+  TruevaluesMax=500,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "anT1gestagedays")
+
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="sfhDiscrepCon",
+  variableOfInterestPattern="sfhDiscrepConExists",
+  TruevaluesMin=2.1,
+  TruevaluesMax=500,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "anT1gestagedays")
+
+
+####Referrals####
 # Ref to HR
 VisitVariables(
   smallD=smallD,
@@ -1311,5 +1378,21 @@ smallD[stringr::str_detect(merged_indic_csection_lowercase,"breehch"),
 #in strings that we want we use the %in%
 #smallD[merged_indic_csection %in% c("Breech","TWINS , BOTH BREECH IN LABOUR"#,"breach", "transverse"), var:=true
 
+ varskeep <- c("prettyExposure",
+               "uniquied",
+               "bookorgistricthashed",
+               "SevOrModHbatBirth",
+               "sevHTNatBirth",
+               "has_malpresentation",
+               "has_merged_presentation_breech")
+ 
+ outcome <-smallD[,varsKeep,with=F]
+
+
+#### BirthOutcome Data set to send #####
+
 #### Anonymize Data Set ####
 #### Choose Variables Data Set ####
+#each outcome will have its own data set with the variables we made above
+#rename ident_dhis2_control to something else in each data set
+#keep lab values in smaller data sets 
