@@ -41,8 +41,8 @@ CreatingFurtherVariablesNormal <- function(d){
                                   breaks=c(0,200,900,1824,3054,100000),
                                   include.lowest=T)]
   d[,incomecat:=cut(income,
-                               breaks=c(0,200,900,1824,3054,100000),
-                               include.lowest=T)]
+                           breaks=c(0,200,900,1824,3054,100000),
+                           include.lowest=T)]
   
   xtabs(~d$avgincomecat)
   

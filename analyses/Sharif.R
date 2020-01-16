@@ -652,17 +652,7 @@ cor.test(d$educationaccu, d$paraaccu)
 
 ############END###############
 
-
-############END###############
-############END###############
-
-### TRANSFER TO EXCEL ###
-
-### openxlsx::write.xlsx(dAtAsEt*,file.path(FOLDER_DATA_RESULTS,"nAmE*.xlsx")) ###
-
-d$educationca
-
-#######################^
+###################Urine Stick by month####
 d[,laburgluxxx:=as.numeric()]
 vars <- names(d)[stringr::str_detect(names(d),"^laburglu_")]
 for(i in vars){d[is.na(get(i)),laburgluxxx:=0]}
@@ -671,7 +661,7 @@ for(i in vars){d[get(i) %in% c("POS","NEG"),laburgluxxx:=1]}
 d[laburgluxxx==0, laburgluTF1:="Miss"]
 d[laburgluxxx==1, laburgluTF1:="Avail"]
 
-Accu_URGLU<-(d[!is.na(bookorgname),
+Accu_URGLU<-(d[!is.na(bookorgname) & bookyearmonth=="2019-11",
                c("bookorgname",
                  "laburgluTF1", "bookyearmonth")])
 
@@ -686,3 +676,13 @@ XTBSU$Miss=NULL
 XTBSU
 percent((sum(XTBSU$Avail))/(sum(XTBSU$Tot)))
 sum(XTBSU$Tot)
+
+############END###############
+############END###############
+
+### TRANSFER TO EXCEL ###
+
+### openxlsx::write.xlsx(dAtAsEt*,file.path(FOLDER_DATA_RESULTS,"nAmE*.xlsx")) ###
+
+d$educationca
+
