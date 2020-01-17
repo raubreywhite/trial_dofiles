@@ -262,9 +262,23 @@ VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterest
 
 
 
-######### Managements ############
-#creating new variable for weeks for managements
-mandays<- list(
+###### identifying outcomes #######
+
+# categories we want
+days <- list(
+  "00_14"=c(-500:104),
+  "15_17"=c(105:125),
+  "18_22"=c(126:160),
+  "23_23"=c(161:167),
+  "24_28"=c(168:202),
+  "29_30"=c(203:216),
+  "31_33"=c(217:237),
+  "34_34"=c(238:244),
+  "35_37"=c(245:265),
+  "38_41"=c(266:293),
+  
+  #using below vectors for managementsinstead of using two seperate vectors
+  
   "00_00"=0*7+c(0:6),
   "01_01"=1*7+c(0:6),
   "02_02"=2*7+c(0:6),
@@ -276,10 +290,19 @@ mandays<- list(
   "08_08"=8*7+c(0:6),
   "09_09"=9*7+c(0:6),
   "10_10"=10*7+c(0:6),
+  "11_11"=11*7+c(0:6),
+  "12_12"=12*7+c(0:6),
+  "13_13"=13*7+c(0:6),
+  "14_14"=14*7+c(0:6),
+  "15_15"=15*7+c(0:6),
+  "16_16"=16*7+c(0:6),
+  "17_17"=17*7+c(0:6),
+  "18_18"=18*7+c(0:6),
+  "19_19"=9*7+c(0:6),
   "20_20"=20*7+c(0:6),
   "21_21"=21*7+c(0:6),
   "22_22"=22*7+c(0:6),
-  "23_23"=23*7+c(0:6),
+  #"23_23"=23*7+c(0:6),
   "24_24"=24*7+c(0:6),
   "25_25"=25*7+c(0:6),
   "26_26"=26*7+c(0:6),
@@ -297,77 +320,11 @@ mandays<- list(
   "38_38"=38*7+c(0:6),
   "39_39"=39*7+c(0:6),
   "40_40"=40*7+c(0:6),
-  "40_40"=41*7+c(0:6)
-  
+  "41_41"=41*7+c(0:6)
 
 )
 
 
-for(i in 0:37){
-  #i=23
-  
-  # make sure everything has 2 digits (with 0 in front)
-  week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(3,4), width=2, flag="0")
-  
-  #output variable
-  var_manhb <- sprintf("TrialOne_manhb_%s_%s", week_current, week_current)
-  
-  #id source
-  var_badhb <- sprintf("TrialOne_labhb_anemia_sev_%s_%s", week_current, week_current)
-  
-  # no one has anything
-  smallD[,(var_manhb):=as.logical(NA)]
-  # is false, if you have a bad hb
-  smallD[get(var_badhb)==TRUE, (var_man_hb):=TRUE]
-  for(week_later in weeks_later){
-    var_secondcheck <- sprintf("TrialOne_labhb_exists_%s_%s", 
-                               week_later, 
-                               week_later)
-    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
-    smallD[get(var_man_hb)==FALSE  & get(var_secondcheck)==TRUE, (var_man_hb):=TRUE]
-  }
-}
-
-# join the weeks together
-
-smallD[,TrialOne_manhb_07_12:=pmax(
-  TrialOne_manhb_07_07,
-  TrialOne_manhb_08_08,
-  TrialOne_manhb_09_09,
-  TrialOne_manhb_10_10,
-  TrialOne_manhb_11_11,
-  TrialOne_manhb_12_12,
-  na.rm=T)
-  ]
-
-
-#EXAMPLE:
-  
-  library(data.table)
-x <- data.table(
-  x1=c(NA,NA,NA,T,T,F,F),
-  x2=c(NA,T,F,T,F,T,F)
-)
-x[,y:=pmax(x1,x2,na.rm=T)]
-x
-
-
-
-###### identifying outcomes #######
-
-days <- list(
-  "00_14"=c(-500:104),
-  "15_17"=c(105:125),
-  "18_22"=c(126:160),
-  "23_23"=c(161:167),
-  "24_28"=c(168:202),
-  "29_30"=c(203:216),
-  "31_33"=c(217:237),
-  "34_34"=c(238:244),
-  "35_37"=c(245:265),
-  "38_41"=c(266:293)
-)
 
 ###ANC Visits####
 
@@ -470,7 +427,7 @@ VisitVariables(
   gestagedaysVariable = "anT1gestagedays")
 
 
-###ANC Anemia ####
+### ANC Anemia ####
 # lab hb exists
 VisitVariables(
   smallD=smallD,
@@ -715,54 +672,149 @@ VisitVariables(
   TruevaluesDiscrete ="RefHosp",
   gestagedaysVariable = "manT1gestagedays")
 
-######## Managements ########
+# Management Performed
+# Ref to Hosp
+VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="manperf",
+  variableOfInterestPattern="manperf",
+  TruevaluesMin=1,
+  TruevaluesMax=1,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "manT1gestagedays")
 
-######################## Export ANC Outcome Data Sets ########################
-#make these into vars and add them in vars keep
-varsanevent <- names(smallD)[stringr::str_detect(names(smallD),"^anevent")]
-varsangAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^angestage")]
-varsangAdays <- names(smallD)[stringr::str_detect(names(smallD),"^anT1gestagedays")]
-varslabevent <- names(smallD)[stringr::str_detect(names(smallD),"^labevent")]
-varslabgAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^labgestage")]
-varslabgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^labT1gestagedays")]
-varslabhb <- names(smallD)[stringr::str_detect(names(smallD),"^labhb")]
-varsmanevent <- names(smallD)[stringr::str_detect(names(smallD),"^manevent")]
-varsmangAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^mangestage")]
-varsgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^manT1gestagedays")]
-varsmantypex <- names(smallD)[stringr::str_detect(names(smallD),"^mantypex")]
-varsmantypey <- names(smallD)[stringr::str_detect(names(smallD),"^mantypey")]
-varsRefhosp<- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHosp_")]
-varsRefHR <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHR_")]
-	
 
-varskeep <- c("prettyExposure",	
-               "uniqueid",	
-               "age",	
-               "agepregnancy",	
-               "avgincome",
-               "avgincomecat",	
-               "education", 
-               "educationcat",
-               "str_TRIAL_1_Cluster",	
-               "bookorgdistricthashed",	
-               "bookhistdm",	
-               "bookhistcs",	
-               "bookhistgdm",	
-               "bookhistperi",	
-               "bookhistph",	
-               "bookhistaph",	
-               "bookhistabort",	
-               "bookhistpreecl",	
-               "bookheight",	
-               "bookwight",	
-               "bookbmi", 
-               "bookbmicat",
-               "bookevent",	
-               "bookgestage",	
-               "bookgestagedays",	
-               "booklabhb"	
-               	
-)
+######### Managements ############
+
+
+# take into account the 4 weeks after 37
+#sev anemia
+for(i in 0:37){
+  #i=23
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(3,4), width=2, flag="0")
+  
+  #output variable
+  var_manhb <- sprintf("TrialOne_manhb_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_manhb <- "temp_manhb"
+
+  #id source
+  var_badhb <- sprintf("TrialOne_labhb_anemia_sev_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_manhb):=as.logical(NA)]
+
+  # is false, if you have a bad hb
+  smallD[get(var_badhb)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badhb)==TRUE, (var_temp_manhb):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHosp_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second anemia check
+    var_secondcheck <- sprintf("TrialOne_labhb_exists_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manhb)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manhb):=TRUE]
+  }
+  #making var for sev anemia 
+  smallD[,(var_manhb):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manhb):=get(var_temp_manhb)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manhb):=get(var_temp_manhb) & get(var_temp_manperf)]
+
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_manhb):=NULL]
+}
+
+# create the man vars we want/join the weeks together
+#pmax does horizontal maximum for wide format
+
+smallD[,TrialOne_manhb_07_12:=pmax(
+  TrialOne_manhb_07_07,
+  TrialOne_manhb_08_08,
+  TrialOne_manhb_09_09,
+  TrialOne_manhb_10_10,
+  TrialOne_manhb_11_11,
+  TrialOne_manhb_12_12,
+  na.rm=T)
+  ]
+
+#mild_mod anemia
+for(i in 0:37){
+
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(3,4), width=2, flag="0")
+  
+  #output variable
+  var_manhb <- sprintf("TrialOne_manmildmodhb_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_manhb <- "temp_manhb"
+  
+  #id source
+  var_badhb <- sprintf("TrialOne_labhb_anemia_mild_mod_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_manhb):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badhb)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badhb)==TRUE, (var_temp_manhb):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHosp_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second anemia check
+    var_secondcheck <- sprintf("TrialOne_labhb_exists_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manhb)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manhb):=TRUE]
+  }
+  #making var for sev anemia 
+  smallD[,(var_manhb):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manhb):=get(var_temp_manhb)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manhb):=get(var_temp_manhb) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_manhb):=NULL]
+}
+
+
+
 
 ######## Making Variables for managment ###############
 
@@ -1919,6 +1971,63 @@ smallD[prettyExposure=="Trial Arm B", prettyExposure:="C"]
                                       sprintf("%s_BirthOutcomes.xlsx", 
                                               lubridate::today())))
 
+
+ 
+ #################### Export ANC Process Outcome Data Sets ####################
+ 
+ # GA cats at delivery for process outcomes
+ smallD[,birthgAcats:=cut(USorLMPdateCombogAdays,
+                          breaks=c(0,104,125,160,167,202,216,237,244,265,308),
+                          include.lowest=T)]
+ 
+ #make these into vars and add them in vars keep
+ varsanevent <- names(smallD)[stringr::str_detect(names(smallD),"^anevent")]
+ varsangAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^angestage")]
+ varsangAdays <- names(smallD)[stringr::str_detect(names(smallD),"^anT1gestagedays")]
+ varslabevent <- names(smallD)[stringr::str_detect(names(smallD),"^labevent")]
+ varslabgAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^labgestage")]
+ varslabgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^labT1gestagedays")]
+ varslabhb <- names(smallD)[stringr::str_detect(names(smallD),"^labhb")]
+ varsmanevent <- names(smallD)[stringr::str_detect(names(smallD),"^manevent")]
+ varsmangAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^mangestage")]
+ varsgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^manT1gestagedays")]
+ varsmantypex <- names(smallD)[stringr::str_detect(names(smallD),"^mantypex")]
+ varsmantypey <- names(smallD)[stringr::str_detect(names(smallD),"^mantypey")]
+ varsRefhosp<- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHosp_")]
+ varsRefHR <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHR_")]
+ 
+ 
+ varskeep <- c("prettyExposure",	
+               "uniqueid",	
+               "age",	
+               "agepregnancy",	
+               "avgincome",
+               "avgincomecat",	
+               "education", 
+               "educationcat",
+               "str_TRIAL_1_Cluster",	
+               "bookgestagedays_cats",
+               "bookorgdistricthashed",	
+               "bookhistdm",	
+               "bookhistcs",	
+               "bookhistgdm",	
+               "bookhistperi",	
+               "bookhistph",	
+               "bookhistaph",	
+               "bookhistabort",	
+               "bookhistpreecl",	
+               "bookheight",	
+               "bookwight",	
+               "bookbmi", 
+               "bookbmicat",
+               "bookevent",	
+               "bookgestage",	
+               "bookgestagedays",	
+               "booklabhb",
+               "birthgAcats"
+               
+ )
+ 
 
  #### Anonymize Data Set ####
  #### Choose Variables Data Set ####
