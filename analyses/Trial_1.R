@@ -673,7 +673,6 @@ VisitVariables(
   gestagedaysVariable = "manT1gestagedays")
 
 # Management Performed
-# Ref to Hosp
 VisitVariables(
   smallD=smallD,
   days=days,
@@ -687,15 +686,15 @@ VisitVariables(
 
 ######### Managements ############
 
-
 # take into account the 4 weeks after 37
+
 #sev anemia
 for(i in 0:37){
   #i=23
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(3,4), width=2, flag="0")
+  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
   
   #output variable
   var_manhb <- sprintf("TrialOne_manhb_%s_%s", week_current, week_current)
@@ -723,10 +722,7 @@ for(i in 0:37){
     smallD[get(var_temp_manperf)==FALSE & 
              get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
     
-    # working only on second anemia check
-    var_secondcheck <- sprintf("TrialOne_labhb_exists_%s_%s", 
-                               week_later, 
-                               week_later)
+   
     # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
     smallD[get(var_temp_manhb)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manhb):=TRUE]
   }
@@ -757,16 +753,17 @@ smallD[,TrialOne_manhb_07_12:=pmax(
   TrialOne_manhb_12_12,
   na.rm=T)
   ]
+####### Check time ranges for each of the vars #########
 
-#mild_mod anemia
+#mild_mod anemia retest after one month 
 for(i in 0:37){
 
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(3,4), width=2, flag="0")
+  weeks_later <- formatC(i+c(3,5), width=2, flag="0")
   
   #output variable
-  var_manhb <- sprintf("TrialOne_manmildmodhb_%s_%s", week_current, week_current)
+  var_manhb <- sprintf("TrialOne_manhb_mildmodhbret_%s_%s", week_current, week_current)
   var_temp_manperf <- "temp_manperf"
   var_temp_manhb <- "temp_manhb"
   
@@ -784,7 +781,7 @@ for(i in 0:37){
   
   for(week_later in weeks_later){
     # working only on manerf check
-    var_secondcheck <- sprintf("TrialOne_refHosp_%s_%s", 
+    var_secondcheck <- sprintf("TrialOne_labhb_exists_%s_%s", 
                                week_later, 
                                week_later)
     # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
@@ -792,9 +789,9 @@ for(i in 0:37){
              get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
     
     # working only on second anemia check
-    var_secondcheck <- sprintf("TrialOne_labhb_exists_%s_%s", 
-                               week_later, 
-                               week_later)
+    #var_secondcheck <- sprintf("TrialOne_labhb_exists_%s_%s", 
+                           #    week_later, 
+                            #   week_later)
     # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
     smallD[get(var_temp_manhb)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manhb):=TRUE]
   }
@@ -813,10 +810,514 @@ for(i in 0:37){
   smallD[,(var_temp_manhb):=NULL]
 }
 
+#ModsevGHTbpsyst
+for(i in 0:37){
+  #i=23
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(3,4), width=2, flag="0")
+  
+  #output variable
+  var_manght <- sprintf("TrialOne_manhtn_ModSev_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_manght <- "temp_manght"
+  
+  #id source
+  var_badght <- sprintf("TrialOne_anbpsyst_modSevHTN_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_manght):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badght)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badght)==TRUE, (var_temp_manght):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHosp_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second anemia check
+    var_secondcheck <- sprintf("TrialOne_anbpsyst_present_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manght)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manght):=TRUE]
+  }
+  #making var for sev anemia 
+  smallD[,(var_manght):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manght):=get(var_temp_manght)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manght):=get(var_temp_manght) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_manght):=NULL]
+}
 
 
+# High RBG, RefHosp
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  
+  #output variable
+  var_mangdm <- sprintf("TrialOne_manRBGHigh_Hosp_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_mangdm <- "temp_mangdm"
+  
+  #id source
+  var_badgdm <- sprintf("TrialOne_labbloodglu_high_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_mangdm):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badgdm)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badgdm)==TRUE, (var_temp_mangdm):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHosp_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second check
+    # var_secondcheck <- sprintf("TrialOne_labbloodglu_exists_%s_%s", 
+    #                            week_later, 
+    #                            week_later)
+     # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_mangdm)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_mangdm):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_mangdm):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_mangdm):=get(var_temp_mangdm)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_mangdm):=get(var_temp_mangdm) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_mangdm):=NULL]
+  
+}
 
-######## Making Variables for managment ###############
+# High RBG, RefHR
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  
+  #output variable
+  var_mangdm <- sprintf("TrialOne_manRBGHigh_HR_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_mangdm <- "temp_mangdm"
+  
+  #id source
+  var_badgdm <- sprintf("TrialOne_labbloodglu_high_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_mangdm):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badgdm)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badgdm)==TRUE, (var_temp_mangdm):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHR_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second check
+    # var_secondcheck <- sprintf("TrialOne_labbloodglu_exists_%s_%s", 
+    #                            week_later, 
+    #                            week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_mangdm)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_mangdm):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_mangdm):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_mangdm):=get(var_temp_mangdm)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_mangdm):=get(var_temp_mangdm) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_mangdm):=NULL]
+  
+}
+
+
+#make anonymized smallD, save to dropbox for mahima
+
+# malpresentation: us_malpres
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  
+  #output variable
+  var_manpres <- sprintf("TrialOne_manmalpres_us_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_manpres <- "temp_manpres"
+  
+  #id source
+  var_badpres <- sprintf("TrialOne_us_malpresvar_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_manpres):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badpres)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badpres)==TRUE, (var_temp_manpres):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHosp_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second check
+    # var_secondcheck <- sprintf("TrialOne_labbloodglu_exists_%s_%s", 
+    #                            week_later, 
+    #                            week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manpres)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manpres):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_manpres):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manpres):=get(var_temp_manpres)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manpres):=get(var_temp_manpres) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_manpres):=NULL]
+  
+}
+
+# malpresentation: anexampalpmal
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  
+  #output variable
+  var_manpres <- sprintf("TrialOne_manmalpres_anexam_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_manpres <- "temp_manpres"
+  
+  #id source
+  var_badpres <- sprintf("TrialOne_anexampalpmal_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_manpres):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badpres)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badpres)==TRUE, (var_temp_manpres):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHosp_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second check
+    # var_secondcheck <- sprintf("TrialOne_labbloodglu_exists_%s_%s", 
+    #                            week_later, 
+    #                            week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manpres)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manpres):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_manpres):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manpres):=get(var_temp_manpres)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manpres):=get(var_temp_manpres) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_manpres):=NULL]
+  
+}
+
+#iugr Ref hosp
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  
+  #output variable
+  var_maniugr <- sprintf("TrialOne_maniugr_Hosp_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_maniugr <- "temp_maniugr"
+  
+  #id source
+  var_badiugr <- sprintf("TrialOne_us_iugrSuspected_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_maniugr):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badiugr)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badiugr)==TRUE, (var_temp_maniugr):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHosp_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second check
+    # var_secondcheck <- sprintf("TrialOne_labbloodglu_exists_%s_%s", 
+    #                            week_later, 
+    #                            week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_maniugr)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_maniugr):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_maniugr):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_maniugr):=get(var_temp_maniugr)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_maniugr):=get(var_temp_maniugr) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_maniugr):=NULL]
+  
+}
+
+#iugr Ref HR
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  
+  #output variable
+  var_maniugr <- sprintf("TrialOne_maniugr_HR_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_maniugr <- "temp_maniugr"
+  
+  #id source
+  var_badiugr <- sprintf("TrialOne_us_iugrSuspected_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_maniugr):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badiugr)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badiugr)==TRUE, (var_temp_maniugr):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHR_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second check
+    # var_secondcheck <- sprintf("TrialOne_labbloodglu_exists_%s_%s", 
+    #                            week_later, 
+    #                            week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_maniugr)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_maniugr):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_maniugr):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_maniugr):=get(var_temp_maniugr)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_maniugr):=get(var_temp_maniugr) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_maniugr):=NULL]
+  
+}
+
+#lga Ref HR
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  
+  #output variable
+  var_manlga <- sprintf("TrialOne_manlga_HR_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_manlga <- "temp_manlga"
+  
+  #id source
+  var_badlga <- sprintf("TrialOne_us_lgaSuspected_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_manlga):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badlga)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badlga)==TRUE, (var_temp_manlga):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHR_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second check
+    # var_secondcheck <- sprintf("TrialOne_labbloodglu_exists_%s_%s", 
+    #                            week_later, 
+    #                            week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manlga)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manlga):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_manlga):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manlga):=get(var_temp_manlga)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manlga):=get(var_temp_manlga) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_manlga):=NULL]
+  
+}
+
+
+#lga Ref hosp
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  
+  #output variable
+  var_manlga <- sprintf("TrialOne_manlga_Hosp_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_manlga <- "temp_manlga"
+  
+  #id source
+  var_badlga <- sprintf("TrialOne_us_lgaSuspected_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_manlga):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badlga)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badlga)==TRUE, (var_temp_manlga):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refHosp_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second check
+    # var_secondcheck <- sprintf("TrialOne_labbloodglu_exists_%s_%s", 
+    #                            week_later, 
+    #                            week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manlga)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manlga):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_manlga):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manlga):=get(var_temp_manlga)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manlga):=get(var_temp_manlga) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_manlga):=NULL]
+  
+}
 
 ## SevAnemia
 
@@ -1723,14 +2224,16 @@ smallD[stringr::str_detect(merged_indic_csection_lowercase,"breehch"),
        has_malpresentation:=TRUE]
 
 
-##Twins Variable
-smallD[,multiplepreg:=FALSE]
+###### Multiplepreg Var ###### 
+smallD[,multiplepreg:=as.numeric(NA)]
+smallD[,multiplepreg:=1]
+
 smallD[stringr::str_detect(merged_indic_csection_lowercase,"twins"),
-       multiplepreg:=TRUE]
+       multiplepreg:=2]
 smallD[stringr::str_detect(merged_indic_csection_lowercase,"twin"),
-       multiplepreg:=TRUE]
+       multiplepreg:=2]
 smallD[stringr::str_detect(merged_indic_csection_lowercase,"triplets"),
-       multiplepreg:=TRUE]
+       multiplepreg:=3]
 
 #making paperhbo lowercase to use in multiplepreg var paperhbo
 smallD[,lowercasepaperhbo_notes_1:= stringr::str_to_lower(paperhbo_notes_1)]
@@ -1738,21 +2241,20 @@ smallD[,lowercasepaperhbo_notes_2:= stringr::str_to_lower(paperhbo_notes_2)]
 
 smallD[multiplepreg==FALSE &
          stringr::str_detect(lowercasepaperhbo_notes_1,"twins"),
-       multiplepreg:=TRUE]
+       multiplepreg:=2]
 
 smallD[multiplepreg==FALSE &
          stringr::str_detect(lowercasepaperhbo_notes_1,"twin"),
-       multiplepreg:=TRUE]
+       multiplepreg:=2]
 
 smallD[multiplepreg==FALSE &
          stringr::str_detect(lowercasepaperhbo_notes_2,"twins"),
-       multiplepreg:=TRUE]
+       multiplepreg:=2]
 
 smallD[multiplepreg==FALSE &
          stringr::str_detect(lowercasepaperhbo_notes_2,"twin"),
-       multiplepreg:=TRUE]
+       multiplepreg:=2]
 
-#twins var from dhis2hosp birthoutcomes
 
 #twins variable from avicenna
 smallD[,lowercaseAvicnotes_1:= stringr::str_to_lower(acsdatatext_1)]
@@ -1761,28 +2263,28 @@ smallD[,lowercaseAvicnotes_3:= stringr::str_to_lower(acsdatatext_3)]
 
 
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_1,"twin"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercaseAvicnotes_1,"twin"), multiplepreg:=2]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_1,"twins"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercaseAvicnotes_1,"twins"), multiplepreg:=2]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_1,"triplet"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercaseAvicnotes_1,"triplet"), multiplepreg:=3]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_1,"triplets"), multiplepreg:=TRUE]    
+         stringr::str_detect(lowercaseAvicnotes_1,"triplets"), multiplepreg:=3]    
 
-smallD[multiplepreg==FALSE & stringr::str_detect(lowercaseAvicnotes_2,"twin"), multiplepreg:=TRUE] 
+smallD[multiplepreg==FALSE & stringr::str_detect(lowercaseAvicnotes_2,"twin"), multiplepreg:=2] 
 
-smallD[multiplepreg==FALSE & stringr::str_detect(lowercaseAvicnotes_2,"twins"), multiplepreg:=TRUE]
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_2,"triplet"), multiplepreg:=TRUE]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_2,"triplets"), multiplepreg:=TRUE]    
+smallD[multiplepreg==FALSE & stringr::str_detect(lowercaseAvicnotes_2,"twins"), multiplepreg:=2]
 
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_3,"triplet"), multiplepreg:=TRUE]     
+         stringr::str_detect(lowercaseAvicnotes_2,"triplet"), multiplepreg:=3]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_3,"treplit"), multiplepreg:=TRUE]     
-nrow(smallD[multiplepreg==T])
+         stringr::str_detect(lowercaseAvicnotes_2,"triplets"), multiplepreg:=3]    
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_3,"triplet"), multiplepreg:=3]     
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_3,"treplit"), multiplepreg:=3]     
+nrow(smallD[multiplepreg==3])
 
 #twins var dhis2
 smallD[,lowercaseDhis2hbo_1:= stringr::str_to_lower(dhis2hbousrecommendcomment_1)]
@@ -1790,9 +2292,9 @@ smallD[,lowercaseDhis2hbo_2:= stringr::str_to_lower(dhis2hbousrecommendcomment_2
 smallD[,lowercaseDhis2hbo_3:= stringr::str_to_lower(dhis2hbousrecommendcomment_3)]
 
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseDhis2ho_1,"twins"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercaseDhis2hbo_1,"twins"), multiplepreg:=2]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseDhis2ho_1,"twin"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercaseDhis2hbo_1,"twin"), multiplepreg:=2]
 
 #twins var dhis2
 smallD[,lowercasehbocon_1:= stringr::str_to_lower(hboconreasonforcs_1)]
@@ -1800,20 +2302,20 @@ smallD[,lowercasehbocon_2:= stringr::str_to_lower(hboconreasonforcs_2)]
 smallD[,lowercasehbocon_3:= stringr::str_to_lower(hboconreasonforcs_3)]
 
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_1,"twins"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercasehbocon_1,"twins"), multiplepreg:=2]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_1,"twin"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercasehbocon_1,"twin"), multiplepreg:=2]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_1,"triplets"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercasehbocon_1,"triplets"), multiplepreg:=3]
 
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_2,"twins"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercasehbocon_2,"twins"), multiplepreg:=2]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_2,"twin"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercasehbocon_2,"twin"), multiplepreg:=2]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_2,"triplet"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercasehbocon_2,"triplet"), multiplepreg:=3]
 smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_3,"triplet"), multiplepreg:=TRUE]
+         stringr::str_detect(lowercasehbocon_3,"triplet"), multiplepreg:=3]
 
 
 
@@ -1880,7 +2382,7 @@ openxlsx::write.xlsx(smalld,
                        sprintf("Macrosomia_%s.xlsx", 
                                lubridate::today())))
 
-#### Anonymized BirthOutcome Data Set#####
+#################### Anonymized BirthOutcome Data Set ####################
 varsanexpalp <- names(smallD)[stringr::str_detect(names(smallD),"^anexampalp")]
 varsuspres <- names(smallD)[stringr::str_detect(names(smallD),"^uspres")]
 varsusgestage <- names(smallD)[stringr::str_detect(names(smallD),"^usgestage")]
@@ -1995,9 +2497,40 @@ smallD[prettyExposure=="Trial Arm B", prettyExposure:="C"]
  varsmantypey <- names(smallD)[stringr::str_detect(names(smallD),"^mantypey")]
  varsRefhosp<- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHosp_")]
  varsRefHR <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHR_")]
+ varsT1anvis <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anvisitnew")]
+ varsHBscr <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_labhb_")]
+ varsT1bpsyst <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anbpsyst_")]
+ varsT1bpdia <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anbpdiast_")]
  
+ varsT1labur <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_laburglu_")]
  
- varskeep <- c("prettyExposure",	
+ varsT1labblglu <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_labbloodglu_")]
+ varsT1labfastglu <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_labfastbloodglu_")]
+ varsanexamsfh <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anexamsfh_")]
+ 
+ varsanexampalpmal <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anexampalpmal_")]
+ 
+ varsanexmalpres <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_malpresanexam_")]
+
+varsSFHdisc <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_sfhDiscrep")]
+varsmanperf <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manperf_")]
+varsUs <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_us_")]
+varsusgAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^usgestage")]
+varsusgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^usT1gestagedays")]
+
+
+
+### Management vars ###
+manhb <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manhb_")]
+manhtn <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manhtn_")]
+manRBG <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manRBGHigh_")]
+malpres <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manmalpres_")]
+iugr <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_maniugr_")]
+lga <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manlga_")]
+
+
+ 
+ varskeepAll <- c("prettyExposure",	
                "uniqueid",	
                "age",	
                "agepregnancy",	
@@ -2012,21 +2545,139 @@ smallD[prettyExposure=="Trial Arm B", prettyExposure:="C"]
                "bookhistcs",	
                "bookhistgdm",	
                "bookhistperi",	
-               "bookhistph",	
+               "bookhistpph",	
                "bookhistaph",	
                "bookhistabort",	
                "bookhistpreecl",	
                "bookheight",	
-               "bookwight",	
+               "bookweight",	
                "bookbmi", 
                "bookbmicat",
                "bookevent",	
                "bookgestage",	
                "bookgestagedays",	
                "booklabhb",
-               "birthgAcats"
+               "birthgAcats",
+               varsT1anvis,
+               varsangAdays,
+               varsangAweeks,
+               varsanevent
+               
                
  )
+ 
+ 
+ 
+ varshb <-c(varslabevent, 
+            varslabgAweeks, 
+            varslabgAdays,
+            varslabhb, 
+            varsHBscr
+             )
+ 
+ 
+ varsbp <-c(varsT1bpsyst,
+            varsT1bpdia
+             )
+ 
+ varsgdm <-c(varslabevent, 
+             varslabgAweeks, 
+             varslabgAdays,
+             varsT1labur,
+             varsT1labblglu,
+             varsT1labfastglu
+             )
+ varsmalpres <- c(varsUs,
+                  malpres,
+                  iugr,
+                  lga)
+ 
+ varsfgr <- c(varsusgAweeks,
+              varsusgAdays,
+              varsiugr,
+              varslga,
+              varsUs,
+              varsSFHdisc,
+              varsanexamsfh,
+              varsanexampalpmal,
+              varsanexmalpres)
+ 
+ varsman <-c(varsmanevent,
+             varsmangAweeks,
+             varsmantypey,
+             varsmantypex,
+             varsgAdays,
+             varsRefHR,
+             varsRefhosp,
+             varsmanperf)
+ 
+ 
+ ###### Attendance data set  ######
+ varskeep <- c(varskeepAll)
+ attendance <-smallD[,varskeep,with=F]
+ 
+ openxlsx::write.xlsx(attendance,file.path(FOLDER_DATA_CLEAN,
+                                            "Trial_1_Outcomes",
+                                            sprintf("%s_Attendance.xlsx", 
+                                                    lubridate::today())))
+ 
+ ###### Anemia  data set  ###### 
+ varskeep <- c(varskeepAll,
+               varshb,
+               varsman)
+ hb <-smallD[,varskeep,with=F]
+ 
+ openxlsx::write.xlsx(hb,file.path(FOLDER_DATA_CLEAN,
+                                           "Trial_1_Outcomes",
+                                           sprintf("%s_Anemia.xlsx", 
+                                                   lubridate::today())))
+ 
+ ###### Hypertension data set  ###### 
+ varskeep <- c(varskeepAll,
+               varsbp,
+               varsman)
+ bp <-smallD[,varskeep,with=F]
+ 
+ openxlsx::write.xlsx(bp,file.path(FOLDER_DATA_CLEAN,
+                                   "Trial_1_Outcomes",
+                                   sprintf("%s_HTN.xlsx", 
+                                           lubridate::today())))
+ 
+ ###### GDM data set  ###### 
+ varskeep <- c(varskeepAll,
+               varsgdm,
+               varsman)
+ gdm <-smallD[,varskeep,with=F]
+ 
+ openxlsx::write.xlsx(gdm,file.path(FOLDER_DATA_CLEAN,
+                                   "Trial_1_Outcomes",
+                                   sprintf("%s_GDM.xlsx", 
+                                           lubridate::today())))
+ ###### Malpres data set  ###### 
+ varskeep <- c(varskeepAll,
+               varsmalpres,
+               varsman)
+ malpres <-smallD[,varskeep,with=F]
+ 
+ openxlsx::write.xlsx(malpres,file.path(FOLDER_DATA_CLEAN,
+                                    "Trial_1_Outcomes",
+                                    sprintf("%s_Malpres.xlsx", 
+                                            lubridate::today())))
+ 
+ 
+ 
+ 
+ ###### FGR data set  ###### 
+ varskeep <- c(varskeepAll,
+               varsfgr,
+               varsman)
+ fgr <-smallD[,varskeep,with=F]
+ 
+ openxlsx::write.xlsx(fgr,file.path(FOLDER_DATA_CLEAN,
+                                    "Trial_1_Outcomes",
+                                    sprintf("%s_FGR.xlsx", 
+                                            lubridate::today())))
+ 
  
 
  #### Anonymize Data Set ####
