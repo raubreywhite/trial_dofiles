@@ -3,11 +3,13 @@ DHIS2_Ultrasound <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     controlName = "Ultrasound.csv",
     clinicName = "Ultrasound results.csv",
     isControl=isControl)
+  #unique(d$eventdate)[1:10]
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
-    d[,eventdate:=as.Date(eventdate, "%d/%m/%Y")]
+    d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
+    #unique(d$eventdate)[1:10]
   } else {
     d[,eventdate:=as.Date(eventdate)]
   }
@@ -27,6 +29,10 @@ DHIS2_Ultrasound <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     lengthAfterEarlyEvent=42*7,
     keepbooklmp=TRUE
   )
+  
+  #sum(is.na(d$booklmp))
+  #sum(is.na(d$bookdate))
+  #sum(is.na(d$eventdate))
   
   if (isControl) {
     d[,ancgestationalageatvisitweeks:=floor(as.numeric(difftime(eventdate,booklmp,units="days"))/7)]
