@@ -503,7 +503,14 @@ SaveCISMACDataBase<- function(){
     stop("THESE VARIABLES DONT EXIST IN CISMAC DATABASE")
   }
   
-  d <-d[ident_TRIAL_1==T,varsKeep,with=F]
+  
+  smallD <-d[ident_TRIAL_1==T,varsKeep,with=F]
+  
+  #save copy to dropbox
+  openxlsx::write.xlsx(smallD, file.path(FOLDER_DROPBOX_RESULTS,
+                                      "mahima",
+                                      "trial_1",
+                                      "anonymized_data.xlsx"))
   
   # A = controls, B= intervention
   A <-d[ident_dhis2_control==T]

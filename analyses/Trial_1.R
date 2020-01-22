@@ -141,7 +141,7 @@ vars <- stringr::str_subset(names(smallD), "^anexamsfh_")
 
 vars <- stringr::str_remove(vars, "anexamsfh_")
 
-
+#anexamsfh stuff
 for(i in vars){
   print(i)
   anexamsfh <-sprintf("anexamsfh_%s",i)
@@ -156,11 +156,10 @@ for(i in vars){
 }
 
 # SFH discrepancy with ancongestagesizevisitweek
-
 vars <- stringr::str_subset(names(smallD), "^anconancgestationaageatvisitweeks_")
 vars <- stringr::str_remove(vars, "anconancgestationaageatvisitweeks_")
 
-
+#anconancgestationaageatvisitweeks var
 for(i in vars){
   print(i)
   anconangestageweeks <-sprintf("anconancgestationaageatvisitweeks_%s",i)
@@ -204,6 +203,7 @@ for(i in 1:length(vars_source)){
   
 }
 
+
 VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterestPattern,TruevaluesMin=NULL,TruevaluesMax=NULL,TruevaluesDiscrete=NULL,gestagedaysVariable="anT1gestagedays" ){
 
   if(!is.null(TruevaluesMin) & !is.null(TruevaluesMax) & !is.null(TruevaluesDiscrete)){
@@ -213,11 +213,8 @@ VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterest
   if(is.null(TruevaluesMin) & is.null(TruevaluesMax) & is.null(TruevaluesDiscrete)){
     stop ("ALL TRUE VALUES NULL")
   }
-  smallD[,angestagedays_0:=bookgestagedays]
-  smallD[,anbpdiast_0:=bookbpdiast]
-  smallD[,anbpsyst_0:=bookbpsyst]
-  smallD[,anexamsfh_0:=bookexamsfh]
-  smallD[,labhb_0:=booklabhb]
+  
+  
   
   
   
@@ -233,6 +230,7 @@ VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterest
     var <- sprintf("TrialOne_%s_%s",variableOfInterestName,names(days)[i])
     # initialize all as FALSE if has booking variable
     smallD[!is.na(ident_dhis2_booking),(var):=FALSE]
+    #xtabs(~smallD[[var]])
     
     # loop through the "gestage"/"bp" variables
     for(j in 1:length(listOfGestAgeVars)){
@@ -254,10 +252,10 @@ VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterest
         
     }
   }
-  smallD[,angestagedays_0:=NULL]
-  smallD[,anbpdiast_0:=NULL]
-  smallD[,anbpsyst_0:=NULL]
- 
+
+  return(smallD)
+  
+  
 }
 
 
@@ -320,15 +318,18 @@ days <- list(
   "38_38"=38*7+c(0:6),
   "39_39"=39*7+c(0:6),
   "40_40"=40*7+c(0:6),
-  "41_41"=41*7+c(0:6)
+  "41_41"=41*7+c(0:6),
+  "42_42"=42*7+c(0:6)
 
 )
 
 
 
-###ANC Visits####
 
-VisitVariables(
+###ANC Visits####
+smallD[,anT1gestagedays_0:=bookgestagedays]
+
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anvisitnew",
@@ -337,10 +338,15 @@ VisitVariables(
   TruevaluesMax=260,
   gestagedaysVariable="anT1gestagedays")
 
-###ANC BP SYT ####
+smallD[,anT1gestagedays_0:=NULL]
+xtabs(~smallD$TrialOne_anvisitnew_00_00)
 
+###ANC BP SYT ####
 # BP SYST Present
-VisitVariables(
+smallD[,anT1gestagedays_0:=bookgestagedays]
+smallD[,anbpsyst_0:=bookbpsyst]
+
+smallD<-VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anbpsyst_present",
@@ -349,8 +355,15 @@ VisitVariables(
   TruevaluesMax=170,
   gestagedaysVariable = "anT1gestagedays")
 
+smallD[,anT1gestagedays_0:=NULL]
+smallD[,anbpsyst_0:=NULL]
+xtabs(~smallD$TrialOne_anbpsyst_present_00_00)
+
 # BP Diast Present
-VisitVariables(
+smallD[,anT1gestagedays_0:=bookgestagedays]
+smallD[,anbpdiast_0:=bookbpdiast]
+
+smallD<- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anbpdiast_present",
@@ -359,8 +372,15 @@ VisitVariables(
   TruevaluesMax=170,
   gestagedaysVariable = "anT1gestagedays")
 
+smallD[,anT1gestagedays_0:=NULL]
+smallD[,anbpdiast_0:=NULL]
+xtabs(~smallD$TrialOne_anbpdiast_present_00_14)
+
 # BP Syst High
-VisitVariables(
+smallD[,anT1gestagedays_0:=bookgestagedays]
+smallD[,anbpsyst_0:=bookbpsyst]
+
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anbpsyst_high",
@@ -370,8 +390,15 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
 
+smallD[,anT1gestagedays_0:=NULL]
+smallD[,anbpsyst_0:=NULL]
+xtabs(~smallD$TrialOne_anbpsyst_high_00_14)
+
 # BP Syst MildHTN
-VisitVariables(
+smallD[,anT1gestagedays_0:=bookgestagedays]
+smallD[,anbpsyst_0:=bookbpsyst]
+
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anbpsyst_mildHTN",
@@ -381,8 +408,15 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
 
+smallD[,anT1gestagedays_0:=NULL]
+smallD[,anbpsyst_0:=NULL]
+xtabs(~smallD$TrialOne_anbpsyst_mildHTN_00_14)
+
 # BP Syst ModSevHTN
-VisitVariables(
+smallD[,anT1gestagedays_0:=bookgestagedays]
+smallD[,anbpsyst_0:=bookbpsyst]
+
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anbpsyst_modSevHTN",
@@ -392,9 +426,15 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
 
+smallD[,anT1gestagedays_0:=NULL]
+smallD[,anbpsyst_0:=NULL]
+xtabs(~smallD$TrialOne_anbpsyst_modSevHTN_00_14)
 
 # BP Diast High
-VisitVariables(
+smallD[,anT1gestagedays_0:=bookgestagedays]
+smallD[,anbpdiast_0:=bookbpdiast]
+
+smallD <-VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anbpdiast_high",
@@ -404,8 +444,15 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
 
+smallD[,anT1gestagedays_0:=NULL]
+smallD[,anbpdiast_0:=NULL]
+xtabs(~smallD$TrialOne_anbpdiast_high_00_14)
+
+
 # BP Diast MildHTN
-VisitVariables(
+smallD[,anT1gestagedays_0:=bookgestagedays]
+smallD[,anbpdiast_0:=bookbpdiast]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anbpdiast_mildHTN",
@@ -414,9 +461,15 @@ VisitVariables(
   TruevaluesMax=99,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
+smallD[,anT1gestagedays_0:=NULL]
+smallD[,anbpdiast_0:=NULL]
+xtabs(~smallD$TrialOne_anbpdiast_mildHTN_00_14)
+
 
 # BP Diast Mod/SevHTN
-VisitVariables(
+smallD[,anT1gestagedays_0:=bookgestagedays]
+smallD[,anbpdiast_0:=bookbpdiast]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anbpdiast_modSevHTN",
@@ -425,11 +478,17 @@ VisitVariables(
   TruevaluesMax=200,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
+smallD[,anT1gestagedays_0:=NULL]
+smallD[,anbpdiast_0:=NULL]
+xtabs(~smallD$TrialOne_anbpdiast_modSevHTN_00_14)
 
 
 ### ANC Anemia ####
 # lab hb exists
-VisitVariables(
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labhb_1),
+              labT1gestagedays_0:=labT1gestagedays_1]
+smallD[!is.na(labhb_1) & !is.na(labT1gestagedays_0),labhb_0:=booklabhb]
+smallD <-VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labhb_exists",
@@ -440,11 +499,16 @@ VisitVariables(
   gestagedaysVariable = "labT1gestagedays")
 
 nrow(smallD[labhb_1>=4 & labhb_1<=20])
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labhb_0:=NULL]
 xtabs(~smallD$TrialOne_labhb_exists_15_17)
 
 
 # sev anemia
-VisitVariables(
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labhb_1),
+       labT1gestagedays_0:=labT1gestagedays_1]
+smallD[!is.na(labhb_1) & !is.na(labT1gestagedays_0),labhb_0:=booklabhb]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labhb_anemia_sev",
@@ -454,8 +518,17 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
 
+nrow(smallD[labhb_1>=4 & labhb_1<=20])
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labhb_0:=NULL]
+xtabs(~smallD$TrialOne_labhb_anemia_sev_15_17)
+
+
 # mild and moderate anemia
-VisitVariables(
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labhb_1),
+       labT1gestagedays_0:=labT1gestagedays_1]
+smallD[!is.na(labhb_1) & !is.na(labT1gestagedays_0),labhb_0:=booklabhb]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labhb_anemia_mild_mod",
@@ -464,11 +537,19 @@ VisitVariables(
   TruevaluesMax=10.9,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
+nrow(smallD[labhb_1>=4 & labhb_1<=11])
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labhb_0:=NULL]
+xtabs(~smallD$TrialOne_labhb_anemia_mild_mod_15_17)
+
 
 
 ### Lab RBS Normal ####
-# normal blood glucose
-VisitVariables(
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(laburglu_1),
+       labT1gestagedays_0:=labT1gestagedays_1]
+smallD[!is.na(laburglu_1) & !is.na(labT1gestagedays_0),laburglu_0:=laburglu_1]
+# normal urine glucose
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="laburglu_exists",
@@ -477,9 +558,15 @@ VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete = c("POS", "NEG"),
   gestagedaysVariable = "labT1gestagedays")
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,laburglu_0:=NULL]
+xtabs(~smallD$TrialOne_laburglu_exists_15_17)
 
 # lab urglu pos
-VisitVariables(
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(laburglu_1),
+       labT1gestagedays_0:=labT1gestagedays_1]
+smallD[!is.na(laburglu_1) & !is.na(labT1gestagedays_0),laburglu_0:=laburglu_1]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="laburglu_pos",
@@ -488,9 +575,16 @@ VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete ="POS",
   gestagedaysVariable = "labT1gestagedays")
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,laburglu_0:=NULL]
+xtabs(~smallD$TrialOne_laburglu_pos_15_17)
 
 # normal bloodglu values
-VisitVariables(
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labbloodglu_1),
+       labT1gestagedays_0:=labT1gestagedays_1]
+smallD[!is.na(labbloodglu_1) & !is.na(labT1gestagedays_0),
+              labbloodglu_0:=labbloodglu_1]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labbloodglu_exists",
@@ -499,9 +593,16 @@ VisitVariables(
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labbloodglu_0:=NULL]
+xtabs(~smallD$TrialOne_labbloodglu_exists_15_17)
 
 # high blood glucose
-VisitVariables(
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labbloodglu_1),
+       labT1gestagedays_0:=labT1gestagedays_1]
+smallD[!is.na(labbloodglu_1) & !is.na(labT1gestagedays_0),
+       labbloodglu_0:=labbloodglu_1]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labbloodglu_high",
@@ -510,9 +611,17 @@ VisitVariables(
   TruevaluesMax=500,
   TruevaluesDiscrete =NULL,
   gestagedaysVariable = "labT1gestagedays")
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labbloodglu_0:=NULL]
+xtabs(~smallD$TrialOne_labbloodglu_high_15_17)
+
 
 # Lab FBS Normal 
-VisitVariables(
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labfastbloodglu_1),
+       labT1gestagedays_0:=labT1gestagedays_1]
+smallD[!is.na(labfastbloodglu_1) & !is.na(labT1gestagedays_0),
+       labfastbloodglu_0:=labfastbloodglu_1]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labfastbloodglu_exists",
@@ -521,9 +630,18 @@ VisitVariables(
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labfastbloodglu_0:=NULL]
+xtabs(~smallD$TrialOne_labfastbloodglu_exists_15_17)
+
+
 
 # Lab FBS High 
-VisitVariables(
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labfastbloodglu_1),
+       labT1gestagedays_0:=labT1gestagedays_1]
+smallD[!is.na(labfastbloodglu_1) & !is.na(labT1gestagedays_0),
+       labfastbloodglu_0:=labfastbloodglu_1]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labfastbloodglu_high",
@@ -532,11 +650,13 @@ VisitVariables(
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
-
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labfastbloodglu_0:=NULL]
+xtabs(~smallD$TrialOne_labfastbloodglu_high_00_14)
 
 #### US visits ####
 # Has US visit
-VisitVariables(
+smallD <-VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="us_exists",
@@ -546,20 +666,22 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable ="usT1gestagedays")
 
+xtabs(~smallD$TrialOne_us_exists_00_14)
 
 # US suspected IUGR
-VisitVariables(
+smallD <-VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="us_iugrSuspected",
   variableOfInterestPattern="usiugr",
-  TruevaluesMin=1,
-  TruevaluesMax=1,
-  TruevaluesDiscrete = NULL,
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete = 1,
   gestagedaysVariable ="usT1gestagedays")
+xtabs(~smallD$TrialOne_us_iugrSuspected_00_14)
 
 # US expected LGA
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="us_lgaSuspected",
@@ -569,8 +691,10 @@ VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "usT1gestagedays")
 
+xtabs(~smallD$TrialOne_us_lgaSuspected_00_14)
+
 # US pres-malpresentation
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="us_malpres",
@@ -579,9 +703,10 @@ VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete="Yes",
   gestagedaysVariable = "usT1gestagedays")
+xtabs(~smallD$TrialOne_us_malpres_00_14)
 
 # US pres-malpresentation
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="us_malpresvar",
@@ -590,11 +715,12 @@ VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete= c("Trasverse","Breech"),
   gestagedaysVariable = "usT1gestagedays")
+xtabs(~smallD$TrialOne_us_malpresvar_00_14)
 
 
 ####SFH Discrepancies####
 #AN SFH measurements
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anexamsfh_exists",
@@ -603,10 +729,11 @@ VisitVariables(
   TruevaluesMax=44,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
+xtabs(~smallD$TrialOne_anexamsfh_exists_00_14)
 
 
 ######## Re Check These SFH Discrep variables!!!!!################
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="sfhDiscrepExists",
@@ -615,8 +742,10 @@ VisitVariables(
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
+xtabs(~smallD$TrialOne_sfhDiscrepExists_00_14)
 
-VisitVariables(
+
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="sfhDiscrepCon",
@@ -625,9 +754,10 @@ VisitVariables(
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
+xtabs(~smallD$TrialOne_sfhDiscrepExists_00_14)
 
 #anexampalp malpres
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="malpresanexam",
@@ -636,9 +766,10 @@ VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete = "Yes",
   gestagedaysVariable = "anT1gestagedays")
+xtabs(~smallD$TrialOne_sfhDiscrepExists_00_14)
 
 #anexampalp source
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="anexampalpmal",
@@ -647,11 +778,12 @@ VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete = c("Trasverse","Breech"),
   gestagedaysVariable = "anT1gestagedays")
+xtabs(~smallD$TrialOne_anexampalpmal_00_14)
 
 
 ####Referrals####
 # Ref to HR
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="refHR",
@@ -660,9 +792,10 @@ VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete ="RefHighRisk",
   gestagedaysVariable = "manT1gestagedays")
+xtabs(~smallD$TrialOne_refHR_00_14)
 
 # Ref to Hosp
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="refHosp",
@@ -671,9 +804,11 @@ VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete ="RefHosp",
   gestagedaysVariable = "manT1gestagedays")
+xtabs(~smallD$TrialOne_refHosp_00_14)
+
 
 # Management Performed
-VisitVariables(
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="manperf",
@@ -682,6 +817,8 @@ VisitVariables(
   TruevaluesMax=1,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "manT1gestagedays")
+xtabs(~smallD$TrialOne_manperf_00_14)
+
 
 
 ######### Managements ############
@@ -694,7 +831,7 @@ for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
   
   #output variable
   var_manhb <- sprintf("TrialOne_manhb_%s_%s", week_current, week_current)
@@ -740,6 +877,7 @@ for(i in 0:37){
   smallD[,(var_temp_manperf):=NULL]
   smallD[,(var_temp_manhb):=NULL]
 }
+xtabs(~smallD$TrialOne_manhb_24_24)
 
 # create the man vars we want/join the weeks together
 #pmax does horizontal maximum for wide format
@@ -760,7 +898,7 @@ for(i in 0:37){
 
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(3,5), width=2, flag="0")
+  weeks_later <- formatC(i+c(3:5), width=2, flag="0")
   
   #output variable
   var_manhb <- sprintf("TrialOne_manhb_mildmodhbret_%s_%s", week_current, week_current)
@@ -809,6 +947,7 @@ for(i in 0:37){
   smallD[,(var_temp_manperf):=NULL]
   smallD[,(var_temp_manhb):=NULL]
 }
+xtabs(~smallD$TrialOne_manhb_mildmodhbret_32_32)
 
 #ModsevGHTbpsyst
 for(i in 0:37){
@@ -816,7 +955,7 @@ for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(3,4), width=2, flag="0")
+  weeks_later <- formatC(i+c(3:4), width=2, flag="0")
   
   #output variable
   var_manght <- sprintf("TrialOne_manhtn_ModSev_%s_%s", week_current, week_current)
@@ -865,14 +1004,14 @@ for(i in 0:37){
   smallD[,(var_temp_manperf):=NULL]
   smallD[,(var_temp_manght):=NULL]
 }
-
+xtabs(~smallD$TrialOne_manhtn_ModSev_18_18)
 
 # High RBG, RefHosp
 for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
   
   #output variable
   var_mangdm <- sprintf("TrialOne_manRBGHigh_Hosp_%s_%s", week_current, week_current)
@@ -922,13 +1061,15 @@ for(i in 0:37){
   smallD[,(var_temp_mangdm):=NULL]
   
 }
+xtabs(~smallD$TrialOne_manRBGHigh_Hosp_24_24)
+
 
 # High RBG, RefHR
 for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
   
   #output variable
   var_mangdm <- sprintf("TrialOne_manRBGHigh_HR_%s_%s", week_current, week_current)
@@ -978,16 +1119,15 @@ for(i in 0:37){
   smallD[,(var_temp_mangdm):=NULL]
   
 }
+xtabs(~smallD$TrialOne_manRBGHigh_HR_24_24)
 
-
-#make anonymized smallD, save to dropbox for mahima
 
 # malpresentation: us_malpres
 for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
   
   #output variable
   var_manpres <- sprintf("TrialOne_manmalpres_us_%s_%s", week_current, week_current)
@@ -1037,13 +1177,15 @@ for(i in 0:37){
   smallD[,(var_temp_manpres):=NULL]
   
 }
+xtabs(~smallD$TrialOne_manmalpres_us_36_36)
+
 
 # malpresentation: anexampalpmal
 for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
   
   #output variable
   var_manpres <- sprintf("TrialOne_manmalpres_anexam_%s_%s", week_current, week_current)
@@ -1093,13 +1235,15 @@ for(i in 0:37){
   smallD[,(var_temp_manpres):=NULL]
   
 }
+xtabs(~smallD$TrialOne_manmalpres_anexam_35_35)
+
 
 #iugr Ref hosp
 for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
   
   #output variable
   var_maniugr <- sprintf("TrialOne_maniugr_Hosp_%s_%s", week_current, week_current)
@@ -1149,13 +1293,14 @@ for(i in 0:37){
   smallD[,(var_temp_maniugr):=NULL]
   
 }
+xtabs(~smallD$TrialOne_maniugr_Hosp_32_32)
 
 #iugr Ref HR
 for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
   
   #output variable
   var_maniugr <- sprintf("TrialOne_maniugr_HR_%s_%s", week_current, week_current)
@@ -1205,13 +1350,14 @@ for(i in 0:37){
   smallD[,(var_temp_maniugr):=NULL]
   
 }
+xtabs(~smallD$TrialOne_maniugr_HR_32_32)
 
 #lga Ref HR
 for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
   
   #output variable
   var_manlga <- sprintf("TrialOne_manlga_HR_%s_%s", week_current, week_current)
@@ -1261,14 +1407,14 @@ for(i in 0:37){
   smallD[,(var_temp_manlga):=NULL]
   
 }
-
+xtabs(~smallD$TrialOne_manlga_HR_32_32)
 
 #lga Ref hosp
 for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0,1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
   
   #output variable
   var_manlga <- sprintf("TrialOne_manlga_Hosp_%s_%s", week_current, week_current)
@@ -1318,6 +1464,1011 @@ for(i in 0:37){
   smallD[,(var_temp_manlga):=NULL]
   
 }
+xtabs(~smallD$TrialOne_manlga_Hosp_32_32)
+
+########## lmpstatusKnown #########
+
+#Notes:
+#calculate gA based on how system calculates it. 
+#check code to make sure everything is recalculated
+#any us dates prior to lmp dates should be reverted backwards from that date
+
+lmpstatusKnown<-smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                          ArmB=sum(ident_dhis2_control==F, na.rm=TRUE)), 
+                       keyby=.(booklmpknown)]
+
+
+################################ HBO ################################
+
+#gestationalage at delivery
+nrow(smallD[!is.na(merged_gestagedeliv)])
+nrow(smallD[merged_abortion==T])
+
+missinggA<-smallD[is.na(mahima_hospenteredgestage_1),
+                  
+                  c("bookdate",
+                    "ident_dhis2_control",
+                    "booklmp",
+                    "merged_datedeliv",
+                    "merged_gestagedeliv",
+                    "cpodate_1",
+                    "cpopregoutcome_1", 
+                    "prettyExposure",
+                    "USorLMPdate",
+                    "mahima_gestageatbirthwk_1")]
+
+table<- missinggA[,.(
+  BookdateNa=sum(is.na(bookdate)),
+  MahimagestagebirthNA=sum(is.na(mahima_gestageatbirthwk_1)),
+  USorLMPdateNa=sum(is.na(USorLMPdate)),
+  DoBNa=sum(is.na(merged_datedeliv)),
+  gAdelivNa=sum(is.na(merged_gestagedeliv)),
+  BooklmpNA=sum(is.na(booklmp)),
+  CPOdateNA=sum(is.na(cpodate_1)),
+  CPOpregNA=sum(is.na(cpopregoutcome_1))),
+  keyby=.(prettyExposure)]
+
+#TO DO: figure out why some are missing gAs-either not calculated, not entered, etc
+
+# Creating categories for the at birth variables
+smallD[,USorLMPdateCombogAdays:= as.numeric(difftime(
+  mahima_dateofbirth_1,
+  USorLMPdate,
+  units ="days"))]
+
+smallD[,gAatBirth_cats:=cut((USorLMPdateCombogAdays),
+                            breaks=c(-1000,0,14,104,119,
+                                     125,154,167, 196,
+                                     216,231,244,259,266,280,294,314,500000),
+                            include.lowest=T)]
+
+smallD[,gAatBirth_mostGAs_cats:=cut(((7*mahima_gestageatbirthwk_1)),
+                                    breaks=c(-1000,0,14,104,119,
+                                             125,154,167, 196,
+                                             216,231,244,259,266,280,294,314,500000),
+                                    include.lowest=T)]
+
+
+
+
+
+#added 37-38, 38-40,40-42, above 45 weeks
+#38 weeks=266 days
+#40 weeks=280 days
+#42 weeks=294 days
+#45 weeks=315 days
+
+######### HTN at Birth ##########
+#cleaning systolic bp, move to top level cleaning sheet
+smallD[,merged_bpdiast := stringr::str_replace(as.numeric(merged_bpdiast), 
+                                               "[0-9][0-9][0-9]/$","")]
+
+smallD[,merged_bpsyst:=as.numeric(merged_bpsyst)]
+
+###making severe htn variable
+smallD[,sevHTNatBirth:=NA]
+smallD[!is.na(merged_bpsyst) &
+         !is.na(merged_bpdiast),sevHTNatBirth:=FALSE]
+smallD[(merged_bpsyst>=160 & merged_bpsyst<=300) |
+         (merged_bpdiast>=110 & merged_bpdiast<=300),sevHTNatBirth:=TRUE ]
+
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                 keyby=.(sevHTNatBirth)]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("SevHTNatBirth_%s.xlsx", 
+                               lubridate::today())))
+
+
+
+######### HBG at Birth ##########
+unique(smallD$merged_birthhemo)
+
+#cleaning 
+smallD[,merged_birthhemo:=as.numeric(merged_birthhemo)]
+unique(smallD$merged_birthhemo)
+
+#variable for moderate or severe anemia
+smallD[,SevOrModHbatBirth:=NA]
+smallD[!is.na(merged_birthhemo),SevOrModHbatBirth:=FALSE]
+smallD[merged_birthhemo>=3 & 
+         merged_birthhemo<9,SevOrModHbatBirth:=TRUE]
+
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                 keyby=.(SevOrModHbatBirth)]
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("SevModHBG_%s.xlsx", 
+                               lubridate::today())))
+
+
+
+######### Birth Weight ##########
+unique(smallD$merged_pregbweight)
+
+#cleaning 
+smallD[,merged_pregbweight:=as.numeric(merged_pregbweight)]
+unique(smallD$merged_pregbweight)
+
+#2 options to clean them, when its less than 5, multiply it by 100
+#when its >=10 and <40, but for this option it may not be the greatest idea because it could just be a shifted value from some other data variable in data entry
+
+smallD[merged_pregbweight<7 &
+         merged_pregbweight>0, 
+       merged_pregbweight:=1000*merged_pregbweight]
+
+smallD[merged_pregbweight<50 & merged_pregbweight>16, 
+       merged_pregbweight:=100*merged_pregbweight]
+#getting summary data
+sapply(smallD$merged_pregbweight, mean, na.rm=TRUE)
+
+summary(smallD[merged_pregbweight<6000 & merged_pregbweight>500]$merged_pregbweight)
+
+
+
+######### Presentaion ##########
+unique(smallD$merged_presentationdeliv)
+
+smallD[,has_merged_presentation_breech:=FALSE]
+
+smallD[merged_presentationdeliv %in% c("Breech",
+                                       "Transverse",
+                                       "TRANSVERSE",
+                                       "Trasverse",
+                                       "Breach",
+                                       "TRANSVER BOTHE",
+                                       "BREECH"),
+       has_merged_presentation_breech:=TRUE]
+
+
+
+######### Date Deliv ##########
+unique(smallD$merged_gestagedeliv)
+nrow(smallD[is.na(merged_gestagedeliv)])
+
+
+######### GA ##########
+
+##LmpT1 for the new LMP that we calculated
+
+#cleaning
+unique(smallD$merged_datedeliv)
+nrow(smallD[is.na(merged_datedeliv)])
+
+nrow(smallD[is.na(USorLMPdate)])
+
+nrow(smallD[is.na(mahima_dateofbirth_1)])
+
+nrow(smallD[is.na(mahima_gestageatbirthwk_1)])
+
+nrow(smallD[is.na(mahima_hospenteredgestage_1)])
+
+
+# Deliveries by gestational age category
+# we should include outcome with this
+
+#smallD[,mergedGABirth_cats:=cut(mahima_gestageatbirthwk_1,
+#                        breaks=c(0,15,17),
+#                       include.lowest = TRUE]
+
+nam <- names(smallD)[stringr::str_detect(names(smallD),"^mahima_dateofbirth_[0-9]*$")]
+num <- stringr::str_replace(nam,"mahima_dateofbirth_","")
+for(i in num){
+  print(i)
+  
+  smallD[,(sprintf("mahima_gestageatbirthwk_%s",i)):=round(as.numeric(difftime(
+    get(sprintf("mahima_dateofbirth_%s", i)),
+    USorLMPdate,
+    units="weeks")),digits=1)]
+}
+
+nrow(smallD[is.na(mahima_gestageatbirthwk_1)])
+
+smallD[is.na(mahima_gestageatbirthwk_1),
+       mahima_gestageatbirthwk_1:=mahima_hospenteredgestage_1]
+
+
+smallD[is.na(USorLMPdate),
+       mahima_gestageatbirthwk_1:=mahima_hospenteredgestage_1]
+
+
+#checking out who still has missing data and why
+NomahimagA <- smallD[is.na(mahima_gestageatbirthwk_1), 
+                     c("uniqueid",
+                       "matching",
+                       "merged_datedeliv",
+                       "mahima_hospenteredgestage_1",
+                       "merged_gestagedeliv",
+                       "USorLMPdate")]
+
+openxlsx::write.xlsx(NomahimagA, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("No_mahima_gA_%s.xlsx", lubridate::today())))
+
+#making small data set to get birth weight data stuff
+sgaLga <- smallD[,c("mahima_gestageatbirthwk_1","merged_pregbweight")]
+
+openxlsx::write.xlsx(sgaLga, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "demographics_and_history",
+                       sprintf("SgaLgaDataSet_%s.xlsx", lubridate::today())))
+
+#making sgA variables
+smallD[,sga:=NA]
+smallD[!is.na(merged_pregbweight) & !is.na(USorLMPdateCombogAdays),sga:=FALSE]
+
+#identifying sgas
+smallD[sga==FALSE &
+         merged_pregbweight>0 & 
+         merged_pregbweight<2394 & 
+         USorLMPdateCombogAdays>=259 & 
+         USorLMPdateCombogAdays<=265, sga:=TRUE]
+smallD[sga==FALSE &
+         merged_pregbweight<2550 & 
+         USorLMPdateCombogAdays>=266 & 
+         USorLMPdateCombogAdays<=272, sga:=TRUE]
+smallD[sga==FALSE &
+         merged_pregbweight<2696 &
+         USorLMPdateCombogAdays>=273 & 
+         USorLMPdateCombogAdays<=279, sga:=TRUE]
+smallD[sga==FALSE &
+         merged_pregbweight<2831 & 
+         USorLMPdateCombogAdays>=280 & 
+         USorLMPdateCombogAdays<=286, sga:=TRUE]
+smallD[sga==FALSE &
+         merged_pregbweight<2952 & 
+         USorLMPdateCombogAdays>=287 &
+         USorLMPdateCombogAdays<=293, sga:=TRUE]
+
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                 keyby=.(sga)]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("Sga_%s.xlsx", 
+                               lubridate::today())))
+
+
+#making lgA variables
+smallD[,lga:=NA]
+
+#everyone who isnt missing gA and weight is given a false
+smallD[!is.na(merged_pregbweight) & !is.na(USorLMPdateCombogAdays), lga:=FALSE]
+
+#identifying lgas
+smallD[lga==FALSE &
+         merged_pregbweight>3259 & 
+         USorLMPdateCombogAdays>=259 &
+         USorLMPdateCombogAdays<=265, lga:=TRUE]
+smallD[lga==FALSE &
+         merged_pregbweight>3471 & 
+         USorLMPdateCombogAdays>=266 & 
+         USorLMPdateCombogAdays<=272, lga:=TRUE]
+smallD[lga==FALSE &
+         merged_pregbweight>3670 & 
+         USorLMPdateCombogAdays>=273 &
+         USorLMPdateCombogAdays<=279, lga:=TRUE]
+smallD[lga==FALSE &
+         merged_pregbweight>3854 & 
+         USorLMPdateCombogAdays>=280 & 
+         USorLMPdateCombogAdays<=286, lga:=TRUE]
+smallD[lga==FALSE &
+         merged_pregbweight>4018 &
+         USorLMPdateCombogAdays>=287 & 
+         USorLMPdateCombogAdays<=293, lga:=TRUE]
+
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                 keyby=.(lga)]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("Lga_%s.xlsx", 
+                               lubridate::today())))
+
+######### Indication for CS ##########
+
+#cleaning
+unique(smallD$merged_indic_csection)
+smallD[,has_malpresentation:=NA]
+
+smallD[!is.na(merged_indic_csection), has_malpresentation:=FALSE]
+
+#creating lower cases in all of them
+smallD[,merged_indic_csection_lowercase:= stringr::str_to_lower(merged_indic_csection)]
+
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"breech"),
+       has_malpresentation:=TRUE]
+
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"transfe lie"),
+       has_malpresentation:=TRUE]
+
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"transverse"),
+       has_malpresentation:=TRUE]
+
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"trnasverse"),
+       has_malpresentation:=TRUE]
+
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"malpresentation"),
+       has_malpresentation:=TRUE]
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"breach"),
+       has_malpresentation:=TRUE]
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"male position"),
+       has_malpresentation:=TRUE]
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"transver"),
+       has_malpresentation:=TRUE]
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"transfer"),
+       has_malpresentation:=TRUE]
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"transvearse"),
+       has_malpresentation:=TRUE]
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"breec"),
+       has_malpresentation:=TRUE]
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"breehch"),
+       has_malpresentation:=TRUE]
+
+
+######### Multiplepreg Var ##########
+
+smallD[,multiplepreg:=as.numeric(NA)]
+smallD[,multiplepreg:=1]
+
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"twins"),
+       multiplepreg:=2]
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"twin"),
+       multiplepreg:=2]
+smallD[stringr::str_detect(merged_indic_csection_lowercase,"triplets"),
+       multiplepreg:=3]
+
+#making paperhbo lowercase to use in multiplepreg var paperhbo
+smallD[,lowercasepaperhbo_notes_1:= stringr::str_to_lower(paperhbo_notes_1)]
+smallD[,lowercasepaperhbo_notes_2:= stringr::str_to_lower(paperhbo_notes_2)]
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasepaperhbo_notes_1,"twins"),
+       multiplepreg:=2]
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasepaperhbo_notes_1,"twin"),
+       multiplepreg:=2]
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasepaperhbo_notes_2,"twins"),
+       multiplepreg:=2]
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasepaperhbo_notes_2,"twin"),
+       multiplepreg:=2]
+
+
+#twins variable from avicenna
+smallD[,lowercaseAvicnotes_1:= stringr::str_to_lower(acsdatatext_1)]
+smallD[,lowercaseAvicnotes_2:= stringr::str_to_lower(acsdatatext_2)]
+smallD[,lowercaseAvicnotes_3:= stringr::str_to_lower(acsdatatext_3)]
+
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_1,"twin"), multiplepreg:=2]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_1,"twins"), multiplepreg:=2]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_1,"triplet"), multiplepreg:=3]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_1,"triplets"), multiplepreg:=3]    
+
+smallD[multiplepreg==FALSE & stringr::str_detect(lowercaseAvicnotes_2,"twin"), multiplepreg:=2] 
+
+smallD[multiplepreg==FALSE & stringr::str_detect(lowercaseAvicnotes_2,"twins"), multiplepreg:=2]
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_2,"triplet"), multiplepreg:=3]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_2,"triplets"), multiplepreg:=3]    
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_3,"triplet"), multiplepreg:=3]     
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseAvicnotes_3,"treplit"), multiplepreg:=3]     
+nrow(smallD[multiplepreg==3])
+
+#twins var dhis2
+smallD[,lowercaseDhis2hbo_1:= stringr::str_to_lower(dhis2hbousrecommendcomment_1)]
+smallD[,lowercaseDhis2hbo_2:= stringr::str_to_lower(dhis2hbousrecommendcomment_2)]
+smallD[,lowercaseDhis2hbo_3:= stringr::str_to_lower(dhis2hbousrecommendcomment_3)]
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseDhis2hbo_1,"twins"), multiplepreg:=2]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercaseDhis2hbo_1,"twin"), multiplepreg:=2]
+
+#twins var dhis2
+smallD[,lowercasehbocon_1:= stringr::str_to_lower(hboconreasonforcs_1)]
+smallD[,lowercasehbocon_2:= stringr::str_to_lower(hboconreasonforcs_2)]
+smallD[,lowercasehbocon_3:= stringr::str_to_lower(hboconreasonforcs_3)]
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasehbocon_1,"twins"), multiplepreg:=2]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasehbocon_1,"twin"), multiplepreg:=2]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasehbocon_1,"triplets"), multiplepreg:=3]
+
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasehbocon_2,"twins"), multiplepreg:=2]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasehbocon_2,"twin"), multiplepreg:=2]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasehbocon_2,"triplet"), multiplepreg:=3]
+smallD[multiplepreg==FALSE &
+         stringr::str_detect(lowercasehbocon_3,"triplet"), multiplepreg:=3]
+
+
+#in strings that we want we use the %in%
+#smallD[merged_indic_csection %in% c("Breech","TWINS , BOTH BREECH IN LABOUR"#,"breach", "transverse"), var:=true
+
+######### LBW and Macrosomia  ##########
+# extremely low birth weight
+smallD[,elbw:=NA]
+smallD[!is.na(merged_pregbweight),elbw:=FALSE]
+smallD[USorLMPdateCombogAdays>168 &
+         USorLMPdateCombogAdays<=314 &
+         merged_pregbweight <1000, elbw:=TRUE]
+
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                 keyby=.(elbw)]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("Elbw_%s.xlsx", 
+                               lubridate::today())))
+# vlbw: verylow birth weight
+smallD[,vlbw:=NA]
+smallD[!is.na(merged_pregbweight),vlbw:=FALSE]
+smallD[USorLMPdateCombogAdays>168 &
+         USorLMPdateCombogAdays<=314 &
+         merged_pregbweight <1500, vlbw:=TRUE]
+
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                 keyby=.(vlbw)]
+
+# lbw:low birth weight
+smallD[,lbw:=NA]
+smallD[!is.na(merged_pregbweight),lbw:=FALSE]
+smallD[USorLMPdateCombogAdays>168 &
+         USorLMPdateCombogAdays<=314 &
+         merged_pregbweight <2500, lbw:=TRUE]
+
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                 keyby=.(lbw)]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("Lbw_%s.xlsx", 
+                               lubridate::today())))
+
+# macrosomia
+smallD[,macrosomia:=as.logical(NA)]
+smallD[!is.na(merged_pregbweight), macrosomia:=FALSE]
+smallD[USorLMPdateCombogAdays>168 &
+         USorLMPdateCombogAdays<=314 &
+         merged_pregbweight>4000, macrosomia:=TRUE]
+
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                 keyby=.(macrosomia)]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("Macrosomia_%s.xlsx", 
+                               lubridate::today())))
+
+
+
+######### Anc detection of SGA  ##########
+#ANC detection of SGA: one variable, computed from TrialOne_us_iugrSuspected.
+
+smallD[,anc_detection_sga:=as.logical(FALSE)]
+
+smallD[TrialOne_us_iugrSuspected_20_20=="TRUE"| 
+      TrialOne_us_iugrSuspected_21_21=="TRUE" | 
+      TrialOne_us_iugrSuspected_22_22=="TRUE" | 
+      TrialOne_us_iugrSuspected_24_24=="TRUE" | 
+      TrialOne_us_iugrSuspected_25_25=="TRUE" | 
+      TrialOne_us_iugrSuspected_26_26=="TRUE" | 
+      TrialOne_us_iugrSuspected_27_27=="TRUE" | 
+      TrialOne_us_iugrSuspected_28_28=="TRUE" |
+      TrialOne_us_iugrSuspected_29_29=="TRUE" | 
+      TrialOne_us_iugrSuspected_30_30=="TRUE" | 
+      TrialOne_us_iugrSuspected_31_31=="TRUE" | 
+      TrialOne_us_iugrSuspected_32_32=="TRUE" |
+      TrialOne_us_iugrSuspected_33_33=="TRUE" | 
+      TrialOne_us_iugrSuspected_35_35=="TRUE" | 
+      TrialOne_us_iugrSuspected_36_36=="TRUE" | 
+      TrialOne_us_iugrSuspected_37_37=="TRUE", anc_detection_sga:=TRUE]
+
+# SGA at birth undetected during ANC: one variable, computed from anc_detection_sga #(above) and sga (already in the birth outcomes data)
+
+smallD[,sga_undetected_at_birth:=as.logical(FALSE)]
+smallD[anc_detection_sga==F & sga==T,sga_undetected_at_birth:=TRUE]
+
+
+#################### Vars to add to other data sets #################### 
+# GA cats at delivery for process outcomes
+smallD[,birthgAcats:=cut(USorLMPdateCombogAdays,
+                         breaks=c(0,104,125,160,167,202,216,237,244,265,308),
+                         include.lowest=T)]
+
+#make these into vars and add them in vars keep
+varsanevent <- names(smallD)[stringr::str_detect(names(smallD),"^anevent")]
+varsangAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^angestage")]
+varsangAdays <- names(smallD)[stringr::str_detect(names(smallD),"^anT1gestagedays")]
+varslabevent <- names(smallD)[stringr::str_detect(names(smallD),"^labevent")]
+varslabgAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^labgestage")]
+varslabgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^labT1gestagedays")]
+varslabhb <- names(smallD)[stringr::str_detect(names(smallD),"^labhb")]
+varslabother <- names(smallD)[stringr::str_detect(names(smallD),"^labother")]
+varslaburpro <- names(smallD)[stringr::str_detect(names(smallD),"^laburpro")]
+varsmanevent <- names(smallD)[stringr::str_detect(names(smallD),"^manevent")]
+varsmangAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^mangestage")]
+varsgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^manT1gestagedays")]
+varsmantypex <- names(smallD)[stringr::str_detect(names(smallD),"^mantypex")]
+varsmantypey <- names(smallD)[stringr::str_detect(names(smallD),"^mantypey")]
+varsRefhosp<- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHosp_")]
+varsRefHR <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHR_")]
+varsT1anvis <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anvisitnew")]
+varsHBscr <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_labhb_")]
+varsT1bpsyst <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anbpsyst_")]
+varsT1bpdia <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anbpdiast_")]
+
+varsT1labur <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_laburglu_")]
+
+varsT1labblglu <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_labbloodglu_")]
+varsT1labfastglu <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_labfastbloodglu_")]
+varslabrbs <- names(smallD)[stringr::str_detect(names(smallD),"^labbloodglu")]
+varslabfbs <- names(smallD)[stringr::str_detect(names(smallD),"^labfastbloodglu")]
+varslaburglu<- names(smallD)[stringr::str_detect(names(smallD),"^laburglu")]
+varslabogct <- names(smallD)[stringr::str_detect(names(smallD),"^labogct")]
+
+varsanexamsfh <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anexamsfh_")]
+
+varsanexampalpmal <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anexampalpmal_")]
+
+varsanexmalpres <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_malpresanexam_")]
+
+varsSFHdisc <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_sfhDiscrep")]
+varsmanperf <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manperf_")]
+varsUs <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_us_")]
+varsusgAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^usgestage")]
+varsusgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^usT1gestagedays")]
+varsUSevents <- varsmanevent <- names(smallD)[stringr::str_detect(names(smallD),"^usevent")]
+
+
+### Management vars ###
+manhb <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manhb_")]
+manhtn <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manhtn_")]
+manRBG <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manRBGHigh_")]
+malpres <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manmalpres_")]
+iugr <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_maniugr_")]
+lga <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manlga_")]
+
+
+#################### Anonymized BirthOutcome Data Set ####################
+varsanexpalp <- names(smallD)[stringr::str_detect(names(smallD),"^anexampalp")]
+varsuspres <- names(smallD)[stringr::str_detect(names(smallD),"^uspres")]
+varsusgestage <- names(smallD)[stringr::str_detect(names(smallD),"^usgestage")]
+varsusgestagedays <- names(smallD)[stringr::str_detect(names(smallD),"^usT1gestagedays")]
+varsangestage <- names(smallD)[stringr::str_detect(names(smallD),"^angestage")]
+varsangestagedays <- names(smallD)[stringr::str_detect(names(smallD),"^anT1gestagedays")]
+varsusiugr <- names(smallD)[stringr::str_detect(names(smallD),"^usiugr")]
+varsuslga <- names(smallD)[stringr::str_detect(names(smallD),"^uslga")]
+varsanbpsyst <- names(smallD)[stringr::str_detect(names(smallD),"^anbpsyst")]
+varsanbpdiast <- names(smallD)[stringr::str_detect(names(smallD),"^anbpdiast")]
+
+
+smallD[prettyExposure=="Trial Arm A", prettyExposure:="D"]
+smallD[prettyExposure=="Trial Arm B", prettyExposure:="C"]
+
+varskeep <- c("prettyExposure",
+              "uniqueid",
+              "agecat",
+              "agepregnancycat",
+              "incomecat",
+              "education",
+              "educationcat",
+              "str_TRIAL_1_Cluster",
+              "bookorgdistricthashed",
+              "bookgestage",
+              "bookgestagedays_cats",
+              "age",	
+              "agepregnancy",	
+              "avgincome",
+              "avgincomecat",	
+              "bookhistdm",	
+              "bookhistcs",	
+              "bookhistgdm",	
+              "bookhistperi",	
+              "bookhistpph",	
+              "bookhistaph",	
+              "bookhistabort",	
+              "bookhistpreecl",	
+              "bookheight",	
+              "bookweight",	
+              "bookbmi", 
+              "bookbmicat",
+              "bookevent",	
+              "bookgestage",	
+              "bookgestagedays",	
+              "booklabhb",
+              "birthgAcats",
+              varsT1anvis,
+              varsangAdays,
+              varsangAweeks,
+              varsanevent,
+              "merged_birthhemo",
+              "SevOrModHbatBirth",
+              "merged_bpsyst",
+              "merged_bpdiast",
+              "sevHTNatBirth",
+              "merged_modedeliv",
+              "merged_pregoutcome",
+              "merged_pregoutcome_1",
+              "merged_pregoutcome_2",
+              "merged_pregoutcome_3",
+              "merged_indic_csection",
+              "merged_presentationdeliv",
+              "has_malpresentation",
+              "merged_pregbweight",
+              "merged_birthweight_1",
+              "merged_birthweight_2",
+              "merged_birthweight_3",
+              "mahima_hospenteredgestage_1",
+              "mahima_gestageatbirthwk_1",
+              "macrosomia",
+              "elbw",
+              "vlbw",
+              "lbw",
+              "USorLMPdateCombogAdays",
+              "lga",
+              "sga",
+              "anc_detection_sga",
+              "TrialOne_us_iugrSuspected_00_14",
+              "TrialOne_us_iugrSuspected_15_17",
+              "TrialOne_us_iugrSuspected_18_22",
+              "TrialOne_us_iugrSuspected_23_23",
+              "TrialOne_us_iugrSuspected_24_28",
+              "TrialOne_us_iugrSuspected_29_30",
+              "TrialOne_us_iugrSuspected_29_30",
+              "TrialOne_us_iugrSuspected_31_33",
+              "TrialOne_us_iugrSuspected_34_34",
+              "TrialOne_us_iugrSuspected_35_37",
+              "multiplepreg",
+              "lowercasepaperhbo_notes_1", 
+              "lowercasepaperhbo_notes_2",
+              "lowercaseAvicnotes_1",
+              "lowercaseAvicnotes_2",
+              "lowercaseAvicnotes_3",
+              "lowercaseDhis2hbo_1",
+              "lowercaseDhis2hbo_2",
+              "lowercaseDhis2hbo_3",
+              "lowercasehbocon_1",
+              "lowercasehbocon_2",
+              "lowercasehbocon_3",
+              varsanexpalp,
+              varsuspres,
+              varsUSevents,
+              varsusgestage,
+              varsusgestagedays,
+              varsangestage,
+              varsangestagedays,
+              varsusiugr,
+              varsuslga,
+              varsUs
+              
+)
+
+hbooutcomes <-smallD[,varskeep,with=F]
+
+openxlsx::write.xlsx(hbooutcomes,file.path(FOLDER_DATA_CLEAN,
+                                           "Trial_1_Outcomes",
+                                           sprintf("%s_BirthOutcomes.xlsx", 
+                                                   lubridate::today())))
+
+
+
+#################### Export ANC Process Outcome Data Sets ####################
+
+varskeepAll <- c("prettyExposure",	
+                 "uniqueid",	
+                 "age",	
+                 "agecat",
+                 "agepregnancy",
+                 "agepregnancycat",
+                 "avgincome",
+                 "avgincomecat",	
+                 "education", 
+                 "educationcat",
+                 "str_TRIAL_1_Cluster",	
+                 "bookgestagedays_cats",
+                 "bookorgdistricthashed",	
+                 "bookhistdm",	
+                 "bookhistcs",	
+                 "bookhistgdm",	
+                 "bookhistperi",	
+                 "bookhistpph",	
+                 "bookhistaph",	
+                 "bookhistabort",	
+                 "bookhistpreecl",	
+                 "bookheight",	
+                 "bookweight",	
+                 "bookbmi", 
+                 "bookbmicat",
+                 "bookevent",	
+                 "bookgestage",	
+                 "bookgestagedays",	
+                 "booklabhb",
+                 "birthgAcats",
+                 "mahima_gestageatbirthwk_1",
+                 "mahima_gA_1_us_cats",
+                 "mahima_gA_1_us",
+                 varsT1anvis,
+                 varsangAdays,
+                 varsangAweeks,
+                 varsanevent)
+                 
+                 
+
+
+
+
+varshb <-c(varslabevent, 
+           varslabgAweeks, 
+           varslabgAdays,
+           varslabhb, 
+           varsHBscr,
+           manhb)
+
+
+
+varsbp <-c("bookbpsyst",
+           "bookbpdiast",
+           varsanbpsyst,
+           varsanbpdiast,
+           varsT1bpsyst,
+           varsT1bpdia,
+           varslabevent,
+           varslabgAweeks, 
+           varslabgAdays,
+           varslaburpro,
+           varslabother,
+           varsUSevents,
+           varsusgestage,
+           varsusgestagedays,
+           manhtn)
+
+
+varsgdm <-c(varslabevent, 
+            varslabgAweeks, 
+            varslabgAdays,
+            varsT1labur,
+            varsT1labblglu,
+            varsT1labfastglu,
+            varslabrbs, 
+            varslabfbs,
+            varslaburglu,
+            varslabogct,
+            varslabother,
+            manRBG)
+
+#### Pres at term 36+ #####
+smallD <- d[ident_TRIAL_1==T,]
+smallD[,hasan36plusweeks:=FALSE]
+#smallD[,hasanexampalp36:= FALSE]
+vars <- stringr::str_subset(names(smallD),"^angestage_")
+for (i in vars){
+  print(i)
+  smallD[get(i)>=36 & get(i)<=40, hasan36plusweeks:=TRUE]
+  
+}
+
+#fetal presentation at term by ultrasound
+smallD[,presatterm:=as.character(NA)]
+
+vars <- stringr::str_subset(names(smallD),"^uspres_")
+
+
+for (var_pres in vars){
+  
+  vargestage <-stringr::str_replace(var_pres,"uspres", "usgestage")
+  
+  smallD[hasan36plusweeks==TRUE &
+           get(vargestage)>=36 &
+           get(vargestage)<=40 &
+           !is.na(get(var_pres)) &
+           get(var_pres)!="",
+         presatterm:=get(var_pres)]
+}
+
+
+# anexampalp at term
+
+smallD[,anexampalp36:=as.character(NA)]
+
+vars_gestage <- stringr::str_subset(names(smallD),"^angestage_[0-9]+")
+
+
+
+for (var_gestage in vars_gestage){
+  
+  var_exampalp <-stringr::str_replace(var_gestage,"angestage", "anexampalp")
+  
+  smallD[hasan36plusweeks==TRUE &
+           get(var_gestage)>=36 &
+           get(var_gestage)<=40 &
+           !is.na(get(var_exampalp)) &
+           get(var_exampalp)!="",
+         anexampalp36:=get(var_exampalp)]
+}
+
+
+varsmalpres <- c(varsUSevents,
+                 varsUs,
+                 varsuspres,
+                 malpres,
+                 varsanexampalpmal,
+                 varsanexmalpres,
+                 varsUSevents,
+                 varsusgestage,
+                 varsusgestagedays,
+                 anexampalp36,
+                 presatterm
+                 )
+
+varsfgr <- c(varsusgAweeks,
+             varsusgAdays,
+             varsUSevents,
+             varsusiugr,
+             varsuslga,
+             varsUs,
+             varsSFHdisc,
+             varsanexamsfh,
+             iugr,
+             lga)
+
+varsman <-c(varsmanevent,
+            varsmangAweeks,
+            varsmantypey,
+            varsmantypex,
+            varsgAdays,
+            varsRefHR,
+            varsRefhosp,
+            varsmanperf)
+
+
+###### Attendance data set  ######
+smallD[prettyExposure=="D", prettyExposure:="E"]
+smallD[prettyExposure=="C", prettyExposure:="F"]
+varskeep <- c(varskeepAll)
+attendance <-smallD[,varskeep,with=F]
+
+openxlsx::write.xlsx(attendance,file.path(FOLDER_DATA_CLEAN,
+                                          "Trial_1_Outcomes",
+                                          sprintf("%s_Attendance.xlsx", 
+                                                  lubridate::today())))
+
+###### Anemia  data set  ###### 
+smallD[prettyExposure=="E", prettyExposure:="G"]
+smallD[prettyExposure=="F", prettyExposure:="H"]
+varskeep <- c(varskeepAll,
+              varshb,
+              varsman)
+hb <-smallD[,varskeep,with=F]
+
+openxlsx::write.xlsx(hb,file.path(FOLDER_DATA_CLEAN,
+                                  "Trial_1_Outcomes",
+                                  sprintf("%s_Anemia.xlsx", 
+                                          lubridate::today())))
+
+###### Hypertension data set  ###### 
+smallD[prettyExposure=="G", prettyExposure:="J"]
+smallD[prettyExposure=="H", prettyExposure:="I"]
+varskeep <- c(varskeepAll,
+              varsbp,
+              varsman)
+bp <-smallD[,varskeep,with=F]
+
+openxlsx::write.xlsx(bp,file.path(FOLDER_DATA_CLEAN,
+                                  "Trial_1_Outcomes",
+                                  sprintf("%s_HTN.xlsx", 
+                                          lubridate::today())))
+
+###### GDM data set  ###### 
+smallD[prettyExposure=="J", prettyExposure:="K"]
+smallD[prettyExposure=="I", prettyExposure:="L"]
+varskeep <- c(varskeepAll,
+              varsgdm,
+              varsman)
+gdm <-smallD[,varskeep,with=F]
+
+openxlsx::write.xlsx(gdm,file.path(FOLDER_DATA_CLEAN,
+                                   "Trial_1_Outcomes",
+                                   sprintf("%s_GDM.xlsx", 
+                                           lubridate::today())))
+###### Malpres data set  ###### 
+smallD[prettyExposure=="K", prettyExposure:="A"]
+smallD[prettyExposure=="L", prettyExposure:="B"]
+varskeep <- c(varskeepAll,
+              varsmalpres,
+              varsman)
+malpres <-smallD[,varskeep,with=F]
+
+openxlsx::write.xlsx(malpres,file.path(FOLDER_DATA_CLEAN,
+                                       "Trial_1_Outcomes",
+                                       sprintf("%s_Malpres.xlsx", 
+                                               lubridate::today())))
+
+
+
+
+###### FGR data set  ###### 
+smallD[prettyExposure=="A", prettyExposure:="N"]
+smallD[prettyExposure=="B", prettyExposure:="M"]
+varskeep <- c(varskeepAll,
+              varsfgr,
+              varsman)
+fgr <-smallD[,varskeep,with=F]
+
+openxlsx::write.xlsx(fgr,file.path(FOLDER_DATA_CLEAN,
+                                   "Trial_1_Outcomes",
+                                   sprintf("%s_FGR.xlsx", 
+                                           lubridate::today())))
+
+
+
+#### Anonymize Data Set ####
+#### Choose Variables Data Set ####
+#each outcome will have its own data set with the variables we made above
+#rename ident_dhis2_control to something else in each data set
+#keep lab values in smaller data sets 
+
+
+
+########################  random samples **** QC **** ######################## 
+set.seed(7)
+randomsample <- smallD[!is.na(TrialOne_labhb_anemia_sev_00_14)==T][sample(1:.N,5)]
+#export this
+
+
+
 
 ## SevAnemia
 
@@ -1487,11 +2638,6 @@ smallD[TrialOne_laburglu_pos_35_37==T &
          TrialOne_refHR_35_37==T,
        TrialOne_man_gdm_35_37:=TRUE]
 
-
-###### random samples **** QC **** #######
-set.seed(7)
-randomsample <- smallD[!is.na(TrialOne_labhb_anemia_sev_00_14)==T][sample(1:.N,5)]
-#export this
 
 ############################# TABLES ##################################
 
@@ -1863,825 +3009,3 @@ openxlsx::write.xlsx(refHosp,
 
 
 
-########## Managements #########
-
-  
-##visits by 
-#TO DO: managements and laburglu in a different code , referral to HR or refhosp 
-#has to be onewith in one week after a lab test 
-
-#calculate gA based on how system calculates it. 
-#check code to make sure everything is recalculated
-#any us dates prior to lmp dates should be reverted backwards from that date
-
-lmpstatusKnown<-smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
-                          ArmB=sum(ident_dhis2_control==F, na.rm=TRUE)), 
-                       keyby=.(booklmpknown)]
-
-
-################################ HBO ################################
-
-#gestationalage at delivery
-nrow(smallD[!is.na(merged_gestagedeliv)])
-nrow(smallD[merged_abortion==T])
-
-missinggA<-smallD[is.na(mahima_hospenteredgestage_1),
-                  
-                  c("bookdate",
-                    "ident_dhis2_control",
-                    "booklmp",
-                    "merged_datedeliv",
-                    "merged_gestagedeliv",
-                    "cpodate_1",
-                    "cpopregoutcome_1", 
-                    "prettyExposure",
-                    "USorLMPdate",
-                    "mahima_gestageatbirthwk_1")]
-
-table<- missinggA[,.(
-  BookdateNa=sum(is.na(bookdate)),
-  MahimagestagebirthNA=sum(is.na(mahima_gestageatbirthwk_1)),
-  USorLMPdateNa=sum(is.na(USorLMPdate)),
-  DoBNa=sum(is.na(merged_datedeliv)),
-  gAdelivNa=sum(is.na(merged_gestagedeliv)),
-  BooklmpNA=sum(is.na(booklmp)),
-  CPOdateNA=sum(is.na(cpodate_1)),
-  CPOpregNA=sum(is.na(cpopregoutcome_1))),
-  keyby=.(prettyExposure)]
-
-#TO DO: figure out why some are missing gAs-either not calculated, not entered, etc
-
-# Creating categories for the at birth variables
-smallD[,USorLMPdateCombogAdays:= as.numeric(difftime(
-  mahima_dateofbirth_1,
-  USorLMPdate,
-  units ="days"))]
-
-smallD[,gAatBirth_cats:=cut((USorLMPdateCombogAdays),
-                            breaks=c(-1000,0,14,104,119,
-                                     125,154,167, 196,
-                                     216,231,244,259,266,280,294,314,500000),
-                            include.lowest=T)]
-
-smallD[,gAatBirth_mostGAs_cats:=cut(((7*mahima_gestageatbirthwk_1)),
-                            breaks=c(-1000,0,14,104,119,
-                                     125,154,167, 196,
-                                     216,231,244,259,266,280,294,314,500000),
-                            include.lowest=T)]
-
-
-
-
-
-#added 37-38, 38-40,40-42, above 45 weeks
-#38 weeks=266 days
-#40 weeks=280 days
-#42 weeks=294 days
-#45 weeks=315 days
-
-######### HTN at Birth ##########
-#cleaning systolic bp, move to top level cleaning sheet
-smallD[,merged_bpdiast := stringr::str_replace(as.numeric(merged_bpdiast), 
-                                               "[0-9][0-9][0-9]/$","")]
-
-smallD[,merged_bpsyst:=as.numeric(merged_bpsyst)]
-
-###making severe htn variable
-smallD[,sevHTNatBirth:=NA]
-smallD[!is.na(merged_bpsyst) &
-         !is.na(merged_bpdiast),sevHTNatBirth:=FALSE]
-smallD[(merged_bpsyst>=160 & merged_bpsyst<=300) |
-       (merged_bpdiast>=110 & merged_bpdiast<=300),sevHTNatBirth:=TRUE ]
-
-smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
-                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
-                 keyby=.(sevHTNatBirth)]
-
-
-openxlsx::write.xlsx(smalld, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "hbo_outcomes",
-                       sprintf("SevHTNatBirth_%s.xlsx", 
-                               lubridate::today())))
-
-
-
-######### HBG at Birth ##########
-unique(smallD$merged_birthhemo)
-
-#cleaning 
-smallD[,merged_birthhemo:=as.numeric(merged_birthhemo)]
-unique(smallD$merged_birthhemo)
-
-#variable for moderate or severe anemia
-smallD[,SevOrModHbatBirth:=NA]
-smallD[!is.na(merged_birthhemo),SevOrModHbatBirth:=FALSE]
-smallD[merged_birthhemo>=3 & 
-       merged_birthhemo<9,SevOrModHbatBirth:=TRUE]
-
-smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
-                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
-                 keyby=.(SevOrModHbatBirth)]
-
-openxlsx::write.xlsx(smalld, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "hbo_outcomes",
-                       sprintf("SevModHBG_%s.xlsx", 
-                               lubridate::today())))
-
-
-
-######### Birth Weight ##########
-unique(smallD$merged_pregbweight)
-
-#cleaning 
-smallD[,merged_pregbweight:=as.numeric(merged_pregbweight)]
-unique(smallD$merged_pregbweight)
-
-#2 options to clean them, when its less than 5, multiply it by 100
-#when its >=10 and <40, but for this option it may not be the greatest idea because it could just be a shifted value from some other data variable in data entry
-
-smallD[merged_pregbweight<7 &
-         merged_pregbweight>0, 
-         merged_pregbweight:=1000*merged_pregbweight]
-
-smallD[merged_pregbweight<50 & merged_pregbweight>16, 
-       merged_pregbweight:=100*merged_pregbweight]
-#getting summary data
-sapply(smallD$merged_pregbweight, mean, na.rm=TRUE)
-
-summary(smallD[merged_pregbweight<6000 & merged_pregbweight>500]$merged_pregbweight)
-
-
-
-######### Presentaion ##########
-unique(smallD$merged_presentationdeliv)
-
-smallD[,has_merged_presentation_breech:=FALSE]
-
-smallD[merged_presentationdeliv %in% c("Breech",
-                                         "Transverse",
-                                         "TRANSVERSE",
-                                         "Trasverse",
-                                         "Breach",
-                                         "TRANSVER BOTHE",
-                                         "BREECH"),
-                  has_merged_presentation_breech:=TRUE]
-
-######### Date Deliv ##########
-unique(smallD$merged_gestagedeliv)
-nrow(smallD[is.na(merged_gestagedeliv)])
-
-
-######### GA ##########
-
-##LmpT1 for the new LMP that we calculated
-
-#cleaning
-unique(smallD$merged_datedeliv)
-nrow(smallD[is.na(merged_datedeliv)])
-
-nrow(smallD[is.na(USorLMPdate)])
-
-nrow(smallD[is.na(mahima_dateofbirth_1)])
-
-nrow(smallD[is.na(mahima_gestageatbirthwk_1)])
-
-nrow(smallD[is.na(mahima_hospenteredgestage_1)])
-
-
-# Deliveries by gestational age category
-# we should include outcome with this
-
-#smallD[,mergedGABirth_cats:=cut(mahima_gestageatbirthwk_1,
-        #                        breaks=c(0,15,17),
-         #                       include.lowest = TRUE]
-
-nam <- names(smallD)[stringr::str_detect(names(smallD),"^mahima_dateofbirth_[0-9]*$")]
-num <- stringr::str_replace(nam,"mahima_dateofbirth_","")
-for(i in num){
-  print(i)
-
-  smallD[,(sprintf("mahima_gestageatbirthwk_%s",i)):=round(as.numeric(difftime(
-    get(sprintf("mahima_dateofbirth_%s", i)),
-    USorLMPdate,
-    units="weeks")),digits=1)]
-}
-
-nrow(smallD[is.na(mahima_gestageatbirthwk_1)])
-
-smallD[is.na(mahima_gestageatbirthwk_1),
-       mahima_gestageatbirthwk_1:=mahima_hospenteredgestage_1]
-
-
-smallD[is.na(USorLMPdate),
-       mahima_gestageatbirthwk_1:=mahima_hospenteredgestage_1]
-
-
-#checking out who still has missing data and why
-NomahimagA <- smallD[is.na(mahima_gestageatbirthwk_1), 
-                     c("uniqueid",
-                       "matching",
-                       "merged_datedeliv",
-                       "mahima_hospenteredgestage_1",
-                       "merged_gestagedeliv",
-                       "USorLMPdate")]
-
-openxlsx::write.xlsx(NomahimagA, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "demographics_and_history",
-                       sprintf("No_mahima_gA_%s.xlsx", lubridate::today())))
-
-#making small data set to get birth weight data stuff
-sgaLga <- smallD[,c("mahima_gestageatbirthwk_1","merged_pregbweight")]
-
-openxlsx::write.xlsx(sgaLga, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "demographics_and_history",
-                       sprintf("SgaLgaDataSet_%s.xlsx", lubridate::today())))
-
-#making sgA variables
-smallD[,sga:=NA]
-smallD[!is.na(merged_pregbweight) & !is.na(USorLMPdateCombogAdays),sga:=FALSE]
-
-#identifying sgas
-smallD[sga==FALSE &
-         merged_pregbweight>0 & 
-         merged_pregbweight<2394 & 
-         USorLMPdateCombogAdays>=259 & 
-         USorLMPdateCombogAdays<=265, sga:=TRUE]
-smallD[sga==FALSE &
-         merged_pregbweight<2550 & 
-         USorLMPdateCombogAdays>=266 & 
-         USorLMPdateCombogAdays<=272, sga:=TRUE]
-smallD[sga==FALSE &
-         merged_pregbweight<2696 &
-         USorLMPdateCombogAdays>=273 & 
-         USorLMPdateCombogAdays<=279, sga:=TRUE]
-smallD[sga==FALSE &
-         merged_pregbweight<2831 & 
-         USorLMPdateCombogAdays>=280 & 
-         USorLMPdateCombogAdays<=286, sga:=TRUE]
-smallD[sga==FALSE &
-         merged_pregbweight<2952 & 
-         USorLMPdateCombogAdays>=287 &
-         USorLMPdateCombogAdays<=293, sga:=TRUE]
-
-smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
-                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
-                 keyby=.(sga)]
-
-
-openxlsx::write.xlsx(smalld, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "hbo_outcomes",
-                       sprintf("Sga_%s.xlsx", 
-                               lubridate::today())))
-
-
-#making lgA variables
-smallD[,lga:=NA]
-
-#everyone who isnt missing gA and weight is given a false
-smallD[!is.na(merged_pregbweight) & !is.na(USorLMPdateCombogAdays), lga:=FALSE]
-
-#identifying lgas
-smallD[lga==FALSE &
-         merged_pregbweight>3259 & 
-         USorLMPdateCombogAdays>=259 &
-         USorLMPdateCombogAdays<=265, lga:=TRUE]
-smallD[lga==FALSE &
-         merged_pregbweight>3471 & 
-         USorLMPdateCombogAdays>=266 & 
-         USorLMPdateCombogAdays<=272, lga:=TRUE]
-smallD[lga==FALSE &
-         merged_pregbweight>3670 & 
-         USorLMPdateCombogAdays>=273 &
-         USorLMPdateCombogAdays<=279, lga:=TRUE]
-smallD[lga==FALSE &
-         merged_pregbweight>3854 & 
-         USorLMPdateCombogAdays>=280 & 
-         USorLMPdateCombogAdays<=286, lga:=TRUE]
-smallD[lga==FALSE &
-         merged_pregbweight>4018 &
-         USorLMPdateCombogAdays>=287 & 
-         USorLMPdateCombogAdays<=293, lga:=TRUE]
-
-smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
-                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
-                 keyby=.(lga)]
-
-
-openxlsx::write.xlsx(smalld, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "hbo_outcomes",
-                       sprintf("Lga_%s.xlsx", 
-                               lubridate::today())))
-######### Indication for CS ##########
-
-#cleaning
-unique(smallD$merged_indic_csection)
-smallD[,has_malpresentation:=NA]
-
-smallD[!is.na(merged_indic_csection), has_malpresentation:=FALSE]
-
-#creating lower cases in all of them
-smallD[,merged_indic_csection_lowercase:= stringr::str_to_lower(merged_indic_csection)]
-
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"breech"),
-       has_malpresentation:=TRUE]
-
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"transfe lie"),
-       has_malpresentation:=TRUE]
-
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"transverse"),
-       has_malpresentation:=TRUE]
-
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"trnasverse"),
-       has_malpresentation:=TRUE]
-
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"malpresentation"),
-       has_malpresentation:=TRUE]
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"breach"),
-       has_malpresentation:=TRUE]
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"male position"),
-       has_malpresentation:=TRUE]
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"transver"),
-       has_malpresentation:=TRUE]
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"transfer"),
-       has_malpresentation:=TRUE]
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"transvearse"),
-       has_malpresentation:=TRUE]
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"breec"),
-       has_malpresentation:=TRUE]
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"breehch"),
-       has_malpresentation:=TRUE]
-
-
-###### Multiplepreg Var ###### 
-smallD[,multiplepreg:=as.numeric(NA)]
-smallD[,multiplepreg:=1]
-
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"twins"),
-       multiplepreg:=2]
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"twin"),
-       multiplepreg:=2]
-smallD[stringr::str_detect(merged_indic_csection_lowercase,"triplets"),
-       multiplepreg:=3]
-
-#making paperhbo lowercase to use in multiplepreg var paperhbo
-smallD[,lowercasepaperhbo_notes_1:= stringr::str_to_lower(paperhbo_notes_1)]
-smallD[,lowercasepaperhbo_notes_2:= stringr::str_to_lower(paperhbo_notes_2)]
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasepaperhbo_notes_1,"twins"),
-       multiplepreg:=2]
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasepaperhbo_notes_1,"twin"),
-       multiplepreg:=2]
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasepaperhbo_notes_2,"twins"),
-       multiplepreg:=2]
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasepaperhbo_notes_2,"twin"),
-       multiplepreg:=2]
-
-
-#twins variable from avicenna
-smallD[,lowercaseAvicnotes_1:= stringr::str_to_lower(acsdatatext_1)]
-smallD[,lowercaseAvicnotes_2:= stringr::str_to_lower(acsdatatext_2)]
-smallD[,lowercaseAvicnotes_3:= stringr::str_to_lower(acsdatatext_3)]
-
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_1,"twin"), multiplepreg:=2]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_1,"twins"), multiplepreg:=2]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_1,"triplet"), multiplepreg:=3]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_1,"triplets"), multiplepreg:=3]    
-
-smallD[multiplepreg==FALSE & stringr::str_detect(lowercaseAvicnotes_2,"twin"), multiplepreg:=2] 
-
-smallD[multiplepreg==FALSE & stringr::str_detect(lowercaseAvicnotes_2,"twins"), multiplepreg:=2]
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_2,"triplet"), multiplepreg:=3]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_2,"triplets"), multiplepreg:=3]    
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_3,"triplet"), multiplepreg:=3]     
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseAvicnotes_3,"treplit"), multiplepreg:=3]     
-nrow(smallD[multiplepreg==3])
-
-#twins var dhis2
-smallD[,lowercaseDhis2hbo_1:= stringr::str_to_lower(dhis2hbousrecommendcomment_1)]
-smallD[,lowercaseDhis2hbo_2:= stringr::str_to_lower(dhis2hbousrecommendcomment_2)]
-smallD[,lowercaseDhis2hbo_3:= stringr::str_to_lower(dhis2hbousrecommendcomment_3)]
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseDhis2hbo_1,"twins"), multiplepreg:=2]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercaseDhis2hbo_1,"twin"), multiplepreg:=2]
-
-#twins var dhis2
-smallD[,lowercasehbocon_1:= stringr::str_to_lower(hboconreasonforcs_1)]
-smallD[,lowercasehbocon_2:= stringr::str_to_lower(hboconreasonforcs_2)]
-smallD[,lowercasehbocon_3:= stringr::str_to_lower(hboconreasonforcs_3)]
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_1,"twins"), multiplepreg:=2]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_1,"twin"), multiplepreg:=2]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_1,"triplets"), multiplepreg:=3]
-
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_2,"twins"), multiplepreg:=2]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_2,"twin"), multiplepreg:=2]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_2,"triplet"), multiplepreg:=3]
-smallD[multiplepreg==FALSE &
-         stringr::str_detect(lowercasehbocon_3,"triplet"), multiplepreg:=3]
-
-
-
-
-#in strings that we want we use the %in%
-#smallD[merged_indic_csection %in% c("Breech","TWINS , BOTH BREECH IN LABOUR"#,"breach", "transverse"), var:=true
-
-
-######### LBW and Macrosomia ##########
-# extremely low birth weight
-smallD[,elbw:=NA]
-smallD[!is.na(merged_pregbweight),elbw:=FALSE]
-smallD[USorLMPdateCombogAdays>168 &
-         USorLMPdateCombogAdays<=314 &
-         merged_pregbweight <1000, elbw:=TRUE]
-
-smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
-                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
-                 keyby=.(elbw)]
-
-
-openxlsx::write.xlsx(smalld, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "hbo_outcomes",
-                       sprintf("Elbw_%s.xlsx", 
-                               lubridate::today())))
-
-# lbw:low birth weight
-smallD[,lbw:=NA]
-smallD[!is.na(merged_pregbweight),lbw:=FALSE]
-smallD[USorLMPdateCombogAdays>168 &
-         USorLMPdateCombogAdays<=314 &
-         merged_pregbweight <1500, lbw:=TRUE]
-
-smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
-                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
-                 keyby=.(lbw)]
-
-
-openxlsx::write.xlsx(smalld, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "hbo_outcomes",
-                       sprintf("Lbw_%s.xlsx", 
-                               lubridate::today())))
-
-# macrosomia
-smallD[,macrosomia:=as.logical(NA)]
-smallD[!is.na(merged_pregbweight), macrosomia:=FALSE]
-smallD[USorLMPdateCombogAdays>168 &
-         USorLMPdateCombogAdays<=314 &
-         merged_pregbweight <1500, macrosomia:=TRUE]
-
-smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
-                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
-                 keyby=.(macrosomia)]
-
-
-openxlsx::write.xlsx(smalld, 
-                     file.path(
-                       FOLDER_DATA_RESULTS_WB,
-                       "hbo_outcomes",
-                       sprintf("Macrosomia_%s.xlsx", 
-                               lubridate::today())))
-
-#################### Anonymized BirthOutcome Data Set ####################
-varsanexpalp <- names(smallD)[stringr::str_detect(names(smallD),"^anexampalp")]
-varsuspres <- names(smallD)[stringr::str_detect(names(smallD),"^uspres")]
-varsusgestage <- names(smallD)[stringr::str_detect(names(smallD),"^usgestage")]
-varsusgestagedays <- names(smallD)[stringr::str_detect(names(smallD),"^usT1gestagedays")]
-varsangestage <- names(smallD)[stringr::str_detect(names(smallD),"^angestage")]
-varsangestagedays <- names(smallD)[stringr::str_detect(names(smallD),"^anT1gestagedays")]
-varsusiugr <- names(smallD)[stringr::str_detect(names(smallD),"^usiugr")]
-varsuslga <- names(smallD)[stringr::str_detect(names(smallD),"^uslga")]
-
-smallD[prettyExposure=="Trial Arm A", prettyExposure:="D"]
-smallD[prettyExposure=="Trial Arm B", prettyExposure:="C"]
-
- varskeep <- c("prettyExposure",
-               "uniqueid",
-               "agecat",
-               "agepregnancycat",
-               "incomecat",
-               "educationcat",
-               "str_TRIAL_1_Cluster",
-               "bookorgdistricthashed",
-               "bookgestage",
-               "merged_birthhemo",
-               "SevOrModHbatBirth",
-               "merged_bpsyst",
-               "merged_bpdiast",
-               "sevHTNatBirth",
-               "merged_modedeliv",
-               "merged_pregoutcome",
-               "merged_pregoutcome_1",
-               "merged_pregoutcome_2",
-               "merged_pregoutcome_3",
-               "merged_indic_csection",
-               "merged_presentationdeliv",
-               "TrialOne_malpresanexam_35_37",
-               "TrialOne_malpresanexam_38_41",
-               "TrialOne_us_malpres_35_37",
-               "TrialOne_us_malpres_38_41",
-               "has_malpresentation",
-               "merged_pregbweight",
-               "merged_birthweight_1",
-               "merged_birthweight_2",
-               "merged_birthweight_3",
-               "mahima_hospenteredgestage_1",
-               "mahima_gestageatbirthwk_1",
-               "macrosomia",
-               "elbw",
-               "lbw",
-               "USorLMPdateCombogAdays",
-              "lga",
-               "sga",
-              "TrialOne_us_iugrSuspected_00_14",
-              "TrialOne_us_iugrSuspected_15_17",
-              "TrialOne_us_iugrSuspected_18_22",
-              "TrialOne_us_iugrSuspected_23_23",
-              "TrialOne_us_iugrSuspected_24_28",
-              "TrialOne_us_iugrSuspected_29_30",
-              "TrialOne_us_iugrSuspected_29_30",
-              "TrialOne_us_iugrSuspected_31_33",
-              "TrialOne_us_iugrSuspected_34_34",
-              "TrialOne_us_iugrSuspected_35_37",
-              "multiplepreg",
-              "lowercasepaperhbo_notes_1", 
-              "lowercasepaperhbo_notes_2",
-              "lowercaseAvicnotes_1",
-              "lowercaseAvicnotes_2",
-              "lowercaseAvicnotes_3",
-              "lowercaseDhis2hbo_1",
-              "lowercaseDhis2hbo_2",
-              "lowercaseDhis2hbo_3",
-              "lowercasehbocon_1",
-              "lowercasehbocon_2",
-              "lowercasehbocon_3",
-              varsanexpalp,
-              varsuspres,
-              varsusgestage,
-              varsusgestagedays,
-              varsangestage,
-              varsangestagedays,
-              varsusiugr,
-              varsuslga
-              
-              )
- 
- hbooutcomes <-smallD[,varskeep,with=F]
- 
- openxlsx::write.xlsx(hbooutcomes,file.path(FOLDER_DATA_CLEAN,
-                                      "Trial_1_Outcomes",
-                                      sprintf("%s_BirthOutcomes.xlsx", 
-                                              lubridate::today())))
-
-
- 
- #################### Export ANC Process Outcome Data Sets ####################
- 
- # GA cats at delivery for process outcomes
- smallD[,birthgAcats:=cut(USorLMPdateCombogAdays,
-                          breaks=c(0,104,125,160,167,202,216,237,244,265,308),
-                          include.lowest=T)]
- 
- #make these into vars and add them in vars keep
- varsanevent <- names(smallD)[stringr::str_detect(names(smallD),"^anevent")]
- varsangAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^angestage")]
- varsangAdays <- names(smallD)[stringr::str_detect(names(smallD),"^anT1gestagedays")]
- varslabevent <- names(smallD)[stringr::str_detect(names(smallD),"^labevent")]
- varslabgAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^labgestage")]
- varslabgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^labT1gestagedays")]
- varslabhb <- names(smallD)[stringr::str_detect(names(smallD),"^labhb")]
- varsmanevent <- names(smallD)[stringr::str_detect(names(smallD),"^manevent")]
- varsmangAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^mangestage")]
- varsgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^manT1gestagedays")]
- varsmantypex <- names(smallD)[stringr::str_detect(names(smallD),"^mantypex")]
- varsmantypey <- names(smallD)[stringr::str_detect(names(smallD),"^mantypey")]
- varsRefhosp<- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHosp_")]
- varsRefHR <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_refHR_")]
- varsT1anvis <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anvisitnew")]
- varsHBscr <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_labhb_")]
- varsT1bpsyst <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anbpsyst_")]
- varsT1bpdia <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anbpdiast_")]
- 
- varsT1labur <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_laburglu_")]
- 
- varsT1labblglu <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_labbloodglu_")]
- varsT1labfastglu <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_labfastbloodglu_")]
- varsanexamsfh <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anexamsfh_")]
- 
- varsanexampalpmal <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anexampalpmal_")]
- 
- varsanexmalpres <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_malpresanexam_")]
-
-varsSFHdisc <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_sfhDiscrep")]
-varsmanperf <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manperf_")]
-varsUs <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_us_")]
-varsusgAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^usgestage")]
-varsusgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^usT1gestagedays")]
-
-
-
-### Management vars ###
-manhb <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manhb_")]
-manhtn <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manhtn_")]
-manRBG <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manRBGHigh_")]
-malpres <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manmalpres_")]
-iugr <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_maniugr_")]
-lga <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manlga_")]
-
-
- 
- varskeepAll <- c("prettyExposure",	
-               "uniqueid",	
-               "age",	
-               "agepregnancy",	
-               "avgincome",
-               "avgincomecat",	
-               "education", 
-               "educationcat",
-               "str_TRIAL_1_Cluster",	
-               "bookgestagedays_cats",
-               "bookorgdistricthashed",	
-               "bookhistdm",	
-               "bookhistcs",	
-               "bookhistgdm",	
-               "bookhistperi",	
-               "bookhistpph",	
-               "bookhistaph",	
-               "bookhistabort",	
-               "bookhistpreecl",	
-               "bookheight",	
-               "bookweight",	
-               "bookbmi", 
-               "bookbmicat",
-               "bookevent",	
-               "bookgestage",	
-               "bookgestagedays",	
-               "booklabhb",
-               "birthgAcats",
-               varsT1anvis,
-               varsangAdays,
-               varsangAweeks,
-               varsanevent
-               
-               
- )
- 
- 
- 
- varshb <-c(varslabevent, 
-            varslabgAweeks, 
-            varslabgAdays,
-            varslabhb, 
-            varsHBscr
-             )
- 
- 
- varsbp <-c(varsT1bpsyst,
-            varsT1bpdia
-             )
- 
- varsgdm <-c(varslabevent, 
-             varslabgAweeks, 
-             varslabgAdays,
-             varsT1labur,
-             varsT1labblglu,
-             varsT1labfastglu
-             )
- varsmalpres <- c(varsUs,
-                  malpres,
-                  iugr,
-                  lga)
- 
- varsfgr <- c(varsusgAweeks,
-              varsusgAdays,
-              varsiugr,
-              varslga,
-              varsUs,
-              varsSFHdisc,
-              varsanexamsfh,
-              varsanexampalpmal,
-              varsanexmalpres)
- 
- varsman <-c(varsmanevent,
-             varsmangAweeks,
-             varsmantypey,
-             varsmantypex,
-             varsgAdays,
-             varsRefHR,
-             varsRefhosp,
-             varsmanperf)
- 
- 
- ###### Attendance data set  ######
- varskeep <- c(varskeepAll)
- attendance <-smallD[,varskeep,with=F]
- 
- openxlsx::write.xlsx(attendance,file.path(FOLDER_DATA_CLEAN,
-                                            "Trial_1_Outcomes",
-                                            sprintf("%s_Attendance.xlsx", 
-                                                    lubridate::today())))
- 
- ###### Anemia  data set  ###### 
- varskeep <- c(varskeepAll,
-               varshb,
-               varsman)
- hb <-smallD[,varskeep,with=F]
- 
- openxlsx::write.xlsx(hb,file.path(FOLDER_DATA_CLEAN,
-                                           "Trial_1_Outcomes",
-                                           sprintf("%s_Anemia.xlsx", 
-                                                   lubridate::today())))
- 
- ###### Hypertension data set  ###### 
- varskeep <- c(varskeepAll,
-               varsbp,
-               varsman)
- bp <-smallD[,varskeep,with=F]
- 
- openxlsx::write.xlsx(bp,file.path(FOLDER_DATA_CLEAN,
-                                   "Trial_1_Outcomes",
-                                   sprintf("%s_HTN.xlsx", 
-                                           lubridate::today())))
- 
- ###### GDM data set  ###### 
- varskeep <- c(varskeepAll,
-               varsgdm,
-               varsman)
- gdm <-smallD[,varskeep,with=F]
- 
- openxlsx::write.xlsx(gdm,file.path(FOLDER_DATA_CLEAN,
-                                   "Trial_1_Outcomes",
-                                   sprintf("%s_GDM.xlsx", 
-                                           lubridate::today())))
- ###### Malpres data set  ###### 
- varskeep <- c(varskeepAll,
-               varsmalpres,
-               varsman)
- malpres <-smallD[,varskeep,with=F]
- 
- openxlsx::write.xlsx(malpres,file.path(FOLDER_DATA_CLEAN,
-                                    "Trial_1_Outcomes",
-                                    sprintf("%s_Malpres.xlsx", 
-                                            lubridate::today())))
- 
- 
- 
- 
- ###### FGR data set  ###### 
- varskeep <- c(varskeepAll,
-               varsfgr,
-               varsman)
- fgr <-smallD[,varskeep,with=F]
- 
- openxlsx::write.xlsx(fgr,file.path(FOLDER_DATA_CLEAN,
-                                    "Trial_1_Outcomes",
-                                    sprintf("%s_FGR.xlsx", 
-                                            lubridate::today())))
- 
- 
-
- #### Anonymize Data Set ####
- #### Choose Variables Data Set ####
- #each outcome will have its own data set with the variables we made above
- #rename ident_dhis2_control to something else in each data set
- #keep lab values in smaller data sets 

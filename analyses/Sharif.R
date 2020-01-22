@@ -683,6 +683,3 @@ sum(XTBSU$Tot)
 ### TRANSFER TO EXCEL ###
 
 ### openxlsx::write.xlsx(dAtAsEt*,file.path(FOLDER_DATA_RESULTS,"nAmE*.xlsx")) ###
-
-d$educationca
-
