@@ -485,10 +485,9 @@ xtabs(~smallD$TrialOne_anbpdiast_modSevHTN_00_14)
 
 ### ANC Anemia ####
 # lab hb exists
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labhb_1),
-              labT1gestagedays_0:=labT1gestagedays_1]
-smallD[!is.na(labhb_1) & !is.na(labT1gestagedays_0),labhb_0:=booklabhb]
-smallD <-VisitVariables(
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labhb_0:=booklabhb]
+smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labhb_exists",
@@ -505,9 +504,8 @@ xtabs(~smallD$TrialOne_labhb_exists_15_17)
 
 
 # sev anemia
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labhb_1),
-       labT1gestagedays_0:=labT1gestagedays_1]
-smallD[!is.na(labhb_1) & !is.na(labT1gestagedays_0),labhb_0:=booklabhb]
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labhb_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -518,16 +516,15 @@ smallD <- VisitVariables(
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
 
-nrow(smallD[labhb_1>=4 & labhb_1<=20])
+nrow(smallD[labhb_1>=1 & labhb_1<7])
 smallD[,labT1gestagedays_0:=NULL]
 smallD[,labhb_0:=NULL]
 xtabs(~smallD$TrialOne_labhb_anemia_sev_15_17)
 
 
 # mild and moderate anemia
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labhb_1),
-       labT1gestagedays_0:=labT1gestagedays_1]
-smallD[!is.na(labhb_1) & !is.na(labT1gestagedays_0),labhb_0:=booklabhb]
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labhb_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -537,17 +534,16 @@ smallD <- VisitVariables(
   TruevaluesMax=10.9,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
-nrow(smallD[labhb_1>=4 & labhb_1<=11])
+nrow(smallD[labhb_1>=7 & labhb_1<=11])
 smallD[,labT1gestagedays_0:=NULL]
 smallD[,labhb_0:=NULL]
-xtabs(~smallD$TrialOne_labhb_anemia_mild_mod_15_17)
+xtabs(~smallD$TrialOne_labhb_anemia_mild_mod_15_17, addNA=T)
 
 
 
 ### Lab RBS Normal ####
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(laburglu_1),
-       labT1gestagedays_0:=labT1gestagedays_1]
-smallD[!is.na(laburglu_1) & !is.na(labT1gestagedays_0),laburglu_0:=laburglu_1]
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,laburglu_0:=booklabhb]
 # normal urine glucose
 smallD <- VisitVariables(
   smallD=smallD,
@@ -563,9 +559,8 @@ smallD[,laburglu_0:=NULL]
 xtabs(~smallD$TrialOne_laburglu_exists_15_17)
 
 # lab urglu pos
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(laburglu_1),
-       labT1gestagedays_0:=labT1gestagedays_1]
-smallD[!is.na(laburglu_1) & !is.na(labT1gestagedays_0),laburglu_0:=laburglu_1]
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,laburglu_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -580,10 +575,8 @@ smallD[,laburglu_0:=NULL]
 xtabs(~smallD$TrialOne_laburglu_pos_15_17)
 
 # normal bloodglu values
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labbloodglu_1),
-       labT1gestagedays_0:=labT1gestagedays_1]
-smallD[!is.na(labbloodglu_1) & !is.na(labT1gestagedays_0),
-              labbloodglu_0:=labbloodglu_1]
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labbloodglu_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -598,10 +591,8 @@ smallD[,labbloodglu_0:=NULL]
 xtabs(~smallD$TrialOne_labbloodglu_exists_15_17)
 
 # high blood glucose
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labbloodglu_1),
-       labT1gestagedays_0:=labT1gestagedays_1]
-smallD[!is.na(labbloodglu_1) & !is.na(labT1gestagedays_0),
-       labbloodglu_0:=labbloodglu_1]
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labbloodglu_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -617,10 +608,8 @@ xtabs(~smallD$TrialOne_labbloodglu_high_15_17)
 
 
 # Lab FBS Normal 
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labfastbloodglu_1),
-       labT1gestagedays_0:=labT1gestagedays_1]
-smallD[!is.na(labfastbloodglu_1) & !is.na(labT1gestagedays_0),
-       labfastbloodglu_0:=labfastbloodglu_1]
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labfastbloodglu_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -637,10 +626,8 @@ xtabs(~smallD$TrialOne_labfastbloodglu_exists_15_17)
 
 
 # Lab FBS High 
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & !is.na(labfastbloodglu_1),
-       labT1gestagedays_0:=labT1gestagedays_1]
-smallD[!is.na(labfastbloodglu_1) & !is.na(labT1gestagedays_0),
-       labfastbloodglu_0:=labfastbloodglu_1]
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labfastbloodglu_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -665,7 +652,6 @@ smallD <-VisitVariables(
   TruevaluesMax=300,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable ="usT1gestagedays")
-
 xtabs(~smallD$TrialOne_us_exists_00_14)
 
 # US suspected IUGR
@@ -690,7 +676,6 @@ smallD <- VisitVariables(
   TruevaluesMax=1,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "usT1gestagedays")
-
 xtabs(~smallD$TrialOne_us_lgaSuspected_00_14)
 
 # US pres-malpresentation
@@ -882,15 +867,15 @@ xtabs(~smallD$TrialOne_manhb_24_24)
 # create the man vars we want/join the weeks together
 #pmax does horizontal maximum for wide format
 
-smallD[,TrialOne_manhb_07_12:=pmax(
-  TrialOne_manhb_07_07,
-  TrialOne_manhb_08_08,
-  TrialOne_manhb_09_09,
-  TrialOne_manhb_10_10,
-  TrialOne_manhb_11_11,
-  TrialOne_manhb_12_12,
-  na.rm=T)
-  ]
+# smallD[,TrialOne_manhb_07_12:=pmax(
+#   TrialOne_manhb_07_07,
+#   TrialOne_manhb_08_08,
+#   TrialOne_manhb_09_09,
+#   TrialOne_manhb_10_10,
+#   TrialOne_manhb_11_11,
+#   TrialOne_manhb_12_12,
+#   na.rm=T)
+#   ]
 ####### Check time ranges for each of the vars #########
 
 #mild_mod anemia retest after one month 
@@ -1467,7 +1452,7 @@ for(i in 0:37){
 xtabs(~smallD$TrialOne_manlga_Hosp_32_32)
 
 ########## lmpstatusKnown #########
-
+varsT1all <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_")]
 #Notes:
 #calculate gA based on how system calculates it. 
 #check code to make sure everything is recalculated
@@ -1630,7 +1615,6 @@ smallD[merged_presentationdeliv %in% c("Breech",
        has_merged_presentation_breech:=TRUE]
 
 
-
 ######### Date Deliv ##########
 unique(smallD$merged_gestagedeliv)
 nrow(smallD[is.na(merged_gestagedeliv)])
@@ -1705,8 +1689,9 @@ openxlsx::write.xlsx(sgaLga,
                        "demographics_and_history",
                        sprintf("SgaLgaDataSet_%s.xlsx", lubridate::today())))
 
+
 #making sgA variables
-smallD[,sga:=NA]
+smallD[,sga:=as.logical(NA)]
 smallD[!is.na(merged_pregbweight) & !is.na(USorLMPdateCombogAdays),sga:=FALSE]
 
 #identifying sgas
@@ -1785,7 +1770,24 @@ openxlsx::write.xlsx(smalld,
                        sprintf("Lga_%s.xlsx", 
                                lubridate::today())))
 
-######### Indication for CS ##########
+######### ANC Detection of sga ##########
+smallD[is.na(sga),anc_detection_sga:=as.logical(NA)]
+
+
+for(i in 20:37){
+    var <- sprintf("TrialOne_us_iugrSuspected_%s_%s",i,i)
+    
+    smallD[get(var)==T, anc_detection_sga:=TRUE ]
+    
+}
+
+# undetected sga at birth
+smallD[is.na(sga), sga_undetected:=as.logical(NA)]
+smallD[is.na(sga) & !is.na(anc_detection_sga), sga_undetected:=FALSE]
+smallD[anc_detection_sga==FALSE & sga==T,sga_undetected:=TRUE]
+
+
+######### Indication for CS and Malpresentation ##########
 
 #cleaning
 unique(smallD$merged_indic_csection)
@@ -1824,6 +1826,99 @@ smallD[stringr::str_detect(merged_indic_csection_lowercase,"breec"),
        has_malpresentation:=TRUE]
 smallD[stringr::str_detect(merged_indic_csection_lowercase,"breehch"),
        has_malpresentation:=TRUE]
+
+###################### Presentation at Term and Detection ###################### 
+#### Pres at term 36+ #####
+smallD[,hasan36plusweeks:=FALSE]
+#smallD[,hasanexampalp36:= FALSE]
+vars <- stringr::str_subset(names(smallD),"^angestage_")
+for (i in vars){
+  print(i)
+  smallD[get(i)>=36 & get(i)<=40, hasan36plusweeks:=TRUE]
+  
+}
+
+#fetal presentation at term by ultrasound
+smallD[,presatterm:=as.character(NA)]
+
+vars <- stringr::str_subset(names(smallD),"^uspres_")
+
+
+for (var_pres in vars){
+  
+  vargestage <-stringr::str_replace(var_pres,"uspres", "usgestage")
+  
+  smallD[hasan36plusweeks==TRUE &
+           get(vargestage)>=36 &
+           get(vargestage)<=40 &
+           !is.na(get(var_pres)) &
+           get(var_pres)!="",
+         presatterm:=get(var_pres)]
+}
+
+
+# anexampalp at term
+smallD[,anexampalp_0:=bookexampalp]
+smallD[,anexampalp36:=as.character(NA)]
+vars_gestage <- stringr::str_subset(names(smallD),"^angestage_[0-9]+")
+
+for (var_gestage in vars_gestage){
+  
+  var_exampalp <-stringr::str_replace(var_gestage,"angestage", "anexampalp")
+  
+  smallD[hasan36plusweeks==TRUE &
+           get(var_gestage)>=36 &
+           get(var_gestage)<=40 &
+           !is.na(get(var_exampalp)) &
+           get(var_exampalp)!="",
+         anexampalp36:=get(var_exampalp)]
+}
+
+# 
+
+smallD[,anc_detection_malpres_1:=as.logical(NA)]
+smallD[!is.na(merged_presentationdeliv) & 
+         !is.na(presatterm),
+       anc_detection_malpres_1:=FALSE]
+smallD[anc_detection_malpres_1==FALSE & 
+         presatterm %in% c("Breech","Trasverse"), anc_detection_malpres_1:=TRUE ]
+
+
+#making anc detection malpres with vars we used from loop
+
+smallD[,anc_detection_malpres_2:=as.logical(NA)]
+#need to define false
+for(i in 35:38){
+  var <- sprintf("TrialOne_us_malpresvar_%s_%s",i,i)
+  
+  smallD[anc_detection_malpres_2==FALSE & 
+           get(var)==TRUE, anc_detection_malpres_2:=TRUE ]
+  
+}
+
+smallD[,anc_detection_malpres_3:=as.logical(NA)]
+for(i in 35:38){
+  var <- sprintf("TrialOne_anexampalpmal_%s_%s",i,i)
+  
+  smallD[anc_detection_malpres_3==FALSE & 
+           get(var)==TRUE, anc_detection_malpres_3:=TRUE ]
+  
+}
+
+
+#malpresentation at birth undetected
+
+smallD[is.na(has_malpresentation), malpres_undetected_1:=as.logical(NA)]
+smallD[is.na(has_malpresentation), malpres_undetected_2:=as.logical(NA)]
+smallD[is.na(has_malpresentation), malpres_undetected_3:=as.logical(NA)]
+
+smallD[anc_detection_malpres_1==F, malpres_undetected_1:=FALSE]
+smallD[anc_detection_malpres_2==F, malpres_undetected_2:=FALSE]
+smallD[anc_detection_malpres_3==F, malpres_undetected_3:=FALSE]
+
+smallD[malpres_undetected_1==F & has_malpresentation==T,malpres_undetected_1:=TRUE]
+smallD[malpres_undetected_2==F & has_malpresentation==T,malpres_undetected_2:=TRUE]
+smallD[malpres_undetected_3==F & has_malpresentation==T,malpres_undetected_3:=TRUE]
 
 
 ######### Multiplepreg Var ##########
@@ -2129,7 +2224,7 @@ varskeep <- c("prettyExposure",
               "bookgestage",	
               "bookgestagedays",	
               "booklabhb",
-              "birthgAcats",
+              "gAatBirth_cats",
               varsT1anvis,
               varsangAdays,
               varsangAweeks,
@@ -2161,6 +2256,7 @@ varskeep <- c("prettyExposure",
               "lga",
               "sga",
               "anc_detection_sga",
+              "sga_undetected_at_birth",
               "TrialOne_us_iugrSuspected_00_14",
               "TrialOne_us_iugrSuspected_15_17",
               "TrialOne_us_iugrSuspected_18_22",
@@ -2184,6 +2280,7 @@ varskeep <- c("prettyExposure",
               "lowercasehbocon_2",
               "lowercasehbocon_3",
               varsanexpalp,
+              varsanexampalpmal,
               varsuspres,
               varsUSevents,
               varsusgestage,
@@ -2288,56 +2385,6 @@ varsgdm <-c(varslabevent,
             varslabogct,
             varslabother,
             manRBG)
-
-#### Pres at term 36+ #####
-smallD <- d[ident_TRIAL_1==T,]
-smallD[,hasan36plusweeks:=FALSE]
-#smallD[,hasanexampalp36:= FALSE]
-vars <- stringr::str_subset(names(smallD),"^angestage_")
-for (i in vars){
-  print(i)
-  smallD[get(i)>=36 & get(i)<=40, hasan36plusweeks:=TRUE]
-  
-}
-
-#fetal presentation at term by ultrasound
-smallD[,presatterm:=as.character(NA)]
-
-vars <- stringr::str_subset(names(smallD),"^uspres_")
-
-
-for (var_pres in vars){
-  
-  vargestage <-stringr::str_replace(var_pres,"uspres", "usgestage")
-  
-  smallD[hasan36plusweeks==TRUE &
-           get(vargestage)>=36 &
-           get(vargestage)<=40 &
-           !is.na(get(var_pres)) &
-           get(var_pres)!="",
-         presatterm:=get(var_pres)]
-}
-
-
-# anexampalp at term
-
-smallD[,anexampalp36:=as.character(NA)]
-
-vars_gestage <- stringr::str_subset(names(smallD),"^angestage_[0-9]+")
-
-
-
-for (var_gestage in vars_gestage){
-  
-  var_exampalp <-stringr::str_replace(var_gestage,"angestage", "anexampalp")
-  
-  smallD[hasan36plusweeks==TRUE &
-           get(var_gestage)>=36 &
-           get(var_gestage)<=40 &
-           !is.na(get(var_exampalp)) &
-           get(var_exampalp)!="",
-         anexampalp36:=get(var_exampalp)]
-}
 
 
 varsmalpres <- c(varsUSevents,

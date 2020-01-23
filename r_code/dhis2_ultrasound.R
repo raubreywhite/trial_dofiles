@@ -118,7 +118,6 @@ DHIS2_Ultrasound <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"usrecommendationscomments","uscomments")
   
   if(IS_GAZA){
-    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
     d[,usedd:=as.Date(usedd, "%m/%d/%Y")]
   } else {
     newdates<-as.Date(d$usedd, "%Y-%m-%d")
