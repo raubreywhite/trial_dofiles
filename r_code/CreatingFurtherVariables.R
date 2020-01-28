@@ -974,12 +974,11 @@ class(d$mahima_gA_1_us)
   ##making categories of days for booking
   
   d[,bookgestagedays_cats:=cut(bookgestagedays,
-                               breaks=c(-500,104,119,
-                                        125,154,167, 196,
-                                        216,231,244,259),
+                               breaks=c(-500,0,104,
+                                        125,160,167,202,
+                                        216,237,244,265,293),
                                include.lowest=T)]
-  
-  
+
   
   
   # MAKE BOOK VISIT FOR ANEMIA

@@ -38,3 +38,6 @@ msglogs[,timesincelastmsg:=as.numeric(difftime(datesent, prevdatesent,units="day
 msglogs <- msglogs[is.na(timesincelastmsg)| timesincelastmsg>0]
 
 unique(msglogs$msgid)
+
+#melt the small data set we have
+#merge and reshape to wide

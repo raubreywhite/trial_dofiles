@@ -22,110 +22,7 @@ smallD <- smallD <- d[bookdate >= "2017-01-15"&
                         bookdate<="2017-09-15" &
                         ident_TRIAL_1==T,]
 
-### making gestational ages based on usedd=<20, then lmp, then us>20 ###
-# + means repeat, $ means the end of the entire string
-smallD[,lmpT1:=as.Date(NA)]
-us_gestages <- stringr::str_subset(names(smallD), "^usgestage_[0-9]+")
-us_date <- stringr::str_subset(names(smallD), "^usdate_[0-9]+")
-
-
-#seq_along identical to 1:lenth()
-for(i in seq_along(us_gestages)){
-  var_us_gestage <- us_gestages[i]
-  var_us_date<- us_date[i]
-  
-  smallD[is.na(lmpT1) & 
-           get(var_us_gestage)<= 20, 
-         
-         lmpT1:=get(var_us_date)-get(var_us_gestage)*7]
-
-}
-
-smallD[is.na(lmpT1) & !is.na(booklmp), lmpT1:=booklmp]
-
-for(i in seq_along(us_gestages)){
-  var_us_gestage <- us_gestages[i]
-  var_us_date<- us_date[i]
-  
-  smallD[is.na(lmpT1) & get(var_us_gestage)>=20 & get(var_us_gestage)<40,
-         
-         lmpT1:=get(var_us_date)-get(var_us_gestage)*7]
-  
-  
-}
-
-#qc new variables
-smallD[is.na(lmpT1), c("booklmp",us_gestages, us_date), with=F]
-
-
-##looping through to make gestages for each of the program stages
-#Us gAs
-us_date <- stringr::str_subset(names(smallD), "^usdate_[0-9]+")
-usT1_gA <- stringr::str_replace(us_date, "usdate","usT1gestagedays")
-
-for(i in seq_along(us_date)){
-  var_us_gestage <- usT1_gA[i]
-  var_us_date<- us_date[i] 
-  
-  smallD[,(var_us_gestage):=floor(as.numeric(difftime(get(var_us_date),
-                                                      lmpT1, 
-                                                      units="days")))]
-  
-}
-
-
-#ANC gAs
-an_date <- stringr::str_subset(names(smallD), "^andate_[0-9]+")
-anT1_gA <- stringr::str_replace(an_date, "andate","anT1gestagedays")
-
-for(i in seq_along(an_date)){
-  var_an_gestage <- anT1_gA[i]
-  var_an_date<- an_date[i] 
-  
-  smallD[,(var_an_gestage):=floor(as.numeric(difftime(get(var_an_date),
-                                                      lmpT1, 
-                                                      units="days")))]
-  
-}
-
-#Lab gAs
-##NEED TO ROUND OR USE FLOOR
-lab_date <- stringr::str_subset(names(smallD), "^labdate_[0-9]+")
-labT1_gA <- stringr::str_replace(lab_date, "labdate","labT1gestagedays")
-
-for(i in seq_along(lab_date)){
-  var_lab_gestage <- labT1_gA[i]
-  var_lab_date<- lab_date[i] 
-  
-  smallD[,(var_lab_gestage):=floor(as.numeric(difftime(get(var_lab_date),
-                                                       lmpT1, 
-                                                       units="days")))]
-  
-}
-
-#Man gAs
-man_date <- stringr::str_subset(names(smallD), "^mandate_[0-9]+")
-manT1_gA <- stringr::str_replace(man_date, "mandate","manT1gestagedays")
-
-for(i in seq_along(man_date)){
-  var_man_gestage <- manT1_gA[i]
-  var_man_date<- man_date[i] 
-  
-  smallD[,(var_man_gestage):=floor(as.numeric(difftime(get(var_man_date),
-                                                       lmpT1, 
-                                                       units="days")))]
-  
-}
-
-
-##making categories of days for booking
-
-smallD[,bookgestagedays_cats:=cut(bookgestagedays,
-                       breaks=c(-500,104,119,
-                                125,154,167, 196,
-                                216,231,244,259),
-                       include.lowest=T)]
-
+### use gestational ages from creatin further variables
 
 
 # MAKE BOOK VISIT FOR ANEMIA
@@ -181,6 +78,59 @@ openxlsx::write.xlsx(smallD[,c("bookgestage",
                        FOLDER_DATA_RESULTS,
                        "booking_and_visits",
                        sprintf("%s_bookgA_ancongA.xlsx", lubridate::today())))
+
+
+# anT1 in weeks to calculate sfhDiscrep via anexamsfh and anT1gestagedays to weeks
+smallD[,anT1gestagedays_0:=bookgestagedays]
+vars <- stringr::str_subset(names(smallD), "^anT1gestagedays_")
+vars <- stringr::str_remove(vars, "^anT1gestagedays_")
+for (i in vars){
+  anT1gestagedays <- sprintf("anT1gestagedays_%s",i)
+  anT1gAweeks <- sprintf("anT1gAweeks_%s",i)
+ 
+  smallD[, (anT1gAweeks):=floor(get(anT1gestagedays)/7)]
+}
+
+gAscheck <- smallD[,c("bookgestagedays",
+                      "bookgestage",
+                      "anT1gAweeks_0",
+                      "anT1gAweeks_1",
+                      "anT1gestagedays_1",
+                      "angestage_1",
+                      "anT1gAweeks_2",
+                      "anT1gestagedays_2",
+                      "angestage_2",
+                      "anT1gAweeks_3",
+                      "angestage_3",
+                      "anT1gestagedays_3")]
+
+
+# Discrepancy Variable anexamsfh variable
+smallD[,anexamsfh_0:=bookexamsfh]
+
+vars <- stringr::str_subset(names(smallD), "^anexamsfh_")
+vars <- stringr::str_remove(vars, "anexamsfh_")
+
+# i in length will just print out the length
+# i in 1:length same as seq_along. but seq_along preferred bc works when length of vector
+#is 0. Use this if have predefined 
+# i in vars (object) take every single value of vars and loop through them
+
+#anexamsfh stuff with anT1gAweeks
+for(i in vars){
+  print(i)
+  anexamsfh <-sprintf("anexamsfh_%s",i)
+  anT1gAweeks <- sprintf("anT1gAweeks_%s",i)
+  sfhDiscrepAnt1gas <-  sprintf("sfhDiscrepAnt1gas_%s",i)
+  sfhDiscrepAnt1gasCat <-  sprintf("sfhDiscrepAnt1gasCat_%s",i)
+  
+smallD[!is.na(anT1gAweeks) &
+       !is.na(get(anexamsfh)), (sfhDiscrepAnt1gas):=abs(get(anexamsfh)-get(anT1gAweeks))]
+
+smallD[!is.na(anT1gAweeks) &
+         !is.na(get(anexamsfh)), (sfhDiscrepAnt1gasCat):=abs(get(anexamsfh)-get(anT1gAweeks))>2]
+
+}
 
 # an exam malpresentation into one variable
 vars_source <- names(d)[stringr::str_detect(names(smallD),"^anexampalp_")]
@@ -705,6 +655,8 @@ xtabs(~smallD$TrialOne_us_malpresvar_00_14)
 
 ####SFH Discrepancies####
 #AN SFH measurements
+smallD[,anexamsfh_0:=bookexamsfh]
+smallD[,anTgestagedays_0:=bookgestagedays]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -714,7 +666,44 @@ smallD <- VisitVariables(
   TruevaluesMax=44,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
+smallD[,anexamsfh_0:=NULL]
+smallD[,anTgestagedays_0:=NULL]
 xtabs(~smallD$TrialOne_anexamsfh_exists_00_14)
+
+
+# sfhDiscrepAnt1gasCat
+smallD[,anexamsfh_0:=bookexamsfh]
+smallD[,anTgestagedays_0:=bookgestagedays]
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="sfhDiscrepBinary",
+  variableOfInterestPattern="sfhDiscrepAnt1gasCat",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete ="TRUE",
+  gestagedaysVariable = "anT1gestagedays")
+smallD[,anexamsfh_0:=NULL]
+smallD[,anTgestagedays_0:=NULL]
+xtabs(~smallD$TrialOne_sfhDiscrepBinary_15_17)
+
+
+
+# sfhDiscrepAnt1gas
+smallD[,anexamsfh_0:=bookexamsfh]
+smallD[,anTgestagedays_0:=bookgestagedays]
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="sfhDiscrepExists",
+  variableOfInterestPattern="sfhDiscrepAnt1gas",
+  TruevaluesMin=3,
+  TruevaluesMax=200,
+  TruevaluesDiscrete =NULL,
+  gestagedaysVariable = "anT1gestagedays")
+smallD[,anexamsfh_0:=NULL]
+smallD[,anTgestagedays_0:=NULL]
+xtabs(~smallD$TrialOne_sfhDiscrepExists_15_17)
 
 
 ######## Re Check These SFH Discrep variables!!!!!################
@@ -754,6 +743,8 @@ smallD <- VisitVariables(
 xtabs(~smallD$TrialOne_sfhDiscrepExists_00_14)
 
 #anexampalp source
+smallD[,anexampalp_0:=bookexampalp]
+smallD[,anT1gestagedays_0:=bookgestagedays]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -763,6 +754,8 @@ smallD <- VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete = c("Trasverse","Breech"),
   gestagedaysVariable = "anT1gestagedays")
+smallD[,anexampalp_0:=NULL]
+smallD[,anT1gestagedays_0:=NULL]
 xtabs(~smallD$TrialOne_anexampalpmal_00_14)
 
 
@@ -1771,7 +1764,7 @@ openxlsx::write.xlsx(smalld,
                                lubridate::today())))
 
 ######### ANC Detection of sga ##########
-smallD[is.na(sga),anc_detection_sga:=as.logical(NA)]
+smallD[,anc_detection_sga:=FALSE]
 
 
 for(i in 20:37){
@@ -1780,12 +1773,13 @@ for(i in 20:37){
     smallD[get(var)==T, anc_detection_sga:=TRUE ]
     
 }
+xtabs(~smallD$anc_detection_sga)
 
 # undetected sga at birth
-smallD[is.na(sga), sga_undetected:=as.logical(NA)]
-smallD[is.na(sga) & !is.na(anc_detection_sga), sga_undetected:=FALSE]
-smallD[anc_detection_sga==FALSE & sga==T,sga_undetected:=TRUE]
-
+smallD[is.na(sga), sga_undetected_at_birth:=as.logical(NA)]
+smallD[sga==T & anc_detection_sga==T, sga_undetected_at_birth:=FALSE]
+smallD[anc_detection_sga==FALSE & sga==T,sga_undetected_at_birth:=TRUE]
+xtabs(~smallD$sga_undetected_at_birth)
 
 ######### Indication for CS and Malpresentation ##########
 
@@ -1875,10 +1869,7 @@ for (var_gestage in vars_gestage){
 }
 
 # 
-
-smallD[,anc_detection_malpres_1:=as.logical(NA)]
-smallD[!is.na(merged_presentationdeliv) & 
-         !is.na(presatterm),
+smallD[!is.na(presatterm),
        anc_detection_malpres_1:=FALSE]
 smallD[anc_detection_malpres_1==FALSE & 
          presatterm %in% c("Breech","Trasverse"), anc_detection_malpres_1:=TRUE ]
@@ -2087,34 +2078,35 @@ openxlsx::write.xlsx(smalld,
                        sprintf("Macrosomia_%s.xlsx", 
                                lubridate::today())))
 
+######### Outcome Var ##########
+#everyone starts of as missing
+smallD[,TrialOne_primarypregoutc:=as.logical(NA)]
+
+varshbooutcome <- smallD[,c("SevOrModHbatBirth",
+                            "sevHTNatBirth",
+                            "sga_undetected_at_birth",
+                            "lga",
+                            "malpres_undetected_1",
+                            "malpres_undetected_2",
+                            "malpres_undetected_3")]
+
+varlist <- names(varshbooutcome)
+
+# anyone who has atleast one false is set to False
+#at least one value is true
+for(i in seq_along(varlist)){
+  
+  smallD[get(varlist)==F, TrialOne_primarypregoutc:=F]
+ 
+}
+
+#at least one value is true, set to True regardless of other values
+for(i in seq_along(varlist)){
+  
+  smallD[get(varlist)==T, TrialOne_primarypregoutc:=T]
+}
 
 
-######### Anc detection of SGA  ##########
-#ANC detection of SGA: one variable, computed from TrialOne_us_iugrSuspected.
-
-smallD[,anc_detection_sga:=as.logical(FALSE)]
-
-smallD[TrialOne_us_iugrSuspected_20_20=="TRUE"| 
-      TrialOne_us_iugrSuspected_21_21=="TRUE" | 
-      TrialOne_us_iugrSuspected_22_22=="TRUE" | 
-      TrialOne_us_iugrSuspected_24_24=="TRUE" | 
-      TrialOne_us_iugrSuspected_25_25=="TRUE" | 
-      TrialOne_us_iugrSuspected_26_26=="TRUE" | 
-      TrialOne_us_iugrSuspected_27_27=="TRUE" | 
-      TrialOne_us_iugrSuspected_28_28=="TRUE" |
-      TrialOne_us_iugrSuspected_29_29=="TRUE" | 
-      TrialOne_us_iugrSuspected_30_30=="TRUE" | 
-      TrialOne_us_iugrSuspected_31_31=="TRUE" | 
-      TrialOne_us_iugrSuspected_32_32=="TRUE" |
-      TrialOne_us_iugrSuspected_33_33=="TRUE" | 
-      TrialOne_us_iugrSuspected_35_35=="TRUE" | 
-      TrialOne_us_iugrSuspected_36_36=="TRUE" | 
-      TrialOne_us_iugrSuspected_37_37=="TRUE", anc_detection_sga:=TRUE]
-
-# SGA at birth undetected during ANC: one variable, computed from anc_detection_sga #(above) and sga (already in the birth outcomes data)
-
-smallD[,sga_undetected_at_birth:=as.logical(FALSE)]
-smallD[anc_detection_sga==F & sga==T,sga_undetected_at_birth:=TRUE]
 
 
 #################### Vars to add to other data sets #################### 
@@ -2161,6 +2153,8 @@ varsanexampalpmal <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_
 varsanexmalpres <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_malpresanexam_")]
 
 varsSFHdisc <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_sfhDiscrep")]
+varsSFHdiscExists <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_sfhDiscrepExists")]
+
 varsmanperf <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manperf_")]
 varsUs <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_us_")]
 varsusgAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^usgestage")]
@@ -2225,6 +2219,7 @@ varskeep <- c("prettyExposure",
               "bookgestagedays",	
               "booklabhb",
               "gAatBirth_cats",
+              "TrialOne_primarypregoutc",
               varsT1anvis,
               varsangAdays,
               varsangAweeks,
@@ -2282,7 +2277,13 @@ varskeep <- c("prettyExposure",
               varsanexpalp,
               varsanexampalpmal,
               varsuspres,
-              varsUSevents,
+              "anc_detection_malpres_1",
+              "anc_detection_malpres_2",
+              "anc_detection_malpres_3",
+              "malpres_undetected_1",
+              "malpres_undetected_2",
+              "malpres_undetected_3",
+               varsUSevents,
               varsusgestage,
               varsusgestagedays,
               varsangestage,
@@ -2343,10 +2344,6 @@ varskeepAll <- c("prettyExposure",
                  varsanevent)
                  
                  
-
-
-
-
 varshb <-c(varslabevent, 
            varslabgAweeks, 
            varslabgAdays,
@@ -2396,8 +2393,8 @@ varsmalpres <- c(varsUSevents,
                  varsUSevents,
                  varsusgestage,
                  varsusgestagedays,
-                 anexampalp36,
-                 presatterm
+                 "anexampalp36",
+                 "presatterm"
                  )
 
 varsfgr <- c(varsusgAweeks,
@@ -2407,6 +2404,7 @@ varsfgr <- c(varsusgAweeks,
              varsuslga,
              varsUs,
              varsSFHdisc,
+             varsSFHdiscExists,
              varsanexamsfh,
              iugr,
              lga)
@@ -3052,7 +3050,4 @@ openxlsx::write.xlsx(refHosp,
                        "booking_and_visits",
                        sprintf("refHosp_%s.xlsx", 
                                lubridate::today())))
-
-
-
 
