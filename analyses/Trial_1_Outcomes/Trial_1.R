@@ -23,7 +23,11 @@ smallD <- smallD <- d[bookdate >= "2017-01-15"&
                         ident_TRIAL_1==T,]
 
 ### use gestational ages from creatin further variables
-
+smallD[,bookgestagedays_cats:=cut(bookgestagedays,
+                             breaks=c(-500,0,104,
+                                      125,160,167,202,
+                                      216,237,244,265,293),
+                             include.lowest=T)]
 
 # MAKE BOOK VISIT FOR ANEMIA
 smallD[,booklabhb:=as.numeric(NA)]
@@ -165,9 +169,6 @@ VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterest
   }
   
   
-  
-  
-  
   # pull out a list of all of the gestage variables
   
   gestagedaysVariablewithcarrot <- sprintf("^%s",gestagedaysVariable)
@@ -272,8 +273,6 @@ days <- list(
   "42_42"=42*7+c(0:6)
 
 )
-
-
 
 
 ###ANC Visits####
@@ -442,7 +441,7 @@ smallD <- VisitVariables(
   days=days,
   variableOfInterestName="labhb_exists",
   variableOfInterestPattern="labhb",
-  TruevaluesMin=4,
+  TruevaluesMin=1,
   TruevaluesMax=20,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
@@ -451,6 +450,26 @@ nrow(smallD[labhb_1>=4 & labhb_1<=20])
 smallD[,labT1gestagedays_0:=NULL]
 smallD[,labhb_0:=NULL]
 xtabs(~smallD$TrialOne_labhb_exists_15_17)
+
+#normal hb
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labhb_0:=booklabhb]
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labhb_0:=booklabhb]
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="labhb_normal",
+  variableOfInterestPattern="labhb",
+  TruevaluesMin=11,
+  TruevaluesMax=20,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "labT1gestagedays")
+
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labhb_0:=NULL]
+xtabs(~smallD$TrialOne_labhb_normal_15_17)
+
 
 
 # sev anemia
@@ -2092,21 +2111,21 @@ varshbooutcome <- smallD[,c("SevOrModHbatBirth",
 
 varlist <- names(varshbooutcome)
 
-# anyone who has atleast one false is set to False
-#at least one value is true
-for(i in seq_along(varlist)){
-  
-  smallD[get(varlist)==F, TrialOne_primarypregoutc:=F]
- 
-}
+# anyone who has all FALSE is set to False
+smallD[SevOrModHbatBirth==F &
+         sevHTNatBirth==F &
+         sga_undetected_at_birth==F &
+         lga==F &
+         malpres_undetected_1==F &
+         malpres_undetected_2==F &
+         malpres_undetected_3==F,
+         TrialOne_primarypregoutc:= FALSE]
 
 #at least one value is true, set to True regardless of other values
-for(i in seq_along(varlist)){
-  
-  smallD[get(varlist)==T, TrialOne_primarypregoutc:=T]
+for(i in varlist){
+  #print(i)
+  smallD[get(i)==T, TrialOne_primarypregoutc:=T]
 }
-
-
 
 
 #################### Vars to add to other data sets #################### 
