@@ -5,7 +5,7 @@
 #Number of opportunities should be same as opportunities of attendance
 smallD[,OpportunityBPScreening:= OpportunityofVisits]
 
-#BP Screenings (sucesses)
+#BP Screenings (sucesses) for anyone who has been screened
 smallD[,BPonTime:=0]
 smallD[TrialOne_anbpsyst_present_15_17==T & TrialOne_anbpdiast_present_15_17==T, 
        BPonTime:=BPonTime+1]
@@ -19,3 +19,7 @@ smallD[TrialOne_anbpsyst_present_35_37==T & TrialOne_anbpdiast_present_35_37==T,
        BPonTime:=BPonTime+1]
 #check 
 xtabs(~smallD$BPonTime, addNA = T)
+
+
+##### Need to take into consideration cases with high bp values and then rescreened ####
+# Severe Hypertension

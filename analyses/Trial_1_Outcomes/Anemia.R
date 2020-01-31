@@ -2,6 +2,8 @@
 
 
 ########## Anemia ########## 
+
+## No Anemia Cases ##
 # Define opportunities for everyone assuming No one has anemia
 smallD[bookgestagedays_cats=="[-500,0]", Opportunity_anemia_screening:=as.numeric(NA)]
 
@@ -36,6 +38,7 @@ xtabs(~smallD$Opportunity_anemia_screening, addNA=T)
 
 
 #id women referred at some point in time to remove the the opportunities she may have
+#might have toe remove this
 smallD[TrialOne_refHosp_35_37==T | TrialOne_refHR_35_37==T,
        Opportunity_anemia_screening:=Opportunity_anemia_screening-0]
 
@@ -78,14 +81,11 @@ smallD[bookgestagedays_cats %in% c("(0,104]") &
 # booked 15-17
 smallD[bookgestagedays_cats %in% c("(104,125]") & 
          (TrialOne_labhb_normal_14_14==T|
-            TrialOne_labhb_normal_15_17==T |
-            TrialOne_labhbnormal_18_18==T), HbonTime:=HbonTime+1]
+            TrialOne_labhb_normal_15_17==T), HbonTime:=HbonTime+1]
 
 #booked 18-22
 smallD[bookgestagedays_cats %in% c( "(125,160]" ) &
-         (TrialOne_labhb_normal_17_17==T |
-            TrialOne_labhb_normal_18_22==T), HbonTime:=HbonTime+1]
-
+         (TrialOne_labhb_normal_18_22==T), HbonTime:=HbonTime+1]
 
 #24-28 screenings
 smallD[TrialOne_labhb_normal_23_23==T |
@@ -98,19 +98,14 @@ smallD[bookgestagedays_cats %in% c("(202,216]","(216,237]" ) &
             TrialOne_labhb_normal_31_33==T), 
        HbonTime:=HbonTime+1]
 
-
 #booked 34_34
 smallD[bookgestagedays_cats %in% c("(237,244]") &
          TrialOne_labhb_normal_34_34==T, HbonTime:=HbonTime+1]
 
-
 #35-37
 smallD[TrialOne_labhb_normal_35_37==T, HbonTime:=HbonTime+1]
 
-# Severe anemia
-#if you have severe anemia at any point, refer to hospital and does not get opportunities in the future. 
-# fix management variables and add the ones we need
-# they are all single
+## Severe anemia ##
 # before 15 weeks
 smallD[TrialOne_labhb_anemia_sev_00_14==T,
        Opportunity_anemia_screening := Opportunity_anemia_screening-2]
@@ -164,12 +159,30 @@ smallD[TrialOne_labhb_anemia_sev_35_37==T & TrialOne_manhb_35_37==T,HbonTime:=Hb
 #check if managed. 
 #If managed and decreases leave opportunity as is
 #if managed and improves, opportunity for next gA window increases
+ 
 
+##### Should add the result of the screening somewhere #####
 #00-14
+smallD[TrialOne_labhb_anemia_mild_mod_00_14==T,Opportunity_anemia_screening:= Opportunity_anemia_screening-2]
+smallD[TrialOne_labhb_anemia_mild_mod_00_14==T &
+         (TrialOne_manhb_mildmodhbret_18_18==T|
+         TrialOne_manhb_mildmodhbret_19_19==T|
+         TrialOne_manhb_mildmodhbret_20_20==T),
+            Opportunity_anemia_screening:= Opportunity_anemia_screening-2]
+
+
 #15-17
+smallD[TrialOne_labhb_anemia_mild_mod_15_17==T,Opportunity_anemia_screening:= Opportunity_anemia_screening-2]
+smallD[TrialOne_labhb_anemia_mild_mod_15_17==T &
+         (TrialOne_manhb_mildmodhbret_18_18==T|
+            TrialOne_manhb_mildmodhbret_19_19==T|
+            TrialOne_manhb_mildmodhbret_20_20==T),
+       Opportunity_anemia_screening:= Opportunity_anemia_screening-2]
 #18-22
 #24-28
 #29-30
+#31-33
+#34-34
 
 
 

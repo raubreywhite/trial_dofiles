@@ -33,7 +33,45 @@ smallD[,bookgestagedays_cats:=cut(bookgestagedays,
 smallD[,booklabhb:=as.numeric(NA)]
 smallD[abs(labT1gestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
 
+# MAKE BOOK VISIT FOR Laburglu
+smallD[,booklaburglu:=as.character(NA)]
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & laburglu_1%in%c("NEG","POS"),
+       booklaburglu:=laburglu_1]
 
+smallD[,booklaburglu:=NULL]
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7,
+         booklaburglu:=laburglu_1]
+xtabs(~smallD$booklaburglu)
+str(smallD$booklaburglu)
+unique(smallD$booklaburglu)
+
+smallD[,booklaburglu:=NULL]
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & laburglu_1%in%c("NEG","POS"),
+       booklaburglu:=laburglu_1]
+xtabs(~smallD$booklaburglu)
+
+
+# MAKE BOOK VISIT FOR LABBLOODGLU
+smallD[,booklabbloodglu:=as.integer(NA)]
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7,booklabbloodglu:=labbloodglu_1]
+xtabs(~smallD$booklabbloodglu, addNA=T)
+
+# MAKE BOOK VISIT FOR LABBLOODGLU_HIGH
+smallD[,booklabbloodglu_high:=as.logical(NA)]
+smallD[!is.na(booklabbloodglu),booklabbloodglu_high:=FALSE]
+smallD[booklabbloodglu>=140 & booklabbloodglu<500,booklabbloodglu_high:=TRUE]
+xtabs(~smallD$booklabbloodglu_high, addNA=T)
+
+# MAKE BOOK VISIT FOR LABFASTBLOODGLU
+smallD[,booklabfastbloodglu:=as.numeric(NA)]
+smallD[abs(labT1gestagedays_1-bookgestagedays)<7,booklabfastbloodglu:=labfastbloodglu_1]
+xtabs(~smallD$booklabfastbloodglu)
+
+# MAKE BOOK VISIT FOR LABfastBLOODGLU_HIGH
+smallD[,booklabfastbloodglu_high:=as.logical(NA)]
+smallD[!is.na(booklabfastbloodglu),booklabfastbloodglu_high:=FALSE]
+smallD[booklabfastbloodglu>126 ,booklabfastbloodglu_high:=TRUE]
+xtabs(~smallD$booklabfastbloodglu_high, addNA=T)
 
 # Discrepancy Variable anexamsfh variable
 smallD[,anexamsfh_0:=bookexamsfh]
@@ -197,6 +235,7 @@ VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterest
         
     
         smallD[!is.na(get(var)) & get(gestageVar) %in% days[[i]] & !is.na(get(interestVar)) & get(interestVar)>=TruevaluesMin & get(interestVar)<=TruevaluesMax, (var):=TRUE]
+  
       }
          
          
@@ -454,8 +493,6 @@ xtabs(~smallD$TrialOne_labhb_exists_15_17)
 #normal hb
 smallD[,labT1gestagedays_0:=bookgestagedays]
 smallD[,labhb_0:=booklabhb]
-smallD[,labT1gestagedays_0:=bookgestagedays]
-smallD[,labhb_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -469,8 +506,6 @@ smallD <- VisitVariables(
 smallD[,labT1gestagedays_0:=NULL]
 smallD[,labhb_0:=NULL]
 xtabs(~smallD$TrialOne_labhb_normal_15_17)
-
-
 
 # sev anemia
 smallD[,labT1gestagedays_0:=bookgestagedays]
@@ -503,16 +538,17 @@ smallD <- VisitVariables(
   TruevaluesMax=10.9,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
-nrow(smallD[labhb_1>=7 & labhb_1<=11])
+nrow(smallD[labhb_1>=7 & labhb_1<11])
 smallD[,labT1gestagedays_0:=NULL]
 smallD[,labhb_0:=NULL]
+nrow(smallD[labgestage_1<=15 & labgestage_1<=17 & labhb_1>7 & labhb_1<11])
 xtabs(~smallD$TrialOne_labhb_anemia_mild_mod_15_17, addNA=T)
 
 
 
 ### Lab RBS Normal ####
 smallD[,labT1gestagedays_0:=bookgestagedays]
-smallD[,laburglu_0:=booklabhb]
+smallD[,laburglu_0:=booklaburglu]
 # normal urine glucose
 smallD <- VisitVariables(
   smallD=smallD,
@@ -529,7 +565,7 @@ xtabs(~smallD$TrialOne_laburglu_exists_15_17)
 
 # lab urglu pos
 smallD[,labT1gestagedays_0:=bookgestagedays]
-smallD[,laburglu_0:=booklabhb]
+smallD[,laburglu_0:=booklaburglu]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -537,15 +573,17 @@ smallD <- VisitVariables(
   variableOfInterestPattern="laburglu",
   TruevaluesMin=NULL,
   TruevaluesMax=NULL,
-  TruevaluesDiscrete ="POS",
+  TruevaluesDiscrete =c("POS"),
   gestagedaysVariable = "labT1gestagedays")
 smallD[,labT1gestagedays_0:=NULL]
 smallD[,laburglu_0:=NULL]
-xtabs(~smallD$TrialOne_laburglu_pos_15_17)
+nrow(smallD[laburglu_1=="POS" & labgestage_1>0 & labgestage_1<=14])
+xtabs(~smallD$TrialOne_laburglu_pos_00_14)
 
-# normal bloodglu values
+
+# labbloodglu exist
 smallD[,labT1gestagedays_0:=bookgestagedays]
-smallD[,labbloodglu_0:=booklabhb]
+smallD[,labbloodglu_0:=booklabbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -561,7 +599,7 @@ xtabs(~smallD$TrialOne_labbloodglu_exists_15_17)
 
 # high blood glucose
 smallD[,labT1gestagedays_0:=bookgestagedays]
-smallD[,labbloodglu_0:=booklabhb]
+smallD[,labbloodglu_0:=booklabbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -573,36 +611,69 @@ smallD <- VisitVariables(
   gestagedaysVariable = "labT1gestagedays")
 smallD[,labT1gestagedays_0:=NULL]
 smallD[,labbloodglu_0:=NULL]
-xtabs(~smallD$TrialOne_labbloodglu_high_15_17)
+xtabs(~smallD$TrialOne_labbloodglu_high_00_14)
+xtabs(~smallD$TrialOne_labbloodglu_high_18_22)
 
 
-# Lab FBS Normal 
+# Lab FBS exists
+#http://perinatology.com/Reference/Reference%20Ranges/Glucose,%20fasting.htm
 smallD[,labT1gestagedays_0:=bookgestagedays]
-smallD[,labfastbloodglu_0:=booklabhb]
+smallD[,labfastbloodglu_0:=booklabfastbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labfastbloodglu_exists",
   variableOfInterestPattern="labfastbloodglu",
   TruevaluesMin=50,
-  TruevaluesMax=500,
+  TruevaluesMax=200,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
 smallD[,labT1gestagedays_0:=NULL]
 smallD[,labfastbloodglu_0:=NULL]
 xtabs(~smallD$TrialOne_labfastbloodglu_exists_15_17)
 
+# Lab FBS Normal
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labfastbloodglu_0:=booklabfastbloodglu]
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="labfastbloodglu_normal",
+  variableOfInterestPattern="labfastbloodglu",
+  TruevaluesMin=71,
+  TruevaluesMax=91,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "labT1gestagedays")
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labfastbloodglu_0:=NULL]
+xtabs(~smallD$TrialOne_labfastbloodglu_normal_15_17)
+
+# Lab FBS likely GDM
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labfastbloodglu_0:=booklabfastbloodglu]
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="labfastbloodglu_likelyGDM",
+  variableOfInterestPattern="labfastbloodglu",
+  TruevaluesMin=92,
+  TruevaluesMax=125,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "labT1gestagedays")
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labfastbloodglu_0:=NULL]
+xtabs(~smallD$TrialOne_labfastbloodglu_likelyGDM_24_28)
 
 
 # Lab FBS High 
 smallD[,labT1gestagedays_0:=bookgestagedays]
-smallD[,labfastbloodglu_0:=booklabhb]
+smallD[,labfastbloodglu_0:=booklabfastbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labfastbloodglu_high",
   variableOfInterestPattern="labfastbloodglu",
-  TruevaluesMin=105,
+  TruevaluesMin=126,
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT1gestagedays")
@@ -789,7 +860,10 @@ smallD <- VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete ="RefHighRisk",
   gestagedaysVariable = "manT1gestagedays")
+nrow(smallD[mantypex_1=="RefHighRisk" & mangestage_1>=15 & mangestage_1<=17])
+nrow(smallD[mantypex_1=="RefHighRisk" & mangestage_1>=0 & mangestage_1<=14])
 xtabs(~smallD$TrialOne_refHR_00_14)
+xtabs(~smallD$TrialOne_refHR_35_37)
 
 # Ref to Hosp
 smallD <- VisitVariables(
@@ -801,6 +875,7 @@ smallD <- VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete ="RefHosp",
   gestagedaysVariable = "manT1gestagedays")
+nrow(smallD[mantypex_1=="RefHosp" & mangestage_1>=0 & mangestage_1<=14])
 xtabs(~smallD$TrialOne_refHosp_00_14)
 
 
