@@ -878,6 +878,19 @@ smallD <- VisitVariables(
 nrow(smallD[mantypex_1=="RefHosp" & mangestage_1>=0 & mangestage_1<=14])
 xtabs(~smallD$TrialOne_refHosp_00_14)
 
+# RefDiabetes
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="refDiab",
+  variableOfInterestPattern="mantypex",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete ="RefDiabetes",
+  gestagedaysVariable = "manT1gestagedays")
+nrow(smallD[mantypex_1=="RefDiabetes" & mangestage_1>=0 & mangestage_1<=14])
+xtabs(~smallD$TrialOne_refDiab_00_14)
+
 
 # Management Performed
 smallD <- VisitVariables(
@@ -1163,6 +1176,63 @@ for(i in 0:37){
   for(week_later in weeks_later){
     # working only on manerf check
     var_secondcheck <- sprintf("TrialOne_refHR_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second check
+    # var_secondcheck <- sprintf("TrialOne_labbloodglu_exists_%s_%s", 
+    #                            week_later, 
+    #                            week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_mangdm)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_mangdm):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_mangdm):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_mangdm):=get(var_temp_mangdm)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_mangdm):=get(var_temp_mangdm) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_mangdm):=NULL]
+  
+}
+xtabs(~smallD$TrialOne_manRBGHigh_HR_24_24)
+
+# High RBG, RefDIAB
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
+  
+  #output variable
+  var_mangdm <- sprintf("TrialOne_manRBGHigh_Diab_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_mangdm <- "temp_mangdm"
+  
+  #id source
+  var_badgdm <- sprintf("TrialOne_labbloodglu_high_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_mangdm):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badgdm)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badgdm)==TRUE, (var_temp_mangdm):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("TrialOne_refDiab_%s_%s", 
                                week_later, 
                                week_later)
     # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
