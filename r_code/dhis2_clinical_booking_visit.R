@@ -3,7 +3,8 @@ DHIS2_BookingVisit <- function(isControl,
                                IS_GAZA=FALSE
                                ) {
   FOLDERS <- DHIS2_Folders(isControl = isControl)
-
+  
+  
   if (isControl) {
     # read in ANC followup, keep the first obs per pregnancy
     d <- fread(
@@ -14,6 +15,8 @@ DHIS2_BookingVisit <- function(isControl,
       ),
       encoding = "UTF-8"
     )
+    
+    
     setnames(d, 2, "uniqueid")
     setorder(d, uniqueid, `Event date`)
     d[, visitNum := 1:.N, by = .(uniqueid)]
@@ -32,7 +35,7 @@ DHIS2_BookingVisit <- function(isControl,
     firstObsPerPreg[, `ANC Other medications the woman is currently taking` := NULL]
 
     # Merge in the first ANC observation so that this file
-    # looks the same as the interventiond data
+    # looks the same as the intervention data
 
     d <- fread(
       sprintf(
@@ -87,10 +90,10 @@ DHIS2_BookingVisit <- function(isControl,
     d[, anccounselingaboutpkuscreening := as.numeric(NA)]
     d[, ancppcvisitundertakenbywhom := as.numeric(NA)]
     d[, paperbackupused := as.numeric(NA)]
-
     # capture tostring anclmpstatus, replace
     # capture tostring ancotherfamilyconcernspecified, replace
     # capture tostring ancpallor, replace
+    
   } else {
     print("CHECKINGCHECKING****")
     print(FOLDERS)
@@ -128,7 +131,7 @@ DHIS2_BookingVisit <- function(isControl,
    
     
     setnames(d, 2, "uniqueid")
-    
+   
     d[,confamilyhistoryofbronchialastma:=as.numeric(NA)]
     d[,confamilyhistoryofcardiacdisease:=as.numeric(NA)]
     d[,usrecommendationscommentsx:=as.numeric(NA)]   
@@ -156,6 +159,24 @@ DHIS2_BookingVisit <- function(isControl,
   }
 
   for (i in names(d)) setnames(d, i, ExtractOnlyEnglishLettersAndNumbers(i)[[1]])
+  
+  # fixing event dates
+  #NOT WORKING
+  unique(d$eventdate)
+  str(d$eventdate)
+  
+  d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0$")]
+  
+  #becomes missing when this step is performed
+  #d[,eventdate:=as.Date(eventdate, format="%m/%d/%Y")]
+  
+  # this worked instead
+  d[,eventdate:=as.Date(format(as.Date(eventdate, "%Y-%m-%d"), "%m/%d/%y"), 
+                        format = "%m/%d/%y")]
+  unique(d$eventdate)
+  
+  
+  
 
   if(IS_GAZA){
     if(!"identificationdocumentnumber" %in% names(d)){

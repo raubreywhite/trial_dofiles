@@ -208,7 +208,7 @@ VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterest
   
   
   # pull out a list of all of the gestage variables
-  
+  #browser()
   gestagedaysVariablewithcarrot <- sprintf("^%s",gestagedaysVariable)
   listOfGestAgeVars <- names(smallD)[stringr::str_detect(names(smallD),gestagedaysVariablewithcarrot)]
   listOfInterestVars <- stringr::str_replace(listOfGestAgeVars, gestagedaysVariable,variableOfInterestPattern)
@@ -860,7 +860,7 @@ smallD <- VisitVariables(
   TruevaluesMax=NULL,
   TruevaluesDiscrete ="RefHighRisk",
   gestagedaysVariable = "manT1gestagedays")
-nrow(smallD[mantypex_1=="RefHighRisk" & mangestage_1>=15 & mangestage_1<=17])
+nrow(smallD[mantypex_1=="RefHighRisk" & manT1gestagedays_1>=15 & manT1gestagedays_1<=17])
 nrow(smallD[mantypex_1=="RefHighRisk" & mangestage_1>=0 & mangestage_1<=14])
 xtabs(~smallD$TrialOne_refHR_00_14)
 xtabs(~smallD$TrialOne_refHR_35_37)

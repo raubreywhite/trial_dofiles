@@ -18,14 +18,10 @@ smallD[bookgestagedays_cats %in% c( "(125,160]" ), Opportunity_GDM_screening:=2]
 smallD[bookgestagedays_cats %in% c("(160,167]"), Opportunity_GDM_screening:=2]
 
 #booked 24-28
-smallD[TrialOne_anvisitnew_24_24==T|
-         TrialOne_anvisitnew_25_25==T|
-         TrialOne_anvisitnew_26_26==T|
-         TrialOne_anvisitnew_27_27==T, Opportunity_GDM_screening:=1]
+smallD[bookgestagedays_cats %in% c("(167,202]"), Opportunity_GDM_screening:=1]
 
 #booked 29-30
-smallD[bookgestagedays_cats %in% c( "(202,216]" )|
-         TrialOne_anvisitnew_28_28==T, Opportunity_GDM_screening:=1]
+smallD[bookgestagedays_cats %in% c( "(202,216]"), Opportunity_GDM_screening:=1]
 
 #booked 31-33
 smallD[bookgestagedays_cats %in% c( "(216,237]" ), Opportunity_GDM_screening:=1]
@@ -76,14 +72,13 @@ smallD[,screenb424:=as.logical(NA)]
 smallD[bookgestagedays_cats %in% c("(0,104]","(104,125]","(125,160]","(160,167]"),
        screenb424:=F]
 smallD[screenb424==F &
-        (!is.na(booklaburglu)| !is.na(booklabbloodglu)|!is.na(booklabfastbloodglu)),
+        (!is.na(booklaburglu) | !is.na(booklabbloodglu)|!is.na(booklabfastbloodglu)),
        screenb424:=T]
 xtabs(~smallD$screenb424, addNA=T)
 
 ##Defining Successes
 smallD[,GDMscreeningontime:=0]
-smallD[booklabbloodglu_high==FALSE & 
-         screenb424==T, 
+smallD[screenb424==T, 
        GDMscreeningontime:=GDMscreeningontime+1]
 xtabs(~smallD$GDMscreeningontime, addNA = T)
 
@@ -91,17 +86,16 @@ xtabs(~smallD$GDMscreeningontime, addNA = T)
 smallD[(TrialOne_labbloodglu_exists_24_24==T|
          TrialOne_labbloodglu_exists_25_25==T|
          TrialOne_labbloodglu_exists_26_26==T|
-         TrialOne_labbloodglu_exists_27_27==T),
+         TrialOne_labbloodglu_exists_27_27==T)|
          (TrialOne_labfastbloodglu_exists_24_24==T|
          TrialOne_labfastbloodglu_exists_25_25==T|
          TrialOne_labfastbloodglu_exists_26_26==T|
-         TrialOne_labfastbloodglu_exists_27_27==T),GDMscreeningontime+1]
+         TrialOne_labfastbloodglu_exists_27_27==T),GDMscreeningontime:=GDMscreeningontime+1]
          
 
 #Screening after 28 weeks: Creating one var for 3 possibilities
 smallD[,screenafter28:=as.logical(NA)]
-smallD[bookgestagedays_cats %in% c("(202,216]","(216,237]","(237,244]","(244,265]") |
-         TrialOne_anvisitnew_28_28==T,
+smallD[bookgestagedays_cats %in% c("(202,216]","(216,237]","(237,244]","(244,265]"),
        screenafter28:=F]
 smallD[screenafter28==F &
          (!is.na(booklabbloodglu)|!is.na(booklabfastbloodglu)),
@@ -110,8 +104,7 @@ xtabs(~smallD$screenafter28, addNA=T)
 
 ##Defining Success
 # after 28 weeks
-smallD[booklabbloodglu_high==FALSE & 
-         screenafter28==T, 
+smallD[screenafter28==T, 
        GDMscreeningontime:=GDMscreeningontime+1]
 xtabs(~smallD$GDMscreeningontime, addNA = T)
 
@@ -127,6 +120,23 @@ varsmanRBGHigh <-names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manR
 for (i in varsmanRBGHigh){smallD[get(i)==T, proprefDiab:=T]}
 #fix this statement
 smallD[booklabbloodglu_high==T & proprefDiab==T, booklabbloodgluhigh_refer:=TRUE]
+
+#booked before 24 weeks
+b415weeks <- smallD[bookgestagedays_cats %in% c( "(0,104]")]
+## High at 24-28 weeks
+b415weeks[,TrialOne_bloodsugar_24_28_high:=as.logical(NA)]
+b415weeks[TrialOne_labbloodglu_exists_24_24==T|
+         TrialOne_labbloodglu_exists_25_25==T|
+         TrialOne_labbloodglu_exists_26_26==T|
+         TrialOne_labbloodglu_high_27_27==T,TrialOne_bloodsugar_24_28_high:=FALSE]
+
+smallD[TrialOne_bloodsugar_24_28_high==F & 
+         (TrialOne_labbloodglu_high_24_24==T|
+            TrialOne_labbloodglu_high_25_25==T|
+            TrialOne_labbloodglu_high_26_26==T|
+            TrialOne_labbloodglu_high_27_27==T),TrialOne_bloodsugar_24_28_high:=T]
+
+
 
 ## High at 24-28 weeks
 smallD[,TrialOne_bloodsugar_24_28_high:=as.logical(NA)]

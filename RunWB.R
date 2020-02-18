@@ -3,7 +3,7 @@
 setwd("C:/data processing/trial_dofiles")
 
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
-sapply(fileSources, source, .GlobalEnv)
+sapply(fileSources, debugSource)
 
 Setup(IS_GAZA=FALSE)
 
