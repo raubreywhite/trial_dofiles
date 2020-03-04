@@ -1,4 +1,6 @@
 ### Need to import smallD
+#check this code and how to read it in despite the date
+anemia <- fread("C:/data processing/data_clean/Trial_1_Outcomes/"Anemia.xlsx",encoding="UTF-8"")
 
 
 ########## Anemia ########## 
@@ -109,17 +111,40 @@ smallD[TrialOne_labhb_normal_35_37==T, HbonTime:=HbonTime+1]
 # before 15 weeks
 smallD[TrialOne_labhb_anemia_sev_00_14==T,
        Opportunity_anemia_screening := Opportunity_anemia_screening-2]
-smallD[TrialOne_labhb_anemia_sev_00_14==T & TrialOne_manhb_00_14==T,HbonTime:=HbonTime+1]
+smallD[TrialOne_labhb_anemia_sev_00_14==T & 
+         (TrialOne_manhb_00_00==T |
+            TrialOne_manhb_01_01==T |
+            TrialOne_manhb_02_02==T |
+            TrialOne_manhb_03_03==T |
+            TrialOne_manhb_04_04==T |
+            TrialOne_manhb_05_05==T |
+            TrialOne_manhb_06_06==T |
+            TrialOne_manhb_07_07==T |
+            TrialOne_manhb_08_08==T |
+            TrialOne_manhb_09_09==T |
+            TrialOne_manhb_10_10==T |
+            TrialOne_manhb_11_11==T |
+            TrialOne_manhb_12_12==T |
+            TrialOne_manhb_13_13==T |
+            TrialOne_manhb_14_14==T),HbonTime:=HbonTime+1]
 
 #15-17
 smallD[TrialOne_labhb_anemia_sev_15_17==T,
        Opportunity_anemia_screening := Opportunity_anemia_screening-2]
-smallD[TrialOne_labhb_anemia_sev_15_17==T & TrialOne_manhb_15_17==T,HbonTime:=HbonTime+1]
+smallD[TrialOne_labhb_anemia_sev_15_17==T & 
+         (TrialOne_manhb_15_15==T |
+          TrialOne_manhb_16_16==T |
+          TrialOne_manhb_17_17==T),HbonTime:=HbonTime+1]
 
 #18-22
 smallD[TrialOne_labhb_anemia_sev_18_22==T,
        Opportunity_anemia_screening := Opportunity_anemia_screening-2]
-smallD[TrialOne_labhb_anemia_sev_18_22==T & TrialOne_manhb_18_22==T,HbonTime:=HbonTime+1]
+smallD[TrialOne_labhb_anemia_sev_18_22==T & 
+         (TrialOne_manhb_18_18==T|
+            TrialOne_manhb_19_19==T |
+            TrialOne_manhb_20_20==T |
+            TrialOne_manhb_21_21==T |
+            TrialOne_manhb_22_22==T),HbonTime:=HbonTime+1]
 
 #23-23
 smallD[TrialOne_labhb_anemia_sev_23_23==T,
@@ -129,17 +154,27 @@ smallD[TrialOne_labhb_anemia_sev_23_23==T & TrialOne_manhb_23_23==T,HbonTime:=Hb
 #24-28
 smallD[TrialOne_labhb_anemia_sev_24_28==T,
        Opportunity_anemia_screening := Opportunity_anemia_screening-1]
-smallD[TrialOne_labhb_anemia_sev_18_22==T & TrialOne_manhb_18_22==T,HbonTime:=HbonTime+1]
+smallD[TrialOne_labhb_anemia_sev_24_28==T & 
+         (TrialOne_manhb_24_24==T |
+          TrialOne_manhb_25_25==T |
+          TrialOne_manhb_26_26==T |
+          TrialOne_manhb_27_27==T |
+          TrialOne_manhb_28_28==T),HbonTime:=HbonTime+1]
 
 #29-30
 smallD[TrialOne_labhb_anemia_sev_29_30==T,
        Opportunity_anemia_screening := Opportunity_anemia_screening-1]
-smallD[TrialOne_labhb_anemia_sev_29_30==T & TrialOne_manhb_29_30==T,HbonTime:=HbonTime+1]
+smallD[TrialOne_labhb_anemia_sev_29_30==T &
+         (TrialOne_manhb_29_29==T |
+          TrialOne_manhb_30_30==T),HbonTime:=HbonTime+1]
 
 #31-33
 smallD[TrialOne_labhb_anemia_sev_31_33==T,
        Opportunity_anemia_screening := Opportunity_anemia_screening-0]
-smallD[TrialOne_labhb_anemia_sev_31_33==T & TrialOne_manhb_31_33==T,HbonTime:=HbonTime+1]
+smallD[TrialOne_labhb_anemia_sev_31_33==T & 
+         (TrialOne_manhb_31_31==T |
+          TrialOne_manhb_32_32==T |
+          TrialOne_manhb_33_33==T),HbonTime:=HbonTime+1]
 
 #34-34
 smallD[TrialOne_labhb_anemia_sev_34_34==T,
@@ -149,9 +184,18 @@ smallD[TrialOne_labhb_anemia_sev_34_34==T & TrialOne_manhb_34_34==T,HbonTime:=Hb
 #35-37
 smallD[TrialOne_labhb_anemia_sev_35_37==T,
        Opportunity_anemia_screening := Opportunity_anemia_screening-0]
-smallD[TrialOne_labhb_anemia_sev_35_37==T & TrialOne_manhb_35_37==T,HbonTime:=HbonTime+1]
+smallD[TrialOne_labhb_anemia_sev_35_37==T & 
+         (TrialOne_manhb_35_35==T |
+          TrialOne_manhb_36_36==T |
+          TrialOne_manhb_37_37==T),HbonTime:=HbonTime+1]
 
+xtabs(~smallD$HbonTime)
 
+prelimresults <- smallD[,.(
+  N=.N,
+  Success=sum(HbonTime, na.rm=T),
+  Opportunitites=sum(Opportunity_anemia_screening, na.rm=T)),
+  keyby=.(bookgestagedays_cats, ident_dhis2_control)]
 
 
 #mild/mod anemia
@@ -167,7 +211,8 @@ smallD[TrialOne_labhb_anemia_mild_mod_00_14==T,Opportunity_anemia_screening:= Op
 smallD[TrialOne_labhb_anemia_mild_mod_00_14==T &
          (TrialOne_manhb_mildmodhbret_18_18==T|
          TrialOne_manhb_mildmodhbret_19_19==T|
-         TrialOne_manhb_mildmodhbret_20_20==T),
+         TrialOne_manhb_mildmodhbret_20_20==T|
+           TrialOne_manhb_mildmodhbret_21_21==T),
             Opportunity_anemia_screening:= Opportunity_anemia_screening-2]
 
 
@@ -176,13 +221,44 @@ smallD[TrialOne_labhb_anemia_mild_mod_15_17==T,Opportunity_anemia_screening:= Op
 smallD[TrialOne_labhb_anemia_mild_mod_15_17==T &
          (TrialOne_manhb_mildmodhbret_18_18==T|
             TrialOne_manhb_mildmodhbret_19_19==T|
-            TrialOne_manhb_mildmodhbret_20_20==T),
-       Opportunity_anemia_screening:= Opportunity_anemia_screening-2]
+            TrialOne_manhb_mildmodhbret_20_20==T|
+            TrialOne_manhb_mildmodhbret_21_21==T|
+            TrialOne_manhb_mildmodhbret_22_22==T),
+       Opportunity_anemia_screening:= Opportunity_anemia_screening+2]
 #18-22
+smallD[TrialOne_labhb_anemia_mild_mod_18_22==T,Opportunity_anemia_screening:= Opportunity_anemia_screening-2]
+smallD[TrialOne_labhb_anemia_mild_mod_18_22==T &
+         (TrialOne_manhb_mildmodhbret_21_21==T|
+            TrialOne_manhb_mildmodhbret_22_22==T|
+            TrialOne_manhb_mildmodhbret_20_20==T|
+            TrialOne_manhb_mildmodhbret_21_21==T|
+            TrialOne_manhb_mildmodhbret_22_22==T),
+       Opportunity_anemia_screening:= Opportunity_anemia_screening+2]
 #24-28
+smallD[TrialOne_labhb_anemia_mild_mod_24_28==T,Opportunity_anemia_screening:= Opportunity_anemia_screening-1]
+smallD[TrialOne_labhb_anemia_mild_mod_24_28==T &
+         (TrialOne_manhb_mildmodhbret_27_27==T|
+            TrialOne_manhb_mildmodhbret_28_28==T|
+            TrialOne_manhb_mildmodhbret_29_29==T|
+            TrialOne_manhb_mildmodhbret_30_30==T),
+       Opportunity_anemia_screening:= Opportunity_anemia_screening+1]
 #29-30
+smallD[TrialOne_labhb_anemia_mild_mod_29_30==T,Opportunity_anemia_screening:= Opportunity_anemia_screening-1]
+smallD[TrialOne_labhb_anemia_mild_mod_29_30==T &
+         (TrialOne_manhb_mildmodhbret_32_32==T|
+            TrialOne_manhb_mildmodhbret_33_33==T|
+            TrialOne_manhb_mildmodhbret_34_34==T |
+            TrialOne_manhb_mildmodhbret_35_35==T),
+       Opportunity_anemia_screening:= Opportunity_anemia_screening+1]
 #31-33
+smallD[TrialOne_labhb_anemia_mild_mod_31_33==T,Opportunity_anemia_screening:= Opportunity_anemia_screening-1]
+smallD[TrialOne_labhb_anemia_mild_mod_31_33==T &
+         (TrialOne_manhb_mildmodhbret_34_34==T),
+       Opportunity_anemia_screening:= Opportunity_anemia_screening+1]
+
+
 #34-34
+
 
 
 

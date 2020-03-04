@@ -95,6 +95,7 @@ smallD[ident_dhis2_control==F & (TrialOne_refHosp_00_14==T | TrialOne_refHR_00_1
 #check 
 xtabs(~smallD$OpportunityofVisits, addNA = T)
 
+##-1opportunity for visits-need to check this out
 
 #intervention
 

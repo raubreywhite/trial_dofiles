@@ -2,8 +2,6 @@
 # change this to TRUE if you want to run for gaza
 IS_GAZA <-F
 
-### SETUP
-
 ###### SETUP STARTS ######
 setwd("C:/data processing/trial_dofiles")
 
@@ -98,7 +96,6 @@ DD <- d[ident_dhis2_control==F &
 
 
 #% of having call information about women is 100- the above final result
-
 
 #creating new variable for clincs---the same for trial 2 clinics  
 #xtabs(~d$ident_TRIAL_2) # 6347

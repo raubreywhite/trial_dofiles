@@ -902,7 +902,7 @@ smallD <- VisitVariables(
   TruevaluesMax=1,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "manT1gestagedays")
-xtabs(~smallD$TrialOne_manperf_00_14)
+xtabs(~smallD$TrialOne_manperf_18_22)
 
 
 
@@ -1945,6 +1945,19 @@ smallD[sga==T & anc_detection_sga==T, sga_undetected_at_birth:=FALSE]
 smallD[anc_detection_sga==FALSE & sga==T,sga_undetected_at_birth:=TRUE]
 xtabs(~smallD$sga_undetected_at_birth)
 
+smalld <- smallD[,.(ArmA=sum(ident_dhis2_control==T, na.rm=T),
+                    ArmB=sum(ident_dhis2_control==F, na.rm=T)),
+                 keyby=.(sga_undetected_at_birth)]
+
+
+openxlsx::write.xlsx(smalld, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_WB,
+                       "hbo_outcomes",
+                       sprintf("sga_undetected_%s.xlsx", 
+                               lubridate::today())))
+
+
 ######### Indication for CS and Malpresentation ##########
 
 #cleaning
@@ -2074,6 +2087,30 @@ smallD[anc_detection_malpres_3==F, malpres_undetected_3:=FALSE]
 smallD[malpres_undetected_1==F & has_malpresentation==T,malpres_undetected_1:=TRUE]
 smallD[malpres_undetected_2==F & has_malpresentation==T,malpres_undetected_2:=TRUE]
 smallD[malpres_undetected_3==F & has_malpresentation==T,malpres_undetected_3:=TRUE]
+
+
+smalld <- smallD[,.(
+                    UndetectedmalPresANC=sum(malpres_undetected_1==T|
+                                            malpres_undetected_2==T|
+                                            malpres_undetected_3==T, na.rm=T),
+                    DetectedmalpresANC=sum(malpres_undetected_1==F|
+                                             malpres_undetected_2==F|
+                                             malpres_undetected_3==F, na.rm=T)),
+                   keyby=.(ident_dhis2_control)]
+  
+  
+  openxlsx::write.xlsx(smalld, 
+                       file.path(
+                         FOLDER_DATA_RESULTS_WB,
+                         "hbo_outcomes",
+                         sprintf("malpres_undetected_%s.xlsx", 
+                                 lubridate::today())))
+  
+                    
+  
+  
+  
+
 
 
 ######### Multiplepreg Var ##########

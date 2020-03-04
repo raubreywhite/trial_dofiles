@@ -88,7 +88,7 @@ DataCompletion <- function(){
       # mean no 0 but for other variables the best mean is (mean) and this is ugly table , down here 
       #we can make the pretty table for those means 
     )))  
-  ),keyby=.(ident_gaza)]
+  ),keyby=.(ident_gaza,bookyear)]
   
   # turn it into long format
   res <- melt.data.table(res, id.vars="ident_gaza")

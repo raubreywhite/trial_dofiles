@@ -77,7 +77,7 @@ smallD[screenb424==F &
 xtabs(~smallD$screenb424, addNA=T)
 
 ##Defining Successes
-smallD[,GDMscreeningontime:=0]
+smallD[,GDMscreeningontime:=as.numeric(NA)]
 smallD[screenb424==T, 
        GDMscreeningontime:=GDMscreeningontime+1]
 xtabs(~smallD$GDMscreeningontime, addNA = T)

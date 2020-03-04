@@ -21,7 +21,7 @@ smallD[TrialOne_anbpsyst_present_35_37==T & TrialOne_anbpdiast_present_35_37==T,
 xtabs(~smallD$BPonTime, addNA = T)
 
 
-##### Need to take into consideration cases with high bp values and then rescreened ####
+##### Need to take into consideration cases with MILD bp values and then rescreened ####
 # Moderate or severe hypertension
 #refer to hospital or HR
 smallD[TrialOne_anbpsyst_modSevHTN_00_14==T & TrialOne_anbpdiast_modSevHTN_00_14==T,
@@ -31,6 +31,9 @@ smallD[TrialOne_anbpsyst_modSevHTN_15_17==T & TrialOne_anbpdiast_modSevHTN_15_17
        OpportunityofVisits:=OpportunityofVisits-4]
 
 smallD[TrialOne_anbpsyst_modSevHTN_18_22==T & TrialOne_anbpdiast_modSevHTN_18_22==T,
+       OpportunityofVisits:=OpportunityofVisits-3]
+
+smallD[TrialOne_anbpsyst_modSevHTN_23_23==T & TrialOne_anbpdiast_modSevHTN_23_23==T,
        OpportunityofVisits:=OpportunityofVisits-3]
 
 smallD[TrialOne_anbpsyst_modSevHTN_24_28==T & TrialOne_anbpdiast_modSevHTN_24_28==T,
