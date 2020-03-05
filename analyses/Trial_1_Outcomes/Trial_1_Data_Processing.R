@@ -1034,6 +1034,10 @@ for(i in 0:37){
 }
 xtabs(~smallD$TrialOne_manhb_mildmodhbret_32_32)
 
+#mild htn
+#Urine stick AND LFT AND KFT AND ultrasound within a week 
+#refer to hospital if proteinuria
+
 #ModsevGHTbpsyst
 for(i in 0:37){
   #i=23

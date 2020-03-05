@@ -234,6 +234,17 @@ smallD[TrialOne_labhb_anemia_mild_mod_18_22==T &
             TrialOne_manhb_mildmodhbret_21_21==T|
             TrialOne_manhb_mildmodhbret_22_22==T),
        Opportunity_anemia_screening:= Opportunity_anemia_screening+2]
+
+#23-23
+smallD[TrialOne_labhb_anemia_mild_mod_23_23==T,Opportunity_anemia_screening:= Opportunity_anemia_screening-1]
+smallD[TrialOne_labhb_anemia_mild_mod_23_23==T &
+         (TrialOne_manhb_mildmodhbret_26_26==T |
+           TrialOne_manhb_mildmodhbret_27_27==T|
+            TrialOne_manhb_mildmodhbret_28_28==T|
+            TrialOne_manhb_mildmodhbret_29_29==T|
+            TrialOne_manhb_mildmodhbret_30_30==T),
+       Opportunity_anemia_screening:= Opportunity_anemia_screening+1]
+
 #24-28
 smallD[TrialOne_labhb_anemia_mild_mod_24_28==T,Opportunity_anemia_screening:= Opportunity_anemia_screening-1]
 smallD[TrialOne_labhb_anemia_mild_mod_24_28==T &
@@ -247,8 +258,7 @@ smallD[TrialOne_labhb_anemia_mild_mod_29_30==T,Opportunity_anemia_screening:= Op
 smallD[TrialOne_labhb_anemia_mild_mod_29_30==T &
          (TrialOne_manhb_mildmodhbret_32_32==T|
             TrialOne_manhb_mildmodhbret_33_33==T|
-            TrialOne_manhb_mildmodhbret_34_34==T |
-            TrialOne_manhb_mildmodhbret_35_35==T),
+            TrialOne_manhb_mildmodhbret_34_34==T),
        Opportunity_anemia_screening:= Opportunity_anemia_screening+1]
 #31-33
 smallD[TrialOne_labhb_anemia_mild_mod_31_33==T,Opportunity_anemia_screening:= Opportunity_anemia_screening-1]
@@ -258,6 +268,8 @@ smallD[TrialOne_labhb_anemia_mild_mod_31_33==T &
 
 
 #34-34
+
+#35-37
 
 
 

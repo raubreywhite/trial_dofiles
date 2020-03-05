@@ -2,6 +2,8 @@
 
 
 ########## Hypertension ########## 
+#define chronic?
+
 #Number of opportunities should be same as opportunities of attendance
 smallD[,OpportunityBPScreening:= OpportunityofVisits]
 
@@ -20,8 +22,6 @@ smallD[TrialOne_anbpsyst_present_35_37==T & TrialOne_anbpdiast_present_35_37==T,
 #check 
 xtabs(~smallD$BPonTime, addNA = T)
 
-
-##### Need to take into consideration cases with MILD bp values and then rescreened ####
 # Moderate or severe hypertension
 #refer to hospital or HR
 smallD[TrialOne_anbpsyst_modSevHTN_00_14==T & TrialOne_anbpdiast_modSevHTN_00_14==T,
@@ -46,9 +46,17 @@ smallD[TrialOne_anbpsyst_modSevHTN_35_37==T & TrialOne_anbpdiast_modSevHTN_35_37
        OpportunityofVisits:=OpportunityofVisits-4]
 
 
+
+
 #proper managment (who and when do we want this to happen??)
 smallD[, newVar:= as.logical(NA)]
 smallD[TrialOne_manhtn_ModSev_18_18==T, newVar:=TRUE]
 
+
+
+
+##### Need to take into consideration cases with MILD bp values and then rescreened ####
 ##Mild GHT
 #must have other tests like refer to ultrasound, proteinuria, liver function test, kidney #function test, cbc, etc
+
+

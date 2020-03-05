@@ -72,7 +72,8 @@ smallD[,screenb424:=as.logical(NA)]
 smallD[bookgestagedays_cats %in% c("(0,104]","(104,125]","(125,160]","(160,167]"),
        screenb424:=F]
 smallD[screenb424==F &
-        (!is.na(booklaburglu) | !is.na(booklabbloodglu)|!is.na(booklabfastbloodglu)),
+         booklabbloodglu_high==F &
+        ((!is.na(booklaburglu) | !is.na(booklabbloodglu)|!is.na(booklabfastbloodglu))),
        screenb424:=T]
 xtabs(~smallD$screenb424, addNA=T)
 
@@ -122,7 +123,7 @@ for (i in varsmanRBGHigh){smallD[get(i)==T, proprefDiab:=T]}
 smallD[booklabbloodglu_high==T & proprefDiab==T, booklabbloodgluhigh_refer:=TRUE]
 
 #booked before 24 weeks
-b415weeks <- smallD[bookgestagedays_cats %in% c( "(0,104]")]
+b415weeks <- smallD[bookgestagedays_cats %in% c( "(0,104]","(104,125]")]
 ## High at 24-28 weeks
 b415weeks[,TrialOne_bloodsugar_24_28_high:=as.logical(NA)]
 b415weeks[TrialOne_labbloodglu_exists_24_24==T|
@@ -151,4 +152,12 @@ smallD[TrialOne_bloodsugar_24_28_high==F &
           TrialOne_labbloodglu_high_26_26==T|
           TrialOne_labbloodglu_high_27_27==T),TrialOne_bloodsugar_24_28_high:=T]
 
-# Number of referred for 
+# Number of labbloodglu high outside of the time windows
+#TrialOne_labbloodglu_high_00_14,
+#TrialOne_labbloodglu_high_15_17,
+#TrialOne_labbloodglu_high_18_22,
+#TrialOne_labbloodglu_high_23_23
+
+
+
+

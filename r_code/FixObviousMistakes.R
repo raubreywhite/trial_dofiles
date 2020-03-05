@@ -58,8 +58,8 @@ FixObviousMistakes <- function(d){
   
   #missing bookheights for control will show up as empty
   sum(is.na(d$bookheight))
-  str(d$bookheight)
-  unique(d$bookheight)
+  #str(d$bookheight)
+  #unique(d$bookheight)
   
   #replace all bookheights with absolute values
   d[,bookheight:=abs(bookheight)]

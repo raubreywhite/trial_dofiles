@@ -929,7 +929,7 @@ class(d$mahima_gA_1_us)
     var_us_gestage <- usT1_gA[i]
     var_us_date<- us_date[i] 
     
-    d[,(var_us_gestage):=as.numeric(floor(difftime(get(var_us_date)),lmpT1, units="days"))]
+    d[,(var_us_gestage):=as.numeric(floor(difftime(get(var_us_date),lmpT1, units="days")))]
     
   }
   
@@ -942,7 +942,7 @@ class(d$mahima_gA_1_us)
     var_an_gestage <- anT1_gA[i]
     var_an_date<- an_date[i] 
     
-    d[,(var_an_gestage):=as.numeric(floor(difftime(get(var_an_date)),lmpT1, units="days"))]
+    d[,(var_an_gestage):=as.numeric(floor(difftime(get(var_an_date),lmpT1, units="days")))]
     
   }
   
@@ -955,7 +955,7 @@ class(d$mahima_gA_1_us)
     var_lab_gestage <- labT1_gA[i]
     var_lab_date<- lab_date[i] 
     
-    d[,(var_lab_gestage):=as.numeric(floor(difftime(get(var_lab_date)),lmpT1, units="days"))]
+    d[,(var_lab_gestage):=as.numeric(floor(difftime(get(var_lab_date),lmpT1, units="days")))]
     
   }
   
@@ -967,7 +967,7 @@ class(d$mahima_gA_1_us)
     var_man_gestage <- manT1_gA[i]
     var_man_date<- man_date[i] 
     
-    d[,(var_man_gestage):=as.numeric(floor(difftime(get(var_man_date)),lmpT1, units="days"))]
+    d[,(var_man_gestage):=as.numeric(floor(difftime(get(var_man_date),lmpT1, units="days")))]
     
   }
   

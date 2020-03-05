@@ -159,23 +159,32 @@ DHIS2_BookingVisit <- function(isControl,
   }
 
   for (i in names(d)) setnames(d, i, ExtractOnlyEnglishLettersAndNumbers(i)[[1]])
+ 
+  if(!isControl){ 
+      
+    print("1")
+    
+    
+  }
   
   # fixing event dates
   #NOT WORKING
-  unique(d$eventdate)
+  #unique(d$`Event date`)
   str(d$eventdate)
-  
   d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0$")]
+  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
   
-  #becomes missing when this step is performed
-  #d[,eventdate:=as.Date(eventdate, format="%m/%d/%Y")]
+  if(IS_GAZA){
+    #becomes missing when this step is performed
+    d[,eventdate:=as.Date(eventdate, format="%m/%d/%Y")]
+    
+  } else{ # this worked instead
+    
+    d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
+  }
   
-  # this worked instead
-  d[,eventdate:=as.Date(format(as.Date(eventdate, "%Y-%m-%d"), "%m/%d/%y"), 
-                        format = "%m/%d/%y")]
+  
   unique(d$eventdate)
-  
-  
   
 
   if(IS_GAZA){
@@ -198,6 +207,11 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "organisationunitname", "bookorgname")
   setnames(d, "organisationunitcode", "bookorgcode")
   setnames(d, "organisationunit", "bookorgunit")
+  if(IS_GAZA){
+    d[,bookorgname:=bookorgunit]
+   
+  }
+  
   setnames(d, "identificationdocumentnumber", "bookidnumber")
   setnames(d, "ancdiastolicbloodpressuremmhg", "bookbpdiast")
   setnames(d, "anceclampticconvulsions", "bookeclamp")
@@ -420,12 +434,12 @@ DHIS2_BookingVisit <- function(isControl,
   # }
   
   if(IS_GAZA){
-    d[,bookdate:=stringr::str_remove_all(bookdate," 12:00 AM$")]
-    d[,bookdate:=stringr::str_remove_all(bookdate," 0:00$")]
-    d[,bookdate := stringr::str_replace(bookdate, "/([0-9][0-9])$","/20\\1")]
+    #d[,bookdate:=stringr::str_remove_all(bookdate," 12:00 AM$")]
+    #d[,bookdate:=stringr::str_remove_all(bookdate," 0:00$")]
+    #d[,bookdate := stringr::str_replace(bookdate, "/([0-9][0-9])$","/20\\1")]
     str(d$bookdate)
     print(unique(d$bookdate)[1:40])
-    d[,bookdate:=as.Date(bookdate, "%m/%d/%Y")]
+    #d[,bookdate:=as.Date(bookdate, "%m/%d/%Y")]
     d[is.na(bookevent), bookdate := as.Date(datecreated, "%m/%d/%Y")]
     str(d$bookdate)
     #print(unique(d$bookdate)[1:10])

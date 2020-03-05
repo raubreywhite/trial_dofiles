@@ -3,6 +3,8 @@
 setwd("C:/data processing/trial_dofiles")
 
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
+
+fileSources=file.path(getwd(),fileSources)
 sapply(fileSources, debugSource)
 
 Setup(IS_GAZA=FALSE)
