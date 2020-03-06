@@ -8,6 +8,7 @@ DHIS2_Management <- function(
     controlName = "Referrals in ANC period.csv",
     clinicName = "ANCManagements.csv",
     isControl=isControl)
+  
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
@@ -15,7 +16,9 @@ DHIS2_Management <- function(
     d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
-    d[,eventdate:=as.Date(eventdate)]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
+    d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
+   # d[,eventdate:=as.Date(eventdate)]
   }
   setnames(d, 2, "uniqueid")
   

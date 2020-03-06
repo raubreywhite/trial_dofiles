@@ -13,7 +13,9 @@ DHIS2_NewbornCare <- function(isControl, earlyData, booklmp, IS_GAZA=IS_GAZA) {
     d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
-    d[,eventdate:=as.Date(eventdate)]
+    #d[,eventdate:=as.Date(eventdate)]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
+    d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
   }
   setnames(d, 2, "uniqueid")
   d<- Removeduplicate(d=d,tag="nbc",isControl=isControl)

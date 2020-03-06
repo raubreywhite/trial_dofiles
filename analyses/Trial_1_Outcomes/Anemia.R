@@ -1,6 +1,6 @@
 ### Need to import smallD
 #check this code and how to read it in despite the date
-anemia <- fread("C:/data processing/data_clean/Trial_1_Outcomes/"Anemia.xlsx",encoding="UTF-8"")
+#anemia <- fread("C:/data processing/data_clean/Trial_1_Outcomes/"Anemia.xlsx",encoding="UTF#-8"")
 
 
 ########## Anemia ########## 
@@ -37,6 +37,12 @@ smallD[bookgestagedays_cats %in% c( "(237,244]" ), Opportunity_anemia_screening:
 smallD[bookgestagedays_cats %in% c( "(244,265]" ), Opportunity_anemia_screening:=1]
 
 xtabs(~smallD$Opportunity_anemia_screening, addNA=T)
+
+#define different time cats
+smallD[, HbOntime_1:= as.logical(NA)]
+smallD[Opportunity_anemia_screening==3, HbOntime_1:=FALSE]
+
+
 
 
 #id women referred at some point in time to remove the the opportunities she may have
@@ -75,19 +81,32 @@ xtabs(~smallD$Opportunity_anemia_screening, addNA=T)
 ###### Successful Anemia Screenings for NORMAL CONDITIONs ###### 
 smallD[,HbonTime:=0]
 
+#hb on time 1, 2, 3, vars
 #Screen at bookings before 24 weeks??
 # before 15-17
 smallD[bookgestagedays_cats %in% c("(0,104]") & 
          TrialOne_labhb_normal_00_14==T, HbonTime:=HbonTime+1]
 
+smallD[HbOntime_1==F &
+         bookgestagedays_cats %in% c("(0,104]") & 
+         TrialOne_labhb_normal_00_14==T, HbonTime_1:=TRUE]
+
+
 # booked 15-17
 smallD[bookgestagedays_cats %in% c("(104,125]") & 
          (TrialOne_labhb_normal_14_14==T|
             TrialOne_labhb_normal_15_17==T), HbonTime:=HbonTime+1]
+smallD[HbOntime_1==F &
+         bookgestagedays_cats %in% c("(0,104]") & 
+         TrialOne_labhb_normal_14_14==T |
+         TrialOne_labhb_normal_15_17==T, HbonTime_1:=TRUE]
 
 #booked 18-22
 smallD[bookgestagedays_cats %in% c( "(125,160]" ) &
          (TrialOne_labhb_normal_18_22==T), HbonTime:=HbonTime+1]
+smallD[HbOntime_1==F &
+         bookgestagedays_cats %in% c("(125,160]" ) & 
+         TrialOne_labhb_normal_18_22==T, HbonTime_1:=TRUE]
 
 #24-28 screenings
 smallD[TrialOne_labhb_normal_23_23==T |

@@ -679,7 +679,7 @@ smallD <- VisitVariables(
   gestagedaysVariable = "labT1gestagedays")
 smallD[,labT1gestagedays_0:=NULL]
 smallD[,labfastbloodglu_0:=NULL]
-xtabs(~smallD$TrialOne_labfastbloodglu_high_00_14)
+xtabs(~smallD$TrialOne_labfastbloodglu_high_24_28)
 
 #### US visits ####
 # Has US visit
@@ -2088,9 +2088,9 @@ smallD[anc_detection_malpres_1==F, malpres_undetected_1:=FALSE]
 smallD[anc_detection_malpres_2==F, malpres_undetected_2:=FALSE]
 smallD[anc_detection_malpres_3==F, malpres_undetected_3:=FALSE]
 
-smallD[malpres_undetected_1==F & has_malpresentation==T,malpres_undetected_1:=TRUE]
-smallD[malpres_undetected_2==F & has_malpresentation==T,malpres_undetected_2:=TRUE]
-smallD[malpres_undetected_3==F & has_malpresentation==T,malpres_undetected_3:=TRUE]
+smallD[anc_detection_malpres_1==F & has_malpresentation==T,malpres_undetected_1:=TRUE]
+smallD[anc_detection_malpres_2==F & has_malpresentation==T,malpres_undetected_2:=TRUE]
+smallD[anc_detection_malpres_3==F & has_malpresentation==T,malpres_undetected_3:=TRUE]
 
 
 smalld <- smallD[,.(
@@ -2110,12 +2110,7 @@ smalld <- smallD[,.(
                          sprintf("malpres_undetected_%s.xlsx", 
                                  lubridate::today())))
   
-                    
-  
-  
-  
-
-
+ 
 
 ######### Multiplepreg Var ##########
 

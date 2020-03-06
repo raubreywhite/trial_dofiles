@@ -8,6 +8,7 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
     controlName = "Current pregnancy outcome.csv",
     clinicName = "Current pregnancy outcome.csv",
     isControl=isControl)
+  
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]
@@ -15,7 +16,10 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
     d[,eventdate:=stringr::str_remove_all(eventdate," 0:00 AM$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
-    d[,eventdate:=as.Date(eventdate)]
+    #d[,eventdate:=as.Date(eventdate)]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
+    d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
+    
   }
   setnames(d, 2, "uniqueid")
   

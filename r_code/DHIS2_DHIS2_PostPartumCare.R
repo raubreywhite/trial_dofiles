@@ -8,6 +8,10 @@ DHIS2_DHIS2_PostPartumCare <- function(isControl, earlyData, booklmp, IS_GAZA=FA
     controlName = "Postpartum care.csv",
     clinicName = "Postpartum care.csv",
     isControl=isControl)
+  
+  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
+  d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
+  
   if(IS_GAZA){
     message("no identification document number -- we create one")
     d[,identificationdocumentnumber:=1:.N]

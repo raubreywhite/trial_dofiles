@@ -173,6 +173,7 @@ DHIS2_BookingVisit <- function(isControl,
   str(d$eventdate)
   d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0$")]
   d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
+  d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
   
   if(IS_GAZA){
     #becomes missing when this step is performed
@@ -207,10 +208,11 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "organisationunitname", "bookorgname")
   setnames(d, "organisationunitcode", "bookorgcode")
   setnames(d, "organisationunit", "bookorgunit")
-  if(IS_GAZA){
-    d[,bookorgname:=bookorgunit]
+  #try this to rename bookorgname using bookorgunit
+  #if(IS_GAZA){
+   # d[,bookorgname:=bookorgunit]
    
-  }
+ # }
   
   setnames(d, "identificationdocumentnumber", "bookidnumber")
   setnames(d, "ancdiastolicbloodpressuremmhg", "bookbpdiast")
