@@ -14,9 +14,15 @@ DHIS2_NBManagement <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     
     
   } else {
-    #d[,eventdate:=as.Date(eventdate)]
+    print("BEFORE DATE FIXING")
+    print(sum(!is.na(d$eventdate)))
+    
+    d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0$")]
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
     d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
+    
+    print("AFTER DATE FIXING")
+    print(sum(!is.na(d$eventdate)))
   }
   setnames(d, 2, "uniqueid")
   
