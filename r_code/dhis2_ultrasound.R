@@ -12,6 +12,7 @@ DHIS2_Ultrasound <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     #unique(d$eventdate)[1:10]
   } else {
     #d[,eventdate:=as.Date(eventdate)]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0 AM$")]
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
     d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
   }

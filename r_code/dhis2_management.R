@@ -74,8 +74,8 @@ DHIS2_Management <- function(
     setnames(d,"event","manevent")
     #setnames(d,"programstageinstance","uniqueid")
     setnames(d,"programstage","manprogstage")
-    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
-    d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
+    #d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+    #d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
     setnames(d,"eventdate","mandate")
     setnames(d,"longitude","manlong")
     setnames(d,"latitude","manlat")

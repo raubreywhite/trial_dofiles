@@ -46,8 +46,8 @@ DHIS2_NBManagement <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"event","nbmanmanevent")
   #setnames(d,"programstageinstance","uniqueid")
   setnames(d,"programstage","nbmanprogstage")
-  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
-  d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
+  #d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+  #d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
   setnames(d,"eventdate","nbmandate")
   setnames(d,"longitude","nbmanlong")
   setnames(d,"latitude","nbmanlat")

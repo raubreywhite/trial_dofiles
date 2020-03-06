@@ -451,6 +451,9 @@ DHIS2_Master <- function(
     ncol(d)
   }
   
+  data_DHIS2_CurrentPregnancyOutcomes[,num:=1:.N,by=.(uniqueid, bookevent, booknum, eventnum)]
+  xtabs(~data_DHIS2_CurrentPregnancyOutcomes$num)
+  
   print("RESHAPE TO WIDE AND MERGE data_DHIS2_CurrentPregnancyOutcomes")
   d <- ReshapeToWideAndMerge(
     base=d,

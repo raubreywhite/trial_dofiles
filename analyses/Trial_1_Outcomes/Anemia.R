@@ -56,20 +56,24 @@ smallD[bookgestagedays_cats %in% c("(202,216]",
 smallD[bookgestagedays_cats %in% c("(244,265]") |
          TrialOne_anvisitnew_35_37==T, Opportunity_anemia_screening_4:=1]
 
-# Anemia outside of time periods
-#Severe anemia outside of booking visit, 24-28 weeks, 35-37 weeks= opportunity_5=1 
-#Mild or moderate anemia outside of booking visit, 24-28 weeks, 35-37 weeks= opportunity_6=1
+#fix these variables
+smallD[booklabhb>=11 & 
+         (TrialOne_labhb_sev_00_14==T|
+         TrialOne_labhb_sev_15_17==T|
+         TrialOne_labhb_sev_18_22==T|
+         TrialOne_labhb_sev_23_23==T|
+         TrialOne_labhb_sev_29_30==T|
+         TrialOne_labhb_sev_31_33==T|
+         TrialOne_labhb_sev_34_34==T),Opportunity_anemia_screening_5:=1]
 
-
-2.	Remove opportunities for referral (similar to diabetes): 
-  a.	Booking or ANC visit 24-28 weeks: 
-  b.	Booking or ANC visit 35-37 weeks: 
-  c.	Severe anemia outside of booking visit, 24-28 weeks, 35-37 weeks
-d.	Mild or moderate anemia outside of booking visit, 24-28 weeks, 35-37 weeks
-3.	Use the booklabhb variables in addition to/instead of TrialOne_labhb_normal_##_## for all booking success? We need to account for the 1 week before/after screening window for booking screening. I assume booklabhb does that?
-4.	
-
-
+smallD[booklabhb>=11 &
+         (TrialOne_labhb_mildmodane_00_14==T|
+            TrialOne_labhb_sev_15_17==T|
+            TrialOne_labhb_sev_18_22==T|
+            TrialOne_labhb_sev_23_23==T|
+            TrialOne_labhb_sev_29_30==T|
+            TrialOne_labhb_sev_31_33==T|
+            TrialOne_labhb_sev_34_34==T),Opportunity_anemia_screening_6:=1]
 
 
 #define different time cats
@@ -82,6 +86,11 @@ smallD[Opportunity_anemia_screening_2==1, HbOntime_2:=FALSE]
 smallD[, HbOntime_3:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_3==1, HbOntime_3:=FALSE]
 
+smallD[, HbOntime_4:= as.logical(NA)]
+smallD[Opportunity_anemia_screening_4==1, HbOntime_4:=FALSE]
+
+smallD[, HbOntime_3:= as.logical(NA)]
+smallD[Opportunity_anemia_screening_3==1, HbOntime_3:=FALSE]
 
 
 

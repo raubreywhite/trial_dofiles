@@ -47,8 +47,8 @@ DHIS2_PregnancyClosingNotes <- function(isControl, earlyData, booklmp, IS_GAZA=F
   setnames(d,"event","pcnevent")
   #setnames(d,"programstageinstance","uniqueid")
   setnames(d,"programstage","pcnprogstage")
-  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
-  d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
+ # d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+  #d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
   setnames(d,"eventdate","pcndate")
   
   setnames(d,"longitude","pcnlong")

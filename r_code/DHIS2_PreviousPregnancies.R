@@ -38,8 +38,8 @@ DHIS2_PreviousPregnancies <- function(isControl, earlyData, booklmp, IS_GAZA=FAL
   setnames(d,"event","prevevent")
   #setnames(d,"programstageinstance","uniqueid")
   setnames(d,"programstage","prevprogstage")
-  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
-  d[,eventdate:=stringr::str_remove_all(eventdate," 0:00 AM$")]
+  #d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+  #d[,eventdate:=stringr::str_remove_all(eventdate," 0:00 AM$")]
   setnames(d,"eventdate","prevdate")
   setnames(d,"longitude","prevlong")
   setnames(d,"latitude","prevlat")
