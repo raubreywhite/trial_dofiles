@@ -103,7 +103,7 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   d[,num:=1:.N,by=.(uniqueid, bookevent, booknum, eventnum)]
   xtabs(~d$num)
   #cpodupsInv <- cpodups[num>1,]
-  d[num==1]
+  d <- d[num==1]
   d[,num:=NULL]
   
   #if d doesnt have any data, tells R to not run it

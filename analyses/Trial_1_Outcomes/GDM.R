@@ -141,11 +141,11 @@ xtabs(~smallD$GDMscreeningontime_1, addNA=T)
 #24-28 weeks
 smallD[,GDMscreeningontime_2:=as.numeric(NA)]
 
-smallD[(TrialOne_labbloodglu_exists_24_24==T|
-         TrialOne_labbloodglu_exists_25_25==T|
-         TrialOne_labbloodglu_exists_26_26==T|
-         TrialOne_labbloodglu_exists_27_27==T|
-         TrialOne_labbloodglu_exists_28_28==T)|
+smallD[((TrialOne_labbloodglu_exists_24_24==T & TrialOnelabbloodglu_high_24_24==F)|
+         (TrialOne_labbloodglu_exists_25_25==T & TrialOnelabbloodglu_high_25_25==F)|
+         (TrialOne_labbloodglu_exists_26_26==T & TrialOnelabbloodglu_high_26_26==F)|
+         (TrialOne_labbloodglu_exists_27_27==T & TrialOnelabbloodglu_high_27_27==F)|
+         (TrialOne_labbloodglu_exists_28_28==T & TrialOnelabbloodglu_high_28_28==F))|
          (TrialOne_labfastbloodglu_exists_24_24==T|
          TrialOne_labfastbloodglu_exists_25_25==T|
          TrialOne_labfastbloodglu_exists_26_26==T|

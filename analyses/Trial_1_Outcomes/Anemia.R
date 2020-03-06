@@ -28,19 +28,39 @@ smallD[bookgestagedays_cats %in% c( "(167,202]" ), Opportunity_anemia_screening:
 smallD[bookgestagedays_cats %in% c( "(202,216]" ), Opportunity_anemia_screening:=2]
 
 #booked 31-33
-smallD[bookgestagedays_cats %in% c( "(216,237]" ), Opportunity_anemia_screening:=1]
+smallD[bookgestagedays_cats %in% c("(216,237]"), Opportunity_anemia_screening:=1]
 
 #booked 34_34
-smallD[bookgestagedays_cats %in% c( "(237,244]" ), Opportunity_anemia_screening:=1]
+smallD[bookgestagedays_cats %in% c("(237,244]"), Opportunity_anemia_screening:=1]
 
 #booked 35-37
-smallD[bookgestagedays_cats %in% c( "(244,265]" ), Opportunity_anemia_screening:=1]
+smallD[bookgestagedays_cats %in% c("(244,265]"), Opportunity_anemia_screening:=1]
 
 xtabs(~smallD$Opportunity_anemia_screening, addNA=T)
 
+
+#Define opportunities at 3 different cut off points
+smallD[,Opportunity_anemia_screening_1:=as.numeric(NA)]
+smallD[bookgestagedays_cats %in% c("(0,104]",
+                                   "(104,125]",
+                                   "(125,160]",
+                                   "(160,167]"),Opportunity_anemia_screening_1:=1]
+
+smallD[bookgestagedays_cats %in% c("(167,202]")| 
+                        TrialOne_anvisitnew_24_28==T,Opportunity_anemia_screening_2:=1]
+
+smallD[!is.na(bookgestagedays_cats) ,Opportunity_anemia_screening_3:=1]
+
+
 #define different time cats
 smallD[, HbOntime_1:= as.logical(NA)]
-smallD[Opportunity_anemia_screening==3, HbOntime_1:=FALSE]
+smallD[Opportunity_anemia_screening_1==1, HbOntime_1:=FALSE]
+
+smallD[, HbOntime_2:= as.logical(NA)]
+smallD[Opportunity_anemia_screening_2==1, HbOntime_2:=FALSE]
+
+smallD[, HbOntime_3:= as.logical(NA)]
+smallD[Opportunity_anemia_screening_3==1, HbOntime_3:=FALSE]
 
 
 
@@ -96,6 +116,7 @@ smallD[HbOntime_1==F &
 smallD[bookgestagedays_cats %in% c("(104,125]") & 
          (TrialOne_labhb_normal_14_14==T|
             TrialOne_labhb_normal_15_17==T), HbonTime:=HbonTime+1]
+
 smallD[HbOntime_1==F &
          bookgestagedays_cats %in% c("(0,104]") & 
          TrialOne_labhb_normal_14_14==T |
@@ -113,18 +134,32 @@ smallD[TrialOne_labhb_normal_23_23==T |
          TrialOne_labhb_normal_24_28==T, 
        HbonTime:=HbonTime+1]
 
+smallD[HbOntime_2==F & 
+         TrialOne_labhb_normal_23_23==T |
+         TrialOne_labhb_normal_24_28==T, 
+       HbonTime_2:=TRUE]
+
 #booked 29-30, 31-33
 smallD[bookgestagedays_cats %in% c("(202,216]","(216,237]" ) & 
          (TrialOne_labhb_normal_29_30==T|
             TrialOne_labhb_normal_31_33==T), 
        HbonTime:=HbonTime+1]
 
+smallD[HbOntime_3==F & 
+         (!is.na(bookhb) |TrialOne_labhb_normal_29_30==T)|
+         (!is.na(booklabhb)|TrialOne_labhb_normal_31_33==T), 
+       HbonTime_3:=TRUE]
+
 #booked 34_34
 smallD[bookgestagedays_cats %in% c("(237,244]") &
          TrialOne_labhb_normal_34_34==T, HbonTime:=HbonTime+1]
 
-#35-37
+
+
+# 35-37 screenings
 smallD[TrialOne_labhb_normal_35_37==T, HbonTime:=HbonTime+1]
+
+smallD[HbOntime_3==F & TrialOne_labhb_normal_35_37==T, HbonTime_3:=TRUE]
 
 ## Severe anemia ##
 # before 15 weeks
