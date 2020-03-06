@@ -132,7 +132,7 @@ xtabs(~smallD$GDMscreeningontime, addNA = T)
 smallD[,GDMscreeningontime_1:=as.numeric(NA)]
 smallD[screenb424==F, 
        GDMscreeningontime_1:=FALSE]
-smallD[screenb424==T, 
+smallD[screenb424==T & booklaburglu_high==F, 
        GDMscreeningontime_1:=TRUE]
 
 xtabs(~smallD$GDMscreeningontime_1, addNA=T)
@@ -173,7 +173,8 @@ xtabs(~smallD$GDMscreeningontime, addNA = T)
 smallD[,GDMscreeningontime_3:=as.numeric(NA)]
 smallD[screenafter28==F, 
        GDMscreeningontime_3:=FALSE]
-smallD[screenafter28==T, 
+smallD[screenafter28==T & 
+         booklaburglu_high==F, 
        GDMscreeningontime_3:=TRUE]
 xtabs(~smallD$GDMscreeningontime_3, addNA=T)
 

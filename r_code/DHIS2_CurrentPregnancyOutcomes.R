@@ -94,6 +94,18 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   setnames(d,"anchistoryofdvtinpreviouspregnancy","cpodvt")
   setnames(d,"previouscomplicationsnone","cpocomplicationsnone")
   
+  ## Searching for duplicates
+  #if do below code and then choose to only keep num==1, will get rid of ALL dups
+  #data_DHIS2_CurrentPregnancyOutcomes[,num:=.N,by=.(bookevent, eventnum)]
+  #xtabs(~data_DHIS2_CurrentPregnancyOutcomes$num)
+  #cpodups <- data_DHIS2_CurrentPregnancyOutcomes[num>1]
+  
+  d[,num:=1:.N,by=.(uniqueid, bookevent, booknum, eventnum)]
+  xtabs(~d$num)
+  #cpodupsInv <- cpodups[num>1,]
+  d[num==1]
+  d[,num:=NULL]
+  
   #if d doesnt have any data, tells R to not run it
   warning("WE NEED TO FIX THIS")
   
