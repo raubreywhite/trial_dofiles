@@ -128,7 +128,7 @@ DHIS2_BookingVisit <- function(isControl,
       file_to_read_in,
       encoding = "UTF-8"
     )
-   
+
     
     setnames(d, 2, "uniqueid")
    
@@ -159,6 +159,7 @@ DHIS2_BookingVisit <- function(isControl,
   }
 
   for (i in names(d)) setnames(d, i, ExtractOnlyEnglishLettersAndNumbers(i)[[1]])
+  #nrow(d[is.na(eventdate)])
  
   if(!isControl){ 
       
@@ -174,23 +175,25 @@ DHIS2_BookingVisit <- function(isControl,
     d[,eventdate:=as.Date(eventdate, format="%m/%d/%Y")]
     
   } else{ # this worked instead
-    
+    nrow(d[is.na(eventdate)])
     print("BEFORE DATE FIXING")
     print(sum(!is.na(d$eventdate)))
-   
+    #unique(d$eventdate)
     d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0$")]
+  
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
     d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
+    str(d$eventdate)
     
     print("AFTER DATE FIXING")
     print(sum(!is.na(d$eventdate)))
+    
           
   }
   
   
-  unique(d$eventdate)
   
-
+  
   if(IS_GAZA){
     if(!"identificationdocumentnumber" %in% names(d)){
       message("no identification document number -- we create one")
@@ -397,6 +400,7 @@ DHIS2_BookingVisit <- function(isControl,
   d <- unique(d, by = c("uniqueid", "bookdate"))
   print("CB2")
   print(nrow(d))
+ 
 
   # delete people with duplicae LMPs (again, duplicate pregnancies(
   nrow(d)
@@ -411,7 +415,8 @@ DHIS2_BookingVisit <- function(isControl,
   d <- merge(d, data_DHIS2_Demographics, by = c("uniqueid"), all = T)
   print("CB5")
   nrow(d)
-  
+
+ 
   # if control and dont have booking, then delete
   if(isControl){
     d <- d[!is.na(bookevent)]
@@ -449,7 +454,7 @@ DHIS2_BookingVisit <- function(isControl,
     str(d$bookdate)
     #print(unique(d$bookdate)[1:10])
   } else {
-    d[is.na(bookevent), bookdate:=datecreated]
+    d[is.na(bookevent), bookdate:=as.Date(datecreated, "%Y-%m-%d")]
     d[,bookdate:=as.Date(bookdate)]
   }
   
