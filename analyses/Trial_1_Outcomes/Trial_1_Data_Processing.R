@@ -3251,3 +3251,14 @@ openxlsx::write.xlsx(refHosp,
                        sprintf("refHosp_%s.xlsx", 
                                lubridate::today())))
 
+#save a reference data set will all of these variables
+
+t1processoutcomes <- smallD[,]
+openxlsx::write.xlsx(t1processoutcomes, 
+                     file.path(
+                       FOLDER_DATA_CLEAN,
+                       sprintf("T1__Processed_Set_%s.xlsx", 
+                               lubridate::today())))
+
+
+
