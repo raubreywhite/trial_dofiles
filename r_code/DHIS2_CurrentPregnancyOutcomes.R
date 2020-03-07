@@ -107,6 +107,9 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   #cpodups <- data_DHIS2_CurrentPregnancyOutcomes[num>1]
   
   d[,num:=1:.N,by=.(uniqueid, bookevent, booknum, eventnum)]
+  
+  print("1")
+  
   print(xtabs(~d$num))
   #cpodupsInv <- cpodups[num>1,]
   d <- d[num==1]
@@ -119,11 +122,15 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   d <- CleanOrgName(data=d,nameToReplace="cpoorgname")
   }
   
-  d[,num:=1:.N,by=.(uniqueid, bookevent, booknum, eventnum)]
-  print(xtabs(~d$num))
+  #d[,num:=1:.N,by=.(uniqueid, bookevent, booknum, eventnum)]
+  #print("2")
+  #print(xtabs(~d$num))
   #cpodupsInv <- cpodups[num>1,]
-  d <- d[num==1]
-  d[,num:=NULL]
+  #d <- d[num==1]
+  #print("3")
+  #print(xtabs(~d$num))
+  #d[,num:=NULL]
+ 
   
   return(d)
 }

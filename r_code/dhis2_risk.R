@@ -12,7 +12,9 @@ DHIS2_RiskFactors <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
     #d[,eventdate:=as.Date(eventdate)]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0$")]
     d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
   }
   setnames(d, 2, "uniqueid")
@@ -39,7 +41,7 @@ DHIS2_RiskFactors <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
                             "trackedentity"),
                 goodname="uniqueid")
   setnames(d,"programstage","riskprogstage")
-  d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+  #d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
   setnames(d,"eventdate","riskdate")
   setnames(d,"longitude","risklong")
   setnames(d,"latitude","risklat")

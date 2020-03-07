@@ -212,14 +212,16 @@ DHIS2_Master <- function(
   nrow(data_DHIS2_RiskFactors)
   
   ####
-  # DHIS2 MANAGEMENTS
+  # DHIIS2 MANAGEMENT
   print("CLEANING DHIS2 MANAGEMENT")
   data_DHIS2_Management <- int <- DHIS2_Management(isControl=FALSE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
   if(!IS_GAZA){
     con <- DHIS2_Management(isControl=TRUE, earlyData=earlyData, booklmp=booklmp, IS_GAZA=IS_GAZA)
+    #print(str(con))
+    #print(str(int))
     data_DHIS2_Management <- rbind(
-       con,
-       int
+      con,
+      int
     )
   }
   print(nrow(data_DHIS2_Management))
@@ -272,6 +274,7 @@ DHIS2_Master <- function(
     booklmp = booklmp,
     IS_GAZA=IS_GAZA)
   print(nrow(data_DHIS2_PregnancyClosingNotes))
+  
   ####
   #
   print("POSTPARTUM CARE")
@@ -451,8 +454,6 @@ DHIS2_Master <- function(
     ncol(d)
   }
   
-  data_DHIS2_CurrentPregnancyOutcomes[,num:=1:.N,by=.(uniqueid, bookevent, booknum, eventnum)]
-  xtabs(~data_DHIS2_CurrentPregnancyOutcomes$num)
   
   print("RESHAPE TO WIDE AND MERGE data_DHIS2_CurrentPregnancyOutcomes")
   d <- ReshapeToWideAndMerge(

@@ -16,15 +16,11 @@ DHIS2_Management <- function(
     d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
     d[,eventdate:=as.Date(eventdate, "%m/%d/%Y")]
   } else {
-    print("BEFORE DATE FIXING")
-    print(sum(!is.na(d$eventdate)))
     
-    d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0$")]
+    d[,eventdate:=stringr::str_remove_all(eventdate," 00:00.00.0$")]
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
     d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
     
-    print("AFTER DATE FIXING")
-    print(sum(!is.na(d$eventdate)))
   }
   setnames(d, 2, "uniqueid")
   
@@ -49,8 +45,8 @@ DHIS2_Management <- function(
     # TAMARA/MERVETT FIX CONTROL VARIABLES HERE
     setnames(d,"event","manevent")
     setnames(d,"programstage","manprogstage")
-    d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
-    d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
+    #d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
+    #d[,eventdate:=stringr::str_remove_all(eventdate," 00:00.00.0$")]
     setnames(d,"eventdate","mandate")
     setnames(d,"longitude","manlong")
     setnames(d,"latitude","manlat")
@@ -64,18 +60,25 @@ DHIS2_Management <- function(
     setnames(d,"managementdetailsselector","mantypey")
     d[,manperf:=as.integer(NA)]
     
-    
-   
-    
-    
+
     
   } else {
+    #fixin eventdate for intervention
+    # print("BEFORE DATE FIXING")
+    # print(sum(!is.na(d$eventdate)))
+    # 
+    # d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0$")]
+    # d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
+    # d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
+    # 
+    # print("AFTER DATE FIXING")
+    # print(sum(!is.na(d$eventdate)))
+    # 
+    
     # intervention stuff is done here
     setnames(d,"event","manevent")
     #setnames(d,"programstageinstance","uniqueid")
     setnames(d,"programstage","manprogstage")
-    #d[,eventdate:=stringr::str_remove_all(eventdate," 12:00 AM$")]
-    #d[,eventdate:=stringr::str_remove_all(eventdate," 0:00$")]
     setnames(d,"eventdate","mandate")
     setnames(d,"longitude","manlong")
     setnames(d,"latitude","manlat")
