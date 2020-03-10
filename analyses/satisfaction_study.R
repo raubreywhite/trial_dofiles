@@ -23,7 +23,7 @@ if(IS_GAZA){
   #add clinic size
   columnsIWant <- c(
     "uniqueid",
-    "boojorgname",
+    "bookorgname",
     "gA_todaylmp",
     "gA_todayus_1",
     "bookgestage"
@@ -32,8 +32,8 @@ if(IS_GAZA){
   #need to define these 
   #depend on what day the data extraction begins in the week
   #38-39+6 weeks target gAs
-  gestAgeEarly <- 252
-  gestAgeLate <- 256
+  gestAgeEarly <- 266
+  gestAgeLate <- 273
   
 } else {
   d <- LoadDataFileFromNetworkWB() 
@@ -51,6 +51,8 @@ if(IS_GAZA){
   columnsIWant <- c(
     "uniqueid",
     "bookorgname",
+    #"str_Trial_2_ClusSize",
+    "str_TRIAL_2_Cluster",
     "firstname",
     "fathersname",
     "middlename",
@@ -67,13 +69,13 @@ if(IS_GAZA){
   
   #need to define these 
   #depend on what day the data extraction begins in the week
-  gestAgeEarly <- 252
-  gestAgeLate <- 256
+  gestAgeEarly <- 273
+  gestAgeLate <- 279
   
 }
 
 ##
-####################### Mobile number data quality ####################### 
+####################### Mobile number DQ START ####################### 
 
 #xtabs(~d$mobile)
 #d$mobile
@@ -101,6 +103,8 @@ if(IS_GAZA){
 #d$phone
 #class(d$phone)
 
+
+
 #add defintion for trial 2 -- dates and clinic arms
 qcmobilenums <- d[ident_dhis2_control==F & 
                   ident_dhis2_booking==T,
@@ -110,9 +114,11 @@ qcmobilenums <- d[ident_dhis2_control==F &
                "% mobileNO & phoneNo"= 100*mean((is.na(mobile) | mobile=="") & 
                                                   (is.na(phone) | phone=="")))]
 
+####################### Mobile number DQ END ####################### 
+
 # Calculating gA
 ## LMP
-T2WB[,gA_todaylmp:=round(as.numeric(
+d[,gA_todaylmp:=round(as.numeric(
   difftime(lubridate::today(),booklmp, units="days")))]
 
 #d[,gA_todayedd:=round(as.numeric(
@@ -124,12 +130,12 @@ T2WB[,gA_todaylmp:=round(as.numeric(
 
 # US
 
-T2WB[,estimatedgest_1:=round(as.numeric(
+d[,estimatedgest_1:=round(as.numeric(
   difftime(lubridate::today(),usdate_1, units="days")))]
 
-T2WB[,usgestage_1days:=usgestage_1*7]
+d[usgestage_1<=22,usgestage_1days:=usgestage_1*7]
 
-T2WB[,gA_todayus_1:=estimatedgest_1 + usgestage_1days]
+d[,gA_todayus_1:=estimatedgest_1 + usgestage_1days]
 
 #from edd
 #d[,estimatedd:=round(as.numeric(
@@ -146,7 +152,7 @@ sum(is.na(d$booklmp))
 if(IS_GAZA==FALSE){
   # WEST BANK
   # select the booking/control/clinic people that we want
-  satstudy <- d[ident_dhis2_control==F & 
+  satstudy <- d[bookdate>="2019-03-16" & ident_dhis2_control==F & 
                 ident_dhis2_booking==T &
                 (ident_TRIAL_2_and_3==T)]
   # delete the people who dont have either a phone or a mobile
@@ -155,16 +161,16 @@ if(IS_GAZA==FALSE){
   # GAZA
   # select the booking/control/clinic people that we want
   # (this should be everyone)
-  satstudy <- d[ident_dhis2_control==F & 
-                    ident_dhis2_booking==T 
-                    & (ident_TRIAL_2_and_3==T)]
+  satstudywb <- d[bookdate>="2019-03-16" & 
+                    ident_dhis2_booking==T & 
+                    (ident_TRIAL_2_and_3==T)]
 }
 
 
 
 # these are the things that are the same bewteen gaza and WB
 # restrict on gestational age
-satstudy <- satstudy[
+satstudygaza <- satstudy[
   #(gA_todayedd36 >=gestAgeEarly & gA_todayedd36 <= gestAgeLate),
   (gA_todayus_1 >=gestAgeEarly & gA_todayus_1 <= gestAgeLate) |
     (gA_todaylmp >=gestAgeEarly & gA_todaylmp <= gestAgeLate),
@@ -185,7 +191,7 @@ if(IS_GAZA){
   setorder(satstudy,randomNumber)
   satstudy[,randomNumber:=NULL]
 }
-openxlsx::write.xlsx(satstudy, 
+openxlsx::write.xlsx(satstudywb, 
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "satisfaction",
@@ -204,7 +210,7 @@ openxlsx::write.xlsx(satstudy,
 #small <- d[rand_order<=4]
 
 
-openxlsx::write.xlsx(CASES, 
+openxlsx::write.xlsx(satstudygaza, 
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "satisfaction",
