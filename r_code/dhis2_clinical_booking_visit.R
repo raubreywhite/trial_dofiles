@@ -215,10 +215,10 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "organisationunitcode", "bookorgcode")
   setnames(d, "organisationunit", "bookorgunit")
   #try this to rename bookorgname using bookorgunit
-  #if(IS_GAZA){
-   # d[,bookorgname:=bookorgunit]
+  if(IS_GAZA){
+    d[,bookorgname:=bookorgunit]
    
- # }
+ }
   
   setnames(d, "identificationdocumentnumber", "bookidnumber")
   setnames(d, "ancdiastolicbloodpressuremmhg", "bookbpdiast")

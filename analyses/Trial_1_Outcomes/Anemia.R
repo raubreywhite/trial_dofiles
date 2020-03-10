@@ -5,25 +5,34 @@
 
 ########## Anemia ########## 
 # Define opportunities at 3 different cut off points
+
+## booked before 24
 smallD[,Opportunity_anemia_screening_1:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(0,104]",
                                    "(104,125]",
                                    "(125,160]",
-                                   "(160,167]"),Opportunity_anemia_screening_1:=1]
-
+                                   "(160,167]"),
+                          Opportunity_anemia_screening_1:=1]
+## booked 24 or has visit 
 smallD[,Opportunity_anemia_screening_2:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(167,202]")| 
-                        TrialOne_anvisitnew_24_28==T,Opportunity_anemia_screening_2:=1]
+                        TrialOne_anvisitnew_24_28==T,
+                         Opportunity_anemia_screening_2:=1]
 
+# booked 29-34 weeks
 smallD[,Opportunity_anemia_screening_3:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(202,216]",
                                    "(216,237]",
-                                   "(237,244]"),Opportunity_anemia_screening_3:=1]
+                                   "(237,244]"),
+                          Opportunity_anemia_screening_3:=1]
 
+## booked or visit at 35-37 weeks
 smallD[,Opportunity_anemia_screening_4:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(244,265]") |
-         TrialOne_anvisitnew_35_37==T, Opportunity_anemia_screening_4:=1]
+                          TrialOne_anvisitnew_35_37==T, 
+                          Opportunity_anemia_screening_4:=1]
 
+## severe anemia at booking and at any other visit after that
 smallD[,Opportunity_anemia_screening_5:=as.numeric(NA)]
 smallD[booklabhb<7 & booklabhb>0 &
          (TrialOne_labhb_anemia_sev_00_14==T|
@@ -33,7 +42,7 @@ smallD[booklabhb<7 & booklabhb>0 &
             TrialOne_labhb_anemia_sev_29_30==T|
             TrialOne_labhb_anemia_sev_31_33==T|
             TrialOne_labhb_anemia_sev_34_34==T),Opportunity_anemia_screening_5:=1]
-
+## mild mod anemia
 smallD[,Opportunity_anemia_screening_6:=as.numeric(NA)]
 smallD[booklabhb<11 & booklabhb>=7 &
          (TrialOne_labhb_anemia_mild_mod_00_14==T|
@@ -42,51 +51,69 @@ smallD[booklabhb<11 & booklabhb>=7 &
             TrialOne_labhb_anemia_mild_mod_23_23==T|
             TrialOne_labhb_anemia_mild_mod_29_30==T|
             TrialOne_labhb_anemia_mild_mod_31_33==T|
-            TrialOne_labhb_anemia_mild_mod_34_34==T),Opportunity_anemia_screening_6:=1]
+            TrialOne_labhb_anemia_mild_mod_34_34==T),
+       Opportunity_anemia_screening_6:=1]
 
 # ADJUSTING OPPORTUNITIES FOR THOSE WHO HAVE BEEN REFERRED
 ## Before 24 weeks
+
+#variable for man sev anemia anytime before 24 weeks
+smallD[,manhbsev:=(TrialOne_manhb_00_00 |
+                     TrialOne_manhb_01_01 |
+                     TrialOne_manhb_02_02 |
+                     TrialOne_manhb_03_03 |
+                     TrialOne_manhb_04_04 |
+                     TrialOne_manhb_05_05 |
+                     TrialOne_manhb_06_06 |
+                     TrialOne_manhb_07_07 |
+                     TrialOne_manhb_08_08 |
+                     TrialOne_manhb_09_09 |
+                     TrialOne_manhb_10_10 |
+                     TrialOne_manhb_11_11 |
+                     TrialOne_manhb_12_12 |
+                     TrialOne_manhb_13_13 |
+                     TrialOne_manhb_14_14 |
+                     TrialOne_manhb_15_15 |
+                     TrialOne_manhb_16_16 |
+                     TrialOne_manhb_17_17 |
+                     TrialOne_manhb_18_18 |
+                     TrialOne_manhb_19_19 |
+                     TrialOne_manhb_20_20 |
+                     TrialOne_manhb_21_21 |
+                     TrialOne_manhb_22_22 |
+                     TrialOne_manhb_23_23)]
+xtabs(~smallD$manhbsev, addNA=T)
+
 smallD[Opportunity_anemia_screening_1==1 &
          (TrialOne_refHR_00_14==T|
             TrialOne_refHR_15_17==T|
             TrialOne_refHR_18_22==T|
-            TrialOne_refHR_23_23==T),
+            TrialOne_refHR_23_23==T)|
+         (TrialOne_refHosp_00_14==T|
+            TrialOne_refHR_15_17==T|
+            TrialOne_refHosp_18_22==T|
+            TrialOne_refHosp_23_23==T),
        Opportunity_anemia_screening_1:=Opportunity_anemia_screening_1-1]
 xtabs(~smallD$Opportunity_anemia_screening_1, addNA=T)
 
 ## At 24-28 weeks
 smallD[Opportunity_anemia_screening_2==1 &
          (TrialOne_anvisitnew_24_24 & 
-         (TrialOne_refHR_00_14==T|
-            TrialOne_refHR_15_17==T|
-            TrialOne_refHR_18_22==T|
-            TrialOne_refHR_23_23==T))|
+         (Opportunity_anemia_screening_1==0))|
   (TrialOne_anvisitnew_25_25 & 
-     (TrialOne_refHR_00_14==T|
-        TrialOne_refHR_15_17==T|
-        TrialOne_refHR_18_22==T|
-        TrialOne_refHR_23_23==T|
+     (Opportunity_anemia_screening_1==0|
         TrialOne_refHR_24_24==T))|
   (TrialOne_anvisitnew_26_26 & 
-     (TrialOne_refHR_00_14==T|
-        TrialOne_refHR_15_17==T|
-        TrialOne_refHR_18_22==T|
-        TrialOne_refHR_23_23==T|
+     (Opportunity_anemia_screening_1==0|
         TrialOne_refHR_24_24==T|
         TrialOne_refHR_25_25==T))|
   (TrialOne_anvisitnew_27_27 & 
-     (TrialOne_refHR_00_14==T|
-        TrialOne_refHR_15_17==T|
-        TrialOne_refHR_18_22==T|
-        TrialOne_refHR_23_23==T|
+     (Opportunity_anemia_screening_1==0|
         TrialOne_refHR_24_24==T|
         TrialOne_refHR_25_25==T|
         TrialOne_refHR_26_26==T))|
   (TrialOne_anvisitnew_28_28 & 
-     (TrialOne_refHR_00_14==T|
-        TrialOne_refHR_15_17==T|
-        TrialOne_refHR_18_22==T|
-        TrialOne_refHR_23_23==T|
+     (Opportunity_anemia_screening_1==0|
         TrialOne_refHR_24_24==T|
         TrialOne_refHR_25_25==T|
         TrialOne_refHR_26_26==T|
@@ -96,13 +123,9 @@ smallD[Opportunity_anemia_screening_2==1 &
 xtabs(~smallD$Opportunity_anemia_screening_2, addNA=T)
 
 # 35-37 weeks
-#add refto hosp as well
 smallD[Opportunity_anemia_screening_3==1 &
          (TrialOne_anvisitnew_29_30==T & 
-            (TrialOne_refHR_00_14==T|
-               TrialOne_refHR_15_17==T|
-               TrialOne_refHR_18_22==T|
-               TrialOne_refHR_23_23==T|
+            (Opportunity_anemia_screening_1==0|
                TrialOne_refHR_24_28==T))|
          (TrialOne_anvisitnew_31_33==T & 
             (TrialOne_refHR_00_14==T|
@@ -176,6 +199,15 @@ prelimHB <- smallD[,.(N=.N,
                        Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),
                        Success_4=sum(HbonTime_4, na.rm=T)),
                     keyby=.(ident_dhis2_control)]
+
+
+# Defining anemia at different time points
+smallD[,SevAnem_1:=as.logical(NA)]
+smallD[,SevAnem_1:=(Opportunity_anemia_screening_1==1 &
+                       TrialOne_labhb_anemia_sev_00_14==T |
+                       TrialOne_labhb_anemia_sev_15_17==T |
+                       TrialOne_labhb_anemia_sev_18_22==T |
+                       TrialOne_labhb_anemia_sev_23_23==T)]
 
 
 ############################## ORIGINAL THOUGH PROCESS ############################## 

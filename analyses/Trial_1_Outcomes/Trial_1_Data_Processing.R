@@ -2669,8 +2669,8 @@ openxlsx::write.xlsx(gdm,file.path(FOLDER_DATA_CLEAN,
                                    sprintf("%s_GDM.xlsx", 
                                            lubridate::today())))
 ###### Malpres data set  ###### 
-smallD[prettyExposure=="K", prettyExposure:="A"]
-smallD[prettyExposure=="L", prettyExposure:="B"]
+smallD[ident_dhis2_control==T, prettyExposure:="A"]
+smallD[ident_dhis2_control==F, prettyExposure:="B"]
 varskeep <- c(varskeepAll,
               varsmalpres,
               varsman)
@@ -3252,13 +3252,15 @@ openxlsx::write.xlsx(refHosp,
                                lubridate::today())))
 
 #save a reference data set will all of these variables
-
+#save as csv instead
 t1processoutcomes <- smallD[,]
 openxlsx::write.xlsx(t1processoutcomes, 
                      file.path(
                        FOLDER_DATA_CLEAN,
                        sprintf("T1__Processed_Set_%s.xlsx", 
                                lubridate::today())))
+
+t1processoutcomes <- fread("C:/data processing/data_clean/T1__Processed_Set_2020-03-07.xlsx")
 
 
 

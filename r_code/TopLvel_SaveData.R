@@ -185,6 +185,8 @@ SaveCISMACDataBase<- function(){
   rm("d", envir=.GlobalEnv)
   d=LoadAnonDataFileFromNetwork()
   
+  d[ident_TRIAL_1==T,]
+  
 #in order to keep the ident_control_variable (as requested), recoding it#
 #ident_dhis2_control will be replaced in these datasets with Exposure_Trial_1
   d[,Exposure_Trial_1:=as.character()]
