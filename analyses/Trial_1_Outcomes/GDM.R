@@ -1,10 +1,4 @@
 
-#import data set from process outcomes
-
-#smallD <- fread("C:/data processing/data_clean/Trial_1_Outcomes/2020-03-07_GDM.xlsx")
-
-smallD <- smallD
-
 ########## GDM ########## 
 
 ###Redefining opportinites
@@ -12,6 +6,7 @@ smallD[,Opportunity_GDM_screening_1:=as.numeric(NA)]
 smallD[,Opportunity_GDM_screening_2:=as.numeric(NA)]
 smallD[,Opportunity_GDM_screening_3:=as.numeric(NA)]
 smallD[,Opportunity_GDM_screening_4:=as.numeric(NA)]
+#smallD[,Opportunity_GDM_Screening_5:=as.numeric(NA)]
 
 # before 24
 smallD[bookgestagedays_cats %in% c("(0,104]",
@@ -23,7 +18,7 @@ smallD[bookgestagedays_cats %in% c("(0,104]",
                                    "(104,125]", 
                                    "(125,160]",
                                    "(160,167]",
-                                   "(167,202]") |
+                                   "(167,202]")|
               TrialOne_anvisitnew_24_28==T,Opportunity_GDM_screening_2:=1]
 # after 28
 smallD[bookgestagedays_cats %in% c("(202,216]",
@@ -32,8 +27,7 @@ smallD[bookgestagedays_cats %in% c("(202,216]",
                                    "(244,265]"), Opportunity_GDM_screening_3:=1]
 
 # high rbs anywhere outside of the 24-28
-smallD[(booklabbloodglu_high==F | is.na(booklabbloodglu_high)) & 
-         (TrialOne_labbloodglu_high_00_14==T|
+smallD[(TrialOne_labbloodglu_high_00_14==T|
           TrialOne_labbloodglu_high_15_17==T|
           TrialOne_labbloodglu_high_18_22==T|
           TrialOne_labbloodglu_high_23_23==T|
@@ -51,7 +45,7 @@ xtabs(~smallD$Opportunity_GDM_screening_4, addNA=T)
 
 
 ## Remove opportunities for people who were referred to HR or Hosp
-smallD[,refHRmanRBG_1:=(
+smallD[,refHRHospmanRBG_1:=(
   TrialOne_manRBGHigh_HR_01_01==T|
     TrialOne_manRBGHigh_HR_02_02==T|
     TrialOne_manRBGHigh_HR_03_03==T|
@@ -74,7 +68,52 @@ smallD[,refHRmanRBG_1:=(
     TrialOne_manRBGHigh_HR_20_20==T|
     TrialOne_manRBGHigh_HR_21_21==T|
     TrialOne_manRBGHigh_HR_22_22==T|
-    TrialOne_manRBGHigh_HR_23_23==T)]
+    TrialOne_manRBGHigh_HR_23_23==T)|
+    ( TrialOne_manRBGHigh_Hosp_01_01==T|
+        TrialOne_manRBGHigh_Hosp_02_02==T|
+        TrialOne_manRBGHigh_Hosp_03_03==T|
+        TrialOne_manRBGHigh_Hosp_04_04==T|
+        TrialOne_manRBGHigh_Hosp_05_05==T|
+        TrialOne_manRBGHigh_Hosp_06_06==T|
+        TrialOne_manRBGHigh_Hosp_07_07==T|
+        TrialOne_manRBGHigh_Hosp_08_08==T|
+        TrialOne_manRBGHigh_Hosp_09_09==T|
+        TrialOne_manRBGHigh_Hosp_10_10==T|
+        TrialOne_manRBGHigh_Hosp_11_11==T|
+        TrialOne_manRBGHigh_Hosp_12_12==T|
+        TrialOne_manRBGHigh_Hosp_13_13==T|
+        TrialOne_manRBGHigh_Hosp_14_14==T|
+        TrialOne_manRBGHigh_Hosp_15_15==T|
+        TrialOne_manRBGHigh_Hosp_16_16==T|
+        TrialOne_manRBGHigh_Hosp_17_17==T|
+        TrialOne_manRBGHigh_Hosp_18_18==T|
+        TrialOne_manRBGHigh_Hosp_19_19==T|
+        TrialOne_manRBGHigh_Hosp_20_20==T|
+        TrialOne_manRBGHigh_Hosp_21_21==T|
+        TrialOne_manRBGHigh_Hosp_22_22==T|
+        TrialOne_manRBGHigh_Hosp_23_23==T)]
+
+smallD[,refHRHospmanRBG_2:=(
+    TrialOne_manRBGHigh_Hosp_29_29==T|
+    TrialOne_manRBGHigh_Hosp_30_30==T|
+    TrialOne_manRBGHigh_Hosp_31_31==T|
+    TrialOne_manRBGHigh_Hosp_32_32==T|
+    TrialOne_manRBGHigh_Hosp_33_33==T|
+    TrialOne_manRBGHigh_Hosp_34_34==T|
+    TrialOne_manRBGHigh_Hosp_35_35==T|
+    TrialOne_manRBGHigh_Hosp_36_36==T|
+    TrialOne_manRBGHigh_Hosp_37_37==T)|
+      (TrialOne_manRBGHigh_HR_29_29==T|
+      TrialOne_manRBGHigh_HR_30_30==T|
+      TrialOne_manRBGHigh_HR_31_31==T|
+      TrialOne_manRBGHigh_HR_32_32==T|
+      TrialOne_manRBGHigh_HR_33_33==T|
+      TrialOne_manRBGHigh_HR_34_34==T|
+      TrialOne_manRBGHigh_HR_35_35==T|
+      TrialOne_manRBGHigh_HR_36_36==T|
+      TrialOne_manRBGHigh_HR_37_37==T)
+      ]
+
 
 smallD[(TrialOne_anvisitnew_24_24 & refHRmanRBG_1==T)|
          (TrialOne_anvisitnew_25_25 & 
@@ -173,6 +212,12 @@ smallD[screenafter28==F,
 smallD[screenafter28==T,GDMscreeningontime_3:=TRUE]
 xtabs(~smallD$GDMscreeningontime_3, addNA=T)
 
+#management fo high RBG outside of time windows
+smallD[, GDMscreeningontime_4:=as.logical(NA)]
+smallD[Opportunity_GDM_screening_4==1, GDMscreeningontime_4:= FALSE]
+smallD[GDMscreeningontime_4==F & 
+         (refHRHospmanRBG_1==T|refHRHospmanRBG_2==T),GDMscreeningontime_4:=TRUE]
+
 
 prelimGDM <- smallD[,.(N=.N,
                        Opportun_1=sum(Opportunity_GDM_screening_1==T, na.rm=T),
@@ -184,16 +229,41 @@ prelimGDM <- smallD[,.(N=.N,
                        Opportun_3=sum(Opportunity_GDM_screening_3==T, na.rm=T),
                        Success_3=sum(GDMscreeningontime_3==T, na.rm=T),
                        screenafter28=sum(screenafter28==T, na.rm=T),
-                       screenafter28False=sum(screenafter28==F, na.rm=T)),
+                       screenafter28False=sum(screenafter28==F, na.rm=T),
+                       screenbtwn=sum(GDMscreeningontime_4==T, na.rm=T),
+                       screenbtwnFalse=sum(GDMscreeningontime_4==F, na.rm=T),
+                       Opportun_4=sum(Opportunity_GDM_screening_4==T, na.rm=T)),
                        keyby=.(ident_dhis2_control)]
-                              #str_TRIAL_1_Cluster)]
+                              
                                
 
 openxlsx::write.xlsx(prelimGDM,file.path(FOLDER_DATA_RESULTS,
-                                            "process_outcomes",
                                             "T1",
                                         sprintf("%s_prelim_GDM_Cluster.xlsx",
-                                                lubridate::today))) 
+                                                lubridate::today()))) 
+
+###### GDM data set  ###### 
+GDMSucc <- names(smallD)[stringr::str_detect(names(smallD),"^GDMscreeningontime_")]
+GDMOpp <- names(smallD)[stringr::str_detect(names(smallD),"Opportunity_GDM_")]
+
+
+smallD[ident_dhis2_control==T, prettyExposure:="K"]
+smallD[ident_dhis2_control==F, prettyExposure:="L"]
+varskeep <- c(varskeepAll,
+              varsgdm,
+              varsman,
+              "refHRHospmanRBG_1",
+              "refHRHospmanRBG_2",
+              "screenb424",
+              "screenafter28",
+              GDMSucc,
+              GDMOpp)
+gdm <-smallD[,varskeep,with=F]
+
+openxlsx::write.xlsx(gdm,file.path(FOLDER_DATA_RESULTS,
+                                   "T1",
+                                   sprintf("%s_GDM_Outcomes_dataset.xlsx", 
+                                           lubridate::today())))
  
 #need to do rbs>140 outside windows
 #Random blood sugar >=140 mg/dl and referred

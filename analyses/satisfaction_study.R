@@ -152,8 +152,10 @@ sum(is.na(d$booklmp))
 if(IS_GAZA==FALSE){
   # WEST BANK
   # select the booking/control/clinic people that we want
-  satstudy <- d[bookdate>="2019-03-16" & ident_dhis2_control==F & 
-                ident_dhis2_booking==T &
+  satstudy <- d[bookdate>="2019-03-16" & 
+                ident_dhis2_control==F & 
+                ident_dhis2_booking==T & 
+                  is.na(cpopregoutcome_1) &
                 (ident_TRIAL_2_and_3==T)]
   # delete the people who dont have either a phone or a mobile
   satstudy <- satstudy[mobile!="" | phone!=""]
@@ -161,7 +163,8 @@ if(IS_GAZA==FALSE){
   # GAZA
   # select the booking/control/clinic people that we want
   # (this should be everyone)
-  satstudywb <- d[bookdate>="2019-03-16" & 
+  satstudy <- d[bookdate>="2019-03-16" & 
+                    is.na(cpopregoutcome_1) &
                     ident_dhis2_booking==T & 
                     (ident_TRIAL_2_and_3==T)]
 }
@@ -170,14 +173,14 @@ if(IS_GAZA==FALSE){
 
 # these are the things that are the same bewteen gaza and WB
 # restrict on gestational age
-satstudygaza <- satstudy[
+satstudy <- satstudy[
   #(gA_todayedd36 >=gestAgeEarly & gA_todayedd36 <= gestAgeLate),
   (gA_todayus_1 >=gestAgeEarly & gA_todayus_1 <= gestAgeLate) |
     (gA_todaylmp >=gestAgeEarly & gA_todaylmp <= gestAgeLate),
   columnsIWant,
   with=F]
 
-setorder(satstudy,gA_todaylmp,gA_todayus_1)
+setorder(satstudy,gA_todayus_1,gA_todaylmp)
 nrow(satstudy)
 
 sum(is.na(d$booklmp))
@@ -191,11 +194,11 @@ if(IS_GAZA){
   setorder(satstudy,randomNumber)
   satstudy[,randomNumber:=NULL]
 }
-openxlsx::write.xlsx(satstudywb, 
+openxlsx::write.xlsx(satstudy, 
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "satisfaction",
-                       sprintf("%s_%s_satisfaction script.xlsx",
+                       sprintf("%s_%s_satisfaction WB.xlsx",
                                lubridate::today(),fileTag)))
 
 
@@ -210,7 +213,7 @@ openxlsx::write.xlsx(satstudywb,
 #small <- d[rand_order<=4]
 
 
-openxlsx::write.xlsx(satstudygaza, 
+openxlsx::write.xlsx(satstudy, 
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "satisfaction",

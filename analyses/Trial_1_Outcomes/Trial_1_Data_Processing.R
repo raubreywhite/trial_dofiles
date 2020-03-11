@@ -2618,17 +2618,7 @@ varsman <-c(varsmanevent,
             varsRefhosp,
             varsmanperf)
 
-
-###### Attendance data set  ######
-smallD[prettyExposure=="D", prettyExposure:="E"]
-smallD[prettyExposure=="C", prettyExposure:="F"]
-varskeep <- c(varskeepAll)
-attendance <-smallD[,varskeep,with=F]
-
-openxlsx::write.xlsx(attendance,file.path(FOLDER_DATA_CLEAN,
-                                          "Trial_1_Outcomes",
-                                          sprintf("%s_Attendance.xlsx", 
-                                                  lubridate::today())))
+############################################################################################################################################################################################################ EXPORTING DATA SETS ########################################################################################################################################################################################################
 
 ###### Anemia  data set  ###### 
 smallD[prettyExposure=="E", prettyExposure:="G"]

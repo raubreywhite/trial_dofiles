@@ -154,7 +154,7 @@ smallD[, HbonTime_2c:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_2==1 & 
          TrialOne_labhb_anemia_mild_mod_24_28==T, HbonTime_2c:=FALSE]
 
-smallD[, HboTime_3:= as.logical(NA)]
+smallD[, HbonTime_3:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_3==1, HbonTime_3:=FALSE]
 
 smallD[, HbonTime_4a:= as.logical(NA)]
@@ -172,7 +172,7 @@ smallD[, HbonTime_5:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_5==1, HbonTime_5:=FALSE]
 
 smallD[, HbonTime_6:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_6==1, HbonTime_5:=FALSE]
+smallD[Opportunity_anemia_screening_6==1, HbonTime_6:=FALSE]
 
 
 
@@ -233,7 +233,7 @@ smallD[HbonTime_5==F &
          (TrialOne_manhb_00_00==T|
          TrialOne_manhb_01_01==T|
          TrialOne_manhb_02_02==T|
-         TrialOne_manhb_03_03=T|
+         TrialOne_manhb_03_03==T|
          TrialOne_manhb_04_04==T|
          TrialOne_manhb_05_05==T|
          TrialOne_manhb_06_06==T|
@@ -289,23 +289,53 @@ smallD[HbonTime_6==F &
             TrialOne_manhb_mildmodhbret_32_32==T|
             TrialOne_manhb_mildmodhbret_33_33==T|
             TrialOne_manhb_mildmodhbret_34_34==T),
-       Opportunity_anemia_screening_6:=1]
-
-
+       HbonTime_6:=TRUE]
 
 
 prelimHB <- smallD[,.(N=.N,
                        Opportun_1=sum(Opportunity_anemia_screening_1, na.rm=T),
                        Success_1=sum(HbonTime_1, na.rm=T),
                        Opportun_2=sum(Opportunity_anemia_screening_2, na.rm=T),
-                       Success_2=sum(HbonTime_2, na.rm=T),
+                       Success_2a=sum(HbonTime_2a, na.rm=T),
+                       Opportun_2=sum(Opportunity_anemia_screening_2, na.rm=T),
+                       Success_2b=sum(HbonTime_2b, na.rm=T),
+                       Opportun_2=sum(Opportunity_anemia_screening_2, na.rm=T),
+                       Success_2c=sum(HbonTime_2c, na.rm=T),
                        Opportun_3=sum(Opportunity_anemia_screening_3, na.rm=T),
                        Success_3=sum(Opportunity_anemia_screening_3, na.rm=T),
                        Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),
-                       Success_4=sum(HbonTime_4, na.rm=T)),
+                       Success_4a=sum(HbonTime_4a, na.rm=T),
+                       Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),
+                       Success_4b=sum(HbonTime_4b, na.rm=T),
+                       Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),
+                       Success_4c=sum(HbonTime_4c, na.rm=T),
+                       Opportun_5=sum(Opportunity_anemia_screening_5, na.rm=T),
+                       Success_5=sum(HbonTime_5, na.rm=T),
+                      Opportun_6=sum(Opportunity_anemia_screening_6, na.rm=T),
+                      Success_6=sum(HbonTime_6, na.rm=T)),
                     keyby=.(ident_dhis2_control)]
 
+openxlsx::write.xlsx(prelimHB,file.path(FOLDER_DATA_RESULTS,
+                                         "T1",
+                                         sprintf("%s_prelim_Hb.xlsx",
+                                                 lubridate::today()))) 
+###### Anemia  data set  ###### 
+HbSucc <- names(smallD)[stringr::str_detect(names(smallD),"^HbonTime_")]
+HbOpp <- names(smallD)[stringr::str_detect(names(smallD),"Opportunity_anemia_")]
 
+smallD[ident_dhis2_control==T, prettyExposure:="G"]
+smallD[ident_dhis2_control==F, prettyExposure:="H"]
+varskeep <- c(varskeepAll,
+              varshb,
+              varsman,
+              HbSucc,
+              HbOpp)
+hb <-smallD[,varskeep,with=F]
+
+openxlsx::write.xlsx(hb,file.path(FOLDER_DATA_RESULTS,
+                                  "T1",
+                                  sprintf("%s_Anemia_Outcomes_dataset.xlsx", 
+                                          lubridate::today())))
 ######################################################################################
 ######################################################################################
 ############################## ORIGINAL THOUGH PROCESS ############################## 
