@@ -336,9 +336,11 @@ openxlsx::write.xlsx(hb,file.path(FOLDER_DATA_RESULTS,
                                   "T1",
                                   sprintf("%s_Anemia_Outcomes_dataset.xlsx", 
                                           lubridate::today())))
+
+
 ######################################################################################
 ######################################################################################
-############################## ORIGINAL THOUGH PROCESS ############################## 
+############################## ORIGINAL THOUGHT PROCESS ############################## 
 
 ## No Anemia Cases ##
 # Define opportunities for everyone assuming No one has anemia

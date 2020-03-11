@@ -33,7 +33,7 @@ if(IS_GAZA){
   #depend on what day the data extraction begins in the week
   #38-39+6 weeks target gAs
   gestAgeEarly <- 266
-  gestAgeLate <- 273
+  gestAgeLate <- 276
   
 } else {
   d <- LoadDataFileFromNetworkWB() 
@@ -51,7 +51,6 @@ if(IS_GAZA){
   columnsIWant <- c(
     "uniqueid",
     "bookorgname",
-    #"str_Trial_2_ClusSize",
     "str_TRIAL_2_Cluster",
     "firstname",
     "fathersname",
@@ -74,47 +73,6 @@ if(IS_GAZA){
   
 }
 
-##
-####################### Mobile number DQ START ####################### 
-
-#xtabs(~d$mobile)
-#d$mobile
-#d$phone
-#d$ident_TRIAL_1
-
-#sum(d$mobile == d$phone, na.rm=T)
-#sum(d$mobile != d$phone, na.rm=T)
-#d[mobile!=phone,c("mobile","phone")]
-
-#phoneNumbers <- d[is.na(mobile) | mobile==""]$phone
-#sum(!is.na(phoneNumbers) & phoneNumbers=="")
-#mean(100*(!is.na(phoneNumbers) & phoneNumbers==""))
-
-# to know the format of variables and to know the completeness for chracter vars
-#this formula for string variables ....mean(!is.na(d$mobile))
-
-#class(d$mobile)
-
-#d$mobile
-
-#mean(!(is.na(d$mobile)| d$mobile==""))
-
-# from where this variable?
-#d$phone
-#class(d$phone)
-
-
-
-#add defintion for trial 2 -- dates and clinic arms
-qcmobilenums <- d[ident_dhis2_control==F & 
-                  ident_dhis2_booking==T,
-                .(N=.N,
-                "% mobileYes"=100*mean(!(is.na(mobile) | mobile=="")),
-                "% phoneYes"=100*mean(!(is.na(phone)  | phone=="")),
-               "% mobileNO & phoneNo"= 100*mean((is.na(mobile) | mobile=="") & 
-                                                  (is.na(phone) | phone=="")))]
-
-####################### Mobile number DQ END ####################### 
 
 # Calculating gA
 ## LMP
@@ -159,6 +117,7 @@ if(IS_GAZA==FALSE){
                 (ident_TRIAL_2_and_3==T)]
   # delete the people who dont have either a phone or a mobile
   satstudy <- satstudy[mobile!="" | phone!=""]
+ 
 } else {
   # GAZA
   # select the booking/control/clinic people that we want
@@ -179,6 +138,16 @@ satstudy <- satstudy[
     (gA_todaylmp >=gestAgeEarly & gA_todaylmp <= gestAgeLate),
   columnsIWant,
   with=F]
+#creating other columsn for data collection
+satstudy[,sampleNum:=""]
+satstudy[,status:=""]
+satstudy[,callback_day_1:=""]
+satstudy[,callback_time_1:=""]
+satstudy[,callback_day_2:=""]
+satstudy[,callback_time_2:=""]
+satstudy[,callback_day_3:=""]
+satstudy[,callback_time_3:=""]
+satstudy[,reason_for_ending_call:=""]
 
 setorder(satstudy,gA_todayus_1,gA_todaylmp)
 nrow(satstudy)
@@ -223,3 +192,44 @@ openxlsx::write.xlsx(satstudy,
 ## END HERE
 
 
+##
+####################### Mobile number DQ START ####################### 
+
+#xtabs(~d$mobile)
+#d$mobile
+#d$phone
+#d$ident_TRIAL_1
+
+#sum(d$mobile == d$phone, na.rm=T)
+#sum(d$mobile != d$phone, na.rm=T)
+#d[mobile!=phone,c("mobile","phone")]
+
+#phoneNumbers <- d[is.na(mobile) | mobile==""]$phone
+#sum(!is.na(phoneNumbers) & phoneNumbers=="")
+#mean(100*(!is.na(phoneNumbers) & phoneNumbers==""))
+
+# to know the format of variables and to know the completeness for chracter vars
+#this formula for string variables ....mean(!is.na(d$mobile))
+
+#class(d$mobile)
+
+#d$mobile
+
+#mean(!(is.na(d$mobile)| d$mobile==""))
+
+# from where this variable?
+#d$phone
+#class(d$phone)
+
+
+
+#add defintion for trial 2 -- dates and clinic arms
+qcmobilenums <- d[ident_dhis2_control==F & 
+                    ident_dhis2_booking==T,
+                  .(N=.N,
+                    "% mobileYes"=100*mean(!(is.na(mobile) | mobile=="")),
+                    "% phoneYes"=100*mean(!(is.na(phone)  | phone=="")),
+                    "% mobileNO & phoneNo"= 100*mean((is.na(mobile) | mobile=="") & 
+                                                       (is.na(phone) | phone=="")))]
+
+####################### Mobile number DQ END ####################### 

@@ -232,7 +232,8 @@ prelimGDM <- smallD[,.(N=.N,
                        screenafter28False=sum(screenafter28==F, na.rm=T),
                        screenbtwn=sum(GDMscreeningontime_4==T, na.rm=T),
                        screenbtwnFalse=sum(GDMscreeningontime_4==F, na.rm=T),
-                       Opportun_4=sum(Opportunity_GDM_screening_4==T, na.rm=T)),
+                       Opportun_4=sum(Opportunity_GDM_screening_4==T, na.rm=T),
+                       Succ_4=sum(GDMscreeningontime_4, na.rm=T)),
                        keyby=.(ident_dhis2_control)]
                               
                                
