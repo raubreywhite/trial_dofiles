@@ -111,8 +111,7 @@ smallD[,refHRHospmanRBG_2:=(
       TrialOne_manRBGHigh_HR_34_34==T|
       TrialOne_manRBGHigh_HR_35_35==T|
       TrialOne_manRBGHigh_HR_36_36==T|
-      TrialOne_manRBGHigh_HR_37_37==T)
-      ]
+      TrialOne_manRBGHigh_HR_37_37==T)]
 
 
 smallD[(TrialOne_anvisitnew_24_24 & refHRmanRBG_1==T)|
@@ -154,13 +153,32 @@ scrb424 <- smallD[,.(A=sum(ident_dhis2_control==T),
                      keyby=.(screenb4242)]
 
 ##Defining Successes 
-smallD[,GDMscreeningontime_1:=as.logical(NA)]
+smallD[,GDMscreeningontime_1A:=as.logical(NA)]
+smallD[,GDMscreeningontime_1B:=as.logical(NA)]
+smallD[,GDMscreeningontime_1C:=as.logical(NA)]
 smallD[screenb424==F, 
        GDMscreeningontime_1:=FALSE]
 smallD[screenb424==T, 
        GDMscreeningontime_1:=TRUE]
 
 xtabs(~smallD$GDMscreeningontime_1, addNA=T)
+
+
+smallD[,GDMscreeningontime_1A:=as.logical(NA)]
+smallD[Opportunity_GDM_screening_1==1 & 
+          booklaburglu="NEG", 
+       GDMscreeningontime_1A:=TRUE]
+
+smallD[,GDMscreeningontime_1B:=as.logical(NA)]
+smallD[Opportunity_GDM_screening_1==1 &
+         booklaburglu=="POS" & 
+         !is.na(booklabbloodglu), GDMscreeningontime_1B:=TRUE]
+
+##### Need to add: and referred for 1C!!!! ##### 
+smallD[,GDMscreeningontime_1C:=as.logical(NA)]
+smallD[booklabbloodglu_high==T &
+         !is.na(booklabbloodglu), GDMscreeningontime_1C:=TRUE]
+
 
 
 #24-28 weeks
@@ -221,7 +239,9 @@ smallD[GDMscreeningontime_4==F &
 
 prelimGDM <- smallD[,.(N=.N,
                        Opportun_1=sum(Opportunity_GDM_screening_1==T, na.rm=T),
-                       Success_1=sum(GDMscreeningontime_1==T, na.rm=T),
+                       Success_1A=sum(GDMscreeningontime_1A==T, na.rm=T),
+                       Success_1B=sum(GDMscreeningontime_1B==T, na.rm=T),
+                       Success_1C=sum(GDMscreeningontime_1C==T, na.rm=T),
                        Screenb424=sum(screenb424==T, na.rm=T),
                        Screenb424False=sum(screenb424==F, na.rm=T),
                        Opportun_2=sum(Opportunity_GDM_screening_2==T, na.rm=T),
@@ -240,7 +260,7 @@ prelimGDM <- smallD[,.(N=.N,
 
 openxlsx::write.xlsx(prelimGDM,file.path(FOLDER_DATA_RESULTS,
                                             "T1",
-                                        sprintf("%s_prelim_GDM_Cluster.xlsx",
+                                        sprintf("%s_prelim_GDM.xlsx",
                                                 lubridate::today()))) 
 
 ###### GDM data set  ###### 
@@ -251,6 +271,9 @@ GDMOpp <- names(smallD)[stringr::str_detect(names(smallD),"Opportunity_GDM_")]
 smallD[ident_dhis2_control==T, prettyExposure:="K"]
 smallD[ident_dhis2_control==F, prettyExposure:="L"]
 varskeep <- c(varskeepAll,
+              "booklaburglu",
+              "booklabbloodglu",
+              "booklabfastbloodglu",
               varsgdm,
               varsman,
               "refHRHospmanRBG_1",
