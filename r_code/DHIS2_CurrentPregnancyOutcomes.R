@@ -119,7 +119,7 @@ DHIS2_CurrentPregnancyOutcomes <- function(isControl, earlyData, booklmp, data_i
   warning("WE NEED TO FIX THIS")
   
   if(nrow(d)>0){
-  d <- CleanOrgName(data=d,nameToReplace="cpoorgname")
+  d <- CleanOrgName(data=d,nameToReplace="cpoorgname", IS_GAZA)
   }
   
   #d[,num:=1:.N,by=.(uniqueid, bookevent, booknum, eventnum)]

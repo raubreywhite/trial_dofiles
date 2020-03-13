@@ -1,4 +1,4 @@
-CleanOrgName <- function(data,nameToReplace="bookorgname"){
+CleanOrgName <- function(data,nameToReplace="bookorgname", IS_GAZA){
   oldName <- nameToReplace
   newName <- sprintf("NEW_%s",nameToReplace)
   
@@ -145,6 +145,10 @@ DHIS2_Master <- function(
   openxlsx::write.xlsx(missingNames,file.path(FOLDER_DATA_RAW,"structural_data/to_be_processed_bookorgname.xlsx"))
   
   print(nrow(data_DHIS2_Booking))
+  
+  unique(data_DHIS2_Booking$bookorgname) %in% unique(sData$bookorgname)
+  unique(sData$bookorgname) %in% unique(data_DHIS2_Booking$bookorgname) 
+  
   data_DHIS2_Booking <- merge(data_DHIS2_Booking,sData,by=c("bookorgname"),all.x=T)
   print(nrow(data_DHIS2_Booking))
   
@@ -165,8 +169,17 @@ DHIS2_Master <- function(
   
   ## structural indicators end
   
-  data_DHIS2_Booking[,bookorgname:=NEW_bookorgname]
-  data_DHIS2_Booking[,NEW_bookorgname:=NULL]
+  (!IS_GAZA){
+    
+    data_DHIS2_Booking[,bookorgname:=NEW_bookorgname]
+    data_DHIS2_Booking[,NEW_bookorgname:=NULL]
+    
+    
+  } else {
+    
+    
+  }
+
   
   # we create booknum based on motherIDNO, because women can have multiple uniqueIDs
   #setorder(data_DHIS2_Booking,uniqueid,bookdate)
