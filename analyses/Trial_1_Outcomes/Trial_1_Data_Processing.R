@@ -862,7 +862,8 @@ smallD <- VisitVariables(
   gestagedaysVariable = "manT1gestagedays")
 nrow(smallD[mantypex_1=="RefHighRisk" & manT1gestagedays_1>=15 & manT1gestagedays_1<=17])
 nrow(smallD[mantypex_1=="RefHighRisk" & mangestage_1>=0 & mangestage_1<=14])
-xtabs(~smallD$TrialOne_refHR_00_14)
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_refHR_00_14)
+xtabs(~smallD[ident_dhis2_control==F]$TrialOne_refHR_00_14)
 xtabs(~smallD$TrialOne_refHR_35_37)
 
 # Ref to Hosp
@@ -876,7 +877,8 @@ smallD <- VisitVariables(
   TruevaluesDiscrete ="RefHosp",
   gestagedaysVariable = "manT1gestagedays")
 nrow(smallD[mantypex_1=="RefHosp" & mangestage_1>=0 & mangestage_1<=14])
-xtabs(~smallD$TrialOne_refHosp_00_14)
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_refHosp_00_14)
+xtabs(~smallD[ident_dhis2_control==F]$mantypex_1, addNA=T)
 
 # RefDiabetes
 smallD <- VisitVariables(

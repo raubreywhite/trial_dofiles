@@ -2,7 +2,17 @@ CleanOrgName <- function(data,nameToReplace="bookorgname"){
   oldName <- nameToReplace
   newName <- sprintf("NEW_%s",nameToReplace)
   
-  sData <- readxl::read_excel("../data_raw/structural_data/bookorgname.xlsx")
+  if(IS_GAZA){
+    
+    sData <- readxl::read_excel("../gaza_data_raw/structural_data/bookorgname.xlsx") 
+    
+  } else{
+    
+    sData <- readxl::read_excel("../data_raw/structural_data/bookorgname.xlsx")
+    
+    }
+  
+
   setDT(sData)
   setnames(sData,"bookorgname",oldName)
   setnames(sData,"NEW_bookorgname",newName)

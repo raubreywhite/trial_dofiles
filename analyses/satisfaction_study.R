@@ -1,6 +1,6 @@
 
 # change this to TRUE if you want to run for gaza
-IS_GAZA <-F
+IS_GAZA <-T
 
 ###### SETUP STARTS ######
 setwd("C:/data processing/trial_dofiles")
@@ -24,6 +24,7 @@ if(IS_GAZA){
   columnsIWant <- c(
     "uniqueid",
     "bookorgname",
+    "str_TRIAL_2_ClusSize",
     "gA_todaylmp",
     "gA_todayus_1",
     "bookgestage"
@@ -32,17 +33,11 @@ if(IS_GAZA){
   #need to define these 
   #depend on what day the data extraction begins in the week
   #38-39+6 weeks target gAs
-  gestAgeEarly <- 266
+  gestAgeEarly <- 263
   gestAgeLate <- 276
   
 } else {
   d <- LoadDataFileFromNetworkWB() 
-  
-  #Creating our data set to use
-  #T2WB<- d[Trial_2_and_3==T &
-  #      bookdate >= "" & 
-  #     bookdate<="",]
-  #sat <-
   
   fileTag <- "wb"
   
@@ -52,6 +47,7 @@ if(IS_GAZA){
     "uniqueid",
     "bookorgname",
     "str_TRIAL_2_Cluster",
+    "str_TRIAL_2_ClusSize",
     "firstname",
     "fathersname",
     "middlename",
@@ -66,24 +62,26 @@ if(IS_GAZA){
     
   ) 
   
-  #need to define these 
-  #depend on what day the data extraction begins in the week
-  gestAgeEarly <- 273
-  gestAgeLate <- 279
+  # Data extraction will begin on Sundays (March 15, 2020)
+  # Extract and send lists on Thursdays, so 266-3 days. Woman will be 38 weeks sunday
+  # First week will be 38-39+3 days, second week will be 38 to 38+6, but we will   
+  # extract 3 days earlier so everything goes back by 3 days
+  
+  # First week
+  gestAgeEarly <- 263
+  gestAgeLate <- 276
+  
+  # rest of the weeks
+  #gestAgeEarly <- 263
+  #gestAgeLate <- 269
+  
   
 }
-
-
+xtabs(~d$str_TRIAL_2_ClusSize)
 # Calculating gA
 ## LMP
 d[,gA_todaylmp:=round(as.numeric(
   difftime(lubridate::today(),booklmp, units="days")))]
-
-#d[,gA_todayedd:=round(as.numeric(
-#difftime(lubridate::today(),usedd_1, units="days")))]
-
-#d[gA_todayeddminus:=gA_todayedd-28]
-
 
 
 # US
@@ -91,17 +89,9 @@ d[,gA_todaylmp:=round(as.numeric(
 d[,estimatedgest_1:=round(as.numeric(
   difftime(lubridate::today(),usdate_1, units="days")))]
 
-d[usgestage_1<=22,usgestage_1days:=usgestage_1*7]
+d[usgestage_1<=20,usgestage_1days:=usgestage_1*7]
 
 d[,gA_todayus_1:=estimatedgest_1 + usgestage_1days]
-
-#from edd
-#d[,estimatedd:=round(as.numeric(
-#  difftime(lubridate::today(),usedd_1, units="days")))]
-
-
-#d[,gA_todayedd36:=estimatedd-28]
-
 
 sum(is.na(d$booklmp))
 sum(is.na(d$booklmp))
@@ -110,11 +100,12 @@ sum(is.na(d$booklmp))
 if(IS_GAZA==FALSE){
   # WEST BANK
   # select the booking/control/clinic people that we want
-  satstudy <- d[bookdate>="2019-03-16" & 
+  satstudy <- d[bookdate>="2019-07-01" & 
                 ident_dhis2_control==F & 
                 ident_dhis2_booking==T & 
                   is.na(cpopregoutcome_1) &
                 (ident_TRIAL_2_and_3==T)]
+  
   # delete the people who dont have either a phone or a mobile
   satstudy <- satstudy[mobile!="" | phone!=""]
  
@@ -122,7 +113,7 @@ if(IS_GAZA==FALSE){
   # GAZA
   # select the booking/control/clinic people that we want
   # (this should be everyone)
-  satstudy <- d[bookdate>="2019-03-16" & 
+  satstudy <- d[bookdate>=2019-07-01 & 
                     is.na(cpopregoutcome_1) &
                     ident_dhis2_booking==T & 
                     (ident_TRIAL_2_and_3==T)]
@@ -133,7 +124,6 @@ if(IS_GAZA==FALSE){
 # these are the things that are the same bewteen gaza and WB
 # restrict on gestational age
 satstudy <- satstudy[
-  #(gA_todayedd36 >=gestAgeEarly & gA_todayedd36 <= gestAgeLate),
   (gA_todayus_1 >=gestAgeEarly & gA_todayus_1 <= gestAgeLate) |
     (gA_todaylmp >=gestAgeEarly & gA_todaylmp <= gestAgeLate),
   columnsIWant,
@@ -149,7 +139,7 @@ satstudy[,callback_day_3:=""]
 satstudy[,callback_time_3:=""]
 satstudy[,reason_for_ending_call:=""]
 
-setorder(satstudy,gA_todayus_1,gA_todaylmp)
+setorder(satstudy,str_TRIAL_2_ClusSize,gA_todayus_1,gA_todaylmp)
 nrow(satstudy)
 
 sum(is.na(d$booklmp))
@@ -160,9 +150,31 @@ if(IS_GAZA){
   # sort randomly
   set.seed(as.numeric(lubridate::today()))
   satstudy[,randomNumber:=runif(.N)]
-  setorder(satstudy,randomNumber)
+  setorder(satstudy,str_Trial_2_ClusSize,gA_todayus_1, gA_todaylmp)
   satstudy[,randomNumber:=NULL]
+  satstudy[,sampleNum:=""]
+  satstudy[,status:=""]
+  satstudy[,callback_day_1:=""]
+  satstudy[,callback_time_1:=""]
+  satstudy[,callback_day_2:=""]
+  satstudy[,callback_time_2:=""]
+  satstudy[,callback_day_3:=""]
+  satstudy[,callback_time_3:=""]
+  satstudy[,reason_for_ending_call:=""]
+  
 }
+
+set.seed(4)
+#give everyone random number
+satstudy[,rand_num:=runif(.N)]
+#sort according to random number
+setorder(satstudy, str_Trial_2_ClusSize, rand_num)
+#assign them a row number/order within bookorgname
+satstudy[,rand_order:=1:.N,by=str_TRIAL_2_ClusSize]
+#select cases with 4 or less
+satstudy <- satstudy[rand_order<=4]
+
+
 openxlsx::write.xlsx(satstudy, 
                      file.path(
                        FOLDER_DATA_RESULTS,
@@ -171,22 +183,12 @@ openxlsx::write.xlsx(satstudy,
                                lubridate::today(),fileTag)))
 
 
-#set.seed(4)
-#give everyone random number
-#d[,rand_num:=runif(.N)]
-#sort according to random number
-#setorder(d, bookorgname, rand_num)
-#assign them a row number/order within bookorgname
-#d[,rand_order:=1:.N,by=bookorgname]
-#select cases with 4 or less
-#small <- d[rand_order<=4]
-
 
 openxlsx::write.xlsx(satstudy, 
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "satisfaction",
-                       sprintf("%s_%s_satisfaction CASES.xlsx",
+                       sprintf("%s_%s_satisfaction_gaza.xlsx",
                                lubridate::today(),fileTag)))
 
 ## END HERE

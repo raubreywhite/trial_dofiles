@@ -8,8 +8,8 @@ Setup <- function(IS_GAZA=FALSE){
   REF_WB_CLINIC_CONTROL_DATE <- "2019-03-04"
   
   # define our dates
-  GAZA_CLINIC_INTERVENTION_DATE <- "2020-02-02"
-  GAZA_CLINIC_CONTROL_DATE<- "2020-02-02"
+  GAZA_CLINIC_INTERVENTION_DATE <- "2020-03-10"
+  GAZA_CLINIC_CONTROL_DATE<- "2020-03-10"
 
   
   #since we are finished with control data for trial 1, we can use the export below.

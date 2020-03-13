@@ -31,8 +31,8 @@ Analyse_MissingBirthOutcomes <- function(d){
   
   
   # setnames(table,"uglyname","What a pretty name!")
-  d[,prettyTrial1:="Trial 1"]
-  d[ident_TRIAL_1==FALSE,prettyTrial1:="_Not trial 1"]
+  d[ident_dhis2_control==F,Arm:= "A"]
+  d[ident_dhis2_control==T,Arm:="B"]
   tab <- d[ident_dhis2_booking==1 & ident_TRIAL_1==T,.(
     Total=.N,
     "Total expected delivery"=sum(isExpectedToHaveDelivered,na.rm=T),
@@ -44,7 +44,7 @@ Analyse_MissingBirthOutcomes <- function(d){
     "Number match in paperhbo" = sum(matching=="PaperHBO"),
     "Number not matched" = sum(matching=="Not")
   ),
-  keyby=.(prettyTrial1,bookyearmonth)]
+  keyby=.(bookyearmonth, Arm)]
   tab[,"% Missing":=round(`Number not matched`/Total*100)]
   
   openxlsx::write.xlsx(x=tab,

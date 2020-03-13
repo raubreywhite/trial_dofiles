@@ -14,11 +14,7 @@ smallD[bookgestagedays_cats %in% c("(0,104]",
                                    "(125,160]",
                                    "(160,167]"),Opportunity_GDM_screening_1:=1]
 #24-28
-smallD[bookgestagedays_cats %in% c("(0,104]",
-                                   "(104,125]", 
-                                   "(125,160]",
-                                   "(160,167]",
-                                   "(167,202]")|
+smallD[bookgestagedays_cats %in% c("(167,202]")|
               TrialOne_anvisitnew_24_28==T,Opportunity_GDM_screening_2:=1]
 # after 28
 smallD[bookgestagedays_cats %in% c("(202,216]",
@@ -166,7 +162,7 @@ xtabs(~smallD$GDMscreeningontime_1, addNA=T)
 
 smallD[,GDMscreeningontime_1A:=as.logical(NA)]
 smallD[Opportunity_GDM_screening_1==1 & 
-          booklaburglu="NEG", 
+          booklaburglu=="NEG", 
        GDMscreeningontime_1A:=TRUE]
 
 smallD[,GDMscreeningontime_1B:=as.logical(NA)]
