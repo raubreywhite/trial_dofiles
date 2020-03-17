@@ -41,46 +41,67 @@ xtabs(~smallD$Opportunity_GDM_screening_4, addNA=T)
 
 
 ## Remove opportunities for people who were referred to HR or Hosp
-#refHRHospmanRBG_1 rename to refHrHosp_1
-smallD[,refHrHosp_1:=(
-            TrialOne_refHR_00_14==T|
-            TrialOne_refHR_15_17==T|
-            TrialOne_refHR_18_22==T|
-            Trialone_refHR_23_23==T)|
-          (TrialOne_refHosp_00_14==T|
-           TrialOne_refHosp_15_17==T|
-           TrialOne_refHosp_18_22==T|
-           TrialOne_refHosp_23_23==T)]
+#refHRHospmanRBG_1 rename to RefHr
+smallD[,RefHr:=as.logical(NA)]
+smallD[Opportunity_anemia_screening_1==1, RefHr:=FALSE]
+smallD[(TrialOne_manRef_HR_00_00==T|
+          TrialOne_manRef_HR_01_01==T|
+          TrialOne_manRef_HR_02_02==T|
+          TrialOne_manRef_HR_03_03==T|
+          TrialOne_manRef_HR_04_04==T|
+          TrialOne_manRef_HR_05_05==T|
+          TrialOne_manRef_HR_06_06==T|
+          TrialOne_manRef_HR_07_07==T|
+          TrialOne_manRef_HR_08_08==T|
+          TrialOne_manRef_HR_09_09==T|
+          TrialOne_manRef_HR_10_10==T|
+          TrialOne_manRef_HR_11_11==T|
+          TrialOne_manRef_HR_12_12==T|
+          TrialOne_manRef_HR_13_13==T|
+          TrialOne_manRef_HR_14_14==T|
+          TrialOne_manRef_HR_15_15==T|
+          TrialOne_manRef_HR_16_16==T|
+          TrialOne_manRef_HR_17_17==T|
+          TrialOne_manRef_HR_18_18==T|
+          TrialOne_manRef_HR_19_19==T|
+          TrialOne_manRef_HR_20_20==T|
+          TrialOne_manRef_HR_21_21==T|
+          TrialOne_manRef_HR_22_22==T|
+          TrialOne_manRef_HR_23_23==T),
+       RefHr:=TRUE]
+xtabs(~smallD$RefHr, addNA=T)
 
-#refHRHospmanRBG_2 rename to refHrHosp_2
-smallD[,refHrHosp_2:=(
-    TrialOne_refHR_29_30==T|
-    TrialOne_refHR_31_33==T|
-    TrialOne_refHR_34_34==T|
-    TrialOne_refHR_35_37==T)|
-      (TrialOne_refHosp_29_30==T|
-          TrialOne_refHosp_31_33==T|
-          TrialOne_refHosp_34_34==T|
-          TrialOne_refHosp_35_37==T)]
+#refHrHosp_2 rename to refHr_2
+smallD[,refHr_2:=(
+    TrialOne_refHR_29_29==T|
+    TrialOne_refHR_30_30==T|
+    TrialOne_refHR_31_31==T|
+    TrialOne_refHR_32_32==T|
+      TrialOne_refHR_33_33==T|
+      TrialOne_refHR_34_34==T|
+      TrialOne_refHR_35_35==T|
+      TrialOne_refHR_36_36==T|
+      TrialOne_refHR_35_37==T)]
 
 
-smallD[(TrialOne_anvisitnew_24_24 & 
-           (refHrHosp_1==T))|
-          (TrialOne_anvisitnew_25_25 & 
-             (refHrHosp_1==T|TrialOne_refHR_24_24==T|TrialOne_refHosp_24_24==T))|
-          (TrialOne_anvisitnew_26_26 & 
-             (refHrHosp_1==T|TrialOne_refHR_24_24==T|TrialOne_refHosp_24_24==T|
-                TrialOne_refHR_25_25==T|TrialOne_refHosp_25_25==T))|
-          (TrialOne_anvisitnew_27_27 & 
-             (refHrHosp_1==T|TrialOne_refHR_24_24==T|TrialOne_refHosp_24_24==T|
-                TrialOne_refHR_25_25==T|TrialOne_refHosp_25_25==T|
-                TrialOne_refHR_26_26==T|TrialOne_refHosp_26_26==T))|
-          (TrialOne_anvisitnew_28_28 & 
-             (refHrHosp_1==T|
-                TrialOne_refHR_24_24==T|TrialOne_refHosp_24_24==T|
-                TrialOne_refHR_25_25==T|TrialOne_refHosp_25_25==T|
-                TrialOne_refHR_26_26==T|TrialOne_refHosp_26_26==T|
-                TrialOne_refHR_27_27==T|TrialOne_refHosp_27_27==T)),
+smallD[Opportunity_GDM_screening_2==1 &
+         (TrialOne_anvisitnew_24_24 & 
+            (RefHr==T))|
+         (TrialOne_anvisitnew_25_25 & 
+            (RefHr==T|TrialOne_manRef_HR_24_24==T))|
+         (TrialOne_anvisitnew_26_26 & 
+            (RefHr==T|TrialOne_manRef_HR_24_24==T|
+               TrialOne_manRef_HR_25_25==T))|
+         (TrialOne_anvisitnew_27_27 & 
+            (RefHr==T|TrialOne_manRef_HR_24_24==T|
+               TrialOne_manRef_HR_25_25==T|
+               TrialOne_manRef_HR_26_26==T))|
+         (TrialOne_anvisitnew_28_28 & 
+            (RefHr==T|
+               TrialOne_manRef_HR_24_24==T|
+               TrialOne_manRef_HR_25_25==T|
+               TrialOne_manRef_HR_26_26==T|
+               TrialOne_manRef_HR_27_27==T)), 
        Opportunity_GDM_screening_2:=Opportunity_GDM_screening_2-1]
 
 # checks
@@ -182,7 +203,7 @@ xtabs(~smallD$GDMscreeningontime_3, addNA=T)
 smallD[, GDMscreeningontime_4:=as.logical(NA)]
 smallD[Opportunity_GDM_screening_4==1, GDMscreeningontime_4:= FALSE]
 smallD[GDMscreeningontime_4==F & 
-         (refHrHosp_1==T|refHrHosp_2==T),GDMscreeningontime_4:=TRUE]
+         (RefHr==T|refHr_2==T),GDMscreeningontime_4:=TRUE]
 
 
 prelimGDM <- smallD[,.(N=.N,

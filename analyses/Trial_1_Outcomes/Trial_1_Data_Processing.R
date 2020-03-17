@@ -1622,58 +1622,67 @@ for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:0), width=2, flag="0")
   
   #output variable
-  var_refHosp <-sprintf("TrialOne_manRef_Hosp_%s_%s", week_current, week_current)
-  
+  var_refHosp <- sprintf("TrialOne_manRef_Hosp_%s_%s", week_current, week_current)
   var_temp_manperf <- "temp_manperf"
-  var_temp_referhosp <- "temp_refhosp"
+  var_temp_refHosp <- "temp_refHosp"
   
   #id source
-  var_badref <- sprintf("TrialOne_refHosp_%s_%s", week_current, week_current)
+  var_refHospsource <- sprintf("TrialOne_refHosp_%s_%s", week_current, week_current)
   
   # no one has anything
   smallD[,(var_temp_manperf):=as.logical(NA)]
-  smallD[,(var_temp_referhosp):=as.logical(NA)]
+  smallD[,(var_temp_refHosp):=as.logical(NA)]
   
   # is false, if you have a referral
-  smallD[get(var_badref)==TRUE, (var_temp_manperf):=FALSE]
+  # intervention
+  smallD[get(var_refHospsource)==TRUE, (var_temp_manperf):=FALSE]
   
-  # is true for anyone who has a referral to hospital
-  smallD[get(var_badref)==TRUE, (var_temp_referhosp):=TRUE]
+  # everyone
+  #smallD[!is.na(get(var_refHospsource)), (var_temp_refHosp):=FALSE]
+  
+  # control
+  smallD[get(var_refHospsource)==TRUE, (var_temp_refHosp):=TRUE]
   
   
   for(week_later in weeks_later){
-    # working only on manperf check for intervention arm in this case
-    var_secondcheck <- sprintf("TrialOne_manperf_%s_%s", 
-                               week_later, 
-                               week_later)
+    # working only on manperf check
+    var_manperf <- sprintf("TrialOne_manperf_%s_%s", 
+                           week_later, 
+                           week_later)
     # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
     smallD[get(var_temp_manperf)==FALSE & 
-             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+             get(var_manperf)==TRUE, (var_temp_manperf):=TRUE]
     
     
   }
- smallD[,(var_manref):=as.logical(NA)]
+  #making var for high blood glu 
+  smallD[,(var_refHosp):=as.logical(NA)]
   
   #control
-  smallD[ident_dhis2_control==T,(var_manref):=get(var_temp_referhosp)]
+  smallD[ident_dhis2_control==T,(var_refHosp):=get(var_temp_refHosp)]
   
   #intervention
-  smallD[ident_dhis2_control==F,(var_manref):=get(var_temp_referhosp) & get(var_temp_manperf)]
+  smallD[ident_dhis2_control==F,(var_refHosp):=get(var_temp_manperf) & 
+           get(var_temp_refHosp)]
   
   #delete these variables because will use them in the subsequent loops we make
   
   smallD[,(var_temp_manperf):=NULL]
-  smallD[,(var_temp_referhosp):=NULL]
+  smallD[,(var_temp_refHosp):=NULL]
   
 }
-xtabs(~smallD[ident_dhis2_control==T]$TrialOne_manRef_Hosp_20_20)
-xtabs(~smallD[ident_dhis2_control==F]$TrialOne_manRef_Hosp_20_20)
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_manRef_Hosp_35_35)
+xtabs(~smallD[ident_dhis2_control==F]$TrialOne_manRef_Hosp_35_35)
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_manRef_Hosp_32_32)
+xtabs(~smallD[ident_dhis2_control==F]$TrialOne_manRef_Hosp_32_32)
 
-
-
+checkHosp <- smallD[!is.na(TrialOne_manRef_Hosp_32_32) &
+                      ident_dhis2_control==F, c("TrialOne_manperf_32_32",
+                                 "TrialOne_refHosp_32_32",
+                                 "TrialOne_manRef_Hosp_32_32")]
 
 
 ########## Ref HR for any reason at any time point #########
@@ -1681,62 +1690,66 @@ for(i in 0:37){
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
+  weeks_later <- formatC(i+c(0:0), width=2, flag="0")
   
   #output variable
-  var_refHR<-sprintf("TrialOne_manRef_HR_%s_%s", week_current, week_current)
-  
+  var_refHR <- sprintf("TrialOne_manRef_HR_%s_%s", week_current, week_current)
   var_temp_manperf <- "temp_manperf"
-  var_temp_referHR <- "temp_refHR"
+  var_temp_refHR <- "temp_refHR"
   
   #id source
-  var_badref <- sprintf("TrialOne_refHR_%s_%s", week_current, week_current)
+  var_refHRsource <- sprintf("TrialOne_refHR_%s_%s", week_current, week_current)
   
   # no one has anything
   smallD[,(var_temp_manperf):=as.logical(NA)]
-  smallD[,(var_temp_referHR):=as.logical(NA)]
+  smallD[,(var_temp_refHR):=as.logical(NA)]
   
   # is false, if you have a referral
-  smallD[get(var_badref)==TRUE, (var_temp_manperf):=FALSE]
+  # intervention
+  smallD[get(var_refHRsource)==TRUE, (var_temp_manperf):=FALSE]
   
- # smallD[get(var_badref)==TRUE, (var_temp_referHR):=TRUE]
-  smallD[!is.na(get(var_badref)), (var_temp_referHR):=FALSE]
   
+  # control
+  smallD[get(var_refHRsource)==TRUE, (var_temp_refHR):=TRUE]
   
   
   for(week_later in weeks_later){
-    # working only on manperf check for intervention arm in this case
-    var_secondcheck <- sprintf("TrialOne_manperf_%s_%s", 
-                               week_later, 
-                               week_later)
+    # working only on manperf check
+    var_manperf <- sprintf("TrialOne_manperf_%s_%s", 
+                           week_later, 
+                           week_later)
     # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
     smallD[get(var_temp_manperf)==FALSE & 
-             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+             get(var_manperf)==TRUE, (var_temp_manperf):=TRUE]
     
     
   }
-  smallD[,(var_manref):=as.logical(NA)]
+  #making var for high blood glu 
+  smallD[,(var_refHR):=as.logical(NA)]
   
   #control
-  smallD[ident_dhis2_control==T,(var_manref):=get(var_temp_referHR)]
+  smallD[ident_dhis2_control==T,(var_refHR):=get(var_temp_refHR)]
   
   #intervention
-  smallD[ident_dhis2_control==F,(var_manref):=get(var_temp_referHR) & 
-           get(var_temp_manperf)]
+  smallD[ident_dhis2_control==F,(var_refHR):=get(var_temp_manperf) & 
+           get(var_temp_refHR)]
   
   #delete these variables because will use them in the subsequent loops we make
   
   smallD[,(var_temp_manperf):=NULL]
-  smallD[,(var_temp_referHR):=NULL]
+  smallD[,(var_temp_refHR):=NULL]
   
 }
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_manRef_HR_35_35)
+xtabs(~smallD[ident_dhis2_control==F]$TrialOne_manRef_HR_35_35)
 
 xtabs(~smallD[ident_dhis2_control==T]$TrialOne_manRef_HR_20_20)
 xtabs(~smallD[ident_dhis2_control==F]$TrialOne_manRef_HR_20_20)
 
-
-
-smallD[!is.na(get(var_badref)), (var_temp_referhosp):=FALSE]
+checkHR <- smallD[!is.na(TrialOne_manRef_HR_20_20) &
+                      ident_dhis2_control==F, c("TrialOne_manperf_20_20",
+                                                "TrialOne_refHR_20_20",
+                                                "TrialOne_manRef_HR_20_20")]
 
 
 
@@ -2512,6 +2525,10 @@ varsuslga <- names(smallD)[stringr::str_detect(names(smallD),"^uslga")]
 varsanbpsyst <- names(smallD)[stringr::str_detect(names(smallD),"^anbpsyst")]
 varsanbpdiast <- names(smallD)[stringr::str_detect(names(smallD),"^anbpdiast")]
 
+varsmanrefhosp <-names(smallD)[stringr::str_detect(names(smallD),
+                                          "^TrialOne_manRef_Hosp_")]
+varsmanrefhr <-names(smallD)[stringr::str_detect(names(smallD),
+                                                   "^TrialOne_manRef_HR_")]
 
 smallD[ident_dhis2_control==T, prettyExposure:="D"]
 smallD[ident_dhis2_control==F, prettyExposure:="C"]
@@ -2685,7 +2702,9 @@ varskeepAll <- c("prettyExposure",
                  varsT1anvis,
                  varsangAdays,
                  varsangAweeks,
-                 varsanevent)
+                 varsanevent,
+                 varsmanrefhosp,
+                 varsmanrefhr)
                  
                  
 varshb <-c(varslabevent, 
