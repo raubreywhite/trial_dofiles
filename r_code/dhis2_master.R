@@ -169,7 +169,7 @@ DHIS2_Master <- function(
   
   ## structural indicators end
   
-  (!IS_GAZA){
+  if(!IS_GAZA){
     
     data_DHIS2_Booking[,bookorgname:=NEW_bookorgname]
     data_DHIS2_Booking[,NEW_bookorgname:=NULL]

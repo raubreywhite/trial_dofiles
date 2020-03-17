@@ -60,5 +60,4 @@ sum(XTBSU$Tot)
 
 openxlsx::write.xlsx(XTBSU_GZ,file.path(FOLDER_DATA_RESULTS,"XTBUGZHT.xlsx"))
 
-
 ############END###############

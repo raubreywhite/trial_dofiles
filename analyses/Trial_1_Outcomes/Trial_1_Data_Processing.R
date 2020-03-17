@@ -1612,7 +1612,134 @@ for(i in 0:37){
   smallD[,(var_temp_manlga):=NULL]
   
 }
-xtabs(~smallD$TrialOne_manlga_Hosp_32_32)
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_manlga_Hosp_32_32)
+xtabs(~smallD[ident_dhis2_control==F]$TrialOne_manlga_Hosp_32_32)
+
+########################## Referred for any management ##########################
+
+############ Ref Hosp ####################
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
+  
+  #output variable
+  var_refHosp <-sprintf("TrialOne_manRef_Hosp_%s_%s", week_current, week_current)
+  
+  var_temp_manperf <- "temp_manperf"
+  var_temp_referhosp <- "temp_refhosp"
+  
+  #id source
+  var_badref <- sprintf("TrialOne_refHosp_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_referhosp):=as.logical(NA)]
+  
+  # is false, if you have a referral
+  smallD[get(var_badref)==TRUE, (var_temp_manperf):=FALSE]
+  
+  # is true for anyone who has a referral to hospital
+  smallD[get(var_badref)==TRUE, (var_temp_referhosp):=TRUE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manperf check for intervention arm in this case
+    var_secondcheck <- sprintf("TrialOne_manperf_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    
+  }
+ smallD[,(var_manref):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manref):=get(var_temp_referhosp)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manref):=get(var_temp_referhosp) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_referhosp):=NULL]
+  
+}
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_manRef_Hosp_20_20)
+xtabs(~smallD[ident_dhis2_control==F]$TrialOne_manRef_Hosp_20_20)
+
+
+
+
+
+########## Ref HR for any reason at any time point #########
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
+  
+  #output variable
+  var_refHR<-sprintf("TrialOne_manRef_HR_%s_%s", week_current, week_current)
+  
+  var_temp_manperf <- "temp_manperf"
+  var_temp_referHR <- "temp_refHR"
+  
+  #id source
+  var_badref <- sprintf("TrialOne_refHR_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_referHR):=as.logical(NA)]
+  
+  # is false, if you have a referral
+  smallD[get(var_badref)==TRUE, (var_temp_manperf):=FALSE]
+  
+ # smallD[get(var_badref)==TRUE, (var_temp_referHR):=TRUE]
+  smallD[!is.na(get(var_badref)), (var_temp_referHR):=FALSE]
+  
+  
+  
+  for(week_later in weeks_later){
+    # working only on manperf check for intervention arm in this case
+    var_secondcheck <- sprintf("TrialOne_manperf_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    
+  }
+  smallD[,(var_manref):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manref):=get(var_temp_referHR)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manref):=get(var_temp_referHR) & 
+           get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_referHR):=NULL]
+  
+}
+
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_manRef_HR_20_20)
+xtabs(~smallD[ident_dhis2_control==F]$TrialOne_manRef_HR_20_20)
+
+
+
+smallD[!is.na(get(var_badref)), (var_temp_referhosp):=FALSE]
+
+
+
 
 ########## lmpstatusKnown #########
 varsT1all <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_")]
@@ -2386,8 +2513,8 @@ varsanbpsyst <- names(smallD)[stringr::str_detect(names(smallD),"^anbpsyst")]
 varsanbpdiast <- names(smallD)[stringr::str_detect(names(smallD),"^anbpdiast")]
 
 
-smallD[prettyExposure=="Trial Arm A", prettyExposure:="D"]
-smallD[prettyExposure=="Trial Arm B", prettyExposure:="C"]
+smallD[ident_dhis2_control==T, prettyExposure:="D"]
+smallD[ident_dhis2_control==F, prettyExposure:="C"]
 
 varskeep <- c("prettyExposure",
               "uniqueid",
@@ -2412,6 +2539,13 @@ varskeep <- c("prettyExposure",
               "bookhistaph",	
               "bookhistabort",	
               "bookhistpreecl",	
+              "bookhistpreterm",
+              "bookprimi",
+              "bookhistabort",
+              "bookfetalmove",
+              "bookvagbleed",
+              "bookhistcscompl",
+              "bookhistutesur",
               "bookheight",	
               "bookweight",	
               "bookbmi", 
@@ -2527,7 +2661,15 @@ varskeepAll <- c("prettyExposure",
                  "bookhistpph",	
                  "bookhistaph",	
                  "bookhistabort",	
-                 "bookhistpreecl",	
+                 "bookhistpreecl",
+                 "bookparity",
+                 "bookhistpreterm",
+                 "bookprimi",
+                 "bookhistabort",
+                 "bookfetalmove",
+                 "bookvagbleed",
+                 "bookhistcscompl",
+                 "bookhistutesur",
                  "bookheight",	
                  "bookweight",	
                  "bookbmi", 
@@ -2623,8 +2765,8 @@ varsman <-c(varsmanevent,
 ############################################################################################################################################################################################################ EXPORTING DATA SETS ########################################################################################################################################################################################################
 
 ###### Anemia  data set  ###### 
-smallD[prettyExposure=="E", prettyExposure:="G"]
-smallD[prettyExposure=="F", prettyExposure:="H"]
+smallD[ident_dhis2_control==F, prettyExposure:="G"]
+smallD[ident_dhis2_control==T, prettyExposure:="H"]
 varskeep <- c(varskeepAll,
               varshb,
               varsman)
@@ -2636,8 +2778,8 @@ openxlsx::write.xlsx(hb,file.path(FOLDER_DATA_CLEAN,
                                           lubridate::today())))
 
 ###### Hypertension data set  ###### 
-smallD[prettyExposure=="G", prettyExposure:="J"]
-smallD[prettyExposure=="H", prettyExposure:="I"]
+smallD[ident_dhis2_control==F, prettyExposure:="J"]
+smallD[ident_dhis2_control==T, prettyExposure:="I"]
 varskeep <- c(varskeepAll,
               varsbp,
               varsman)
@@ -2649,8 +2791,8 @@ openxlsx::write.xlsx(bp,file.path(FOLDER_DATA_CLEAN,
                                           lubridate::today())))
 
 ###### GDM data set  ###### 
-smallD[prettyExposure=="J", prettyExposure:="K"]
-smallD[prettyExposure=="I", prettyExposure:="L"]
+smallD[ident_dhis2_control==F, prettyExposure:="K"]
+smallD[ident_dhis2_control==T, prettyExposure:="L"]
 varskeep <- c(varskeepAll,
               varsgdm,
               varsman)
@@ -2666,9 +2808,13 @@ smallD[ident_dhis2_control==F, prettyExposure:="B"]
 varskeep <- c(varskeepAll,
               varsmalpres,
               varsman)
-malpres <-smallD[,varskeep,with=F]
+malpresset <-smallD[,varskeep,with=F]
 
-openxlsx::write.xlsx(malpres,file.path(FOLDER_DATA_CLEAN,
+#unlist(varsmalpres)
+#unlist(varskeepAll)
+#unlist(varskeep)
+
+openxlsx::write.xlsx(malpresset,file.path(FOLDER_DATA_CLEAN,
                                        "Trial_1_Outcomes",
                                        sprintf("%s_Malpres.xlsx", 
                                                lubridate::today())))

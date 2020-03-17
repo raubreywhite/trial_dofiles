@@ -41,94 +41,46 @@ xtabs(~smallD$Opportunity_GDM_screening_4, addNA=T)
 
 
 ## Remove opportunities for people who were referred to HR or Hosp
-smallD[,refHRHospmanRBG_1:=(
-  TrialOne_manRBGHigh_HR_01_01==T|
-    TrialOne_manRBGHigh_HR_02_02==T|
-    TrialOne_manRBGHigh_HR_03_03==T|
-    TrialOne_manRBGHigh_HR_04_04==T|
-    TrialOne_manRBGHigh_HR_05_05==T|
-    TrialOne_manRBGHigh_HR_06_06==T|
-    TrialOne_manRBGHigh_HR_07_07==T|
-    TrialOne_manRBGHigh_HR_08_08==T|
-    TrialOne_manRBGHigh_HR_09_09==T|
-    TrialOne_manRBGHigh_HR_10_10==T|
-    TrialOne_manRBGHigh_HR_11_11==T|
-    TrialOne_manRBGHigh_HR_12_12==T|
-    TrialOne_manRBGHigh_HR_13_13==T|
-    TrialOne_manRBGHigh_HR_14_14==T|
-    TrialOne_manRBGHigh_HR_15_15==T|
-    TrialOne_manRBGHigh_HR_16_16==T|
-    TrialOne_manRBGHigh_HR_17_17==T|
-    TrialOne_manRBGHigh_HR_18_18==T|
-    TrialOne_manRBGHigh_HR_19_19==T|
-    TrialOne_manRBGHigh_HR_20_20==T|
-    TrialOne_manRBGHigh_HR_21_21==T|
-    TrialOne_manRBGHigh_HR_22_22==T|
-    TrialOne_manRBGHigh_HR_23_23==T)|
-    ( TrialOne_manRBGHigh_Hosp_01_01==T|
-        TrialOne_manRBGHigh_Hosp_02_02==T|
-        TrialOne_manRBGHigh_Hosp_03_03==T|
-        TrialOne_manRBGHigh_Hosp_04_04==T|
-        TrialOne_manRBGHigh_Hosp_05_05==T|
-        TrialOne_manRBGHigh_Hosp_06_06==T|
-        TrialOne_manRBGHigh_Hosp_07_07==T|
-        TrialOne_manRBGHigh_Hosp_08_08==T|
-        TrialOne_manRBGHigh_Hosp_09_09==T|
-        TrialOne_manRBGHigh_Hosp_10_10==T|
-        TrialOne_manRBGHigh_Hosp_11_11==T|
-        TrialOne_manRBGHigh_Hosp_12_12==T|
-        TrialOne_manRBGHigh_Hosp_13_13==T|
-        TrialOne_manRBGHigh_Hosp_14_14==T|
-        TrialOne_manRBGHigh_Hosp_15_15==T|
-        TrialOne_manRBGHigh_Hosp_16_16==T|
-        TrialOne_manRBGHigh_Hosp_17_17==T|
-        TrialOne_manRBGHigh_Hosp_18_18==T|
-        TrialOne_manRBGHigh_Hosp_19_19==T|
-        TrialOne_manRBGHigh_Hosp_20_20==T|
-        TrialOne_manRBGHigh_Hosp_21_21==T|
-        TrialOne_manRBGHigh_Hosp_22_22==T|
-        TrialOne_manRBGHigh_Hosp_23_23==T)]
+#refHRHospmanRBG_1 rename to refHrHosp_1
+smallD[,refHrHosp_1:=(
+            TrialOne_refHR_00_14==T|
+            TrialOne_refHR_15_17==T|
+            TrialOne_refHR_18_22==T|
+            Trialone_refHR_23_23==T)|
+          (TrialOne_refHosp_00_14==T|
+           TrialOne_refHosp_15_17==T|
+           TrialOne_refHosp_18_22==T|
+           TrialOne_refHosp_23_23==T)]
 
-smallD[,refHRHospmanRBG_2:=(
-    TrialOne_manRBGHigh_Hosp_29_29==T|
-    TrialOne_manRBGHigh_Hosp_30_30==T|
-    TrialOne_manRBGHigh_Hosp_31_31==T|
-    TrialOne_manRBGHigh_Hosp_32_32==T|
-    TrialOne_manRBGHigh_Hosp_33_33==T|
-    TrialOne_manRBGHigh_Hosp_34_34==T|
-    TrialOne_manRBGHigh_Hosp_35_35==T|
-    TrialOne_manRBGHigh_Hosp_36_36==T|
-    TrialOne_manRBGHigh_Hosp_37_37==T)|
-      (TrialOne_manRBGHigh_HR_29_29==T|
-      TrialOne_manRBGHigh_HR_30_30==T|
-      TrialOne_manRBGHigh_HR_31_31==T|
-      TrialOne_manRBGHigh_HR_32_32==T|
-      TrialOne_manRBGHigh_HR_33_33==T|
-      TrialOne_manRBGHigh_HR_34_34==T|
-      TrialOne_manRBGHigh_HR_35_35==T|
-      TrialOne_manRBGHigh_HR_36_36==T|
-      TrialOne_manRBGHigh_HR_37_37==T)]
+#refHRHospmanRBG_2 rename to refHrHosp_2
+smallD[,refHrHosp_2:=(
+    TrialOne_refHR_29_30==T|
+    TrialOne_refHR_31_33==T|
+    TrialOne_refHR_34_34==T|
+    TrialOne_refHR_35_37==T)|
+      (TrialOne_refHosp_29_30==T|
+          TrialOne_refHosp_31_33==T|
+          TrialOne_refHosp_34_34==T|
+          TrialOne_refHosp_35_37==T)]
 
 
-smallD[(TrialOne_anvisitnew_24_24 & refHRmanRBG_1==T)|
-         (TrialOne_anvisitnew_25_25 & 
-            (refHRmanRBG_1==T|
-               TrialOne_manRBGHigh_HR_24_24==T))|
-         (TrialOne_anvisitnew_26_26 & 
-            (refHRmanRBG_1==T|
-               TrialOne_manRBGHigh_HR_24_24==T|
-               TrialOne_manRBGHigh_HR_25_25==T))|
-         (TrialOne_anvisitnew_27_27 & 
-            (refHRmanRBG_1==T|
-               TrialOne_manRBGHigh_HR_24_24==T|
-               TrialOne_manRBGHigh_HR_25_25==T|
-               TrialOne_manRBGHigh_HR_26_26==T))|
-         (TrialOne_anvisitnew_28_28 & 
-            (refHRmanRBG_1==T|
-               TrialOne_manRBGHigh_HR_24_24==T|
-               TrialOne_manRBGHigh_HR_25_25==T|
-               TrialOne_manRBGHigh_HR_26_26==T|
-               TrialOne_manRBGHigh_HR_27_27==T)),
+smallD[(TrialOne_anvisitnew_24_24 & 
+           (refHrHosp_1==T))|
+          (TrialOne_anvisitnew_25_25 & 
+             (refHrHosp_1==T|TrialOne_refHR_24_24==T|TrialOne_refHosp_24_24==T))|
+          (TrialOne_anvisitnew_26_26 & 
+             (refHrHosp_1==T|TrialOne_refHR_24_24==T|TrialOne_refHosp_24_24==T|
+                TrialOne_refHR_25_25==T|TrialOne_refHosp_25_25==T))|
+          (TrialOne_anvisitnew_27_27 & 
+             (refHrHosp_1==T|TrialOne_refHR_24_24==T|TrialOne_refHosp_24_24==T|
+                TrialOne_refHR_25_25==T|TrialOne_refHosp_25_25==T|
+                TrialOne_refHR_26_26==T|TrialOne_refHosp_26_26==T))|
+          (TrialOne_anvisitnew_28_28 & 
+             (refHrHosp_1==T|
+                TrialOne_refHR_24_24==T|TrialOne_refHosp_24_24==T|
+                TrialOne_refHR_25_25==T|TrialOne_refHosp_25_25==T|
+                TrialOne_refHR_26_26==T|TrialOne_refHosp_26_26==T|
+                TrialOne_refHR_27_27==T|TrialOne_refHosp_27_27==T)),
        Opportunity_GDM_screening_2:=Opportunity_GDM_screening_2-1]
 
 # checks
@@ -230,7 +182,7 @@ xtabs(~smallD$GDMscreeningontime_3, addNA=T)
 smallD[, GDMscreeningontime_4:=as.logical(NA)]
 smallD[Opportunity_GDM_screening_4==1, GDMscreeningontime_4:= FALSE]
 smallD[GDMscreeningontime_4==F & 
-         (refHRHospmanRBG_1==T|refHRHospmanRBG_2==T),GDMscreeningontime_4:=TRUE]
+         (refHrHosp_1==T|refHrHosp_2==T),GDMscreeningontime_4:=TRUE]
 
 
 prelimGDM <- smallD[,.(N=.N,

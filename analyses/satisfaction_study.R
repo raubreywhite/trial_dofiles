@@ -1,6 +1,6 @@
 
 # change this to TRUE if you want to run for gaza
-IS_GAZA <-T
+IS_GAZA <-F
 
 ###### SETUP STARTS ######
 setwd("C:/data processing/trial_dofiles")
@@ -25,6 +25,7 @@ if(IS_GAZA){
     "uniqueid",
     "bookorgname",
     "str_TRIAL_2_ClusSize",
+    "str_TRIAL_2_Cluster",
     "gA_todaylmp",
     "gA_todayus_1",
     "bookgestage"
@@ -77,24 +78,27 @@ if(IS_GAZA){
   
   
 }
+
 xtabs(~d$str_TRIAL_2_ClusSize)
+nrow(d[bookdate>="2019-07-01" & !is.na(booklmp)])
 # Calculating gA
+
 ## LMP
 d[,gA_todaylmp:=round(as.numeric(
   difftime(lubridate::today(),booklmp, units="days")))]
 
+nrow(d[!is.na(booklmp)])
+nrow(d[!is.na(gA_todaylmp)])
 
 # US
-
 d[,estimatedgest_1:=round(as.numeric(
   difftime(lubridate::today(),usdate_1, units="days")))]
+xtabs(~d$estimatedgest_1)
 
-d[usgestage_1<=20,usgestage_1days:=usgestage_1*7]
+d[,usgestage_1days:=usgestage_1*7]
 
 d[,gA_todayus_1:=estimatedgest_1 + usgestage_1days]
 
-sum(is.na(d$booklmp))
-sum(is.na(d$booklmp))
 
 # here are the things that are different between gaza and WB
 if(IS_GAZA==FALSE){
@@ -142,37 +146,32 @@ satstudy[,reason_for_ending_call:=""]
 setorder(satstudy,str_TRIAL_2_ClusSize,gA_todayus_1,gA_todaylmp)
 nrow(satstudy)
 
-sum(is.na(d$booklmp))
-sum(is.na(d$gA_todaylmp))
-sum(is.na(satstudy$gA_todaylmp))
+#sum(is.na(d$booklmp))
+#sum(is.na(d$gA_todaylmp))
+#sum(is.na(satstudy$gA_todaylmp))
 
 if(IS_GAZA){
   # sort randomly
-  set.seed(as.numeric(lubridate::today()))
-  satstudy[,randomNumber:=runif(.N)]
-  setorder(satstudy,str_Trial_2_ClusSize,gA_todayus_1, gA_todaylmp)
-  satstudy[,randomNumber:=NULL]
-  satstudy[,sampleNum:=""]
-  satstudy[,status:=""]
-  satstudy[,callback_day_1:=""]
-  satstudy[,callback_time_1:=""]
-  satstudy[,callback_day_2:=""]
-  satstudy[,callback_time_2:=""]
-  satstudy[,callback_day_3:=""]
-  satstudy[,callback_time_3:=""]
-  satstudy[,reason_for_ending_call:=""]
+  #set.seed(as.numeric(lubridate::today()))
+  #satstudy[,randomNumber:=runif(.N)]
+  
+  set.seed(4)
+  #give everyone random number
+  satstudy[,rand_num:=runif(.N)]
+  #sort according to random number
+  setorder(satstudy, str_TRIAL_2_ClusSize)
+  #assign them a row number/order within bookorgname
+  satstudy[,rand_order:=1:.N,by=str_TRIAL_2_Cluster]
+  #select cases with 4 or less
+  #satstudy[,rand_num:=NULL]
+  satstudy <- satstudy[rand_order<=4]
+  
+  
+  setorder(satstudy,str_TRIAL_2_ClusSize,gA_todayus_1, gA_todaylmp)
+ 
   
 }
 
-set.seed(4)
-#give everyone random number
-satstudy[,rand_num:=runif(.N)]
-#sort according to random number
-setorder(satstudy, str_Trial_2_ClusSize, rand_num)
-#assign them a row number/order within bookorgname
-satstudy[,rand_order:=1:.N,by=str_TRIAL_2_ClusSize]
-#select cases with 4 or less
-satstudy <- satstudy[rand_order<=4]
 
 
 openxlsx::write.xlsx(satstudy, 
@@ -186,7 +185,7 @@ openxlsx::write.xlsx(satstudy,
 
 openxlsx::write.xlsx(satstudy, 
                      file.path(
-                       FOLDER_DATA_RESULTS,
+                       FOLDER_DATA_RESULTS_GAZA,
                        "satisfaction",
                        sprintf("%s_%s_satisfaction_gaza.xlsx",
                                lubridate::today(),fileTag)))
