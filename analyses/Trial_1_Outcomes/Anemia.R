@@ -194,8 +194,14 @@ smallD[Opportunity_anemia_screening_2==1 &
          TrialOne_labhb_anemia_mild_mod_24_28==T, HbonTime_2c:=FALSE]
 
 # Hbontime_3
-smallD[, HbonTime_3:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_3==1, HbonTime_3:=FALSE]
+smallD[, HbonTime_3a:= as.logical(NA)]
+smallD[Opportunity_anemia_screening_3==1, HbonTime_3a:=FALSE]
+
+smallD[, HbonTime_3b:= as.logical(NA)]
+smallD[Opportunity_anemia_screening_3==1, HbonTime_3b:=FALSE]
+
+smallD[, HbonTime_3c:= as.logical(NA)]
+smallD[Opportunity_anemia_screening_3==1, HbonTime_3c:=FALSE]
 
 smallD[, HbonTime_4a:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_4==1, HbonTime_4a:=FALSE]
@@ -253,10 +259,23 @@ smallD[HbonTime_2c==F &
          TrialOne_manhb_mildmodhbret_28_28==T, HbonTime_2c:=TRUE]
 
 #booked 29-30, 31-33, 34
-smallD[HbonTime_3==F & 
-         (!is.na(booklabhb) |TrialOne_labhb_normal_29_30==T)|
-         (!is.na(booklabhb)|TrialOne_labhb_normal_31_33==T)|
-         (!is.na(booklabhb)|TrialOne_labhb_normal_34_34==T), HbonTime_3:=TRUE]
+smallD[HbonTime_3a==F & Opportunity_anemia_screening_3==1 &
+         (TrialOne_labhb_normal_29_30==T)|
+         (TrialOne_labhb_normal_31_33==T)|
+         (TrialOne_labhb_normal_34_34==T), HbonTime_3a:=TRUE]
+
+
+smallD[Opportunity_anemia_screening_3==1 & 
+         (!is.na(booklabhb) |TrialOne_labhb_anemia_mild_mod_29_30==T)|
+         (!is.na(booklabhb)|TrialOne_labhb_anemia_mild_mod_31_33==T)|
+         (!is.na(booklabhb)|TrialOne_labhb_anemia_mild_mod_34_34==T), 
+       HbonTime_3c:=TRUE]
+
+smallD[HbonTime_3b==F & 
+         (!is.na(booklabhb) |TrialOne_labhb_anemia_sev_29_30==T)|
+         (!is.na(booklabhb)|TrialOne_labhb_anemia_sev_31_33==T)|
+         (!is.na(booklabhb)|TrialOne_labhb_anemia_sev_34_34==T), 
+              HbonTime_3b:=TRUE]
 
 
 # 35-37 screenings
@@ -350,7 +369,9 @@ prelimHB <- smallD[,.(N=.N,
                        Opportun_2=sum(Opportunity_anemia_screening_2, na.rm=T),
                        Success_2c=sum(HbonTime_2c, na.rm=T),
                        Opportun_3=sum(Opportunity_anemia_screening_3, na.rm=T),
-                       Success_3=sum(Opportunity_anemia_screening_3, na.rm=T),
+                       Success_3a=sum(HbonTime_3a, na.rm=T),
+                       Success_3b=sum(HbonTime_3b, na.rm=T),
+                       Success_3c=sum(HbonTime_3c, na.rm=T),
                        Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),
                        Success_4a=sum(HbonTime_4a, na.rm=T),
                        Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),

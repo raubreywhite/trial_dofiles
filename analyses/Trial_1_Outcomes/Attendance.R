@@ -1,87 +1,179 @@
 #################################  Attendance ################################
+# making vars
+smallD[, refHrhosp:= as.logical(NA)]
+smallD[,refHRhosp:=(TrialOne_manRef_HR_00_00==T|
+          TrialOne_manRef_HR_01_01==T|
+          TrialOne_manRef_HR_02_02==T|
+          TrialOne_manRef_HR_03_03==T|
+          TrialOne_manRef_HR_04_04==T|
+          TrialOne_manRef_HR_05_05==T|
+          TrialOne_manRef_HR_06_06==T|
+          TrialOne_manRef_HR_07_07==T|
+          TrialOne_manRef_HR_08_08==T|
+          TrialOne_manRef_HR_09_09==T|
+          TrialOne_manRef_HR_10_10==T|
+          TrialOne_manRef_HR_11_11==T|
+          TrialOne_manRef_HR_12_12==T|
+          TrialOne_manRef_HR_13_13==T|
+          TrialOne_manRef_HR_14_14==T)|
+         (TrialOne_manRef_Hosp_00_00==T|
+         TrialOne_manRef_Hosp_01_01==T|
+         TrialOne_manRef_Hosp_02_02==T|
+         TrialOne_manRef_Hosp_03_03==T|
+         TrialOne_manRef_Hosp_04_04==T|
+         TrialOne_manRef_Hosp_05_05==T|
+         TrialOne_manRef_Hosp_06_06==T|
+         TrialOne_manRef_Hosp_07_07==T|
+         TrialOne_manRef_Hosp_08_08==T|
+         TrialOne_manRef_Hosp_09_09==T|
+         TrialOne_manRef_Hosp_10_10==T|
+         TrialOne_manRef_Hosp_11_11==T|
+         TrialOne_manRef_Hosp_12_12==T|
+         TrialOne_manRef_Hosp_13_13==T|
+         TrialOne_manRef_Hosp_14_14==T)
+         ]
 
 ## Define Opportunities
 
 # before 15-17
 smallD[,Opp_1:= as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(0,104]") &
-         TrialOne_refHR_00_14==F &
-         TrialOne_refHosp_00_14==F, Opp_1:=1]
+smallD[bookgestagedays_cats %in% c("(0,104]"),Opp_1:=1]
 
 # booked 15-17
 smallD[,Opp_2:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(104,125]") &
-         TrialOne_refHR_00_14==F &
-         TrialOne_refHosp_00_14==F &
-         TrialOne_refHR_15_17==F &
-         TrialOne_refHosp_15_17==F, Opp_2:=1]
+         refHRhosp==F, Opp_2:=1]
+
 
 #booked 18-22
 smallD[,Opp_3:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(125,160]") &
-         TrialOne_refHR_00_14==F &
-         TrialOne_refHosp_00_14==F &
-         TrialOne_refHR_15_17==F &
-         TrialOne_refHosp_15_17==F, Opp_3:=1]
+         refHRhosp==F &
+         TrialOne_manRef_HR_15_15==F &
+         TrialOne_manRef_Hosp_15_15==F &
+         TrialOne_manRef_HR_16_16==F &
+         TrialOne_manRef_Hosp_16_16==F &
+         TrialOne_manRef_HR_17_17==F &
+         TrialOne_manRef_Hosp_17_17==F, Opp_3:=1]
+
+
 
 #booked 23-23
 smallD[,Opp_4:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(160,167]") &
-        TrialOne_refHR_00_14==F &
-         TrialOne_refHosp_00_14==F &
-         TrialOne_refHR_15_17==F &
-         TrialOne_refHosp_15_17==F &
-         TrialOne_refHR_18_22==F &
-         TrialOne_refHosp_18_22==F, Opp_4:=1]
+         refHRhosp==F &
+         TrialOne_manRef_HR_15_15==F &
+         TrialOne_manRef_Hosp_15_15==F &
+         TrialOne_manRef_HR_16_16==F &
+         TrialOne_manRef_Hosp_16_16==F &
+         TrialOne_manRef_HR_17_17==F &
+         TrialOne_manRef_Hosp_17_17==F &
+         TrialOne_manRef_HR_18_18==F &
+         TrialOne_manRef_Hosp_18_18==F &
+         TrialOne_manRef_HR_19_19==F &
+         TrialOne_manRef_Hosp_19_19==F &
+         TrialOne_manRef_HR_20_20==F &
+         TrialOne_manRef_Hosp_20_20==F &
+         TrialOne_manRef_HR_21_21==F &
+         TrialOne_manRef_Hosp_21_21==F &
+         TrialOne_manRef_HR_22_22==F &
+         TrialOne_manRef_Hosp_22_22==F, Opp_4:=1]
 
 #booked 24-28
 smallD[,Opp_5:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(167,202]") &
-         TrialOne_refHR_00_14==F &
-         TrialOne_refHosp_00_14==F &
-         TrialOne_refHR_15_17==F &
-         TrialOne_refHosp_15_17==F &
-         TrialOne_refHR_18_22==F &
-         TrialOne_refHosp_18_22==F &
-         TrialOne_refHR_18_22==F &
-         TrialOne_refHosp_18_22==F &
-         TrialOne_refHR_23_23==F &
-         TrialOne_refHosp_23_23==F, Opp_5:=1]
+         refHRhosp==F &
+         TrialOne_manRef_HR_15_15==F &
+         TrialOne_manRef_Hosp_15_15==F &
+         TrialOne_manRef_HR_16_16==F &
+         TrialOne_manRef_Hosp_16_16==F &
+         TrialOne_manRef_HR_17_17==F &
+         TrialOne_manRef_Hosp_17_17==F &
+         TrialOne_manRef_HR_18_18==F &
+         TrialOne_manRef_Hosp_18_18==F &
+         TrialOne_manRef_HR_19_19==F &
+         TrialOne_manRef_Hosp_19_19==F &
+         TrialOne_manRef_HR_20_20==F &
+         TrialOne_manRef_Hosp_20_20==F &
+         TrialOne_manRef_HR_21_21==F &
+         TrialOne_manRef_Hosp_21_21==F &
+         TrialOne_manRef_HR_22_22==F &
+         TrialOne_manRef_Hosp_22_22==F &
+         TrialOne_manRef_HR_23_23 &
+         TrialOne_manRef_Hosp_23_23, Opp_5:=1]
+
+
 
 #booked 29-30
 smallD[, Opp_6:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(202,216]") &
-         TrialOne_refHR_00_14==F &
-         TrialOne_refHosp_00_14==F &
-         TrialOne_refHR_15_17==F &
-         TrialOne_refHosp_15_17==F &
-         TrialOne_refHR_18_22==F &
-         TrialOne_refHosp_18_22==F &
-         TrialOne_refHR_18_22==F &
-         TrialOne_refHosp_18_22==F &
-         TrialOne_refHR_23_23==F &
-         TrialOne_refHosp_23_23==F &
-         TrialOne_refHR_24_28==F &
-         TrialOne_refHosp_24_28==F, Opp_6:=1]
+         refHRhosp==F &
+         TrialOne_manRef_HR_15_15==F &
+         TrialOne_manRef_Hosp_15_15==F &
+         TrialOne_manRef_HR_16_16==F &
+         TrialOne_manRef_Hosp_16_16==F &
+         TrialOne_manRef_HR_17_17==F &
+         TrialOne_manRef_Hosp_17_17==F &
+         TrialOne_manRef_HR_18_18==F &
+         TrialOne_manRef_Hosp_18_18==F &
+         TrialOne_manRef_HR_19_19==F &
+         TrialOne_manRef_Hosp_19_19==F &
+         TrialOne_manRef_HR_20_20==F &
+         TrialOne_manRef_Hosp_20_20==F &
+         TrialOne_manRef_HR_21_21==F &
+         TrialOne_manRef_Hosp_21_21==F &
+         TrialOne_manRef_HR_22_22==F &
+         TrialOne_manRef_Hosp_22_22==F &
+         TrialOne_manRef_HR_23_23==F &
+         TrialOne_manRef_Hosp_23_23==F &
+         TrialOne_manRef_HR_24_24==F &
+         TrialOne_manRef_Hosp_24_24==F &
+         TrialOne_manRef_HR_25_25==F &
+         TrialOne_manRef_Hosp_25_25==F &
+         TrialOne_manRef_HR_26_26==F &
+         TrialOne_manRef_Hosp_26_26==F &
+         TrialOne_manRef_HR_27_27==F &
+         TrialOne_manRef_Hosp_27_27==F &
+         TrialOne_manRef_HR_28_28==F &
+         TrialOne_manRef_Hosp_28_28==F, Opp_6:=1]
 
 #booked 31-33
 smallD[,Opp_7:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(216,237]") &
-         TrialOne_refHR_00_14==F &
-         TrialOne_refHosp_00_14==F &
-         TrialOne_refHR_15_17==F &
-         TrialOne_refHosp_15_17==F &
-         TrialOne_refHR_18_22==F &
-         TrialOne_refHosp_18_22==F &
-         TrialOne_refHR_18_22==F &
-         TrialOne_refHosp_18_22==F &
-         TrialOne_refHR_23_23==F &
-         TrialOne_refHosp_23_23==F &
-         TrialOne_refHR_24_28==F &
-         TrialOne_refHosp_24_28==F &
-         TrialOne_refHR_29_30==F &
-         TrialOne_refHosp_29_30==F, Opp_7:=1]
+         refHRhosp==F &
+         TrialOne_manRef_HR_15_15==F &
+         TrialOne_manRef_Hosp_15_15==F &
+         TrialOne_manRef_HR_16_16==F &
+         TrialOne_manRef_Hosp_16_16==F &
+         TrialOne_manRef_HR_17_17==F &
+         TrialOne_manRef_Hosp_17_17==F &
+         TrialOne_manRef_HR_18_18==F &
+         TrialOne_manRef_Hosp_18_18==F &
+         TrialOne_manRef_HR_19_19==F &
+         TrialOne_manRef_Hosp_19_19==F &
+         TrialOne_manRef_HR_20_20==F &
+         TrialOne_manRef_Hosp_20_20==F &
+         TrialOne_manRef_HR_21_21==F &
+         TrialOne_manRef_Hosp_21_21==F &
+         TrialOne_manRef_HR_22_22==F &
+         TrialOne_manRef_Hosp_22_22==F &
+         TrialOne_manRef_HR_23_23==F &
+         TrialOne_manRef_Hosp_23_23==F &
+         TrialOne_manRef_HR_24_24==F &
+         TrialOne_manRef_Hosp_24_24==F &
+         TrialOne_manRef_HR_25_25==F &
+         TrialOne_manRef_Hosp_25_25==F &
+         TrialOne_manRef_HR_26_26==F &
+         TrialOne_manRef_Hosp_26_26==F &
+         TrialOne_manRef_HR_27_27==F &
+         TrialOne_manRef_Hosp_27_27==F &
+         TrialOne_manRef_HR_28_28==F &
+         TrialOne_manRef_Hosp_28_28==F&
+         TrialOne_manRef_HR_29_29==F &
+         TrialOne_manRef_Hosp_29_29==F&
+         TrialOne_manRef_HR_30_30==F, Opp_7:=1]
 
+####### up to here #####
 # booked 34 weeks
 smallD[,Opp_8:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(237,244]") &
