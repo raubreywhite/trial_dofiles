@@ -35,7 +35,7 @@ if(IS_GAZA){
   #depend on what day the data extraction begins in the week
   #38-39+6 weeks target gAs
   gestAgeEarly <- 263
-  gestAgeLate <- 276
+  gestAgeLate <- 269
   
 } else {
   d <- LoadDataFileFromNetworkWB() 
@@ -69,12 +69,12 @@ if(IS_GAZA){
   # extract 3 days earlier so everything goes back by 3 days
   
   # First week
-  gestAgeEarly <- 263
-  gestAgeLate <- 276
+  #gestAgeEarly <- 263
+  #gestAgeLate <- 276
   
   # rest of the weeks
-  #gestAgeEarly <- 263
-  #gestAgeLate <- 269
+  gestAgeEarly <- 263
+  gestAgeLate <- 269
   
   
 }
@@ -117,7 +117,7 @@ if(IS_GAZA==FALSE){
   # GAZA
   # select the booking/control/clinic people that we want
   # (this should be everyone)
-  satstudy <- d[bookdate>=2019-07-01 & 
+  satstudy <- d[bookdate>="2019-07-01" & 
                     is.na(cpopregoutcome_1) &
                     ident_dhis2_booking==T & 
                     (ident_TRIAL_2_and_3==T)]
@@ -150,7 +150,7 @@ nrow(satstudy)
 #sum(is.na(d$gA_todaylmp))
 #sum(is.na(satstudy$gA_todaylmp))
 
-if(IS_GAZA){
+
   # sort randomly
   #set.seed(as.numeric(lubridate::today()))
   #satstudy[,randomNumber:=runif(.N)]
@@ -169,9 +169,8 @@ if(IS_GAZA){
   
   setorder(satstudy,str_TRIAL_2_ClusSize,gA_todayus_1, gA_todaylmp)
  
-  
-}
 
+sattats <-satstudy[,.(N=.N),keyby=.(str_TRIAL_2_ClusSize,str_TRIAL_2_Cluster)]
 
 
 openxlsx::write.xlsx(satstudy, 
@@ -179,6 +178,12 @@ openxlsx::write.xlsx(satstudy,
                        FOLDER_DATA_RESULTS,
                        "satisfaction",
                        sprintf("%s_%s_satisfaction WB.xlsx",
+                               lubridate::today(),fileTag)))
+openxlsx::write.xlsx(sattats, 
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "satisfaction",
+                       sprintf("%s_%s_satstats_WB.xlsx",
                                lubridate::today(),fileTag)))
 
 
@@ -188,6 +193,13 @@ openxlsx::write.xlsx(satstudy,
                        FOLDER_DATA_RESULTS_GAZA,
                        "satisfaction",
                        sprintf("%s_%s_satisfaction_gaza.xlsx",
+                               lubridate::today(),fileTag)))
+
+openxlsx::write.xlsx(sattats, 
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "satisfaction",
+                       sprintf("%s_%s_satstats_gaza.xlsx",
                                lubridate::today(),fileTag)))
 
 ## END HERE

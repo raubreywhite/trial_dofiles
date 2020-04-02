@@ -119,7 +119,7 @@ xtabs(~smallD$screenb424, addNA=T)
 
 scrb424 <- smallD[,.(A=sum(ident_dhis2_control==T),
                         B=sum(ident_dhis2_control==F)),
-                     keyby=.(screenb4242)]
+                     keyby=.(screenb424)]
 
 ##Defining Successes 
 smallD[,GDMscreeningontime_1A:=as.logical(NA)]
@@ -245,8 +245,8 @@ varskeep <- c(varskeepAll,
               "booklabfastbloodglu",
               varsgdm,
               varsman,
-              "refHRHospmanRBG_1",
-              "refHRHospmanRBG_2",
+              "RefHr",
+              "refHr_2",
               "screenb424",
               "screenafter28",
               GDMSucc,
