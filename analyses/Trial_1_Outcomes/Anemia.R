@@ -13,18 +13,27 @@ smallD[bookgestagedays_cats %in% c("(0,104]",
                                    "(125,160]",
                                    "(160,167]"),
                           Opportunity_anemia_screening_1:=1]
+
+xtabs(~smallD$Opportunity_anemia_screening_1, addNA=T)
+
+
 ## booked 24 or has visit 
 smallD[,Opportunity_anemia_screening_2:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(167,202]")| 
                         TrialOne_anvisitnew_24_28==T,
                          Opportunity_anemia_screening_2:=1]
 
-# booked 29-34 weeks
+xtabs(~smallD$Opportunity_anemia_screening_2, addNA=T)
+
+# booked 29-34 weeks or has visit
 smallD[,Opportunity_anemia_screening_3:=as.numeric(NA)]
 smallD[bookgestagedays_cats %in% c("(202,216]",
                                    "(216,237]",
                                    "(237,244]"),
                           Opportunity_anemia_screening_3:=1]
+
+xtabs(~smallD$Opportunity_anemia_screening_3, addNA=T)
+
 
 ## booked or visit at 35-37 weeks
 smallD[,Opportunity_anemia_screening_4:=as.numeric(NA)]
@@ -32,27 +41,31 @@ smallD[bookgestagedays_cats %in% c("(244,265]") |
                           TrialOne_anvisitnew_35_37==T, 
                           Opportunity_anemia_screening_4:=1]
 
+xtabs(~smallD$Opportunity_anemia_screening_4, addNA=T)
+
+
+
 ## severe anemia at booking and at any other visit after that
 smallD[,Opportunity_anemia_screening_5:=as.numeric(NA)]
-smallD[booklabhb<7 & booklabhb>2 &
-         (TrialOne_labhb_anemia_sev_00_14==T|
-            TrialOne_labhb_anemia_sev_15_17==T|
-            TrialOne_labhb_anemia_sev_18_22==T|
-            TrialOne_labhb_anemia_sev_23_23==T|
-            TrialOne_labhb_anemia_sev_29_30==T|
-            TrialOne_labhb_anemia_sev_31_33==T|
-            TrialOne_labhb_anemia_sev_34_34==T),Opportunity_anemia_screening_5:=1]
+smallD[TrialOne_labhb_anemia_sev_00_14==T|
+      TrialOne_labhb_anemia_sev_15_17==T|
+      TrialOne_labhb_anemia_sev_18_22==T|
+      TrialOne_labhb_anemia_sev_23_23==T,Opportunity_anemia_screening_5:=1]
+
+xtabs(~smallD$Opportunity_anemia_screening_5, addNA=T)
+
+
 ## mild mod anemia
 smallD[,Opportunity_anemia_screening_6:=as.numeric(NA)]
-smallD[booklabhb<11 & booklabhb>=7 &
-         (TrialOne_labhb_anemia_mild_mod_00_14==T|
-            TrialOne_labhb_anemia_mild_mod_15_17==T|
-            TrialOne_labhb_anemia_mild_mod_18_22==T|
-            TrialOne_labhb_anemia_mild_mod_23_23==T|
-            TrialOne_labhb_anemia_mild_mod_29_30==T|
-            TrialOne_labhb_anemia_mild_mod_31_33==T|
-            TrialOne_labhb_anemia_mild_mod_34_34==T),
+smallD[TrialOne_labhb_anemia_mild_mod_00_14==T|
+         TrialOne_labhb_anemia_mild_mod_15_17==T|
+         TrialOne_labhb_anemia_mild_mod_18_22==T|
+         TrialOne_labhb_anemia_mild_mod_23_23==T,
        Opportunity_anemia_screening_6:=1]
+
+xtabs(~smallD$Opportunity_anemia_screening_6, addNA=T)
+
+
 
 # ADJUSTING OPPORTUNITIES FOR THOSE WHO HAVE BEEN REFERRED
 ## Before 24 weeks
@@ -168,39 +181,44 @@ smallD[Opportunity_anemia_screening_4==1 &
                TrialOne_manRef_HR_32_32==T|
                TrialOne_manRef_HR_33_33==T)), 
        Opportunity_anemia_screening_4:=Opportunity_anemia_screening_4-1]
-xtabs(~smallD$Opportunity_anemia_screening_3, addNA=T)
+xtabs(~smallD$Opportunity_anemia_screening_4, addNA=T)
 
 #define different time cats for success
 smallD[, HbonTime_1a:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_1==1, HbonTime_1a:=FALSE]
 
 smallD[, HbonTime_1b:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_1==1 &
-         (TrialOne_labhb_anemia_sev_00_14==T|
-          TrialOne_labhb_anemia_sev_15_17==T|
-          TrialOne_labhb_anemia_sev_18_22==T|
-          TrialOne_labhb_anemia_sev_23_23==T), HbonTime_1b:=FALSE]
+smallD[Opportunity_anemia_screening_1==1 & 
+         booklabhb<7 & booklabhb>=2,HbonTime_1b:=FALSE]
+# smallD[Opportunity_anemia_screening_1==1 &
+#          (TrialOne_labhb_anemia_sev_00_14==T|
+#           TrialOne_labhb_anemia_sev_15_17==T|
+#           TrialOne_labhb_anemia_sev_18_22==T|
+#           TrialOne_labhb_anemia_sev_23_23==T), HbonTime_1b:=FALSE]
 
 smallD[, HbonTime_1c:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_1==1 &
-         (TrialOne_labhb_anemia_mild_mod_00_14==T|
-            TrialOne_labhb_anemia_mild_mod_15_17==T|
-            TrialOne_labhb_anemia_mild_mod_18_22==T|
-            TrialOne_labhb_anemia_mild_mod_23_23==T), HbonTime_1c:=FALSE]
+         booklabhb>=7 & booklabhb<11,HbonTime_1c:=FALSE ]
+# smallD[Opportunity_anemia_screening_1==1 &
+#          (TrialOne_labhb_anemia_mild_mod_00_14==T|
+#             TrialOne_labhb_anemia_mild_mod_15_17==T|
+#             TrialOne_labhb_anemia_mild_mod_18_22==T|
+#             TrialOne_labhb_anemia_mild_mod_23_23==T), HbonTime_1c:=FALSE]
 
 
 # Hbontime_2
-smallD[, HbonTime_2a:= as.logical(NA)]
+smallD[,HbonTime_2a:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_2==1, HbonTime_2a:=FALSE]
 
 smallD[, HbonTime_2b:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_2==1 & 
          TrialOne_labhb_anemia_sev_24_28==T, HbonTime_2b:=FALSE]
 
-smallD[, HbonTime_2c:= as.logical(NA)]
+smallD[,HbonTime_2c:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_2==1 & 
          TrialOne_labhb_anemia_mild_mod_24_28==T, HbonTime_2c:=FALSE]
 
+# 29-34 weeks
 # Hbontime_3
 smallD[, HbonTime_3a:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_3==1 & 
@@ -208,15 +226,11 @@ smallD[Opportunity_anemia_screening_3==1 &
 
 smallD[, HbonTime_3b:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_3==1 &
-         (TrialOne_labhb_anemia_sev_29_30==T|
-         TrialOne_labhb_anemia_sev_31_33==T|
-         TrialOne_labhb_anemia_sev_34_34==T), HbonTime_3b:=FALSE]
+         (booklabhb<7 & booklabhb>2), HbonTime_3b:=FALSE]
 
 smallD[, HbonTime_3c:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_3==1 &
-         (TrialOne_labhb_anemia_mild_mod_29_30==T|
-         TrialOne_labhb_anemia_mild_mod_31_33==T|
-         TrialOne_labhb_anemia_mild_mod_34_34==T), HbonTime_3c:=FALSE]
+        (booklabhb<11 & booklabhb>=7), HbonTime_3c:=FALSE]
 
 smallD[, HbonTime_4a:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_4==1, HbonTime_4a:=FALSE]
@@ -247,12 +261,36 @@ smallD[HbonTime_1a==F & booklabhb>=11 &
 xtabs(~smallD$HbonTime_1a, addNA=T)
 
 smallD[HbonTime_1b==F & 
-         booklabhb>=2 & booklabhb<=7,HbonTime_1b:=TRUE]
+         manhbsev==T,HbonTime_1b:=TRUE]
 xtabs(~smallD$HbonTime_1b, addNA=T)
 
 
 smallD[HbonTime_1c==F & 
-         booklabhb>=9 & booklabhb<=10.9,HbonTime_1c:=TRUE]
+        (TrialOne_manhb_mildmodhbret_00_00==T|
+         TrialOne_manhb_mildmodhbret_01_01==T|
+         TrialOne_manhb_mildmodhbret_02_02==T|
+         TrialOne_manhb_mildmodhbret_03_03==T|
+         TrialOne_manhb_mildmodhbret_04_04==T|
+         TrialOne_manhb_mildmodhbret_05_05==T|
+         TrialOne_manhb_mildmodhbret_06_06==T|
+         TrialOne_manhb_mildmodhbret_07_07==T|
+         TrialOne_manhb_mildmodhbret_08_08==T|
+         TrialOne_manhb_mildmodhbret_09_09==T|
+         TrialOne_manhb_mildmodhbret_10_10==T|
+         TrialOne_manhb_mildmodhbret_11_11==T|
+         TrialOne_manhb_mildmodhbret_12_12==T|
+         TrialOne_manhb_mildmodhbret_13_13==T|
+         TrialOne_manhb_mildmodhbret_14_14==T|
+         TrialOne_manhb_mildmodhbret_15_15==T|
+         TrialOne_manhb_mildmodhbret_16_16==T|
+         TrialOne_manhb_mildmodhbret_17_17==T|
+         TrialOne_manhb_mildmodhbret_18_18==T|
+         TrialOne_manhb_mildmodhbret_19_19==T|
+         TrialOne_manhb_mildmodhbret_20_20==T|
+         TrialOne_manhb_mildmodhbret_21_21==T|
+         TrialOne_manhb_mildmodhbret_22_22==T|
+         TrialOne_manhb_mildmodhbret_23_23==T),HbonTime_1c:=TRUE]
+
 xtabs(~smallD$HbonTime_1c, addNA=T)
 
 #24-28 screenings
@@ -307,10 +345,9 @@ smallD[HbonTime_4b==F &
          TrialOne_manhb_37_37==T, HbonTime_4b:=TRUE]
 
 smallD[HbonTime_4c==F &
-         TrialOne_manhb_mildmodhbret_25_25==T|
-         TrialOne_manhb_mildmodhbret_26_26==T|
-         TrialOne_manhb_mildmodhbret_27_27==T|
-         TrialOne_manhb_mildmodhbret_28_28==T, HbonTime_4c:=TRUE]
+         TrialOne_manhb_mildmodhbret_35_35==T|
+         TrialOne_manhb_mildmodhbret_36_36==T|
+         TrialOne_manhb_mildmodhbret_37_37==T, HbonTime_4c:=TRUE]
 
 # severe anemia outside of time windows
 smallD[HbonTime_5==F & 
@@ -337,12 +374,17 @@ smallD[HbonTime_5==F &
          TrialOne_manhb_20_20==T|
          TrialOne_manhb_21_21==T|
          TrialOne_manhb_22_22==T|
-         TrialOne_manhb_23_23==T),HbonTime_5:=TRUE]
+         TrialOne_manhb_23_23==T|
+         TrialOne_manhb_29_29==T|
+         TrialOne_manhb_30_30==T|
+         TrialOne_manhb_31_31==T|
+         TrialOne_manhb_32_32==T|
+         TrialOne_manhb_33_33==T|
+         TrialOne_manhb_34_34==T),HbonTime_5:=TRUE]
 
 #mild/mod anem retest
 smallD[HbonTime_6==F &
-         (TrialOne_labhb_anemia_mild_mod_00_14==T|
-            TrialOne_manhb_mildmodhbret_00_00==T|
+         (TrialOne_manhb_mildmodhbret_00_00==T|
             TrialOne_manhb_mildmodhbret_01_01==T|
             TrialOne_manhb_mildmodhbret_02_02==T|
             TrialOne_manhb_mildmodhbret_03_03==T|
@@ -402,12 +444,15 @@ prelimHB <- smallD[,.(N=.N,
                        Success_4a=sum(HbonTime_4a, na.rm=T),
                        Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),
                        Success_4b=sum(HbonTime_4b, na.rm=T),
-                       Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),
+                       Screening4bF=sum(HbonTime_4b==F, na.rm=T),
                        Success_4c=sum(HbonTime_4c, na.rm=T),
+                       Screening4cF=sum(HbonTime_4c==F, na.rm=T),
                        Opportun_5=sum(Opportunity_anemia_screening_5, na.rm=T),
                        Success_5=sum(HbonTime_5, na.rm=T),
+                      success_5F=sum(HbonTime_5==F),
                       Opportun_6=sum(Opportunity_anemia_screening_6, na.rm=T),
-                      Success_6=sum(HbonTime_6, na.rm=T)),
+                      Success_6=sum(HbonTime_6, na.rm=T),
+                      success_6F=sum(HbonTime_6==F)),
                     keyby=.(ident_dhis2_control)]
 
 openxlsx::write.xlsx(prelimHB,file.path(FOLDER_DATA_RESULTS,

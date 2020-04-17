@@ -7,7 +7,6 @@ setwd("C:/data processing/trial_dofiles")
 
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 sapply(fileSources, source, .GlobalEnv)
-
 Setup(IS_GAZA=IS_GAZA)
 
 
@@ -34,7 +33,7 @@ if(IS_GAZA){
   #need to define these 
   #depend on what day the data extraction begins in the week
   #38-39+6 weeks target gAs
-  gestAgeEarly <- 263
+  gestAgeEarly <- 264
   gestAgeLate <- 269
   
 } else {
@@ -73,7 +72,7 @@ if(IS_GAZA){
   #gestAgeLate <- 276
   
   # rest of the weeks
-  gestAgeEarly <- 263
+  gestAgeEarly <- 264
   gestAgeLate <- 269
   
   
