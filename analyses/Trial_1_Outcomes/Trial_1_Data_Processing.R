@@ -742,6 +742,22 @@ smallD <- VisitVariables(
   gestagedaysVariable = "usT1gestagedays")
 xtabs(~smallD$TrialOne_us_malpresvar_00_14)
 
+#uspres_checked
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="us_pres_checked",
+  variableOfInterestPattern="uspres",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete= c("Trasverse","Breech","Cephalic","Unknown"),
+  gestagedaysVariable = "usT1gestagedays")
+xtabs(~smallD$TrialOne_us_pres_checked_00_14, addNA=T)
+
+
+
+
+
 
 ####SFH Discrepancies####
 #AN SFH measurements
@@ -847,6 +863,22 @@ smallD <- VisitVariables(
 smallD[,anexampalp_0:=NULL]
 smallD[,anT1gestagedays_0:=NULL]
 xtabs(~smallD$TrialOne_anexampalpmal_00_14)
+
+#anexampalp yes
+smallD[,anexampalp_0:=bookexampalp]
+smallD[,anT1gestagedays_0:=bookgestagedays]
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="anexampalpyes",
+  variableOfInterestPattern="anexampalp",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete = c("Trasverse","Breech","Cephalic","Unknown"),
+  gestagedaysVariable = "anT1gestagedays")
+smallD[,anexampalp_0:=NULL]
+smallD[,anT1gestagedays_0:=NULL]
+xtabs(~smallD$TrialOne_anexampalpyes_00_14)
 
 
 ####Referrals####
@@ -2192,15 +2224,15 @@ for (var_gestage in vars_gestage){
 }
 
 # 
-smallD[!is.na(presatterm),
-       anc_detection_malpres_1:=FALSE]
+smallD[,anc_detection_malpres_1:=FALSE]
+
 smallD[anc_detection_malpres_1==FALSE & 
          presatterm %in% c("Breech","Trasverse"), anc_detection_malpres_1:=TRUE ]
 
 
 #making anc detection malpres with vars we used from loop
 
-smallD[,anc_detection_malpres_2:=as.logical(NA)]
+smallD[,anc_detection_malpres_2:=FALSE]
 #need to define false
 for(i in 35:38){
   var <- sprintf("TrialOne_us_malpresvar_%s_%s",i,i)
@@ -2210,7 +2242,7 @@ for(i in 35:38){
   
 }
 
-smallD[,anc_detection_malpres_3:=as.logical(NA)]
+smallD[,anc_detection_malpres_3:=FALSE]
 for(i in 35:38){
   var <- sprintf("TrialOne_anexampalpmal_%s_%s",i,i)
   
@@ -2230,9 +2262,17 @@ smallD[anc_detection_malpres_1==F, malpres_undetected_1:=FALSE]
 smallD[anc_detection_malpres_2==F, malpres_undetected_2:=FALSE]
 smallD[anc_detection_malpres_3==F, malpres_undetected_3:=FALSE]
 
-smallD[anc_detection_malpres_1==F & has_malpresentation==T,malpres_undetected_1:=TRUE]
-smallD[anc_detection_malpres_2==F & has_malpresentation==T,malpres_undetected_2:=TRUE]
-smallD[anc_detection_malpres_3==F & has_malpresentation==T,malpres_undetected_3:=TRUE]
+smallD[anc_detection_malpres_1==F & 
+         (has_malpresentation==T|merged_presentationdeliv==T),
+       malpres_undetected_1:=TRUE]
+
+smallD[anc_detection_malpres_2==F &
+         (has_malpresentation==T|merged_presentationdeliv==T),
+       malpres_undetected_2:=TRUE]
+
+smallD[anc_detection_malpres_3==F & 
+         (has_malpresentation==T|merged_presentationdeliv==T),
+       malpres_undetected_3:=TRUE]
 
 
 smalld <- smallD[,.(
@@ -2488,11 +2528,18 @@ varslabfbs <- names(smallD)[stringr::str_detect(names(smallD),"^labfastbloodglu"
 varslaburglu<- names(smallD)[stringr::str_detect(names(smallD),"^laburglu")]
 varslabogct <- names(smallD)[stringr::str_detect(names(smallD),"^labogct")]
 
+smallD[,anexamsfh_0:=bookexamsfh]
+anexamsfhs <-names(smallD)[stringr::str_detect(names(smallD),"^anexamsfh")]
 varsanexamsfh <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anexamsfh_")]
 
 varsanexampalpmal <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_anexampalpmal_")]
 
 varsanexmalpres <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_malpresanexam_")]
+
+smallD[,anexampalp_0:=bookexampalp]
+anexampalps<-names(smallD)[stringr::str_detect(names(smallD),"^anexampalp_")]
+varsanexampalpyes <- names(smallD)[stringr::str_detect(names(smallD),
+                                                       "^TrialOne_anexampalpyes")]
 
 varsSFHdisc <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_sfhDiscrep")]
 varsSFHdiscExists <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_sfhDiscrepExists")]
@@ -2503,6 +2550,7 @@ varsusgAweeks <- names(smallD)[stringr::str_detect(names(smallD),"^usgestage")]
 varsusgAdays <- names(smallD)[stringr::str_detect(names(smallD),"^usT1gestagedays")]
 varsUSevents <- varsmanevent <- names(smallD)[stringr::str_detect(names(smallD),"^usevent")]
 
+allUs <-names(smallD)[stringr::str_detect(names(smallD),"^us")]
 
 ### Management vars ###
 manhb <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_manhb_")]
@@ -2558,6 +2606,7 @@ varskeep <- c("prettyExposure",
               "bookhistpreecl",	
               "bookhistpreterm",
               "bookprimi",
+              "bookparity",
               "bookhistabort",
               "bookfetalmove",
               "bookvagbleed",
@@ -2629,6 +2678,7 @@ varskeep <- c("prettyExposure",
               "lowercasehbocon_3",
               varsanexpalp,
               varsanexampalpmal,
+              anexampalps,
               varsuspres,
               "anc_detection_malpres_1",
               "anc_detection_malpres_2",
@@ -2643,7 +2693,14 @@ varskeep <- c("prettyExposure",
               varsangestagedays,
               varsusiugr,
               varsuslga,
-              varsUs
+              varsUs,
+              "merged_namehospbirth",
+              "matching",
+              "matching_gov",
+              "matching_private",
+              "matching_hbo",
+              "matching_avicenna"
+              
               
 )
 
@@ -2760,11 +2817,7 @@ varsmalpres <- c(varsUSevents,
                  "presatterm"
                  )
 
-varsfgr <- c(varsusgAweeks,
-             varsusgAdays,
-             varsUSevents,
-             varsusiugr,
-             varsuslga,
+varsfgr <- c(allUs,
              varsUs,
              varsSFHdisc,
              varsSFHdiscExists,
@@ -2821,13 +2874,21 @@ openxlsx::write.xlsx(gdm,file.path(FOLDER_DATA_CLEAN,
                                    "Trial_1_Outcomes",
                                    sprintf("%s_GDM.xlsx", 
                                            lubridate::today())))
+
+
 ###### Malpres data set  ###### 
 smallD[ident_dhis2_control==T, prettyExposure:="A"]
 smallD[ident_dhis2_control==F, prettyExposure:="B"]
 varskeep <- c(varskeepAll,
               varsmalpres,
+              varsanexampalpyes,
+              varsanexpalp,
+              anexampalps,
+              varsuspres,
               varsman)
 malpresset <-smallD[,varskeep,with=F]
+malpresset[1:2]
+
 
 #unlist(varsmalpres)
 #unlist(varskeepAll)
@@ -2845,6 +2906,7 @@ openxlsx::write.xlsx(malpresset,file.path(FOLDER_DATA_CLEAN,
 smallD[prettyExposure=="A", prettyExposure:="N"]
 smallD[prettyExposure=="B", prettyExposure:="M"]
 varskeep <- c(varskeepAll,
+              anexamsfhs,
               varsfgr,
               varsman)
 fgr <-smallD[,varskeep,with=F]

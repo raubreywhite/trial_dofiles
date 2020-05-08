@@ -20,16 +20,27 @@ if(IS_GAZA){
   
   fileTag <- "gaza"
   
+  satGA <- d[bookdate>="2019-07-01" & 
+               is.na(cpopregoutcome_1) &
+               ident_dhis2_booking==T & 
+               (ident_TRIAL_2_and_3==T),]
+  
   
 } else {
   d <- LoadDataFileFromNetworkWB() 
   
   fileTag <- "wb"
   
+  satGA <- d[bookdate>="2019-07-01" & 
+               is.na(cpopregoutcome_1) &
+               ident_dhis2_booking==T & 
+               (ident_TRIAL_2_and_3==T) &
+               (mobile!="" | phone!=""),]
+  
 }
 
 
-satGA <- d[bookdate>="2019-07-01"& ident_TRIAL_2_and_3==T & is.na(cpopregoutcome_1),]
+
 
 # Calculating gA
 
@@ -49,8 +60,8 @@ satGA[,usgestage_1days:=usgestage_1*7]
 
 satGA[,gA_todayus_1:=estimatedgest_1 + usgestage_1days]
 
-gAdist <- satGA[,.(N=.N,
-                   LMP38wks=sum((gA_todaylmp>=266 & gA_todaylmp<=272)| 
+gAdist <- satGA[,.(
+                   LMP38wks0_3days=sum((gA_todaylmp>=266 & gA_todaylmp<=272)| 
                                 (gA_todayus_1>=266 & gA_todayus_1<=272), na.rm=T),
                    LMP37wks=sum((gA_todaylmp>=259 & gA_todaylmp<=265)|
                                   (gA_todayus_1>=259 & gA_todayus_1<=265), na.rm=T),
@@ -67,7 +78,27 @@ gAdist <- satGA[,.(N=.N,
                    LMP31wks=sum((gA_todaylmp>=217 & gA_todaylmp<=223)|
                                   (gA_todayus_1>=217 & gA_todayus_1<=223), na.rm=T),
                    LMP30wks=sum((gA_todaylmp>=210 & gA_todaylmp<=216)|
-                                  (gA_todayus_1>=210 & gA_todayus_1<=216), na.rm=T)),
+                                  (gA_todayus_1>=210 & gA_todayus_1<=216), na.rm=T),
+                   LMP29wks=sum((gA_todaylmp>=203 & gA_todaylmp<=209)|
+                                  (gA_todayus_1>=203 & gA_todayus_1<=209), na.rm=T),
+                   
+                   LMP28wks=sum((gA_todaylmp>=196 & gA_todaylmp<=202)|
+                                  (gA_todayus_1>=196 & gA_todayus_1<=202), na.rm=T),
+                   
+                   LMP27wks=sum((gA_todaylmp>=189 & gA_todaylmp<=195)|
+                                  (gA_todayus_1>=189 & gA_todayus_1<=195), na.rm=T),
+                   
+                   LMP26wks=sum((gA_todaylmp>=182 & gA_todaylmp<=188)|
+                                  (gA_todayus_1>=182 & gA_todayus_1<=188), na.rm=T),
+                   
+                   LMP25wks=sum((gA_todaylmp>=175 & gA_todaylmp<=181)|
+                                  (gA_todayus_1>=175 & gA_todayus_1<=181), na.rm=T),
+                   
+                   LMP24wks=sum((gA_todaylmp>=168 & gA_todaylmp<=174)|
+                                  (gA_todayus_1>=168 & gA_todayus_1<=174), na.rm=T),
+                   
+                   LMP23wks=sum((gA_todaylmp>=161 & gA_todaylmp<=167)|
+                                  (gA_todayus_1>=161 & gA_todayus_1<=167), na.rm=T)),
             
                 keyby=.(str_TRIAL_2_ClusSize,str_TRIAL_2_Cluster)]
 
@@ -77,7 +108,7 @@ openxlsx::write.xlsx(gAdist,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "satisfaction",
-                       sprintf("%s_satGAdistrib_wb.xlsx",
+                       sprintf("%s_satGAdistrib_wb_withphone.xlsx",
                                lubridate::today())))
 
 

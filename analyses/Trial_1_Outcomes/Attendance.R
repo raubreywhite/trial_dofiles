@@ -38,9 +38,11 @@ xtabs(~smallD$refHRhosp, addNA=T)
 
 # oppt 16 week visit
 smallD[,Opp_1:= as.numeric(NA)]
+smallD[bookgestagedays_cats %in% c("(0,104]"),Opp_1:=1]
 smallD[bookgestagedays_cats %in% c("(0,104]") &
-         refHRhosp==F,Opp_1:=1]
+         refHRhosp==T,Opp_1:=0]
 xtabs(~smallD$Opp_1, addNA=T)
+
 
 
 # oppt 18-22 visit

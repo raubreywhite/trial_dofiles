@@ -1,6 +1,6 @@
 
 # change this to TRUE if you want to run for gaza
-IS_GAZA <-F
+IS_GAZA <-T
 
 ###### SETUP STARTS ######
 setwd("C:/data processing/trial_dofiles")
@@ -23,18 +23,19 @@ if(IS_GAZA){
   columnsIWant <- c(
     "uniqueid",
     "bookorgname",
-    "str_TRIAL_2_ClusSize",
     "str_TRIAL_2_Cluster",
+    "str_TRIAL_2_ClusSize",
+    "bookgestage",
     "gA_todaylmp",
-    "gA_todayus_1",
-    "bookgestage"
+    "gA_todayus_1"
+    
   )
   
   #need to define these 
   #depend on what day the data extraction begins in the week
   #38-39+6 weeks target gAs
-  gestAgeEarly <- 264
-  gestAgeLate <- 269
+  gestAgeEarly <- 263
+  gestAgeLate <- 271
   
 } else {
   d <- LoadDataFileFromNetworkWB() 
@@ -71,9 +72,14 @@ if(IS_GAZA){
   #gestAgeEarly <- 263
   #gestAgeLate <- 276
   
+  #dependant on date of extraction
+  #gestAgeLate <- 270
+  
   # rest of the weeks
-  gestAgeEarly <- 264
-  gestAgeLate <- 269
+  gestAgeEarly <- 265
+  #gestAgeLate <- 269
+  
+  gestAgeLate <- 272
   
   
 }
@@ -128,7 +134,8 @@ if(IS_GAZA==FALSE){
 # restrict on gestational age
 satstudy <- satstudy[
   (gA_todayus_1 >=gestAgeEarly & gA_todayus_1 <= gestAgeLate) |
-    (gA_todaylmp >=gestAgeEarly & gA_todaylmp <= gestAgeLate),
+    (gA_todaylmp >=gestAgeEarly & gA_todaylmp <= gestAgeLate) &
+    is.na(cpopregoutcome_1),
   columnsIWant,
   with=F]
 #creating other columsn for data collection
@@ -176,13 +183,13 @@ openxlsx::write.xlsx(satstudy,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "satisfaction",
-                       sprintf("%s_%s_satisfaction WB.xlsx",
+                       sprintf("%s_%s_satisfaction WB_Final.xlsx",
                                lubridate::today(),fileTag)))
 openxlsx::write.xlsx(sattats, 
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "satisfaction",
-                       sprintf("%s_%s_satstats_WB.xlsx",
+                       sprintf("%s_%s_satstats_WB_Final.xlsx",
                                lubridate::today(),fileTag)))
 
 
