@@ -1,4 +1,5 @@
 ### not to be run on server ###
+
 # set working directory
 
 setwd("C:/Users/Mervett_Isbeih/sat_study")
@@ -193,6 +194,12 @@ sat[educat=="(16,25]", edulevel:="After college or university"]
 sat[,bookgestage:=as.numeric(NA)]
 sat[!is.na(bookgAmonth),bookgestage:=4*bookgAmonth]
 
+# bookgAmonthcat
+sat[,bookgAmonthcat:=cut(bookgAmonth,
+                         breaks=c(0,3,6,10),
+                         include.lowest=T)]
+xtabs(~sat$bookgAmonthcat,addNA=T)
+
 # attendance
 setnames(sat,"q15","attend_allanc")
 setnames(sat,"q16","attend_testdiab")
@@ -277,6 +284,7 @@ varskeep <- c("SampNum",
               "leavehome",
               "primipreg",
               "bookgAmonth",
+              "bookgAmonthcat",
               "usother",
               "ancother",
               "refHR",
@@ -324,6 +332,7 @@ openxlsx::write.xlsx(satKeep,
 
 background <- c("agecat",
                 "edulevel",
+                "bookgAmonthcat",
                 "leavehome",
                 "primipreg",
                 "refHR",
@@ -585,3 +594,5 @@ collectornums <- sat[,.(N=.N,
                      keyby=.(collector)]
 
 
+
+        
