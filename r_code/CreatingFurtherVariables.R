@@ -270,7 +270,7 @@ CreatingFurtherVariablesMahima <- function(d){
   d[usedd_1=="2017-07-12" & lastusedd=="2017-06-27", c(nam), with=F] 
  d[,lastusedd:=as.Date(as.numeric(lastusedd),origin="1970-01-01")]
  as.Date(17290,origin="1970-01-01")
- unique(d$lastusedd)
+ #unique(d$lastusedd)
 
 #using lastusedd and minus from hbodates 
 #so that we can get actual gA from usedd
@@ -278,22 +278,18 @@ CreatingFurtherVariablesMahima <- function(d){
  #lastuseddminusdob tis is the diff in days between hosp and usedd
  d[,lastuseddminusdob:=round(as.numeric(
     difftime(mahima_dateofbirth_1,lastusedd, units="weeks")),digits=1)]
-  d$lastuseddminusdob
+  #d$lastuseddminusdob
 class(d$lastuseddminusdob)
 
   
 #calculate the gA from diff plus 40(usgestage_expected)   
 d[,usgestage_expected:=40]
 d[,mahima_gA_1_us:=lastuseddminusdob+40]
-unique(d$mahima_gA_1_us)  
+#unique(d$mahima_gA_1_us)  
 class(d$mahima_gA_1_us)
  
-#d[,us_dateofconception_1:=usdate_1-usgestage_1*7]
-#d$us_dateofconception_1
 
-  
-  
-  ###Making first usedd if its at <=21 gA variable
+###Making first usedd if its at <=21 gA variable
   nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
   num <- stringr::str_replace(nam,"usedd_","")
   d[,first_1_21_usedd:=as.Date(NA)]
@@ -311,9 +307,9 @@ class(d$mahima_gA_1_us)
         is.na(first_1_21_usedd),
       first_1_21_usedd:=as.Date(get(var_usedd),format="%Y-%m-%d")]
   }
-  unique(d$usgestage_1)
-  unique(d$first_1_21_usedd)
-  sum(!is.na(d$first_1_21_usedd))
+  #unique(d$usgestage_1)
+  #unique(d$first_1_21_usedd)
+  #sum(!is.na(d$first_1_21_usedd))
   
   #Making gA for first_1_21_usedd
   
@@ -322,7 +318,30 @@ class(d$mahima_gA_1_us)
   
   d[,first_1_21_usedd_gA:=first_1_21_usedd_diffbtwnHBO+40]
   
-  unique(d$first_1_21_usedd_gA)
+  #unique(d$first_1_21_usedd_gA)
+  
+  
+  #TO DO: make sure we get the 87 women who are missing an lmp or bookdate
+  d[,usedddays:=first_1_21_usedd - as.difftime(280, unit="days")]
+  
+  d[,USorLMPdate:=booklmp]
+  d[!is.na(usedddays),USorLMPdate:=usedddays]
+  #d[is.na(USorLMPdate), USorLMPdate:=]
+  
+  
+  #recalculating bookgestational age into days
+  d[,bookgestagedays:=round(as.numeric(difftime(bookdate,USorLMPdate, units="days")))]
+  
+  bookgestagearms<-d[,.(ArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
+                        ArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),
+                     
+                     keyby=.(bookgestagedays)]
+  
+  openxlsx::write.xlsx(bookgestagearms, 
+                       file.path(
+                         FOLDER_DATA_RESULTS,
+                         "demographics_and_history",
+                         sprintf("%s_bookgestagearms.xlsx",lubridate::today())))
   
   
   
@@ -330,8 +349,14 @@ class(d$mahima_gA_1_us)
   #make sure they are the same types and
   #decide the type. make sure the second one is the same as the edd
   
-  d[,comboUSandLMPgA:=mahima_gestageatbirthwk_1]
-  d[!is.na(first_1_21_usedd_gA),comboUSandLMPgA:=first_1_21_usedd_gA]
+  #d[,comboUSandLMPgA:=mahima_gestageatbirthwk_1]
+  #d[!is.na(first_1_21_usedd_gA),comboUSandLMPgA:=first_1_21_usedd_gA]
+  
+  
+  d[,comboUSandLMPgA:= round(as.numeric(difftime(
+    mahima_dateofbirth_1,
+    USorLMPdate,
+    units ="weeks")), digits=2)]
   
   
   d[,mahima_gA_1_us_cats:=cut(mahima_gA_1_us,
@@ -858,9 +883,8 @@ class(d$mahima_gA_1_us)
   }
   
 
-  #changing lastusedd to days
-  #TO DO: make sure we get the 87 women who are missing an lmp or bookdate
-  d[,usedddays:=lastusedd - as.difftime(280, unit="days")]
+#TO DO: make sure we get the 87 women who are missing an lmp or bookdate
+  d[,usedddays:=first_1_21_usedd - as.difftime(280, unit="days")]
   
   d[,USorLMPdate:=booklmp]
   d[!is.na(usedddays),USorLMPdate:=usedddays]

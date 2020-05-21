@@ -18,7 +18,7 @@ d[ident_dhis2_control==F, prettyExposure:="Trial Arm B"]
 d[ident_dhis2_control==T, prettyExposure:="Trial Arm A"]
 
  # defining dataset
-smallD <- smallD <- d[bookdate >= "2017-01-15"&
+smallD  <- d[bookdate >= "2017-01-15"&
                         bookdate<="2017-09-15" &
                         ident_TRIAL_1==T,]
 
@@ -1926,13 +1926,24 @@ smallD[merged_pregbweight<7 &
          merged_pregbweight>0, 
        merged_pregbweight:=1000*merged_pregbweight]
 
-smallD[merged_pregbweight<50 & merged_pregbweight>16, 
+smallD[merged_pregbweight<60 & merged_pregbweight>=7, 
        merged_pregbweight:=100*merged_pregbweight]
+
+smallD[merged_pregbweight>1000 & merged_pregbweight<1700 & 
+     !is.na(ppcbirthweight_1) &
+     comboUSandLMPgA>=37 & 
+     comboUSandLMPgA<41 &
+     (ppcbirthweight_1-merged_pregbweight)>=200, 
+   merged_pregbweight:=as.numeric(ppcbirthweight_1)]
+
+smallD[merged_pregbweight>6000, merged_pregbweight:=0.1*merged_pregbweight]
+
+smallD[merged_pregbweight==0, merged_pregbweight:=NA]
+
 #getting summary data
 sapply(smallD$merged_pregbweight, mean, na.rm=TRUE)
 
 summary(smallD[merged_pregbweight<6000 & merged_pregbweight>500]$merged_pregbweight)
-
 
 
 ######### Presentaion ##########
@@ -2032,23 +2043,23 @@ smallD[!is.na(merged_pregbweight) & !is.na(USorLMPdateCombogAdays),sga:=FALSE]
 #identifying sgas
 smallD[sga==FALSE &
          merged_pregbweight>0 & 
-         merged_pregbweight<2394 & 
+         merged_pregbweight<2403 & 
          USorLMPdateCombogAdays>=259 & 
          USorLMPdateCombogAdays<=265, sga:=TRUE]
 smallD[sga==FALSE &
-         merged_pregbweight<2550 & 
+         merged_pregbweight<2559 & 
          USorLMPdateCombogAdays>=266 & 
          USorLMPdateCombogAdays<=272, sga:=TRUE]
 smallD[sga==FALSE &
-         merged_pregbweight<2696 &
+         merged_pregbweight<2706 &
          USorLMPdateCombogAdays>=273 & 
          USorLMPdateCombogAdays<=279, sga:=TRUE]
 smallD[sga==FALSE &
-         merged_pregbweight<2831 & 
+         merged_pregbweight<2841 & 
          USorLMPdateCombogAdays>=280 & 
          USorLMPdateCombogAdays<=286, sga:=TRUE]
 smallD[sga==FALSE &
-         merged_pregbweight<2952 & 
+         merged_pregbweight<2963 & 
          USorLMPdateCombogAdays>=287 &
          USorLMPdateCombogAdays<=293, sga:=TRUE]
 
@@ -2073,23 +2084,23 @@ smallD[!is.na(merged_pregbweight) & !is.na(USorLMPdateCombogAdays), lga:=FALSE]
 
 #identifying lgas
 smallD[lga==FALSE &
-         merged_pregbweight>3259 & 
+         merged_pregbweight>3275 & 
          USorLMPdateCombogAdays>=259 &
          USorLMPdateCombogAdays<=265, lga:=TRUE]
 smallD[lga==FALSE &
-         merged_pregbweight>3471 & 
+         merged_pregbweight>3488 & 
          USorLMPdateCombogAdays>=266 & 
          USorLMPdateCombogAdays<=272, lga:=TRUE]
 smallD[lga==FALSE &
-         merged_pregbweight>3670 & 
+         merged_pregbweight>3688 & 
          USorLMPdateCombogAdays>=273 &
          USorLMPdateCombogAdays<=279, lga:=TRUE]
 smallD[lga==FALSE &
-         merged_pregbweight>3854 & 
+         merged_pregbweight>3873 & 
          USorLMPdateCombogAdays>=280 & 
          USorLMPdateCombogAdays<=286, lga:=TRUE]
 smallD[lga==FALSE &
-         merged_pregbweight>4018 &
+         merged_pregbweight>4038 &
          USorLMPdateCombogAdays>=287 & 
          USorLMPdateCombogAdays<=293, lga:=TRUE]
 
