@@ -1,14 +1,16 @@
-######### SETUP STARTS ##########
+###### SETUP STARTS ######
 
 setwd("C:/data processing/trial_dofiles")
 
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
-sapply(fileSources, source, .GlobalEnv)
+
+fileSources=file.path(getwd(),fileSources)
+sapply(fileSources, debugSource)
 
 Setup(IS_GAZA=FALSE)
 
-CheckFilesAndVariables(folder="e.reg-intervention")
-CheckFilesAndVariables(folder="e.reg-control")
+#CheckFilesAndVariables(folder="e.reg-intervention")
+#CheckFilesAndVariables(folder="e.reg-control")
 CheckFilesAndVariables(folder="e.reg-intervention", 
                        REF_DATE = REF_CLINIC_INTERVENTION_DATE, 
                        CHECK_DATE = CLINIC_INTERVENTION_DATE)
@@ -16,19 +18,9 @@ CheckFilesAndVariables(folder="e.reg-control",
                        REF_DATE = REF_CLINIC_CONTROL_DATE, 
                        CHECK_DATE = CLINIC_CONTROL_DATE)
 
-
-
-####LOAD d from Network####
-# PLACE OF DELIVERY INFORMATION CHECKING
-# LATER ON, PUT THIS AUTOMATICALLY IN AN EXCEL REPPORT
 d <- LoadDataFileFromNetwork()
-#### bookvisitspec shouldnt be known  pcnidnumber_1  (amdmotherbirthdate_1
-###previdnumber_1   manidnumber  riskidnumber   d$hbodaltidnum_1   hbodaltidnum_1
-###anidnumber_1     labid     usid
 
-library(janitor)
-
-############SETUP ENDS###########
+###### SETUP ENDS ######
 
 
 ####################################################################################################################
@@ -165,7 +157,7 @@ PPC_HT<-(d[bookyearmonth>=2017 & ident_dhis2_booking==TRUE & !is.na(labhtbinary)
                "labhtbinary")])
 
 
-nrow(PPC_HT)
+nrow(PPC_HT)d$
 
 xtabs(~ident_dhis2_ppc+labhtbinary,data=PPC_HT,addNA = TRUE)
 chisq.test(xtabs(~ident_dhis2_ppc+labhtbinary,data=PPC_HT,addNA = TRUE))

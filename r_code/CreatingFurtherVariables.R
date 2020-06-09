@@ -290,6 +290,8 @@ class(d$mahima_gA_1_us)
  
 
 ###Making first usedd if its at <=21 gA variable
+# to mimick the  eRegistry, we have used the eReg rule
+# the rule takes an ultrasound less than 23 weeks and an lmp if no ultrasound is present
   nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
   num <- stringr::str_replace(nam,"usedd_","")
   d[,first_1_21_usedd:=as.Date(NA)]
@@ -303,7 +305,7 @@ class(d$mahima_gA_1_us)
       
         !is.na(get(var_usgestage)) &
         get(var_usgestage) > 0 &
-        get(var_usgestage) <= 21 &
+        get(var_usgestage) < 23 &
         is.na(first_1_21_usedd),
       first_1_21_usedd:=as.Date(get(var_usedd),format="%Y-%m-%d")]
   }
@@ -330,7 +332,8 @@ class(d$mahima_gA_1_us)
   
   
   #recalculating bookgestational age into days
-  d[,bookgestagedays:=round(as.numeric(difftime(bookdate,USorLMPdate, units="days")))]
+  d[,bookgestagedays:=round(as.numeric(difftime(
+                        bookdate,USorLMPdate, units="days")))]
   
   bookgestagearms<-d[,.(ArmA=sum(ident_dhis2_control==T, na.rm=TRUE),
                         ArmB=sum(ident_dhis2_control==F, na.rm=TRUE)),

@@ -43,7 +43,7 @@ xtabs(~smallD$Opportunity_GDM_screening_4, addNA=T)
 ## Remove opportunities for people who were referred to HR or Hosp
 #refHRHospmanRBG_1 rename to RefHr
 smallD[,RefHr:=as.logical(NA)]
-smallD[Opportunity_anemia_screening_1==1, RefHr:=FALSE]
+smallD[Opportunity_GDM_screening_1==1, RefHr:=FALSE]
 smallD[(TrialOne_manRef_HR_00_00==T|
           TrialOne_manRef_HR_01_01==T|
           TrialOne_manRef_HR_02_02==T|
@@ -143,10 +143,10 @@ smallD[Opportunity_GDM_screening_1==1 &
          booklaburglu=="POS" & 
          !is.na(booklabbloodglu), GDMscreeningontime_1B:=TRUE]
 
-##### Need to add: and referred for 1C!!!! ##### 
 smallD[,GDMscreeningontime_1C:=as.logical(NA)]
 smallD[booklabbloodglu_high==T &
-         !is.na(booklabbloodglu), GDMscreeningontime_1C:=TRUE]
+         !is.na(booklabbloodglu) &
+         RefHr==T, GDMscreeningontime_1C:=TRUE]
 
 
 

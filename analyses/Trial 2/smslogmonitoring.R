@@ -36,7 +36,7 @@ t2 <- d[bookyear>=2018 & (ident_TRIAL_2_and_3==T |
 #with=F looks inside the vars and get the values
 
 ##### import scheduled events #####
-schedeventsraw[1]
+schedeventsraw[1:3]
 
 schedevents<- setnames(schedeventsraw,c("number",
                                         "programStage",
@@ -98,8 +98,7 @@ setnames(schedevents,c("programstage",
            "schedev_dateapptcreated",
            "schedev_orgname"))
 
-
-
+schedevents[1:3]
 
 
 #### scheduled message logs ####
@@ -128,8 +127,8 @@ setnames(msglogs, c("number",
                     "event_id"),
                   c("number",
                      "msgname",
-                     "datesmscreated",
-                     "datesmssent",
+                     "datesmsgenerated",
+                     "datesmsschedfor",
                      "msgid",
                      "creatername",
                      "createruserid",
@@ -145,34 +144,39 @@ msglogs[,datesmssched:=stringr::str_sub(datesmssched,1,10)]
 msglogs[,datesmssched:=as.Date(datesmssched)]
 xtabs(~msglogs$datesmssched)
 
-msglogs[,datesmssent:=stringr::str_sub(datesmssent,1,10)]
-msglogs[,datesmssent:=as.Date(datesmssent)]
-xtabs(~msglogs$datesmssent)
+msglogs[,datesmsschedfor:=stringr::str_sub(datesmsschedfor,1,10)]
+msglogs[,datesmsschedfor:=as.Date(datesmsschedfor)]
+xtabs(~msglogs$datesmsschedfor)
 
-msglogs[,datesmscreated:=stringr::str_sub(datesmscreated,1,10)]
-msglogs[,datesmscreated:=as.Date(datesmscreated)]
-xtabs(~msglogs$datesmscreated)
+msglogs[,datesmsgenerated:=stringr::str_sub(datesmsgenerated,1,10)]
+msglogs[,datesmsgenerated:=as.Date(datesmsgenerated)]
+xtabs(~msglogs$datesmsgenerated)
 
 xtabs(~msglogs$msgname)
+
+nrow(msglogs)
 
 #remove duplicate message
 
 ### this didnt work
-setorder(msglogs,anevent,datesmssent)
+setorder(msglogs,anevent,datesmssched)
 #msglogs[,firstdatesent:=min(datesent),by=uniqueid]
 
 #date of previous one sent
-msglogs[,prevdatesent:=shift(datesmssent), by=anevent]
+msglogs[,prevdatesent:=shift(datesmssched), by=anevent]
 
 #do same for message id as above so we can compare them later
 msglogs[,prevmsgname:=shift(msgname), by=anevent]
 
 #m
-msglogs[,timesincelastmsg:=as.numeric(difftime(datesmssent, prevdatesent,units="days"))]
+msglogs[,timesincelastmsg:=as.numeric(difftime(datesmssched, 
+                                               prevdatesent,units="days"))]
+xtabs(~msglogs$timesincelastmsg, addNA=T)
 
 #get rid of duplicates
 # we are losing messages this way which means the code we have used may not be correct
-#msglogs <- msglogs[is.na(timesincelastmsg)|timesincelastmsg>0]
+
+msglogs <- msglogs[is.na(timesincelastmsg)|timesincelastmsg>0 |(timesincelastmsg==0 & prevmsgname!=msgname), , by=anevent]
 #when we get rid of duplicates, we end up losing some important messages
 #so, maybe we should include the name of the template instead?
 
@@ -180,7 +184,12 @@ nrow(msglogs[msgname!=prevmsgname |is.na(prevmsgname)])
 sort(unique(msglogs$msgname))
 sort(unique(msglogsraw$msg_name))
 
-msglogs <- msglogs[msgname!=prevmsgname |is.na(prevmsgname)]
+xtabs(~msglogs$msgname, addNA=T)
+xtabs(~msglogsraw$msg_name, addNA=T)
+
+sort(unique(msglogsraw$msg_name))
+
+msglogsclean <- msglogs[msgname!=prevmsgname |is.na(prevmsgname)]
 
 xtabs(~msglogs$uniqueid)
 names(msglogs)

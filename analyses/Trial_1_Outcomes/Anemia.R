@@ -190,20 +190,12 @@ smallD[Opportunity_anemia_screening_1==1, HbonTime_1a:=FALSE]
 smallD[, HbonTime_1b:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_1==1 & 
          booklabhb<7 & booklabhb>=2,HbonTime_1b:=FALSE]
-# smallD[Opportunity_anemia_screening_1==1 &
-#          (TrialOne_labhb_anemia_sev_00_14==T|
-#           TrialOne_labhb_anemia_sev_15_17==T|
-#           TrialOne_labhb_anemia_sev_18_22==T|
-#           TrialOne_labhb_anemia_sev_23_23==T), HbonTime_1b:=FALSE]
+
 
 smallD[, HbonTime_1c:= as.logical(NA)]
 smallD[Opportunity_anemia_screening_1==1 &
          booklabhb>=7 & booklabhb<11,HbonTime_1c:=FALSE ]
-# smallD[Opportunity_anemia_screening_1==1 &
-#          (TrialOne_labhb_anemia_mild_mod_00_14==T|
-#             TrialOne_labhb_anemia_mild_mod_15_17==T|
-#             TrialOne_labhb_anemia_mild_mod_18_22==T|
-#             TrialOne_labhb_anemia_mild_mod_23_23==T), HbonTime_1c:=FALSE]
+
 
 
 # Hbontime_2
