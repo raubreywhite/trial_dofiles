@@ -152,23 +152,7 @@ xtabs(~smallD$Opportunity_anemia_screening_2, addNA=T)
 
 # 35-37 weeks
 smallD[Opportunity_anemia_screening_4==1 &
-         (TrialOne_anvisitnew_29_30==T & 
-            (RefHr==T|
-               TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T|
-               TrialOne_manRef_HR_26_26==T|
-               TrialOne_manRef_HR_27_27==T|
-               TrialOne_manRef_HR_28_28==T))|
-         (TrialOne_anvisitnew_31_33==T & 
-            (RefHr==T|
-               TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T|
-               TrialOne_manRef_HR_26_26==T|
-               TrialOne_manRef_HR_27_27==T|
-               TrialOne_manRef_HR_28_28==T|
-               TrialOne_manRef_HR_29_29==T|
-               TrialOne_manRef_HR_30_30==T))|
-         (TrialOne_anvisitnew_34_34==T & 
+         (TrialOne_anvisitnew_35_35==T & 
             (RefHr==T|
                TrialOne_manRef_HR_24_24==T|
                TrialOne_manRef_HR_25_25==T|
@@ -179,7 +163,37 @@ smallD[Opportunity_anemia_screening_4==1 &
                TrialOne_manRef_HR_30_30==T|
                TrialOne_manRef_HR_31_31==T|
                TrialOne_manRef_HR_32_32==T|
-               TrialOne_manRef_HR_33_33==T)), 
+               TrialOne_manRef_HR_33_33==T|
+               TrialOne_manRef_HR_34_34==T))|
+         (TrialOne_anvisitnew_36_36==T & 
+            (RefHr==T|
+               TrialOne_manRef_HR_24_24==T|
+               TrialOne_manRef_HR_25_25==T|
+               TrialOne_manRef_HR_26_26==T|
+               TrialOne_manRef_HR_27_27==T|
+               TrialOne_manRef_HR_28_28==T|
+               TrialOne_manRef_HR_29_29==T|
+               TrialOne_manRef_HR_30_30==T|
+               TrialOne_manRef_HR_31_31==T|
+               TrialOne_manRef_HR_32_32==T|
+               TrialOne_manRef_HR_33_33==T|
+               TrialOne_manRef_HR_34_34==T|
+               TrialOne_manRef_HR_35_35==T))|
+         (TrialOne_anvisitnew_37_37==T & 
+            (RefHr==T|
+               TrialOne_manRef_HR_24_24==T|
+               TrialOne_manRef_HR_25_25==T|
+               TrialOne_manRef_HR_26_26==T|
+               TrialOne_manRef_HR_27_27==T|
+               TrialOne_manRef_HR_28_28==T|
+               TrialOne_manRef_HR_29_29==T|
+               TrialOne_manRef_HR_30_30==T|
+               TrialOne_manRef_HR_31_31==T|
+               TrialOne_manRef_HR_32_32==T|
+               TrialOne_manRef_HR_33_33==T|
+               TrialOne_manRef_HR_34_34==T|
+               TrialOne_manRef_HR_35_35==T|
+               TrialOne_manRef_HR_36_36==T)), 
        Opportunity_anemia_screening_4:=Opportunity_anemia_screening_4-1]
 xtabs(~smallD$Opportunity_anemia_screening_4, addNA=T)
 

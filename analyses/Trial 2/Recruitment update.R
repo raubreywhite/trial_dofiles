@@ -9,6 +9,20 @@ t2reboot[,bookgestagecat:=cut(bookgestage,
                               breaks=c(0,14,17,22,23,28,30,33,34,37,40),
                               include.lowest=T)]
 
+
+#### gestage variable today (days) for attendance ####
+today <- lubridate::today()
+
+t2reboot[,gAtoday_days:=as.numeric(NA)]
+t2reboot[!is.na(first_1_21_usedd),
+         gAtoday_days:=as.numeric(
+           difftime(first_1_21_usedd,today, units="days"))]
+
+t2reboot[is.na(first_1_21_usedd), 
+         gAtoday_days:=as.numeric(difftime(lubridate::today(),booklmp,units="days"))]
+
+
+
 # timely anc variables
 t2reboot[,ancbefore15:=as.logical(NA)]
 t2reboot[,anc15to17:=as.logical(NA)]
@@ -60,6 +74,8 @@ t2nums <- t2reboot[,.(N=.N,
                       Booked=sum(ident_dhis2_booking==T, na.rm=T),
                       ANCvisits=sum(ident_dhis2_an==T, na.rm=T),
                       BookedSMSyes=sum(smsyes==1,na.rm=T),
+                      BookedSMSMno=sum(smsyes==0, na.rm=T),
+                      BookedSMSmiss=sum(is.na(smsyes)),
                       BookedSMSonly=sum(ident_TRIAL_2==T & 
                                           ident_TRIAL_3==F, na.rm=T),
                       BookedinSMSclinic=sum(ident_TRIAL_2==T, na.rm=T),
@@ -103,14 +119,19 @@ sum(t2reboot[ident_dhis2_control==F]$anevent_x,na.rm=T)
 
 t2visits <- t2reboot[,.(N=.N,
                         bookingvisits=sum(!is.na(bookevent), na.rm=T),
+                        expectedtohavedelivered=sum(gAtoday_days>=280 &
+                                                      gAtoday_days<=300),
                         ancvisits=sum(anevent_x, na.rm=T),
                         ancb415=sum(ancbefore15, na.rm=T),
                         anc15to17=sum(anc15to17, na.rm=T),
                         anc18to22=sum(anc18to22, na.rm=T),
+                        anc23=sum(anc23, na.rm=T),
                         anc24to28=sum(anc24to28, na.rm=T),
+                        anc29to30=sum(anc29to30, na.rm=T),
                         anc31to33=sum(anc31to33, na.rm=T),
+                        anc34=sum(anc34, na.rm=T),
                         anc35to37=sum(anc35to37, na.rm=T)),
-                     keyby=.(str_TRIAL_2_Cluster)]
+                     keyby=.(ident_TRIAL_2_3_Control,str_TRIAL_2_Cluster)]
 
 openxlsx::write.xlsx(t2visits,file.path(FOLDER_DATA_RESULTS,
                                          "T2",
@@ -124,8 +145,11 @@ t2visits <- t2reboot[,.(N=.N,
                         ancb415=sum(ancbefore15, na.rm=T),
                         anc15to17=sum(anc15to17, na.rm=T),
                         anc18to22=sum(anc18to22, na.rm=T),
+                        anc23=sum(anc23, na.rm=T),
                         anc24to28=sum(anc24to28, na.rm=T),
+                        anc29to30=sum(anc29to30, na.rm=T),
                         anc31to33=sum(anc31to33, na.rm=T),
+                        anc34=sum(anc34, na.rm=T),
                         anc35to37=sum(anc35to37, na.rm=T))]
 
 openxlsx::write.xlsx(t2visits,file.path(FOLDER_DATA_RESULTS,
@@ -137,12 +161,17 @@ openxlsx::write.xlsx(t2visits,file.path(FOLDER_DATA_RESULTS,
 
 t2visits <- t2reboot[,.(N=.N,
                         bookingvisits=sum(!is.na(bookevent), na.rm=T),
+                        expectedtohavedelivered=sum(gAtoday_days>=280 &
+                                                      gAtoday_days<=300),
                         ancvisits=sum(anevent_x, na.rm=T),
                         ancb415=sum(ancbefore15, na.rm=T),
                         anc15to17=sum(anc15to17, na.rm=T),
                         anc18to22=sum(anc18to22, na.rm=T),
+                        anc23=sum(anc23, na.rm=T),
                         anc24to28=sum(anc24to28, na.rm=T),
+                        anc29to30=sum(anc29to30, na.rm=T),
                         anc31to33=sum(anc31to33, na.rm=T),
+                        anc34=sum(anc34, na.rm=T),
                         anc35to37=sum(anc35to37, na.rm=T)),
                      keyby=.(bookgestagecat)]
 
@@ -1774,25 +1803,25 @@ t2reboot[, HbonTime_3b:= as.logical(NA)]
 t2reboot[Opportunity_anemia_screening_3==1 &
          (booklabhb<7 & booklabhb>2), HbonTime_3b:=FALSE]
 
-t2reboot[, HbonTime_3c:= as.logical(NA)]
+t2reboot[,HbonTime_3c:= as.logical(NA)]
 t2reboot[Opportunity_anemia_screening_3==1 &
          (booklabhb<11 & booklabhb>=7), HbonTime_3c:=FALSE]
 
-t2reboot[, HbonTime_4a:= as.logical(NA)]
+t2reboot[,HbonTime_4a:= as.logical(NA)]
 t2reboot[Opportunity_anemia_screening_4==1, HbonTime_4a:=FALSE]
 
-t2reboot[, HbonTime_4b:= as.logical(NA)]
+t2reboot[,HbonTime_4b:= as.logical(NA)]
 t2reboot[Opportunity_anemia_screening_4==1 &
          TrialOne_labhb_anemia_sev_35_37==T,HbonTime_4b:=FALSE]
 
-t2reboot[, HbonTime_4c:= as.logical(NA)]
+t2reboot[,HbonTime_4c:= as.logical(NA)]
 t2reboot[Opportunity_anemia_screening_4==1 &
          TrialOne_labhb_anemia_mild_mod_35_37==T, HbonTime_4c:=FALSE]
 
-t2reboot[, HbonTime_5:= as.logical(NA)]
+t2reboot[,HbonTime_5:= as.logical(NA)]
 t2reboot[Opportunity_anemia_screening_5==1, HbonTime_5:=FALSE]
 
-t2reboot[, HbonTime_6:= as.logical(NA)]
+t2reboot[,HbonTime_6:= as.logical(NA)]
 t2reboot[Opportunity_anemia_screening_6==1, HbonTime_6:=FALSE]
 
 
@@ -2052,8 +2081,6 @@ t2reboot[bookgestagedays_cats %in% c("(0,104]") &
          refHRhosp==T,Opp_1:=0]
 xtabs(~t2reboot$Opp_1, addNA=T)
 
-
-
 # oppt 18-22 visit
 t2reboot[,Opp_2:=as.numeric(NA)]
 t2reboot[bookgestagedays_cats %in% c("(104,125]")| Opp_1==1, Opp_2:=1]
@@ -2164,7 +2191,7 @@ t2reboot[Succ_5==F & TrialOne_anvisitnew_35_37==T, Succ_5:=TRUE]
 
 xtabs(~t2reboot$Succ_5, addNA=T)
 
-prelimAtt <- t2reboot[,.(N=.N,
+prelimAtt <- t2reboot[gAtoday_days>=280 & gAtoday_days<=300,.(N=.N,
                        bookedb414=sum(bookgestagedays_cats=="(0,104]", na.rm = T),
                        ANC15_17Opps=sum(Opp_1,na.rm=T),
                        ANC15_17=sum(Succ_1, na.rm=T),
@@ -2410,7 +2437,7 @@ prelimGDM <- t2reboot[,.(N=.N,
                        Success_1C=sum(GDMscreeningontime_1C==T, na.rm=T),
                        Screenb424=sum(screenb424==T, na.rm=T),
                        Screenb424False=sum(screenb424==F, na.rm=T),
-                       Opportun_2=sum(Opportunity_GDM_screening_2==T, na.rm=T),
+                       Opportun_2=sum(Opportunity_GDM_screening_2, na.rm=T),
                        Success_2=sum(GDMscreeningontime_2==T, na.rm=T),
                        Opportun_3=sum(Opportunity_GDM_screening_3==T, na.rm=T),
                        Success_3=sum(GDMscreeningontime_3==T, na.rm=T),
@@ -2419,13 +2446,14 @@ prelimGDM <- t2reboot[,.(N=.N,
                        screenbtwn=sum(GDMscreeningontime_4==T, na.rm=T),
                        screenbtwnFalse=sum(GDMscreeningontime_4==F, na.rm=T),
                        Opportun_4=sum(Opportunity_GDM_screening_4==T, na.rm=T),
-                       Succ_4=sum(GDMscreeningontime_4, na.rm=T))]
+                       Succ_4=sum(GDMscreeningontime_4, na.rm=T),
+                       keyby=.(str_TRIAL_2_Cluster))]
 
 
 
 openxlsx::write.xlsx(prelimGDM,file.path(FOLDER_DATA_RESULTS,
                                          "T2",
-                                         sprintf("%s_T2_recruitment_prelim_GDM.xlsx",
+                                         sprintf("%s_T2_recruitment_prelim_GDM_percluster.xlsx",
                                                  lubridate::today()))) 
 
 
