@@ -64,4 +64,10 @@ d[ident_abb==TRUE,stringr::str_subset(names(d),"^a"),with=F]
 # raw AVICENNA database:
 AVICENNA_Master()
 
+openxlsx::write.xlsx(d[ident_TRIAL_1==T & ident_dhis2_control==F,c("uniqueid")], 
+                     FOLDER_DATA_RESULTS,
+                     "trial1intervention_missinguid.xlsx" 
+                     
+)
+
 

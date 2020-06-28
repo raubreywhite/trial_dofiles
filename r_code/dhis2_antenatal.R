@@ -37,6 +37,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     d[,usrecommendationscomments:=NULL] 
     d[,consupplementsyesno:=NULL] 
     d[,conancsupplementprescription:=NULL]
+   
   } else {
     d[,ancsuspectedprematureruptureofmembranesprom:=NULL]
     d[,ancsuspectedpretermprematureruptureofmembranesprom:=NULL]
@@ -70,6 +71,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     d[,anchistoryofblooddisorderspecif:=as.numeric(NA)]
     d[,ancfundalheightmeasurement:=as.numeric(NA)]
     #d[,conancgestationaageatvisitsize:=as.numeric(NA)]
+    #d[,conancgestationaageatvisitweeks:=as.numeric(NA)]
     d[,ancedema:=as.numeric(NA)]
     d[,ancreferralneededforotherchronic:=as.numeric(NA)]
     d[,whichancvisitisthis:=as.numeric(NA)]
@@ -97,6 +99,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     d[,ancreproductivetractinfectionrti:=as.numeric(NA)]
     d[,v42:=as.numeric(NA)]
     d[,anchomevisitoratthehealthclinic:=as.numeric(NA)]
+   
   } else {
    # nothing
   }
@@ -125,7 +128,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"ancedema","anexamedema")
   setnames(d,"ancfetalheartsoundfhs","anexamfh")
   setnames(d,"ancfundalheightmeasurement","anexamsfh")
-  
+ 
   #setnames(d,which(stringr::str_detect(names(d),"^anchypertensioncerebralorvisuals"
   #)),"anhisthtnsymp")
   
@@ -153,19 +156,21 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"anchistoryofmentaldisturbance","anhistpsy")
   setnames(d,"ancreproductivetractinfectionrti","anhistrti")
   
+  setnames(d,"conancgestationaageatvisitweeks", "anconancgestationaageatvisitweeks")
+  
   if(isControl){
     setnames(d,"v42","anhistchronicspec")
     setnames(d,"ancreferralneededforotherchronic","anrefchronic")
-    d[,anexamsfh:=conancgestationaageatvisitsize]
-    d[,conancgestationaageatvisitsize:=NULL] 
-    setnames(d,"conancgestationaageatvisitweeks", "anconancgestationaageatvisitweeks")
+    setnames(d,"conancgestationaageatvisitsize","anexamsfh")
+    
+    
   } else {
     d[,anhistchronicspec:=as.character(NA)]
     d[,anrefchronic:=as.character(NA)]
-    d[,anconancgestationaageatvisitweeks:=as.numeric(NA)]
-   
+  
     
   }
+  
   
   tryCatch({
     setnames(d,"ancallergiesdrugsandorseverefood","anallerfood")

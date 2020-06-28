@@ -94,6 +94,8 @@ DHIS2_BookingVisit <- function(isControl,
     # capture tostring ancotherfamilyconcernspecified, replace
     # capture tostring ancpallor, replace
     
+  
+    
   } else {
     print("CHECKINGCHECKING****")
     print(FOLDERS)
@@ -200,7 +202,7 @@ DHIS2_BookingVisit <- function(isControl,
       d[,identificationdocumentnumber:=1:.N]
     }
     
-    setnames(d,"ancgestationalageatvisitweeks","ancgestationalageatvisitweeks")
+    
   }
   setnames(d, 2, "uniqueid")
   
@@ -229,6 +231,7 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "ancsuspectedpretermprematureruptureofmembranesprom", "bookpprom")
   setnames(d, "ancsuspectedprematureruptureofmembranesprom", "bookprom")
   setnames(d, "ancsystolicbloodpressuremmhg", "bookbpsyst")
+  setnames(d, "ancfundalheightmeasurement", "bookexamsfh")
 
   tryCatch({
     setnames(d, "ancallergiesdrugsandorseverefood", "bookallerfood")
@@ -290,7 +293,7 @@ DHIS2_BookingVisit <- function(isControl,
   })
 
   setnames(d, "anchistoryofcsections2", "bookhistcs")
-  setnames(d, "ancfundalheightmeasurement", "bookexamsfh")
+  
   setnames(d, "ancmedicalexaminationofabdomen", "bookexamabd")
   setnames(d, "ancmedicalexaminationofheart", "bookexamheart")
   setnames(d, "ancmedicalexaminationoflowerlimbs", "bookexamlimb")
@@ -390,6 +393,8 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d,"confamilyhistoryofdiabetesmellitus","bookfamhistdiab")
   setnames(d,"confamilyhistoryofcongenitalanomaly","bookfamhistcongenanom")
   setnames(d,"anchistoryofantepartumhemorrhageinpreviouspregnancy","bookhistantparthemprevpreg")
+  
+  
   
   # more name changing
   

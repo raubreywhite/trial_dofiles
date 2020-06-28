@@ -85,18 +85,18 @@ smallD[,refHr_2:=(
 
 
 smallD[Opportunity_GDM_screening_2==1 &
-         (TrialOne_anvisitnew_24_24 & 
+         (TrialOne_anvisitnew_24_24==T & 
             (RefHr==T))|
-         (TrialOne_anvisitnew_25_25 & 
+         (TrialOne_anvisitnew_25_25==T & 
             (RefHr==T|TrialOne_manRef_HR_24_24==T))|
-         (TrialOne_anvisitnew_26_26 & 
+         (TrialOne_anvisitnew_26_26==T & 
             (RefHr==T|TrialOne_manRef_HR_24_24==T|
                TrialOne_manRef_HR_25_25==T))|
-         (TrialOne_anvisitnew_27_27 & 
+         (TrialOne_anvisitnew_27_27==T & 
             (RefHr==T|TrialOne_manRef_HR_24_24==T|
                TrialOne_manRef_HR_25_25==T|
                TrialOne_manRef_HR_26_26==T))|
-         (TrialOne_anvisitnew_28_28 & 
+         (TrialOne_anvisitnew_28_28==T & 
             (RefHr==T|
                TrialOne_manRef_HR_24_24==T|
                TrialOne_manRef_HR_25_25==T|

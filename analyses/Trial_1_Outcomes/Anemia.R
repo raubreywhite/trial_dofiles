@@ -2,6 +2,8 @@
 #check this code and how to read it in despite the date
 #anemia <- fread("C:/data processing/data_clean/Trial_1_Outcomes/"Anemia.xlsx",encoding="UTF#-8"")
 
+## number of rows, 
+# check management dates and risk data and other dates for other dates
 
 ########## Anemia ########## 
 # Define opportunities at 3 different cut off points
@@ -53,17 +55,6 @@ smallD[TrialOne_labhb_anemia_sev_00_14==T|
       TrialOne_labhb_anemia_sev_23_23==T,Opportunity_anemia_screening_5:=1]
 
 xtabs(~smallD$Opportunity_anemia_screening_5, addNA=T)
-
-
-## mild mod anemia
-smallD[,Opportunity_anemia_screening_6:=as.numeric(NA)]
-smallD[TrialOne_labhb_anemia_mild_mod_00_14==T|
-         TrialOne_labhb_anemia_mild_mod_15_17==T|
-         TrialOne_labhb_anemia_mild_mod_18_22==T|
-         TrialOne_labhb_anemia_mild_mod_23_23==T,
-       Opportunity_anemia_screening_6:=1]
-
-xtabs(~smallD$Opportunity_anemia_screening_6, addNA=T)
 
 
 
@@ -129,18 +120,18 @@ xtabs(~smallD$RefHr, addNA=T)
 
 ## At 24-28 weeks
 smallD[Opportunity_anemia_screening_2==1 &
-        (TrialOne_anvisitnew_24_24 & 
+        (TrialOne_anvisitnew_24_24==T & 
           (RefHr==T))|
-        (TrialOne_anvisitnew_25_25 & 
+        (TrialOne_anvisitnew_25_25==T & 
           (RefHr==T|TrialOne_manRef_HR_24_24==T))|
-        (TrialOne_anvisitnew_26_26 & 
+        (TrialOne_anvisitnew_26_26==T & 
           (RefHr==T|TrialOne_manRef_HR_24_24==T|
              TrialOne_manRef_HR_25_25==T))|
-        (TrialOne_anvisitnew_27_27 & 
+        (TrialOne_anvisitnew_27_27==T & 
           (RefHr==T|TrialOne_manRef_HR_24_24==T|
              TrialOne_manRef_HR_25_25==T|
              TrialOne_manRef_HR_26_26==T))|
-        (TrialOne_anvisitnew_28_28 & 
+        (TrialOne_anvisitnew_28_28==T & 
           (RefHr==T|
         TrialOne_manRef_HR_24_24==T|
         TrialOne_manRef_HR_25_25==T|
@@ -388,6 +379,33 @@ smallD[HbonTime_5==F &
          TrialOne_manhb_33_33==T|
          TrialOne_manhb_34_34==T),HbonTime_5:=TRUE]
 
+## mild mod anemia
+# if all of this is true and none of the other succcess (HBontime is true), then this #should be true. need to run all of the other success to get to that point first and #then calculate this
+smallD[,Opportunity_anemia_screening_6:=as.logical(FALSE)]
+smallD[(TrialOne_labhb_anemia_mild_mod_00_14==T|
+         TrialOne_labhb_anemia_mild_mod_15_17==T|
+         TrialOne_labhb_anemia_mild_mod_18_22==T|
+         TrialOne_labhb_anemia_mild_mod_23_23==T|
+         TrialOne_labhb_anemia_mild_mod_29_30==T|
+         TrialOne_labhb_anemia_mild_mod_34_34==T) &
+         (HbonTime_1a==F &
+            HbonTime_1b==F &
+            HbonTime_1c==F &
+            HbonTime_2a==F &
+            HbonTime_2b==F &
+            HbonTime_2c==F &
+            HbonTime_3a==F &
+            HbonTime_3b==F &
+            HbonTime_3c==F &
+            HbonTime_4a==F &
+            HbonTime_4b==F &
+            HbonTime_4c==F &
+            HbonTime_5==F),
+       Opportunity_anemia_screening_6:=TRUE]
+
+xtabs(~smallD$Opportunity_anemia_screening_6, addNA=T)
+
+
 #mild/mod anem retest
 smallD[HbonTime_6==F &
          (TrialOne_manhb_mildmodhbret_00_00==T|
@@ -458,7 +476,7 @@ prelimHB <- smallD[,.(N=.N,
                       success_5F=sum(HbonTime_5==F),
                       Opportun_6=sum(Opportunity_anemia_screening_6, na.rm=T),
                       Success_6=sum(HbonTime_6, na.rm=T),
-                      success_6F=sum(HbonTime_6==F)),
+                      success_6F=sum(HbonTime_6==F, na.rm=T)),
                     keyby=.(ident_dhis2_control)]
 
 openxlsx::write.xlsx(prelimHB,file.path(FOLDER_DATA_RESULTS,

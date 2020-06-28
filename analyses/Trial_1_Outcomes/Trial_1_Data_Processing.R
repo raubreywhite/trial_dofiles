@@ -81,16 +81,22 @@ vars <- stringr::str_subset(names(smallD), "^anexamsfh_")
 vars <- stringr::str_remove(vars, "anexamsfh_")
 
 #anexamsfh stuff
+## this is a variable that is made using a combination of anexamsfh, angestage, and ## ancongestageatvisitweeks_1. control uses that last one, if its present. If not,
+## if uses the anexamsfh
 for(i in vars){
   print(i)
   anexamsfh <-sprintf("anexamsfh_%s",i)
+  conangestage <-sprintf("anconancgestationaageatvisitweeks_%s",i)
   angestage <- sprintf("angestage_%s",i)
-  sfhDiscrep <-  sprintf("sfhDiscrep_%s",i)
+  sfhDiscrep <- sprintf("sfhDiscrep_%s",i)
   
   smallD[,(sfhDiscrep):=as.numeric(NA)]
   
   smallD[!is.na(get(angestage)) &
            !is.na(get(anexamsfh)), (sfhDiscrep):=abs(get(anexamsfh)-get(angestage))]
+  
+  smallD[!is.na(get(conangestage)) &
+           !is.na(get(anexamsfh)), (sfhDiscrep):=abs(get(anexamsfh)-get(conangestage))]
   
 }
 
@@ -102,14 +108,15 @@ vars <- stringr::str_remove(vars, "anconancgestationaageatvisitweeks_")
 for(i in vars){
   print(i)
   anconangestageweeks <-sprintf("anconancgestationaageatvisitweeks_%s",i)
-  angestage <- sprintf("angestage_%s",i)
+  anexmsfh <- sprintf("anexamsfh_%s",i)
   sfhDiscrepCon <-  sprintf("sfhDiscrepCon_%s",i)
+  
   
   smallD[,(sfhDiscrepCon):=as.numeric(NA)]
   
-  smallD[!is.na(get(angestage)) &
+  smallD[!is.na(get(anexmsfh)) &
            !is.na(get(anconangestageweeks)), 
-              (sfhDiscrepCon):=abs(get(anconangestageweeks)-get(angestage))]
+              (sfhDiscrepCon):=abs(get(anconangestageweeks)-get(anexmsfh))]
   
 }
 
@@ -148,6 +155,7 @@ gAscheck <- smallD[,c("bookgestagedays",
 
 
 # Discrepancy Variable anexamsfh variable
+smallD[ident_dhis2_control==T, bookexamsfh:=conancgestationaageatvisitsize_1]
 smallD[,anexamsfh_0:=bookexamsfh]
 
 vars <- stringr::str_subset(names(smallD), "^anexamsfh_")
@@ -1055,11 +1063,11 @@ for(i in 0:37){
   #making var for sev anemia 
   smallD[,(var_manhb):=as.logical(NA)]
   
-  #control
-  smallD[ident_dhis2_control==T,(var_manhb):=get(var_temp_manhb)]
+  #usualy only do this for control, but because we only want a retest not a manperf
+  smallD[,(var_manhb):=get(var_temp_manhb)]
   
   #intervention
-  smallD[ident_dhis2_control==F,(var_manhb):=get(var_temp_manhb) & get(var_temp_manperf)]
+  #smallD[ident_dhis2_control==F,(var_manhb):=get(var_temp_manhb) & get(var_temp_manp#erf)]
   
   #delete these variables because will use them in the subsequent loops we make
   
