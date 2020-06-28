@@ -69,7 +69,7 @@ DHIS2_BookingVisit <- function(isControl,
     d[, ancrecommendedplaceofbirth := as.numeric(NA)]
     d[, anctetanusboosterdose := as.numeric(NA)]
     d[, anchistoryofblooddisorderspecif := as.numeric(NA)]
-    d[, ancfundalheightmeasurement := as.numeric(NA)]
+    #d[, ancfundalheightmeasurement := as.numeric(NA)]
     d[, ancedema := as.numeric(NA)]
     d[, ancutifollowupscheduled := as.numeric(NA)]
     d[, ancreferralneededforotherchronic := as.numeric(NA)]
@@ -93,6 +93,8 @@ DHIS2_BookingVisit <- function(isControl,
     # capture tostring anclmpstatus, replace
     # capture tostring ancotherfamilyconcernspecified, replace
     # capture tostring ancpallor, replace
+    
+    
     
   
     
@@ -133,6 +135,7 @@ DHIS2_BookingVisit <- function(isControl,
 
     
     setnames(d, 2, "uniqueid")
+    
    
     d[,confamilyhistoryofbronchialastma:=as.numeric(NA)]
     d[,confamilyhistoryofcardiacdisease:=as.numeric(NA)]
@@ -154,7 +157,7 @@ DHIS2_BookingVisit <- function(isControl,
     d[,conrecommendedplaceofbirth:=as.numeric(NA)]
     d[,conancfilenumber:=as.numeric(NA)]
     d[,conancgestationaageatvisitweeks:=as.numeric(NA)]
-    d[,conancgestationaageatvisitsize:=as.numeric(NA)]
+    #d[,conancgestationaageatvisitsize:=as.numeric(NA)]
     d[,usrecommendationscommentsy:=as.numeric(NA)]
     d[,consupplementsyesno:=as.numeric(NA)]
     d[,conancsupplementprescription:=as.numeric(NA)]
@@ -162,6 +165,8 @@ DHIS2_BookingVisit <- function(isControl,
 
   for (i in names(d)) setnames(d, i, ExtractOnlyEnglishLettersAndNumbers(i)[[1]])
   #nrow(d[is.na(eventdate)])
+  
+  #setnames(d,"conancgestationaageatvisitsize","bookexamsfh")
  
   if(!isControl){ 
       
@@ -231,8 +236,7 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "ancsuspectedpretermprematureruptureofmembranesprom", "bookpprom")
   setnames(d, "ancsuspectedprematureruptureofmembranesprom", "bookprom")
   setnames(d, "ancsystolicbloodpressuremmhg", "bookbpsyst")
-  setnames(d, "ancfundalheightmeasurement", "bookexamsfh")
-
+  
   tryCatch({
     setnames(d, "ancallergiesdrugsandorseverefood", "bookallerfood")
   }, error = function(err) {
@@ -293,7 +297,7 @@ DHIS2_BookingVisit <- function(isControl,
   })
 
   setnames(d, "anchistoryofcsections2", "bookhistcs")
-  
+  #setnames(d, "ancfundalheightmeasurement", "bookexamsfh")
   setnames(d, "ancmedicalexaminationofabdomen", "bookexamabd")
   setnames(d, "ancmedicalexaminationofheart", "bookexamheart")
   setnames(d, "ancmedicalexaminationoflowerlimbs", "bookexamlimb")
@@ -397,6 +401,12 @@ DHIS2_BookingVisit <- function(isControl,
   
   
   # more name changing
+  
+  if(isControl){
+   setnames(d,"conancgestationaageatvisitsize","bookexamsfh")
+  } else{
+   setnames(d,"ancfundalheightmeasurement","bookexamsfh")
+  }
   
   
   

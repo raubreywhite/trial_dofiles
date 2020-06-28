@@ -69,7 +69,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
     d[,ancfetalmovement:=as.numeric(NA)]
     d[,anchypothyreoidism:=as.numeric(NA)]
     d[,anchistoryofblooddisorderspecif:=as.numeric(NA)]
-    d[,ancfundalheightmeasurement:=as.numeric(NA)]
+    #d[,ancfundalheightmeasurement:=as.numeric(NA)]
     #d[,conancgestationaageatvisitsize:=as.numeric(NA)]
     #d[,conancgestationaageatvisitweeks:=as.numeric(NA)]
     d[,ancedema:=as.numeric(NA)]
@@ -102,6 +102,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
    
   } else {
    # nothing
+    d[,conancgestationaageatvisitweeks:=as.numeric(NA)]
   }
   
   setnames(d,2,"uniqueid")
@@ -127,9 +128,8 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   setnames(d,"ancsystolicbloodpressuremmhg","anbpsyst")
   setnames(d,"ancedema","anexamedema")
   setnames(d,"ancfetalheartsoundfhs","anexamfh")
-  setnames(d,"ancfundalheightmeasurement","anexamsfh")
- 
-  #setnames(d,which(stringr::str_detect(names(d),"^anchypertensioncerebralorvisuals"
+  
+ #setnames(d,which(stringr::str_detect(names(d),"^anchypertensioncerebralorvisuals"
   #)),"anhisthtnsymp")
   
   setnames(d,which(stringr::str_detect(names(d),"^ancfetalpresentationcheckedbypalpation")),"anexampalp")
@@ -167,7 +167,7 @@ DHIS2_Antenatal <- function(isControl, earlyData, booklmp, IS_GAZA=FALSE) {
   } else {
     d[,anhistchronicspec:=as.character(NA)]
     d[,anrefchronic:=as.character(NA)]
-  
+    setnames(d,"ancfundalheightmeasurement","anexamsfh")
     
   }
   
