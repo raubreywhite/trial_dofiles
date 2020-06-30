@@ -1067,7 +1067,7 @@ for(i in 0:37){
   smallD[,(var_manhb):=get(var_temp_manhb)]
   
   #intervention
-  #smallD[ident_dhis2_control==F,(var_manhb):=get(var_temp_manhb) & get(var_temp_manp#erf)]
+  #smallD[ident_dhis2_control==F,(var_manhb):=get(var_temp_manhb) & get(var_temp_manperf)]
   
   #delete these variables because will use them in the subsequent loops we make
   

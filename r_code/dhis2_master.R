@@ -165,6 +165,8 @@ DHIS2_Master <- function(
     (bookdate<as.Date("2017-01-15") | bookdate>as.Date("2017-09-15")) &
       !is.na(ident_TRIAL_1),ident_TRIAL_1:=FALSE]
   
+  xtabs(~data_DHIS2_Booking$ident_TRIAL_1, addNA=T)
+  
   data_DHIS2_Booking <- data_DHIS2_Booking[is.na(bookorgdistrict) | bookorgdistrict!="TEST"]
   
   ## structural indicators end
