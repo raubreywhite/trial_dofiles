@@ -116,7 +116,7 @@ for(i in vars){
   
   smallD[!is.na(get(anexmsfh)) &
            !is.na(get(anconangestageweeks)), 
-              (sfhDiscrepCon):=abs(get(anconangestageweeks)-get(anexmsfh))]
+              (sfhDiscrepCon):=abs(get(anconangestageweeks)-get(anexamsfh))]
   
 }
 
@@ -177,8 +177,6 @@ for(i in vars){
 smallD[!is.na(anT1gAweeks) &
        !is.na(get(anexamsfh)), (sfhDiscrepAnt1gas):=abs(get(anexamsfh)-get(anT1gAweeks))]
 
-smallD[!is.na(anT1gAweeks) &
-         !is.na(get(anexamsfh)), (sfhDiscrepAnt1gasCat):=abs(get(anexamsfh)-get(anT1gAweeks))>2]
 
 }
 
@@ -776,30 +774,13 @@ smallD <- VisitVariables(
   days=days,
   variableOfInterestName="anexamsfh_exists",
   variableOfInterestPattern="anexamsfh",
-  TruevaluesMin=5,
+  TruevaluesMin=1,
   TruevaluesMax=44,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "anT1gestagedays")
 smallD[,anexamsfh_0:=NULL]
 smallD[,anTgestagedays_0:=NULL]
 xtabs(~smallD$TrialOne_anexamsfh_exists_00_14)
-
-
-# sfhDiscrepAnt1gasCat
-smallD[,anexamsfh_0:=bookexamsfh]
-smallD[,anTgestagedays_0:=bookgestagedays]
-smallD <- VisitVariables(
-  smallD=smallD,
-  days=days,
-  variableOfInterestName="sfhDiscrepBinary",
-  variableOfInterestPattern="sfhDiscrepAnt1gasCat",
-  TruevaluesMin=NULL,
-  TruevaluesMax=NULL,
-  TruevaluesDiscrete ="TRUE",
-  gestagedaysVariable = "anT1gestagedays")
-smallD[,anexamsfh_0:=NULL]
-smallD[,anTgestagedays_0:=NULL]
-xtabs(~smallD$TrialOne_sfhDiscrepBinary_15_17)
 
 
 
@@ -2614,7 +2595,8 @@ varskeep <- c("prettyExposure",
               "age",	
               "agepregnancy",	
               "avgincome",
-              "avgincomecat",	
+              "avgincomecat",
+              "bookexamsfh",
               "bookhistdm",	
               "bookhistcs",	
               "bookhistgdm",	
@@ -2746,7 +2728,8 @@ varskeepAll <- c("prettyExposure",
                  "educationcat",
                  "str_TRIAL_1_Cluster",	
                  "bookgestagedays_cats",
-                 "bookorgdistricthashed",	
+                 "bookorgdistricthashed",
+                 "bookexamsfh",
                  "bookhistdm",	
                  "bookhistcs",	
                  "bookhistgdm",	
