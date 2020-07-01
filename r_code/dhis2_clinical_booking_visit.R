@@ -1,7 +1,7 @@
 DHIS2_BookingVisit <- function(isControl,
                                keepDoubleBookings=FALSE,
                                IS_GAZA=FALSE
-                               ) {
+) {
   FOLDERS <- DHIS2_Folders(isControl = isControl)
   
   
@@ -22,7 +22,7 @@ DHIS2_BookingVisit <- function(isControl,
     d[, visitNum := 1:.N, by = .(uniqueid)]
     firstObsPerPreg <- d[visitNum == 1]
     firstObsPerPreg[, visitNum := NULL]
-
+    
     firstObsPerPreg[, `Event` := NULL]
     firstObsPerPreg[, `Program stage` := NULL]
     firstObsPerPreg[, `Event date` := NULL]
@@ -33,10 +33,10 @@ DHIS2_BookingVisit <- function(isControl,
     firstObsPerPreg[, `Organisation unit` := NULL]
     firstObsPerPreg[, `Con_Abortion` := NULL]
     firstObsPerPreg[, `ANC Other medications the woman is currently taking` := NULL]
-
+    
     # Merge in the first ANC observation so that this file
     # looks the same as the intervention data
-
+    
     d <- fread(
       sprintf(
         "%s/%s ANC Green File.csv",
@@ -79,7 +79,7 @@ DHIS2_BookingVisit <- function(isControl,
     d[, v81 := as.numeric(NA)]
     d[, anchighriskdesignatedwoman := as.numeric(NA)]
     d[, anccounselingaboutironandfolicac := as.numeric(NA)]
-
+    
     d[, ancmchhandbookprovided := as.numeric(NA)]
     d[, ancpreviousepisodesofthrombosis := as.numeric(NA)]
     d[, anchistoryofklexaneprovidedtothe := as.numeric(NA)]
@@ -93,10 +93,6 @@ DHIS2_BookingVisit <- function(isControl,
     # capture tostring anclmpstatus, replace
     # capture tostring ancotherfamilyconcernspecified, replace
     # capture tostring ancpallor, replace
-    
-    
-    
-  
     
   } else {
     print("CHECKINGCHECKING****")
@@ -118,7 +114,7 @@ DHIS2_BookingVisit <- function(isControl,
     # print(d)
     # print(names(d))
     
-   
+    
     
     file_to_read_in <- sprintf(
       "%s/%s Booking Visit.csv",
@@ -132,11 +128,10 @@ DHIS2_BookingVisit <- function(isControl,
       file_to_read_in,
       encoding = "UTF-8"
     )
-
+    
     
     setnames(d, 2, "uniqueid")
     
-   
     d[,confamilyhistoryofbronchialastma:=as.numeric(NA)]
     d[,confamilyhistoryofcardiacdisease:=as.numeric(NA)]
     d[,usrecommendationscommentsx:=as.numeric(NA)]   
@@ -162,20 +157,18 @@ DHIS2_BookingVisit <- function(isControl,
     d[,consupplementsyesno:=as.numeric(NA)]
     d[,conancsupplementprescription:=as.numeric(NA)]
   }
-
+  
   for (i in names(d)) setnames(d, i, ExtractOnlyEnglishLettersAndNumbers(i)[[1]])
   #nrow(d[is.na(eventdate)])
   
-  #setnames(d,"conancgestationaageatvisitsize","bookexamsfh")
- 
   if(!isControl){ 
-      
+    
     print("1")
     
     
   }
   
- 
+  
   
   if(IS_GAZA){
     #becomes missing when this step is performed
@@ -187,7 +180,7 @@ DHIS2_BookingVisit <- function(isControl,
     print(sum(!is.na(d$eventdate)))
     #unique(d$eventdate)
     d[,eventdate:=stringr::str_remove_all(eventdate," 00:00:00.0$")]
-  
+    
     d[,eventdate:=stringr::str_remove_all(eventdate," 12:00:00 AM$")]
     d[,eventdate:=as.Date(eventdate, format="%Y-%m-%d")]
     str(d$eventdate)
@@ -195,7 +188,7 @@ DHIS2_BookingVisit <- function(isControl,
     print("AFTER DATE FIXING")
     print(sum(!is.na(d$eventdate)))
     
-          
+    
   }
   
   
@@ -207,7 +200,7 @@ DHIS2_BookingVisit <- function(isControl,
       d[,identificationdocumentnumber:=1:.N]
     }
     
-    
+    setnames(d,"ancgestationalageatvisitweeks","ancgestationalageatvisitweeks")
   }
   setnames(d, 2, "uniqueid")
   
@@ -223,10 +216,10 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "organisationunit", "bookorgunit")
   #try this to rename bookorgname using bookorgunit
   #if(IS_GAZA){
-   # d[,bookorgname:=bookorgunit]
-    #d[,bookorgname:=bookorgcode]
-   
- #}
+  # d[,bookorgname:=bookorgunit]
+  #d[,bookorgname:=bookorgcode]
+  
+  #}
   
   setnames(d, "identificationdocumentnumber", "bookidnumber")
   setnames(d, "ancdiastolicbloodpressuremmhg", "bookbpdiast")
@@ -242,7 +235,7 @@ DHIS2_BookingVisit <- function(isControl,
   }, error = function(err) {
     setnames(d, "ancallergiesdrugsandorseverefoodallergies", "bookallerfood")
   })
-
+  
   setnames(d, "ancpenicillinallergy", "bookallerpen")
   setnames(d, "anchistoryofothermedicineallergy", "bookallerdrug")
   setnames(d, "ancothermedisineallergyspecified", "bookallerdrugspec")
@@ -251,13 +244,13 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "anchistoryofchronichypertension", "bookhisthtn")
   setnames(d, "anchistoryofdiabetesmellitusioriiinsulindependent", "bookhistdm")
   setnames(d, "anchistoryofrenaldisease", "bookhistrd")
-
+  
   tryCatch({
     setnames(d, "anchistoryofotherchronicconditio", "bookhistotherch")
   }, error = function(err) {
     setnames(d, "anchistoryofotherchronicconditions", "bookhistotherch")
   })
-
+  
   setnames(d, "anchistoryofblooddisorder", "bookhistblood")
   setnames(d, "ancbodyheightm", "bookheight")
   setnames(d, "ancbodyweightkg", "bookweight")
@@ -289,15 +282,14 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "anchistoryofuterineanomalyorinjury", "bookhistute")
   setnames(d, "anchistoryofuterinesurgeryexcludingcs", "bookhistutesur")
   setnames(d, "ancvaginalbleeding", "bookvagbleed")
-
+  
   tryCatch({
     setnames(d, "anchistoryofblooddisorderspecif", "bookhistbloodspec")
   }, error = function(err) {
     setnames(d, "anchistoryofblooddisorderspecified", "bookhistbloodspec")
   })
-
+  
   setnames(d, "anchistoryofcsections2", "bookhistcs")
-  #setnames(d, "ancfundalheightmeasurement", "bookexamsfh")
   setnames(d, "ancmedicalexaminationofabdomen", "bookexamabd")
   setnames(d, "ancmedicalexaminationofheart", "bookexamheart")
   setnames(d, "ancmedicalexaminationoflowerlimbs", "bookexamlimb")
@@ -308,34 +300,34 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "ancinvitrofertilizationivf", "bookhistivf")
   setnames(d, "ancinfertility1yearpriortocurrentpregnancy", "bookhistinfert")
   setnames(d, "ancutifollowupscheduled", "bookutifollow")
-
+  
   tryCatch({
     setnames(d, "ancreferralneededforotherchronic", "bookrefchronic")
   }, error = function(err) {
     setnames(d, "ancreferralneededforotherchronicconditions", "bookrefchronic")
   })
-
+  
   setnames(d, "anchistoryofeclampsiainanypreviouspregnancy", "bookhisteclamp")
-
+  
   tryCatch({
     setnames(d, "anchistoryofdeepveinthrombosisdv", "bookhistdvt")
   }, error = function(err) {
     setnames(d, "anchistoryofdeepveinthrombosisdvtoutsidepreviouspregnancies", "bookhistdvt")
   })
-
+  
   setnames(d, "anchypertensioncerebralorvisualsymptoms", "bookhisthtnsymp")
   setnames(d, "ancfetalpresentationcheckedbypalpation", "bookexampalp")
   setnames(d, "ancfetalheartsoundfhs", "bookexamfh")
   setnames(d, "whichancvisitisthis", "bookvisitspec")
   setnames(d, "ancprimigravidapg", "bookprimi")
   setnames(d, "ancmedicineprescription", "bookmedpres")
-
+  
   tryCatch({
     setnames(d, "v81", "bookhistotherchronic")
   }, error = function(err) {
     setnames(d, "anchistoryofotherchronicconditionspecified", "bookhistotherchronic")
   })
-
+  
   setnames(d, "ancabnormalfindingsofheadandneckspecified", "bookexamheadabn")
   setnames(d, "ancabnormalfindingsofabdomenspecified", "bookexamabdabn")
   setnames(d, "ancabnormalfindingsofbreastsandornipplesspecified", "bookexambreastabn")
@@ -353,34 +345,34 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "ancgestationalageatvisitweeks", "bookgestage")
   setnames(d, "anchighriskdesignatedwoman", "bookhighrisk")
   setnames(d, "anchistoryofanycomplicatedcsection", "bookhistcscompl")
-
+  
   tryCatch({
     setnames(d, "anccounselingaboutironandfolicac", "bookcounsifa")
   }, error = function(err) {
     setnames(d, "anccounselingaboutironandfolicacidsupplementation", "bookcounsifa")
   })
-
+  
   setnames(d, "ancmchhandbookprovided", "bookancbook")
   setnames(d, "ancpreviousepisodesofthrombosis", "bookhistthrom")
-
+  
   tryCatch({
     setnames(d, "anchistoryofklexaneprovidedtothe", "bookhistclex")
   }, error = function(err) {
     setnames(d, "anchistoryofklexaneprovidedtothepatient", "bookhistclex")
   })
-
+  
   tryCatch({
     setnames(d, "anccounselingaboutdangersignsdur", "bookcounsdanger")
   }, error = function(err) {
     setnames(d, "anccounselingaboutdangersignsduringpregnancy", "bookcounsdanger")
   })
-
+  
   tryCatch({
     setnames(d, "anccounselingonnutrioninpregnanc", "bookcounsnut")
   }, error = function(err) {
     setnames(d, "anccounselingonnutrioninpregnancy", "bookcounsnut")
   })
-
+  
   setnames(d, "anccounselingaboutbreastfeeding", "bookcounsbf")
   setnames(d, "anccounselingaboutlaborsigns", "bookcounslabor")
   setnames(d, "anccounselingaboutpkuscreening", "bookcounspku")
@@ -388,7 +380,7 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d, "ancotherfamilyconcernspecified", "bookfamspec")
   setnames(d, "ancppcvisitundertakenbywhom", "bookseenby")
   setnames(d, "anchomevisitoratthehealthclinic", "bookhomeorclinic")
-
+  
   if("paperbackupused" %in% names(d)) setnames(d, "paperbackupused", "bookbackupfile")
   if("ppcwasthisinformationfirstcollectedonpaperandthenenteredintothesystem" %in% names(d)) setnames(d, "ppcwasthisinformationfirstcollectedonpaperandthenenteredintothesystem", "bookbackupfile")
   if(!"bookbackupfile" %in% names(d)) stop("cant find bookbackupfile")
@@ -398,16 +390,12 @@ DHIS2_BookingVisit <- function(isControl,
   setnames(d,"confamilyhistoryofcongenitalanomaly","bookfamhistcongenanom")
   setnames(d,"anchistoryofantepartumhemorrhageinpreviouspregnancy","bookhistantparthemprevpreg")
   
-  
-  
   # more name changing
-  
   if(isControl){
-   setnames(d,"conancgestationaageatvisitsize","bookexamsfh")
-  } else{
-   setnames(d,"ancfundalheightmeasurement","bookexamsfh")
+    setnames(d,"conancgestationaageatvisitsize","bookexamsfh")
+  } else {
+    setnames(d,"ancfundalheightmeasurement", "bookexamsfh")
   }
-  
   
   
   # delete people with duplicate eventdates (these are obvious duplicates)
@@ -416,23 +404,23 @@ DHIS2_BookingVisit <- function(isControl,
   d <- unique(d, by = c("uniqueid", "bookdate"))
   print("CB2")
   print(nrow(d))
- 
-
+  
+  
   # delete people with duplicae LMPs (again, duplicate pregnancies(
   nrow(d)
   d <- unique(d, by = c("uniqueid", "booklmp"))
   print("CB3")
   nrow(d)
-
-
+  
+  
   data_DHIS2_Demographics <- DHIS2_Demographics(isControl = isControl, IS_GAZA=IS_GAZA)
   print("CB4")
   nrow(d)
   d <- merge(d, data_DHIS2_Demographics, by = c("uniqueid"), all = T)
   print("CB5")
   nrow(d)
-
- 
+  
+  
   # if control and dont have booking, then delete
   if(isControl){
     d <- d[!is.na(bookevent)]
@@ -444,7 +432,7 @@ DHIS2_BookingVisit <- function(isControl,
   # for the abortions, we now have "day of showing up and getting registered in demographic file"
   # as "day of booking" (ie bookdate)
   #
-
+  
   d[, ident_dhis2_df_no_gf_or_bf := ifelse(is.na(bookevent), 1, 0)]
   xtabs(~d$ident_dhis2_df_no_gf_or_bf)
   d[, ident_dhis2_booking := ifelse(is.na(bookevent), 0, 1)]
@@ -475,7 +463,7 @@ DHIS2_BookingVisit <- function(isControl,
   }
   
   d[is.na(bookevent), bookevent := sprintf("%s%s", ifelse(isControl,"CON","INT"), 1:.N)]
-
+  
   #d[demoidnumber==852188531]
   #d[uniqueid=="AqJL4IiVSJv"]
   #2017-09-10
@@ -489,17 +477,17 @@ DHIS2_BookingVisit <- function(isControl,
   } else{
     d[, booklmp := as.Date(booklmp)]
   }
-   if (length(unique(d$dob)) == 1) {
-     d[, dob := NULL]
-     d[, dob := as.Date("1980-01-01")]
-   } else {
-     #print(unique(d$dob)[1:30])
-     if(IS_GAZA){
-       d[, dob := as.Date(dob, format="%m/%d/%Y")]
-     } else {
-       d[, dob := as.Date(dob)]
-     }
-   }
+  if (length(unique(d$dob)) == 1) {
+    d[, dob := NULL]
+    d[, dob := as.Date("1980-01-01")]
+  } else {
+    #print(unique(d$dob)[1:30])
+    if(IS_GAZA){
+      d[, dob := as.Date(dob, format="%m/%d/%Y")]
+    } else {
+      d[, dob := as.Date(dob)]
+    }
+  }
   
   # drop women whose 2nd, 3rd, etc pregnancies
   # have LMPs before the first pregnancy's booking date
@@ -527,12 +515,12 @@ DHIS2_BookingVisit <- function(isControl,
   }
   d[, booking_number := 1:.N, by = .(uniqueid)]
   d[, min_event_date := NULL]
-
+  
   
   # Calculate EDD based on LMP
   d[, expecteddateofdelivery := booklmp + 280]
   d[, ident_expected_delivered:= expecteddateofdelivery < min(CLINIC_INTERVENTION_DATE,CLINIC_CONTROL_DATE)]
-
+  
   # Create a new variable for gestational age
   d[, age := floor(as.numeric(difftime(bookdate, dob, units = "days")) / 365)]
   # small cleaning
@@ -552,7 +540,7 @@ DHIS2_BookingVisit <- function(isControl,
         uniqueid %in% na.omit(toremove$uniqueid)
     )]
   }
-
+  
   #### data extractor
   d[,dataextractor:=unlist(ExtractOnlyEnglishLetters(dataextractor))]
   xtabs(~d$dataextractor)
@@ -640,7 +628,7 @@ DHIS2_BookingVisit <- function(isControl,
   #xtabs(~d$booknumber)
   
   #print(names(d))
- 
+  
   #print(d[1,])
   
   #d[demoidnumber==401404496,c("demoidnumber","uniqueid","bookevent","bookdate")]
@@ -654,6 +642,5 @@ DHIS2_BookingVisit <- function(isControl,
   return(d)
   
 }
-
 
 
