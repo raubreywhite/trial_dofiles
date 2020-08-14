@@ -13,7 +13,7 @@ Setup(IS_GAZA=TRUE)
 d <- LoadDataFileFromNetwork()
 
 #making small data set for PPC in 2019
-gaza2019data <- d[bookyear==2019,]
+gaza2019data <- d[bookyear>=2018,]
 
 # ANC Anemia
 
@@ -31,7 +31,7 @@ for (i in vars){
 xtabs(~gaza2019data$haslabhbtermgA)
 
 #labhb value for 35 to 37 weeks
-smallD[,labhbatterm:=as.numeric(NA)]
+gaza2019data[,labhbatterm:=as.numeric(NA)]
 
 vars <- stringr::str_subset(names(gaza2019data),"^labhb_")
 
@@ -40,7 +40,7 @@ for (var_labhb in vars){
   
   vargestage <-stringr::str_replace(var_labhb,"labhb", "labgestage")
   
-  gaza2019data[haslabhbterm==TRUE &
+  gaza2019data[haslabhbtermgA==TRUE &
            get(vargestage)>=35 &
            get(vargestage)<=37 &
            !is.na(get(var_labhb)) &
@@ -49,14 +49,15 @@ for (var_labhb in vars){
 }
 
 anemia <- gaza2019data[,.(N=.N,
-                   Haslabatterm=sum(haslabhbterm==T, na.rm=T),         
+                   Haslabatterm=sum(haslabhbtermgA==T, na.rm=T),         
                    validvalues=sum(labhbatterm>0 & labhbatterm<16, na.rm=T),
                    MildAnemia=sum(labhbatterm>=9 &
                                     labhbatterm<11,na.rm=T),
                    ModerateAnemia=sum(labhbatterm>7 &
                                         labhbatterm<=8.9,na.rm=T),
                    sevAnemia=sum(labhbatterm>0 & 
-                                   labhbatterm<7,na.rm=T))]
+                                   labhbatterm<7,na.rm=T)),
+                   keyby=.(bookyear)]
 
 openxlsx::write.xlsx(anemia, 
                      file.path(

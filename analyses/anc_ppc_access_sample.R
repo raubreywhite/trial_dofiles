@@ -33,7 +33,28 @@ if(IS_GAZA){
   
   fileTag <- "gaza"
   
-  #add clinic size
+  ###Making first usedd if its at <=21 gA variable
+  # to mimick the  eRegistry, we have used the eReg rule
+  # the rule takes an ultrasound less than 23 weeks and an lmp if no ultrasound is present
+  nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
+  num <- stringr::str_replace(nam,"usedd_","")
+  d[,first_1_21_usedd:=as.Date(NA)]
+  for(i in num ){
+    print(i)
+    
+    var_usedd <- sprintf("usedd_%s",i)
+    var_usgestage <- sprintf("usgestage_%s",1)
+    
+    d[!is.na(get(var_usedd)) &
+        
+        !is.na(get(var_usgestage)) &
+        get(var_usgestage) > 0 &
+        get(var_usgestage) < 23 &
+        is.na(first_1_21_usedd),
+      first_1_21_usedd:=as.Date(get(var_usedd),format="%Y-%m-%d")]
+  }
+  
+  #add columns we want here
   columnsIWant <- c(
     "uniqueid")
   
@@ -64,46 +85,41 @@ if(IS_GAZA){
 earlyDate <- as.Date("2020-03-22")
 lateDate <- as.Date("2020-05-26")
 
-
-
-### just looking at some numbers ###
+### looking at numbers ###
 nrow(d[is.na(booklmp)])
 nrow(d[!is.na(booklmp)])
 
 nrow(d[is.na(first_1_21_usedd)])
 nrow(d[!is.na(first_1_21_usedd)])
 
-
-
 # earlydate data 
 d[,gestageEarly:=as.numeric(NA)]
 d[!is.na(first_1_21_usedd), gestageEarly:=as.numeric((difftime(
-  first_1_21_usedd,
   earlyDate,
+  first_1_21_usedd,
   units="days"))+280,digits=1)]
 
 d[is.na(first_1_21_usedd) &
-    !is.na(booklmp_original),
+    !is.na(booklmp),
   gestageEarly:=as.numeric((difftime(
     earlyDate,
-    booklmp_original,
+    booklmp,
     units="days")),digits=1)]
 
 
 # latedate data 
 d[,gestageLate:=as.numeric(NA)]
 d[!is.na(first_1_21_usedd), gestageLate:=as.numeric((difftime(
-  first_1_21_usedd,
   lateDate,
+  first_1_21_usedd,
   units="days"))+280,digits=1)]
 
 d[is.na(first_1_21_usedd) &
-    !is.na(booklmp_original),
+    !is.na(booklmp),
   gestageLate:=as.numeric((difftime(
     lateDate,
-    booklmp_original,
+    booklmp,
     units="days")),digits=1)]
-
 
 
 # ppc date or anc date to between corona virus
@@ -111,10 +127,12 @@ d[,ancovid:=as.logical(NA)]
 d[,ppccovid:=as.logical(NA)]
 
 # ancovid variable
-d[gestageEarly>0 & gestageLate<266, ancovid:=TRUE]
+d[(gestageEarly>0 & gestageEarly<=265) & (gestageLate>0 & gestageLate<266), ancovid:=TRUE]
+xtabs(~d$ancovid,addNA=T)
 
 # ppccovid variable
-d[gestageEarly>=266 & gestageLate<=322]
+d[(gestageEarly>=266 & gestageEarly <=350) & (gestageLate>=266 & gestageLate<350), ppccovid:=TRUE]
+xtabs(~d$ppccovid,addNA=T)
 
 
 
@@ -136,7 +154,7 @@ if(IS_GAZA==FALSE){
 } else {
   # GAZA
   # ANC select the booking/control/clinic people that we want
-  anaccess <- d[bookcovid==T | ancovid==T]
+  anaccess <- d[ancovid==T]
   
   # PPC select the booking/control/clinic people that we want
   ppcaccess <- d[ppccovid==T]
@@ -148,38 +166,44 @@ nrow(ppcaccess)
 
 ### things that are the same between gaza and wb
 # making smaller data sets to select from
-anaccess[,columnsIWant, with=F]
+anc <- anaccess[,columnsIWant, with=F]
 
-ppcaccess[,columnsIWant, with=F]
+ppc <- ppcaccess[,columnsIWant, with=F]
 
 # sort randomly
 set.seed(7)
 
 #give everyone random number
-anaccess[,rand_num:=runif(.N)]
-ppcaccess[,rand_num:=runif(.N)]
-
+anc[,rand_num:=runif(.N)]
+ppc[,rand_num:=runif(.N)]
 
 #sort according to random number
-setorder(anaccess, rand_num)
-setorder(ppcaccess, rand_num)
+setorder(anc, rand_num)
+setorder(ppc, rand_num)
 
 ### can try this to sample-- because below one asks for df and not dt
 # sample (c(1:10), size=3, replace =F)
 # what happens to the columsn that i want after this step??
 # ansample <- sample(ansample$rand_num, size=212, replace=F)
+#or can be done this way:
+#ppcaccess[,rand_num:=runif(.N)]
+#ppcaccess[rand_num < 0.05] # select (approximately) 5% of the rows
 
 
 ## or can try this way instead to take random sample
 if(IS_GAZA){
   
-  ansample <- anaccess[sample(nrow(anaccess),212), ]
-  ppcsample <- ppcsample[sample(nrow(ppcsample),212),]
+  # first sampling was done for 212, but 16% have no number
+  # extracted another sample of 40 for anc bc 33 missing (16%)
+  # extracted 30 for ppc because number of missing 24 (11%)
+  # took 30, but 7 duplicates. tookanother sample of 40 to make sure
+  ansample <- anc[sample(nrow(anc),253), ]
+  ppcsample <- ppc[sample(nrow(ppc),253),]
   
 } else {
   
-  ansample <- anaccess[sample(nrow(anaccess),318), ]
-  ppcsample <- ppcsample[sample(nrow(ppcsample),318),]
+  ansample <- anc[sample(nrow(anc),318), ]
+  ppcsample <- ppc[sample(nrow(ppc),318),]
 
 }
 
@@ -211,7 +235,7 @@ openxlsx::write.xlsx(ansample,
 
 openxlsx::write.xlsx(ppcsample, 
                      file.path(
-                       FOLDER_DATA_RESULTS,
+                       FOLDER_DATA_RESULTS_GAZA,
                        "misc_requests",
                        sprintf("%s_accessibiliy_ppc.xlsx",
                                lubridate::today(),fileTag)))

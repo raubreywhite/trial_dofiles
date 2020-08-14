@@ -7,13 +7,13 @@ Setup <- function(IS_GAZA=FALSE){
   REF_WB_CLINIC_INTERVENTION_DATE <- "2019-03-04"
   REF_WB_CLINIC_CONTROL_DATE <- "2019-03-04"
   
-  # define our dates
-  GAZA_CLINIC_INTERVENTION_DATE <- "2020-05-31"
-  GAZA_CLINIC_CONTROL_DATE<- "2020-05-31"
+  # define our date
+  GAZA_CLINIC_INTERVENTION_DATE <- "2020-06-24"
+  GAZA_CLINIC_CONTROL_DATE<- "2020-06-24"
 
   
   #since we are finished with control data for trial 1, we can use the export below.
-  WB_CLINIC_INTERVENTION_DATE <- "2020-03-03"
+  WB_CLINIC_INTERVENTION_DATE <- "2020-06-23"
   WB_CLINIC_CONTROL_DATE <- "2019-07-07"
   
   FOLDER_DATA_CLEAN_GAZA <<- file.path(getwd(),"../gaza_data_clean")

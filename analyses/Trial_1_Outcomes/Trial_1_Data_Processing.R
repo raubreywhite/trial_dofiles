@@ -155,7 +155,6 @@ gAscheck <- smallD[,c("bookgestagedays",
 
 
 # Discrepancy Variable anexamsfh variable
-smallD[ident_dhis2_control==T, bookexamsfh:=conancgestationaageatvisitsize_1]
 smallD[,anexamsfh_0:=bookexamsfh]
 
 vars <- stringr::str_subset(names(smallD), "^anexamsfh_")
@@ -2541,6 +2540,8 @@ anexampalps<-names(smallD)[stringr::str_detect(names(smallD),"^anexampalp_")]
 varsanexampalpyes <- names(smallD)[stringr::str_detect(names(smallD),
                                                        "^TrialOne_anexampalpyes")]
 
+varscongAvisitweeks <-names(smallD)[stringr::str_detect(names(smallD),"^anconancgestationaageatvisitweeks_")]
+
 varsSFHdisc <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_sfhDiscrep")]
 varsSFHdiscExists <- names(smallD)[stringr::str_detect(names(smallD),"^TrialOne_sfhDiscrepExists")]
 
@@ -2821,6 +2822,7 @@ varsmalpres <- c(varsUSevents,
 
 varsfgr <- c(allUs,
              varsUs,
+             varscongAvisitweeks,
              varsSFHdisc,
              varsSFHdiscExists,
              varsanexamsfh,

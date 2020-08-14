@@ -54,18 +54,8 @@ d <- readRDS(file.path(org::PROJ$DATA,"full_data_from_r.rds"))
 
 ########## Data set definition ################
 
-#gA <- d[bookyear<=2019 & 
-#         (ident_avic_abb==T |
-#        matching=="Governmental"|
-#       matching=="PaperHBO"|
-#        matching=="Private") &
-#        comboUSandLMPgA>=20 &
-#        comboUSandLMPgA<=44 &
-#        mahima_hospenteredgestage_1>=20 &
-#        mahima_hospenteredgestage_1<=44,]
-
-gA <- d[((bookyear==2015) | (ident_TRIAL_1==T & bookdate >= "2017-01-15"&
-                               bookdate<="2017-09-15")) &
+gA <- d[ident_TRIAL_1==T & bookdate >= "2017-01-15"&
+          bookdate<="2017-09-15" &
           (matching=="Avicenna"|
              matching=="Governmental"|
              matching=="PaperHBO"|
@@ -74,407 +64,93 @@ gA <- d[((bookyear==2015) | (ident_TRIAL_1==T & bookdate >= "2017-01-15"&
 
 ################ END  ################
 
-############################# ABSTRACT ############################# 
-gA[!is.na(mahima_gestageatbirthwk_1) & 
-     is.na(mahima_gestageatbirthwk_1_cats), 
-   c("mahima_gestageatbirthwk_1",
-     "mahima_gestageatbirthwk_1_cats")]
-
-sum(!is.na(gA$mahima_gestageatbirthwk_1))
-sum(!is.na(gA$mahima_gestageatbirthwk_1_cats))
-
-sum(!is.na(gA$mahima_gestageatbirthwk_1) & !is.na(gA$mahima_gestageatbirthwk_1_cats))
-sum(!is.na(gA$mahima_gestageatbirthwk_1) & is.na(gA$mahima_gestageatbirthwk_1_cats))
-sum(is.na(gA$mahima_gestageatbirthwk_1) & !is.na(gA$mahima_gestageatbirthwk_1_cats))
 
 
-analysisDatasetUSgA <- gA[ident_TRIAL_1==T &
-                            !is.na(mahima_hospenteredgestage_1) &
-                            mahima_hospenteredgestage_1>0,
-                          c("mahima_dateofbirth_1",
-                            "first_1_21_usedd_gA",
-                            "first_1_21_usedd_gA_cats",
-                            "first_1_21_usedd_gA_cats_wide",
-                            "mahima_hospenteredgestage_1",
-                            "mahima_hospenteredgestage_1_cats",
-                            "mahima_hospenteredgestage_1_cats_wide",
-                            "mahima_gestageatbirthwk_1",
-                            "mahima_gestageatbirthwk_1_cats",
-                            "mahima_gestageatbirthwk_1_cats_wide",
-                            "merged_is_hosp_gov")]
+################  Creating new vars   ################
 
-sum(!is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1) & 
-      !is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats))
-sum(!is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1) & 
-      is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats))
-sum(is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1) & 
-      !is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats))
-
-
-nrow(analysisDatasetUSgA)
-sum(!is.na(analysisDatasetUSgA$first_1_21_usedd_gA))
-sum(!is.na(analysisDatasetUSgA$first_1_21_usedd_gA_cats))
-sum(!is.na(analysisDatasetUSgA$first_1_21_usedd_gA_cats_wide))
-
-sum(!is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1))
-sum(!is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats))
-sum(!is.na(analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats_wide))
-
-sum(!is.na(analysisDatasetUSgA$mahima_hospenteredgestage_1))
-sum(!is.na(analysisDatasetUSgA$mahima_hospenteredgestage_1_cats))
-sum(!is.na(analysisDatasetUSgA$mahima_hospenteredgestage_1_cats_wide))
-
-#qqplots for normality
-#huge outlier at 4,000, so we should get rid of it
-qqnorm(analysisDatasetUSgA$difference_us); qqline(analysisDatasetUSgA$difference_us, col = 2)
-
-
-unique(analysisDatasetUSgA$first_1_21_usedd_gA)
-#1. qqplots, crazy distributions so do the nonparametric analysis
-#not normal distribution, so will have to do nonparametric testing
-qqnorm(analysisDatasetUSgA[abs(first_1_21_usedd_gA)<100]$difference_us)
-qqline(analysisDatasetUSgA[abs(first_1_21_usedd_gA)<100]$difference_us, col = 2)
 
-#2.nonparametic
-#true location is not equal to zero
-#since not significant
-wilcox.test(analysisDatasetUSgA$difference_us)
-
-#since they arent significant, we can present summary statistics of the data
+# USorLMPdatecombogAdays variable (put in creating further variables)
+gA[,USorLMPdateCombogAdays:= as.numeric(difftime(
+  mahima_dateofbirth_1,
+  USorLMPdate,
+  units ="days"))]
 
-# creating analysis variables
-analysisDatasetUSgA[,difference_us := mahima_hospenteredgestage_1 - first_1_21_usedd_gA]
-
-# paired t.test
-t.test(analysisDatasetUSgA$difference_us)
-
-#equivalence test
-#two one sided test, how much do we really care about for them to be the same?
-#ex: test 1 is the difference than -10?
-#dont have equivalence with a region of equivalence of +2 and -2
-#(in our data set because 90% cI is -8.9 to 0.03)
-t.test(analysisDatasetUSgA$difference_us, conf.level = 0.9)
 
-#paired t.test excluding outliers
-unique(analysisDatasetUSgA$mahima_hospenteredgestage_1)
-
-# linear regression
-fit <- lm(difference_us ~ merged_is_hosp_gov, data=analysisDatasetUSgA)
-# (Intercept) is when hospital is private. It says "US estimate is 11 days earlier than entered"
-# merged_is_hosp_govTRUE is the difference between private and government estimates. it is NOT signifant, because the p-value is 0.13!!
-# this means we CANNOT interpret private results and government results separately
-summary(fit)
-
-
-####Table 3: CHIsqtest by ultrasound and then LMP
-#used wider categories to decrease lower numbers in categories
-#tried the chi.sq test which is an estimation but it might be incorrect
-#so we constrained the limits further by merging categories with small numbers
-#so tried fishers exact test and bc sample size is too large so it didnt work
-
-xtabs(~first_1_21_usedd_gA_cats+mahima_hospenteredgestage_1_cats,data=analysisDatasetUSgA)
-chisq.test(xtabs(~first_1_21_usedd_gA_cats+mahima_hospenteredgestage_1_cats,data=analysisDatasetUSgA))
-
 
-xtabs(~first_1_21_usedd_gA_cats_wide+mahima_hospenteredgestage_1_cats_wide,data=analysisDatasetUSgA)
-chisq.test(xtabs(~first_1_21_usedd_gA_cats_wide+mahima_hospenteredgestage_1_cats_wide,data=analysisDatasetUSgA))
 
+# hospital entered gestaational age in days with avg value
+gA[,hospentavgdays:=3+mahima_hospenteredgestage_1*7]
+gA[,hospentdays:=mahima_hospenteredgestage_1*7]
 
-xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats)
-chisq.test(xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats))
 
-xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats_wide+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats_wide)
-chisq.test(xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats_wide+analysisDatasetUSgA$mahima_hospenteredgestage_1_cats_wide))
-
-
-
-
-# we pull ou thte 3 variables that we care about
-#should we add is hosp gov variable here too?
-long <- analysisDatasetUSgA[,c(
-  "first_1_21_usedd_gA",
-  "mahima_hospenteredgestage_1",
-  "mahima_gestageatbirthwk_1"
-)]
-# i create my own id variable (per row number)
-long[,id:=1:.N]
-# reshape to long
-long <- melt.data.table(long, id.vars="id")
 
-# mixed effects linear regression with random effect for person
-# this takes into account the 'paired nature' of the data
-# (i.e. multiple observations per woman/pregnancy)
-summary(lme4::lmer(value ~ variable + (1|id), data=long))
-summary(lme4::lmer(value ~ variable + (1|id), data=long[value >= 0 & value <= 45])) # removing outliers
+# termcats
+gA[,termcats:=cut(USorLMPdateCombogAdays,
+                  breaks=c(-300,0,140,167,230,258,300,308,50000),
+                  include.lowest=T)]
+# xtabs(~gA$termcats, addNA=T)
 
-# this is a normal linear regression
-# (but not appropriate due to the paired nature)
-# outcome ~ exposure
-summary(lm(value ~ variable, data=long))
-# remember to look at the overall pvalue 
-# for each of the variables first!
-# lm generally just reports pair-wise comparisons
-# which are a second step in the analyses
-anova(lm(value ~ variable, data=long))
 
-### 
+## making term variables
+gA[,termcatcombo:=as.character(NA)]
+gA[USorLMPdateCombogAdays>=259 & 
+     USorLMPdateCombogAdays<=300, termcatcombo:="term"]
+gA[USorLMPdateCombogAdays>=168 & 
+     USorLMPdateCombogAdays<=258, termcatcombo:="preterm"]
+gA[USorLMPdateCombogAdays>=301 & 
+     USorLMPdateCombogAdays<=308, termcatcombo:="postterm"]
 
-###also compare difference between governmental and private
-#matching=="Governmental" or matching=="Private"
-#merged_is_hosp_gov, true or false
+gA[,termcathospavg:=as.character(NA)]
+gA[hospentavgdays>=259 & 
+     hospentavgdays<=300, termcathospavg:="term"]
+gA[hospentavgdays>=168 & 
+     hospentavgdays<=258, termcathospavg:="preterm"]
+gA[hospentavgdays>=301 & 
+     hospentavgdays<=308, termcathospavg:="postterm"]
 
 
 
-cat("\nDenominator_first_1_21_usedd\n")
-nrow(analysisDatasetUSgA)
-cat("\nMean_first_1_21_usedd\n")
-mean(analysisDatasetUSgA$first_1_21_usedd_gA)
 
-cat("\nXtabs first_1_21_usedd_gA\n")
-xtabs(~analysisDatasetUSgA$first_1_21_usedd_gA)
+#merged_pregbweight
+#weights not unified, get them all to grams
+#gA[,abbbabyweight_1:=as.numeric(abbbabyweight_1)]
+gA[,bw:=as.numeric(merged_pregbweight)]
+gA[merged_pregbweight>0.1 & merged_pregbweight<7, bw:=1000*merged_pregbweight]
+#gA[merged_pregbweight>=1 & merged_pregbweight<7, bw:=1000*merged_pregbweight]
+gA[merged_pregbweight>=7 & merged_pregbweight<=60, bw:=100*merged_pregbweight]
+gA[merged_pregbweight>6000,bw:=merged_pregbweight*0.1]
 
-cat("\nXtabs first_1_21_usedd_gA_cats\n")
-xtabs(~analysisDatasetUSgA$first_1_21_usedd_gA_cats)
+# cleaning gAs that are less than 2300 at birth, but greater than than 1000
+#gA[,bwreplaced:=as.numeric(bw)]
+gA[bw>1000 & bw<2300 & !is.na(merged_pregbweight), 
+   bw:=as.numeric(merged_pregbweight)]
 
-cat("\nIQRcalculatedgestage\n")
-quantile(x=analysisDatasetUSgA$first_1_21_usedd_gA, 
-         probs = seq(0, 1, 0.25), 
-         na.rm = TRUE)
+#xtabs(~gA$bw)
 
-cat("\nTRIALcats\n")
-xtabs(~analysisDatasetUSgA$first_1_21_usedd_gA)
-xtabs(~analysisDatasetUSgA$first_1_21_usedd_gA_cats+analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats)
+quantile(gA$bw, na.rm=T)
 
-xtabs(~analysisDatasetUSgA$first_1_21_usedd_gA_cats_wide)
-xtabs(~analysisDatasetUSgA$mahima_gestageatbirthwk_1_cats_wide)
 
+bwstats <-gA[USorLMPdateCombogAdays==280 & 
+               bw>0,.(N=.N,
+                      meanbw=mean(bw, na.rm=T),
+                      sd=sd(bw, na.rm=T),
+                      sderror=(sd(bw)/sqrt(sum(!is.na(bw)))),
+                      tenthquantile=quantile(bw, probs=0.1, na.rm=T))]
 
-cat("\nbelow0US\n")
-xtabs(~analysisDatasetUSgA[
-  first_1_21_usedd_gA_cats=="[-30,0]",
-  c(first_1_21_usedd_gA)])
-cat("\nABO\n")
-xtabs(~analysisDatasetUSgA[
-  first_1_21_usedd_gA_cats=="(0,24.7]",
-  c(first_1_21_usedd_gA)])
-cat("\nreallyPRE\n")
-xtabs(~analysisDatasetUSgA[
-  first_1_21_usedd_gA_cats=="(24.7,32.7]",
-  c(first_1_21_usedd_gA)])
-cat("\nPRE\n")
-xtabs(~analysisDatasetUSgA[
-  first_1_21_usedd_gA_cats=="(32.7,37.7]",
-  c(first_1_21_usedd_gA)])
-cat("\nTerm\n")
-xtabs(~analysisDatasetUSgA[
-  first_1_21_usedd_gA_cats=="(37.7,41.7]",
-  c(first_1_21_usedd_gA)])
-cat("\nPost\n")
-xtabs(~analysisDatasetUSgA[
-  first_1_21_usedd_gA_cats=="(41.7,44]",
-  c(first_1_21_usedd_gA)])
-
-
-
+openxlsx::write.xlsx(bwstats,file.path(org::PROJ$SHARED_TODAY,
+                                       sprintf("bwstats_combo_%s.xlsx",
+                                               lubridate::today())))
 
-cat("\nDenominators for first_1_21_usedd\n")
-cat("\nDenominators for TRIAL first_1_21_usedd\n")
-nrow(d[bookyearmonth>="2017-01" & 
-         bookyearmonth<="2017-12" &
-         ident_avic_abb==T & 
-         !is.na(mahima_hospenteredgestage_1) &
-         !is.na(mahima_gestageatbirthwk_1) &
-         !is.na(first_1_21_usedd_gA)&
-         !is.na(first_1_21_usedd_gA_cats),
-       c("mahima_dateofbirth_1",
-         "first_1_21_usedd_gA",
-         "first_1_21_usedd_gA_cats")])
-
-
-
-
-sink()
-
-################################# GRAPHS GA #################################
-
-#making plots for gestage distributions
-analysisDatasetUSgA <- d[bookdate>="2017-01-15" &
-                           bookyearmonth<="2017-09-15" &
-                           ident_TRIAL_1==T &
-                           ident_avic_abb==T &
-                           !is.na(merged_is_hosp_gov) &
-                           !is.na(mahima_hospenteredgestage_1) &
-                           !is.na(mahima_gestageatbirthwk_1) &
-                           !is.na(first_1_21_usedd_gA)&
-                           !is.na(first_1_21_usedd_gA_cats),
-                         c("mahima_hospenteredgestage_1",
-                           "mahima_gestageatbirthwk_1",
-                           "first_1_21_usedd_gA")]
-
-
-
-#dont need an id.vars here because not retaining information for each woman
-long <- melt.data.table(analysisDatasetUSgA)
-head(long)
-
-#ran this and got 3 levels, so must do levels
-long$variable
-
-#see the levels, which one comes first so we can rename them accordingly
-levels(long$variable)
-levels(long$variable) <-c("Entered by HCP",
-                          "Calculated by LMP",
-                          "Calculated from Ultrasound")
-
-
-
-long <- long[!is.na(value)]
-long[,category:=cut(value,
-                    breaks=c(-300,0,24.7,32.7,37.7,41.7,44,9999999999),
-                    include.lowest=T)]
-
-xtabs(~long$category, addNA = T)
-levels(long$category) <- c("<=0",
-                           "1-24",
-                           "25-32",
-                           "33-37",
-                           "38-41",
-                           "42-44",
-                           ">44")
-
-levels(long$category)
-
-xtabs(~long$category, addNA = T)
-levels(long$category) <- c("<=0",
-                           "1-24",
-                           "25-32",
-                           "33-37",
-                           "38-41",
-                           "42-44",
-                           ">44")
-
-levels(long$category)
-
-#if restrict more rows, cant produce both continous and categorical
-p <- ggplot(long[value<50 & value>0], aes(x=value, fill=variable)) 
-p <- p + geom_density(alpha=0.3)
-p <- p + labs(title="Distribution of Gestational Age by Source",
-              caption = "Outliers Removed") +
-  xlab("Weeks") +
-  ylab("Density")
-p <- p + scale_fill_brewer("Gestational Age Source", palette ="Dark2")
-#centers title 
-p <- p + theme(plot.title = element_text(hjust = 0.5))
-p <- p + theme(text = element_text(size=24))
-
-p
-
-ggsave(file.path(
-  org::PROJ$SHARED_TODAY,
-  "GA_Paper_Distribution_Adjusted.png"
-), plot = p, width = 297, height = 210, unit = "mm")
-
-
-
-#####Non-Adjusted Distribution#####
-#if restrict more rows, cant produce both continous and categorical
-p <- ggplot(long[value<300], aes(x=value, fill=variable)) 
-p <- p + geom_density(alpha=0.3)
-p <- p + labs(title="Distribution of Gestational Age by Source",
-              caption= "Outliers Not Removed") +
-  xlab("Weeks")
-p <- p + scale_y_continuous("Frequency", labels=scales::percent)
-p <- p + scale_fill_brewer("Gestational Age Source", palette ="Set1")
-#centers title 
-p <- p + theme(plot.title = element_text(hjust = 0.5))
-p <- p + theme(text = element_text(size=24))
-
-p
-
-ggsave(file.path(
-  org::PROJ$SHARED_TODAY,
-  "GA_Paper_Distribution_NON_Adjusted.png"
-), plot = p, width = 297, height = 210, unit = "mm")
-
-
-###Adjusting the table so we can aggregate and get percentages
-uglytable <- long[,.(
-  N=.N),
-  keyby=.(
-    variable,
-    category
-    
-  )]
-
-
-#####FIX THIS######
-#creating denominator
-#run bottom code when tells you reached elapsed time limit
-#dev.off(
-#ggsave with the restrictions helps save it in higher resolution
-
-####Bar Graph with restriction###
-uglytable[,percentage:=N/sum(N),by=.(variable)]
-p <- ggplot(uglytable, aes(x= category, y=percentage, fill=variable))
-p <- p + geom_col(position="dodge", alpha=0.75)
-p <- p + scale_fill_brewer("Gestational Age Source", palette="Set1")
-p <- p + scale_x_discrete("Weeks")
-p <- p + scale_y_continuous("Frequency", labels=scales::percent)
-p <- p + labs(title="Distribtion of Gestational Age by Category",
-              caption="Outliers not removed")
-p <- p + geom_text(aes(label = round(100*percentage)), 
-                   size=6.5,
-                   vjust = -0.5,
-                   position=position_dodge(width=1))
-p <- p + theme(text = element_text(size=44))
-p <- p + theme_gray(22)
-p 
-
-#ggsave with the restrictions helps save it in higher resolution
-ggsave(file.path(
-  org::PROJ$SHARED_TODAY,
-  "GA_Paper_Bar_graph_Not_Adjusted_with_labels.png"
-), plot = p, width = 297, height = 210, unit = "mm")
-
-
-####Bar Graph with restriction###
-###Removing outliers...other values that arent possible
-uglytable[,percentage:=N/sum(N),by=.(variable)]
-p <- ggplot(uglytable[!category %in% c("<=0",">44")], aes(x= category, y=percentage, fill=variable))
-p <- p + geom_col(position="dodge", alpha=0.75)
-p <- p + scale_fill_brewer("Gestational Age Source", palette="Set1")
-p <- p + scale_x_discrete("Weeks")
-p <- p + scale_y_continuous("Frequency", labels=scales::percent)
-p <- p + labs(title="Distribtion of Gestational Age by Category",
-              caption="Outliers removed")
-p <- p + geom_text(aes(label = round(100*percentage)),
-                   size=6.5,
-                   vjust = -0.5,
-                   position=position_dodge(width=1))
-p <- p + theme(text = element_text(size=44))
-p <- p + theme_gray(22)
-p 
-
-#ggsave with the restrictions helps save it in higher resolution
-ggsave(file.path(
-  org::PROJ$SHARED_TODAY,
-  "GA_Paper_Bar_graph_Adjusted_with_labels.png"
-), plot = p, width = 297, height = 210, unit = "mm")
 
 
 ########## completeness reports ########## 
-
-gA[,termcats:=cut(comboUSandLMPgA,
-                  breaks=c(-100,0,20,32.9,36.9,42.9,44,50,60,200,5000),
-                  include.lowest=T)]
-xtabs(~gA$termcats, addNA=T)
-
 gAcomp <- gA[,.(N=.N,
                 LMP=sum(!is.na(booklmp)),
                 US=sum(!is.na(first_1_21_usedd)),
                 LMPgA=sum(!is.na(mahima_gestageatbirthwk_1)),
                 USgA=sum(!is.na(first_1_21_usedd_gA)),
                 COMBOgA=sum(!is.na(comboUSandLMPgA)),
+                usorlmpcombo=sum(!is.na(USorLMPdateCombogAdays)),
                 HOSPgA=sum(!is.na(mahima_hospenteredgestage_1)),
                 LMPandEntered=sum(!is.na(booklmp) & 
                                     !is.na(mahima_hospenteredgestage_1)),
@@ -498,13 +174,16 @@ openxlsx::write.xlsx(gAcomp,file.path(
   sprintf("Completeness_%s.xlsx",
           lubridate::today())))
 
+
+# only do results for people with both hospentered and usorlmpcombo
+gA <- gA[!is.na(USorLMPdateCombogAdays) & !is.na(hospentavgdays)]
+
 library("e1071")
 # statistical  info
-gAstats <- gA[(comboUSandLMPgA<=44 & 
-                 comboUSandLMPgA>=20) & 
-                (mahima_gestageatbirthwk_1<=44 & mahima_gestageatbirthwk_1>=20) &
-                (first_1_21_usedd_gA<=44 & first_1_21_usedd_gA>=20) &
-                (mahima_hospenteredgestage_1>=20 & mahima_hospenteredgestage_1<=44),
+
+gAstats <- gA[(USorLMPdateCombogAdays<=308 & 
+                 USorLMPdateCombogAdays>=168) & 
+                (hospentdays>=168 & hospentdays<=308),
               .(N=.N,
                 MeanLMPgA=mean(mahima_gestageatbirthwk_1, na.rm=T),
                 MedianLMPgA=median(mahima_gestageatbirthwk_1, na.rm=T),
@@ -525,30 +204,72 @@ gAstats <- gA[(comboUSandLMPgA<=44 &
                 MedianHospgA=median(mahima_hospenteredgestage_1, na.rm=T),
                 SDHospgA=sd(mahima_hospenteredgestage_1, na.rm=T),
                 KurtHospgA=kurtosis(mahima_hospenteredgestage_1,na.rm=T),
-                SkewHospgA=skewness(mahima_hospenteredgestage_1, na.rm=T))]
+                SkewHospgA=skewness(mahima_hospenteredgestage_1, na.rm=T),
+                MeanHospgAavg=mean(hospentavgdays, na.rm=T),
+                MedianHospgAavg=median(hospentavgdays, na.rm=T),
+                SDHospgAavg=sd(hospentavgdays, na.rm=T),
+                KurtHospgAavg=kurtosis(hospentavgdays,na.rm=T),
+                SkewHospgAavg =skewness(hospentavgdays, na.rm=T)
+              )]
 
 openxlsx::write.xlsx(gAstats,file.path(org::PROJ$SHARED_TODAY,
-                                       sprintf("gA_Stats_20_44_ALL_%s.xlsx",lubridate::today())))
+                                       sprintf("gA_Stats_24_44_hospentandcombo_%s.xlsx",lubridate::today())))
+
+
+gAstats <- gA[(USorLMPdateCombogAdays<=308 & 
+                 USorLMPdateCombogAdays>=168) & 
+                (mahima_gestageatbirthwk_1<=44 & mahima_gestageatbirthwk_1>=24) &
+                (first_1_21_usedd_gA<=44 & first_1_21_usedd_gA>=24) &
+                (mahima_hospenteredgestage_1>=24 & 
+                   mahima_hospenteredgestage_1<=44),
+              .(N=.N,
+                MeanLMPgA=mean(mahima_gestageatbirthwk_1, na.rm=T),
+                MedianLMPgA=median(mahima_gestageatbirthwk_1, na.rm=T),
+                SDLMPgA=sd(mahima_gestageatbirthwk_1, na.rm=T),
+                KurtLMPgA=kurtosis(mahima_gestageatbirthwk_1,na.rm=T),
+                SkewLMPgA=skewness(mahima_gestageatbirthwk_1, na.rm=T),
+                MeanUsgA=mean(first_1_21_usedd_gA, na.rm=T),
+                MedianUsgA=median(first_1_21_usedd_gA, na.rm=T),
+                SDUsgA=sd(first_1_21_usedd_gA, na.rm=T),
+                KurtUsgA=kurtosis(first_1_21_usedd_gA,na.rm=T),
+                SkewUsgA=skewness(first_1_21_usedd_gA, na.rm=T),
+                MeanCombogA=mean(comboUSandLMPgA, na.rm=T),
+                MedianCombogA=median(comboUSandLMPgA, na.rm=T),
+                SDCombogA=sd(comboUSandLMPgA, na.rm=T),
+                KurtCombogA=kurtosis(comboUSandLMPgA,na.rm=T),
+                SkewCombogA=skewness(comboUSandLMPgA, na.rm=T),
+                MeanHospgA=mean(mahima_hospenteredgestage_1, na.rm=T),
+                MedianHospgA=median(mahima_hospenteredgestage_1, na.rm=T),
+                SDHospgA=sd(mahima_hospenteredgestage_1, na.rm=T),
+                KurtHospgA=kurtosis(mahima_hospenteredgestage_1,na.rm=T),
+                SkewHospgA=skewness(mahima_hospenteredgestage_1, na.rm=T),
+                MeanHospgAavg=mean(hospentavgdays, na.rm=T),
+                MedianHospgAavg=median(hospentavgdays, na.rm=T),
+                SDHospgAavg=sd(hospentavgdays, na.rm=T),
+                KurtHospgAavg=kurtosis(hospentavgdays,na.rm=T),
+                SkewHospgAavg =skewness(hospentavgdays, na.rm=T)
+              )]
+
+openxlsx::write.xlsx(gAstats,file.path(org::PROJ$SHARED_TODAY,
+                                       sprintf("gA_Stats_24_44_ALL_%s.xlsx",lubridate::today())))
 
 
 
 # term categorical data based on variable
-gAtermcounts <- gA[comboUSandLMPgA<=44 & 
-                     comboUSandLMPgA>=20,.(
-                       N=.N,
-                       LMPgA=sum(!is.na(mahima_gestageatbirthwk_1)),
-                       UsGA=sum(!is.na(first_1_21_usedd_gA)),
-                       CombogA=sum(!is.na(comboUSandLMPgA)),
-                       HospentgA=sum(!is.na(mahima_hospenteredgestage_1))),
-                   keyby=.(termcats)]
+gAtermcounts <- gA[,.(N=.N,
+                      LMPgA=sum(!is.na(mahima_gestageatbirthwk_1)),
+                      UsGA=sum(!is.na(first_1_21_usedd_gA)),
+                      CombogA=sum(!is.na(USorLMPdateCombogAdays)),
+                      HospentgA=sum(!is.na(hospentdays))),
+                   keyby=.(termcatcombo)]
 
 openxlsx::write.xlsx(gAtermcounts,file.path(org::PROJ$SHARED_TODAY,
-                                            sprintf("gA_TermCounts_20_44_%s.xlsx",
+                                            sprintf("gA_TermCounts_24_42_%s.xlsx",
                                                     lubridate::today())))
 
 # birth type
-gAtype <- gA[comboUSandLMPgA<=44 & 
-               comboUSandLMPgA>=20,.(
+gAtype <- gA[USorLMPdateCombogAdays<=308 & 
+               USorLMPdateCombogAdays>=168,.(
                  N=.N,
                  Missing=sum(is.na(merged_pregoutcome)| merged_pregoutcome==""),
                  Alive=sum(merged_pregoutcome=="Live Birth" |
@@ -570,15 +291,15 @@ gAtype <- gA[comboUSandLMPgA<=44 &
                              merged_pregoutcome=="Dead"|
                              merged_pregoutcome=="Died"|
                              merged_pregoutcome=="Male", na.rm=T)),
-             keyby=.(termcats)]
+             keyby=.(termcatcombo)]
 
 openxlsx::write.xlsx(gAtype,file.path(org::PROJ$SHARED_TODAY,
-                                      sprintf("birthoutcome_20_44_%s.xlsx",
+                                      sprintf("birthoutcome_24_44_%s.xlsx",
                                               lubridate::today())))
 
 # birth type CPO 
-CPO <- gA[comboUSandLMPgA<=44 & 
-            comboUSandLMPgA>=20,.(
+CPO <- gA[USorLMPdateCombogAdays<=308 & 
+            USorLMPdateCombogAdays>=168,.(
               N=.N,
               Alive=sum(cpopregoutcome_1=="LIVE", na.rm=T),
               Stillbirth=sum(cpopregoutcome_1=="STILL", na.rm=T),
@@ -587,43 +308,47 @@ CPO <- gA[comboUSandLMPgA<=44 &
                           cpopregoutcome_1=="LATE_DEATH"|
                           cpopregoutcome_1=="INF_DEATH",na.rm=T),
               Missing=sum(is.na(cpopregoutcome_1))),
-          keyby=.(termcats)]
+          keyby=.(termcatcombo)]
 
 openxlsx::write.xlsx(CPO,file.path(org::PROJ$SHARED_TODAY,
-                                   sprintf("cpo_20_44_%s.xlsx",
+                                   sprintf("cpo_24_44_%s.xlsx",
                                            lubridate::today())))
 
 
 
 
-# concordance
-gA[,comboUSandLMPgA_rounded:= floor(comboUSandLMPgA)]
+### concordance in weeks ###
+#gA[,comboUSandLMPgA_rounded:= floor(comboUSandLMPgA)]
 
-gA[,gAdif:=(comboUSandLMPgA-mahima_hospenteredgestage_1)]
+gA[,gAdif:=abs((USorLMPdateCombogAdays-hospentavgdays))]
 xtabs(~gA$gAdif, addNA=T)
 
-gAconcordance <- gA[(comboUSandLMPgA<=44 & 
-                       comboUSandLMPgA>=20) &
+gAconcordance <- gA[(USorLMPdateCombogAdays<=308 & 
+                       USorLMPdateCombogAdays>=168) &
                       !is.na(gAdif),.(N=.N,
                                       noweekdiff=sum(gAdif==0, na.rm=T),
                                       oneweekdif=sum(abs(gAdif)>=1 &
-                                                       abs(gAdif)<2, na.rm=T),
-                                      twoweekdiff=sum(abs(gAdif)>=2 &
-                                                        abs(gAdif)<3, na.rm=T),
-                                      morethan1wkdif=sum(abs(gAdif)>=2, na.rm=T)
-                      )]
+                                                       abs(gAdif)<7, na.rm=T),
+                                      twoweekdiff=sum(abs(gAdif)>=7 &
+                                                        abs(gAdif)<14, na.rm=T),
+                                      morethan1wkdif=sum(abs(gAdif)>=7, na.rm=T))]
 
-openxlsx::write.xlsx(gAconcordance,file.path(org::PROJ$SHARED_TODAY,
-                                             sprintf("gA_Concordance_20_44_%s.xlsx",
-                                                     lubridate::today())))
+openxlsx::write.xlsx(gAconcordance,
+                     file.path(org::PROJ$SHARED_TODAY,
+                               sprintf(
+                                 "gA_Concordance_24_44_%s.xlsx",
+                                 lubridate::today())))
 
 # concordance and birthweight
 
-bwdiff <- gA[gAdif>=2, 
+bwdiff <- gA[gAdif>=14 & 
+               USorLMPdateCombogAdays<=308 & 
+               USorLMPdateCombogAdays>=259, 
              c("bookdate",
                "booklmp", 
                "usedd_1",
                "merged_datedeliv",
+               "mahima_dateofbirth_1",
                "cpodate_1",
                "mahima_hospenteredgestage_1",
                "comboUSandLMPgA",
@@ -633,6 +358,71 @@ bwdiff <- gA[gAdif>=2,
 openxlsx::write.xlsx(bwdiff,file.path(org::PROJ$SHARED_TODAY,
                                       sprintf("bwdiff_gAdiff_37_44_%s.xlsx",
                                               lubridate::today())))
+
+
+## concordance via days variables and the hospavg variable
+gA[,gAdif2:=abs((hospentdays-USorLMPdateCombogAdays))]
+xtabs(~gA$gAdif2, addNA=T)
+
+gAconcordance <- gA[(USorLMPdateCombogAdays<=314 & 
+                       comboUSandLMPgA>=168) &
+                      !is.na(gAdif2),.(N=.N,
+                                       noweekdiff=sum(gAdif2==0, na.rm=T),
+                                       oneweekdif=sum(abs(gAdif2)>=1 &
+                                                        abs(gAdif2)<7, na.rm=T),
+                                       twoweekdiff=sum(abs(gAdif2)>=7 &
+                                                         abs(gAdif2)<14, na.rm=T),
+                                       morethan1wkdif=sum(abs(gAdif2)>=7, na.rm=T)
+                      )]
+
+openxlsx::write.xlsx(gAconcordance,file.path(org::PROJ$SHARED_TODAY,
+                                             sprintf("gA_Concordance_days_24_44_%s.xlsx",
+                                                     lubridate::today())))
+
+
+##### compare
+compare <- gA[gAdif>7, c("gAdif2",
+                         "gAdif",
+                         "mahima_gestageatbirthwk_1",
+                         'hospentdays',
+                         "mahima_hospenteredgestage_1",
+                         "USorLMPdateCombogAdays",
+                         "hospentavgdays",
+                         "bw",
+                         "merged_is_hosp_gov",
+                         "merged_namehospbirth")]
+
+openxlsx::write.xlsx(compare,file.path(org::PROJ$SHARED_TODAY,
+                                       sprintf("concordance_problems_%s.xlsx",
+                                               lubridate::today())))
+
+
+#### preterm and post term defs
+terms <- gA[gAdif2>7 & 
+              USorLMPdateCombogAdays>=224 &
+              USorLMPdateCombogAdays<=308 &
+              (termcatcombo!=termcathospavg), 
+            c("gAdif2",
+              "gAdif",
+              "termcatcombo",
+              "termcathospavg",
+              "booklmp",
+              "first_1_21_usedd",
+              "merged_datedeliv",
+              "USorLMPdateCombogAdays",
+              "hospentavgdays",
+              "mahima_gestageatbirthwk_1",
+              "mahima_hospenteredgestage_1",
+              "merged_namehospbirth",
+              "merged_is_hosp_gov",
+              "bw")]
+
+openxlsx::write.xlsx(terms,file.path(org::PROJ$SHARED_TODAY,
+                                     sprintf("terms3244_%s.xlsx",
+                                             lubridate::today())))
+
+nrow(gA[termcatcombo!=termcathospavg])
+
 
 
 
@@ -658,46 +448,9 @@ openxlsx::write.xlsx(gAover3weeks,file.path(org::PROJ$SHARED_TODAY,
                                                     lubridate::today())))
 
 
-# birth weights and birth outcomes
-gA[,USorLMPdateCombogAdays:= as.numeric(difftime(
-  mahima_dateofbirth_1,
-  USorLMPdate,
-  units ="days"))]
-
-
-#merged_pregbweight
-#weights not unified, get them all to grams
-#gA[,abbbabyweight_1:=as.numeric(abbbabyweight_1)]
-gA[,bw:=as.numeric(merged_pregbweight)]
-gA[merged_pregbweight>0 & merged_pregbweight<7, bw:=1000*merged_pregbweight]
-#gA[merged_pregbweight>=1 & merged_pregbweight<7, bw:=1000*merged_pregbweight]
-gA[merged_pregbweight>=7 & merged_pregbweight<=60, bw:=100*merged_pregbweight]
-gA[merged_pregbweight>6000,bw:=merged_pregbweight*0.1]
-
-# cleaning gAs that are less than 2300 at birth, but greater than than 1000
-#gA[,bwreplaced:=as.numeric(bw)]
-gA[bw>1000 & bw<2300 & !is.na(ppcbirthweight_1), 
-   bw:=as.numeric(ppcbirthweight_1)]
-
-#xtabs(~gA$bw)
-
-quantile(gA$bw, na.rm=T)
-
-
-bwstats <-gA[comboUSandLMPgA>=40 & 
-               comboUSandLMPgA<41 &
-               bw>0,.(N=.N,
-                      meanbw=mean(bw, na.rm=T),
-                      sd=sd(bw, na.rm=T),
-                      sderror=(sd(bw)/sqrt(sum(!is.na(bw)))),
-                      tenthquantile=quantile(bw, probs=0.1, na.rm=T))]
-
-openxlsx::write.xlsx(bwstats,file.path(org::PROJ$SHARED_TODAY,
-                                       sprintf("bwstats_combo_%s.xlsx",
-                                               lubridate::today())))
 # hospentered
-bwstats <-gA[mahima_hospenteredgestage_1>=40 & 
-               mahima_hospenteredgestage_1<41 &
+bwstats <-gA[hospentdays>=280 & 
+               hospentdays<286 &
                bw>0,.(N=.N,
                       meanbw=mean(bw, na.rm=T),
                       sd=sd(bw, na.rm=T),
@@ -706,6 +459,20 @@ bwstats <-gA[mahima_hospenteredgestage_1>=40 &
 
 openxlsx::write.xlsx(bwstats,file.path(org::PROJ$SHARED_TODAY,
                                        sprintf("bwstats_hospent_%s.xlsx",
+                                               lubridate::today())))
+
+# hospenteredavg
+# stats didnt change for sga and lga for this variable- same as hospentered
+bwstats <-gA[hospentavgdays>=280 &
+               hospentavgdays<=286 &
+               bw>0,.(N=.N,
+                      meanbw=mean(bw, na.rm=T),
+                      sd=sd(bw, na.rm=T),
+                      sderror=(sd(bw)/sqrt(sum(!is.na(bw)))),
+                      tenthquantile=quantile(bw, probs=0.1, na.rm=T))]
+
+openxlsx::write.xlsx(bwstats,file.path(org::PROJ$SHARED_TODAY,
+                                       sprintf("bwstats_hospentavg_%s.xlsx",
                                                lubridate::today())))
 
 # ultrasound based
@@ -722,9 +489,9 @@ openxlsx::write.xlsx(bwstats,file.path(org::PROJ$SHARED_TODAY,
                                                lubridate::today())))
 
 
-# calculated lmp
-bwstats <-gA[mahima_gestageatbirthwk_1>=40 & 
-               mahima_gestageatbirthwk_1<41 &
+# combo gA
+bwstats <-gA[USorLMPdateCombogAdays>=280 & 
+               USorLMPdateCombogAdays<=286 &
                bw>0,.(N=.N,
                       meanbw=mean(bw, na.rm=T),
                       sd=sd(bw, na.rm=T),
@@ -732,12 +499,15 @@ bwstats <-gA[mahima_gestageatbirthwk_1>=40 &
                       tenthquantile=quantile(bw, probs=0.1, na.rm=T))]
 
 openxlsx::write.xlsx(bwstats,file.path(org::PROJ$SHARED_TODAY,
-                                       sprintf("bwstats_calculated_%s.xlsx",
+                                       sprintf("bwstats_combo_%s.xlsx",
                                                lubridate::today())))
+
+# mean bw from 37+0 to 41+6 for the different enterd ones
+# proportion of error in each of the categories
 
 
 ###### SGA and LGA proportions  ######
-
+# should probably change bw to be more than 17
 ###### sga ###### 
 
 #making sgA variables combo days
@@ -884,7 +654,7 @@ gA[lga==FALSE &
 
 #41
 gA[lga==FALSE &
-     bw>4020 &
+     bw>4024 &
      USorLMPdateCombogAdays>=287 & 
      USorLMPdateCombogAdays<=293, lga:=TRUE]
 
@@ -962,18 +732,26 @@ gA[lga3==FALSE &
 
 ##### lga and sga proportions ####
 sgalga <-gA[,.(N=.N,
+               notmissbw=sum(!is.na(bw)),
+               missingbw=sum(is.na(bw)),
+               notmissusorlmpdays=sum(!is.na(USorLMPdateCombogAdays) &
+                                        !is.na(bw)),
                sgacomboT=sum(sga==T, na.rm=T),
                sgacomboF=sum(sga==F, na.rm=T),
                missingsga=sum(is.na(sga)),
+               notmissgAent=sum(!is.na(mahima_hospenteredgestage_1) &
+                                  !is.na(bw)),
                sgaenteredT=sum(sga2==T, na.rm=T),
                sgaenteredF=sum(sga2==F, na.rm=T),
                missingsgaentered=sum(is.na(sga2)),
+               notmissuseddbw=sum(!is.na(bw) & 
+                                    !is.na(first_1_21_usedd_gA)),
                sgaUST=sum(sga3==T, na.rm=T),
                sgaUSF=sum(sga3==F, na.rm=T),
                missingsgaUS=sum(is.na(sga3)),
                lgaT=sum(lga==T, na.rm=T),
                lgaF=sum(lga==F, na.rm=T),
-               missingsga=sum(is.na(lga)),
+               missingsga=sum(is.na(lga2)),
                lgaentT=sum(lga2==T, na.rm=T),
                lgaentF=sum(lga2==F, na.rm=T),
                missingsgaent=sum(is.na(lga2)),
@@ -993,12 +771,12 @@ openxlsx::write.xlsx(sgalga,file.path(org::PROJ$SHARED_TODAY,
 #at 24 weeks
 #dev.off() try to run this code if get weird graphic errors
 p <- ggplot(gA, 
-            aes(x=comboUSandLMPgA, y=bw))
+            aes(x=comboUSandLMPgAdays, y=bw))
 
-p <- ggplot(gA[bw>0 & bw<6000 & 
-                 comboUSandLMPgA>0 &
-                 comboUSandLMPgA<44], 
-            aes(x=comboUSandLMPgA, y=bw))
+p <- ggplot(gA[bw>10 & bw<6000 & 
+                 comboUSandLMPgAdays>0 &
+                 comboUSandLMPgAdays<308], 
+            aes(x=comboUSandLMPgAdays, y=bw))
 p <- p + geom_point()
 p <- p + labs(title="Gestational age vs. Birthweight",
               xlab="Calculated Gestational Ages",
@@ -1476,7 +1254,7 @@ ggsave(file.path(
 ################ gA Paper Distribution Graphs ################ 
 
 #dont need an id.vars here because not retaining information for each woman
-tab <- gA[,c("mahima_hospenteredgestage_1", "comboUSandLMPgA")]
+tab <- gA[,c("hospentavgdays", "USorLMPdateCombogAdays")]
 
 long <- melt.data.table(tab)
 head(long)
@@ -1493,13 +1271,13 @@ levels(long$variable) <-c("Entered by HCP",
 
 long <- long[!is.na(value)]
 long[,category:=cut(value,
-                    breaks=c(-300,0,20,32.9,36.9,42.9,44,5000),
+                    breaks=c(-300,0,168,230,258,300,308,5000),
                     include.lowest=T)]
 
 xtabs(~long$category, addNA = T)
 levels(long$category) <- c("<=0",
-                           "1-20",
-                           "21-32",
+                           "1-24",
+                           "24-32",
                            "33-36",
                            "37-42",
                            "43-44",
@@ -1512,13 +1290,13 @@ xtabs(~long$category, addNA = T)
 library(ggplot2)
 
 #if restrict more rows, cant produce both continous and categorical
-p <- ggplot(long[value<50 & value>0], aes(x=value, fill=variable)) 
+p <- ggplot(long[value<350 & value>0], aes(x=value, fill=variable)) 
 p <- p + geom_density(alpha=0.3)
 p <- p + labs(title="Distribution of Gestational Age by Source",
               caption = "Outliers Removed") +
-  xlab("Weeks") +
+  xlab("Days") +
   ylab("Density")
-p <- p + scale_x_continuous("Weeks", lim=c(36, 44))
+p <- p + scale_x_continuous("Weeks", lim=c(252, 308))
 p <- p + scale_fill_brewer("Gestational Age Source", palette ="Dark2")
 #centers title 
 p <- p + theme(plot.title = element_text(hjust = 0.5))
@@ -1540,7 +1318,7 @@ p <- p + geom_density(alpha=0.3)
 p <- p + labs(title="Distribution of Gestational Age by Source",
               caption= "Outliers Not Removed") +
   xlab("Weeks")
-p <- p + scale_x_continuous("Weeks", lim=c(32, 44))
+p <- p + scale_x_continuous("Weeks", lim=c(224, 308))
 p <- p + scale_y_continuous("Frequency", labels=scales::percent)
 p <- p + scale_fill_brewer("Gestational Age Source", palette ="Set1")
 #centers title 
@@ -1553,6 +1331,57 @@ ggsave(file.path(
   org::PROJ$SHARED_TODAY,
   "GA_Paper_Distribution_NON_Adjusted.png"
 ), plot = p, width = 297, height = 210, unit = "mm")
+
+
+
+uglytable <- long[,.(
+  N=.N),
+  keyby=.(
+    variable,
+    category
+    
+  )]
+
+
+#####FIX THIS######
+#creating denominator
+#run bottom code when tells you reached elapsed time limit
+#dev.off(
+#ggsave with the restrictions helps save it in higher resolution
+
+uglytable <- long[,.(N=.N),keyby=.(variable,category)]
+
+####Bar Graph with restriction###
+###Removing outliers...other values that arent possible
+uglytable[,percentage:=N/sum(N),by=.(variable)]
+p <- ggplot(uglytable[!category %in% c("<=0",">44")], 
+            aes(x= category, 
+                y=percentage, 
+                fill=variable))
+
+p <- p + geom_col(position="dodge", alpha=0.75)
+p <- p + scale_fill_brewer("Gestational Age Source", palette="Set1")
+p <- p + scale_x_discrete("Days")
+p <- p + scale_y_continuous("Frequency", labels=scales::percent)
+p <- p + labs(title="Distribtion of Gestational Age by Category",
+              caption="Outliers not removed")
+p <- p + geom_text(aes(label = round(100*percentage)), 
+                   size=6.5,
+                   vjust = -0.5,
+                   position=position_dodge(width=1))
+p <- p + theme(text = element_text(size=44))
+p <- p + theme_gray(22)
+p 
+
+#ggsave with the restrictions helps save it in higher resolution
+ggsave(file.path(
+  org::PROJ$SHARED_TODAY,
+  "GA_Paper_bargraph.png"
+), plot = p, width = 297, height = 210, unit = "mm")
+
+
+
+
 
 
 
