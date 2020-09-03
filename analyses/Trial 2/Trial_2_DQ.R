@@ -14,12 +14,69 @@ sapply(fileSources, source, .GlobalEnv)
 fileSources = file.path("r_trial2", list.files("r_trial2", pattern = "*.[rR]$"))
 sapply(fileSources, source, .GlobalEnv)
 
-Setup(IS_GAZA = FALSE)
+IS_GAZA <- TRUE
+
+Setup(IS_GAZA = TRUE)
 
 ###### SETUP ENDS ######
 
-#d <- LoadDataFileFromNetworkGaza()
-d <- LoadDataFileFromNetworkWB()
+if(IS_GAZA==F){
+
+
+  d <- LoadDataFileFromNetworkWB()
+  fileTag <- "WB"
+
+  }else {
+  
+  d <- LoadDataFileFromNetworkGaza()
+  fileTag <- "GAZA"
+  
+  
+  
+  
+  }
+
+
+
+# export bookorgunitcodes
+
+# Trial 2 Variables (move to creating further variables when run new data)
+d[,ident_T2:=as.logical(NA)]
+d[bookyearmonth>="2019-12" &
+    (ident_TRIAL_2_and_3),ident_T2:=T]
+
+# make a variable for trial 2 and 3 (qid and sms)
+d[ident_T2==T,ident_T2_T3:=FALSE]
+d[ident_T2==T & ident_TRIAL_2==T & ident_TRIAL_3==T, ident_T2_T3:=TRUE]
+
+
+# renaming arms
+d[ident_T2==T & ident_TRIAL_2_3_Control==T, prettyExposure:="Trial Arm A"]
+d[ident_T2==T & ident_TRIAL_2==T & 
+    ident_T2_T3==F, prettyExposure:="Trial Arm C"]
+d[ident_T2==T & 
+    ident_TRIAL_3==T & ident_T2_T3==F, prettyExposure:="Trial Arm B"]
+d[ident_T2==T & ident_T2_T3==T, prettyExposure:="Trial Arm D"]
+
+
+
+# bookorgcodes for each of the clinics
+bookorgcodes <-d[ident_TRIAL_2_and_3==T & bookyearmonth>="2019-12",
+                 c("bookorgname","bookorgcode","prettyExposure")]
+
+setorder(bookorgcodes,bookorgname)
+
+bookorgcodes[,Numtimes:=1:.N,by=.(bookorgname)]
+bookorgcodes <- bookorgcodes[Numtimes==1]
+
+
+
+# adjust this code as a a function for is_gaza
+openxlsx::write.xlsx(bookorgcodes,file.path(FOLDER_DATA_RESULTS_GAZA,
+                                            "T2",
+                                            sprintf("bookorgcodes_GAZA.xlsx",
+                                            lubridate::today())))
+
 
 
 #quality checks for sms
@@ -54,12 +111,15 @@ smalld <- d[ident_dhis2_booking==TRUE &
 smsqcheck <- smalld[,.(
                         Booked=sum(ident_dhis2_booking),
                         WantSMS=sum(SMSyes, na.rm=TRUE),
+                        WantSMSandEligible=sum(has_mobilephone==T &
+                                                 SMSyes==T, na.rm=T),
                         SMSNO=sum(SMSyes==0, na.rm=TRUE),
-                        MissingSMS=sum(is.na(SMSyes))
+                        MissingSMS=sum(is.na(SMSyes)),
+                        has_mobilephone=sum(has_mobilephone,na.rm=T),
+                        meanbookgestage=mean(bookgestage,na.rm=T)
                          ),
                         keyby=.(str_TRIAL_2_Cluster,
                                 bookorgname,
-                                has_mobilephone,
                                 #ident_hr_clinic,
                                 ident_TRIAL_2_3_Control,
                                 ident_TRIAL_2,
@@ -70,9 +130,9 @@ smsqcheck <- smalld[,.(
 
 openxlsx::write.xlsx(smsqcheck, 
                      file.path(
-                       FOLDER_DATA_RESULTS,
+                       FOLDER_DATA_RESULTS_GAZA,
                        "sms_monitoring",
-                       sprintf("%s_SMS_quality_check.xlsx",lubridate::today())))
+                       sprintf("%s_%s_SMS_quality_check.xlsx",lubridate::today(),fileTag)))
 
 ###booking by gestational age distribution###
 smsbookingA <- smalld[,.(
@@ -95,7 +155,7 @@ openxlsx::write.xlsx(smsbookingA,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "sms_monitoring",
-                       sprintf("%s_BookbyGA.xlsx",lubridate::today())))
+                       sprintf("%s_%s_BookbyGA.xlsx",lubridate::today(),fileTag)))
 
 ###all clinics
 smalld <- d[ident_dhis2_booking==TRUE & 
@@ -133,8 +193,8 @@ openxlsx::write.xlsx(smsqcheck,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "sms_monitoring",
-                       sprintf("%s_SMS_quality_check_ALL_clinics.xlsx",
-                               lubridate::today())))
+                       sprintf("%s_%s_SMS_quality_check_ALL_clinics.xlsx",
+                               lubridate::today(),fileTag)))
 
 
 #xtabs(~bookorgname + areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits, data=smalld)
@@ -160,6 +220,34 @@ uglytable <- uglytable[, perc:=round(100*numerator/denominator,2)]
 openxlsx::write.xlsx(uglytable, 
                      file.path(
                        FOLDER_DATA_RESULTS,
-                       "ANC_PPC_Proportions_2018.xlsx"))
+                       sprintf("%s_ANC_PPC_Proportions_2018.xlsx",fileTag
+                               )))
+
+
+##### QID
+
+smallD <- d[bookyear>=2019, c("ident_TRIAL_2_and_3",
+                             "ident_TRIAL_3",
+                             "ident_TRIAL_2",
+                             "ident_TRIAL_2_3_Control",
+                             "ident_dhis2_booking",
+                             "bookyearmonth",
+                             "str_TRIAL_2_Cluster")]
+
+qidqc <- smallD[!is.na(str_TRIAL_2_Cluster),.(Booked=sum(ident_dhis2_booking==T)),
+                keyby=.(str_TRIAL_2_Cluster,
+                        ident_TRIAL_2,
+                        ident_TRIAL_2_3_Control,
+                        ident_TRIAL_2_and_3,
+                        ident_TRIAL_3,
+                       bookyearmonth)]
+
+openxlsx::write.xlsx(qidqc, 
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "sms_monitoring",
+                       sprintf("%s_%s_qidbooking.xlsx",lubridate::today(),fileTag)))
+
+
 
 

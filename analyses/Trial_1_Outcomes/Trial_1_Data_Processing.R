@@ -2867,8 +2867,8 @@ openxlsx::write.xlsx(bp,file.path(FOLDER_DATA_CLEAN,
                                           lubridate::today())))
 
 ###### GDM data set  ###### 
-smallD[ident_dhis2_control==F, prettyExposure:="K"]
-smallD[ident_dhis2_control==T, prettyExposure:="L"]
+smallD[ident_dhis2_control==F, prettyExposure:="L"]
+smallD[ident_dhis2_control==T, prettyExposure:="K"]
 varskeep <- c(varskeepAll,
               varsgdm,
               varsman)
