@@ -90,15 +90,20 @@ DataCompletion <- function(){
     )))  
   ),keyby=.(ident_gaza,bookyear)]
   
+  # should give two things for gaza and 4 things for bookyear
+  xtabs(~ident_gaza+bookyear, data=res)
+  
   # turn it into long format
-  res <- melt.data.table(res, id.vars="ident_gaza")
+  res <- melt.data.table(res, id.vars=c("ident_gaza", "bookyear"))
+  
+  #cross tabs to look at how many variables 
   # split the variable name into 2 variables ("variable name", and "function")
   res[,variable:=stringr::str_replace(variable,"\\.1\\.","_1.")]
   res[,var:=stringr::str_split_fixed(variable,"\\.",2)[,1]]
   res[,method:=stringr::str_split_fixed(variable,"\\.",2)[,2]]
   
   # put all of the different values into wide format
-  res <- dcast.data.table(res,ident_gaza+var~method,value.var = "value")
+  res <- dcast.data.table(res,ident_gaza+bookyear+var~method,value.var = "value")
   
   # make it a bit prettier
   setorder(res,var,-ident_gaza)

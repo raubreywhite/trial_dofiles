@@ -29,7 +29,8 @@ Setup <- function(){
                        "arabicStemR",
                        "lme4",
                        "fs",
-                       "fancycut"
+                       "fancycut",
+                       "dplyr"
                        
   )
   
@@ -48,6 +49,7 @@ Setup <- function(){
   # load libraries
   library(data.table)
   library(ggplot2)
+  library(dplyr)
   
   # date stuff
   MAX_YEAR <<- stringr::str_sub(CLINIC_CONTROL_DATE,1,4)

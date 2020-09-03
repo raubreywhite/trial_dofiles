@@ -9,6 +9,9 @@ Setup(IS_GAZA=FALSE)
 
 ###### SETUP ENDS ######
 
+##### 
+
+
 
 if(IS_GAZA==F){
   
@@ -40,22 +43,24 @@ setDT(sData)
 }
 
 ############ Trial 2 SMS Monitoring ###############
-varsbooking <-names(d)[stringr::str_detect(names(d),"^book")]
-varsanc <- names(d)[stringr::str_detect(names(d),"^an")]
-varslab <-  names(d)[stringr::str_detect(names(d),"^lab")]
-varsus <-  names(d)[stringr::str_detect(names(d),"^us")]
+
+varsancevent <- names(d)[stringr::str_detect(names(d),"^anevent")]
+varsancdate <- names(d)[stringr::str_detect(names(d),"^anevent")]
+
 
 # check these definitions
 t2 <- d[bookyear>=2019 & ident_TRIAL_2_and_3==T,
         c("uniqueid",
           "bookevent",
-          "bookorgnane",
+          "bookorgname",
           "bookdate",
-          "ident_dhis2_booking",
-          varsbooking,
-          varsanc,
-          varslab,
-          varsus), with=F]
+          "ident_TRIAL_2_and_3",
+          "ident_TRIAL_2_3_Control",
+          "ident_TRIAL_2",
+          "ident_TRIAL_3",
+          varsancevent,
+          varsancdate), with=F]
+
 t2 <-t2[,anevent_0:=bookevent]
 t2 <-t2[,andate_0:=bookdate]
 
@@ -300,7 +305,13 @@ msglogs[msgschedb4visit==F & timeschedb4visit>0 , msgschedb4visit:=TRUE]
 
 
 
-##### Merge scheduled events with 
+##### Merge scheduled events with data and then message logs
+# first reshape wide data
+long <-melt.data.table(t2, id.vars = c("uniqueid", "bookevent"))
+
+ancdata <- merge(long, schedevents, by="anevent")
+
+
 # if add all.y=T the number of rows goes from 21,069 to 42171
 joined <- merge(schedevents,msglogs, by="anevent", all.x=T)
 
@@ -308,9 +319,10 @@ setnames(joined,"schedev_orgname","bookorgname")
 
 
 
+
 ######## clean bookorgname structural data sheet to merge here
 
-  
+  # merge by tracked entity instance
   
 sData <- sData[,c("bookorgname",
                   "NEW_bookorgname",

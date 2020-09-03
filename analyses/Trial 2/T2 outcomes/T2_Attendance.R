@@ -14,6 +14,92 @@
 #   fileTag <-"GAZA"
 #  }
 
+
+
+smallD[,andate_0:=bookdate]
+smallD[,angestage_0:=bookgestage]
+
+# id maximum amount of things
+smallD[,firstvisitinT2:=as.numeric(NA)]
+
+# need to change date back later to dec 01, 2019
+
+
+temp <- stringr::str_subset(names(smallD),"^andate_")
+
+# -1 because have 22 dates and have a 0 in there
+for(i in 0:(length(temp)-1)){
+  
+  datevar <- paste0("andate_",i)
+  
+  gestagevar <- paste0("angestage_",i)
+  
+  smallD[is.na(firstvisitinT2) & 
+           get(datevar)>="2020-02-01",firstvisitinT2:=i]
+  
+  
+}
+
+for(i in 0:(length(temp)-1)){
+  
+  datevar <- paste0("andate_",i)
+  
+  gestagevar <- paste0("angestage_",i)
+  
+  outcomevar <- paste0("anT2gestagedays_",i)
+  
+  smallD[i>=firstvisitinT2,(outcomevar):=as.numeric(floor(difftime(get(datevar),lmpT1, units="days")))]
+
+}
+
+
+
+
+VisitVariables()
+
+###ANC Visits####
+
+
+#ANC gAs
+an_date <- stringr::str_subset(names(smallD), "^andate_[0-9]+")
+anT2_gA <- stringr::str_replace(an_date, "andate","anT2gestagedays")
+
+for(i in seq_along(an_date)){
+  var_an_gestage <- anT2_gA[i]
+  var_an_date<- an_date[i] 
+  
+  smallD[,(var_an_gestage):=as.numeric(floor(difftime(get(var_an_date),lmpT1, units="days")))]
+  
+}
+
+smallD[,anT2gestagedays_0:=bookgestagedays]
+
+
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="anT2visit",
+  variableOfInterestPattern="anT2gestagedays",
+  TruevaluesMin=-500,
+  TruevaluesMax=260,
+  gestagedaysVariable="anT2gestagedays")
+
+smallD[,anT1gestagedays_0:=NULL]
+xtabs(~smallD$T2_anvisitnew_00_00)
+
+# btween dec-mar and july and august, total number of one week msg and how many had a recap msg
+
+# first opportunity
+smallD[,Opp_1:= as.numeric(NA)]
+
+smallD[bookgestagedays_cats %in% c("(0,104]") |
+         t2newvisit_00_14==T,Opp_1:=1]
+
+
+
+
+
+
 # making vars
 smallD[,refHRhosp:= FALSE]
 smallD[(T2_manRef_HR_00_00==T|
