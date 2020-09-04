@@ -46,10 +46,7 @@ Setup <- function(IS_GAZA=FALSE){
                        "arabicStemR",
                        "lme4",
                        "fs",
-                       "fancycut",
-                       "tidyverse",
-                       "dplyr"
-                      
+                       "fancycut"
   )
   
   
@@ -114,7 +111,7 @@ Setup <- function(IS_GAZA=FALSE){
   # load libraries
   library(data.table)
   library(ggplot2)
-  library(tidyverse)
+  #library(tidyverse)
   
 
   
