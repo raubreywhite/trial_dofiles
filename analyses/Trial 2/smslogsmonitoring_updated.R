@@ -12,20 +12,22 @@ Setup(IS_GAZA=FALSE)
 ##### 
 # global options -->  unticked cleanup output after successful... 
 # and ticked View Rcheck
+# schedevents events scheduled
+# msglogs= messages sent
 
 if(IS_GAZA==F){
   
   # read in logs #
   
   # all scheduled events
-  schedeventsraw <- fread("C:/data processing/data_raw/smslogs/schedevents/2020-08-05_schedevents.csv")
+  schedeventsraw <- fread("C:/data processing/data_raw/smslogs/schedevents/2020-08-25.csv")
   
   # all scheduled messages
-  msglogsraw <- fread("C:/data processing/data_raw/smslogs/dhis2allschedmsgs/2020-08-05.csv")
+  msglogsraw <- fread("C:/data processing/data_raw/smslogs/dhis2allschedmsgs/2020-08-25.csv")
   
   
   # all sent sms
-  allsmssentraw <-fread("C:/data processing/data_raw/smslogs/dhis2allmsgssent/2020-08-05.csv")
+  allsmssentraw <-fread("C:/data processing/data_raw/smslogs/dhis2allmsgssent/2020-08-25.csv")
   
   ###### Load in Data Set ###### 
   d <- LoadDataFileFromNetwork()
@@ -71,7 +73,7 @@ t2 <-t2[,anevent_0:=bookevent]
 t2 <-t2[,andate_0:=bookdate]
 
 # trial arms
-t2[ident_TRIAL_2_3_Control==T,prettyExposure:="Control"]
+t2[ident_TRIAL_2_3_Control==T,TrialArm:="Control"]
 
 t2[ident_TRIAL_2==T & 
      ident_TRIAL_3==F,TrialArm:="SMS only"]
@@ -82,15 +84,25 @@ t2[ident_TRIAL_2==F &
 t2[ident_TRIAL_2==T & 
      ident_TRIAL_3==T,TrialArm:="SMS and QID"]
 
-t2 <- t2[,c("uniqueid",
+t2 <- t2[bookdate>="2019-12-01" &
+           bookdate<="2020-03-30",c("uniqueid",
             "bookevent",
             "bookorgname",
             "bookdate",
             "bookgestage",
+            "anevent_0",
+            "andate_0",
             "ident_dhis2_booking",
+            "TrialArm",
             varsancevent,
             varsancdate,
             varsancgestage), with=F]
+
+nrow(t2)
+
+
+
+################ t2 ends here ################ 
 
 #with=F looks inside the vars and get the values
 
@@ -142,10 +154,12 @@ setorder(schedevents, uniqueid,event_id,schedev_dateapptcreated)
 
 schedevents[,schedev_orgname:=ExtractOnlyEnglishLetters(schedev_orgname)]
 
+schedevents[,ident_schedevent:=T]
+
 
 #### scheduled message logs ####
-msglogsraw[1]
 
+msglogsraw[1]
 
 #need to know the difference between the date variables
 #name the first one something so they arent missing
@@ -172,11 +186,11 @@ setnames(msglogs, c("msg_name",
            "creatername",
            "createruserid",
            "datesmssched",
-           "anevent"))
+           "event_id"))
 
 msglogs[1]
 unique(msglogs$msgname)
-unique(msglogs$anevent)
+unique(msglogs$event_id)
 
 #cleaning var types
 msglogs[,datesmssched:=stringr::str_sub(datesmssched,1,10)]
@@ -197,15 +211,15 @@ nrow(msglogs)
 
 ####### remove duplicate messages #######
 
-### this didnt work
-setorder(msglogs,anevent,datesmssched)
-msglogs[,firstdatesent:=min(datesmssched),by=anevent]
+setorder(msglogs,event_id,datesmssched)
+msglogs[,firstdatesent:=min(datesmssched),by="event_id"]
 
 #date of previous one sent
-msglogs[,prevdatesent:=shift(datesmssched), by=anevent]
+# changed datesmssched to datesmsschedfor 
+msglogs[,prevdatesent:=shift(datesmssched), by="event_id"]
 
 #do same for message id as above so we can compare them later
-msglogs[,prevmsgname:=shift(msgname), by=anevent]
+msglogs[,prevmsgname:=shift(msgname), by="event_id"]
 
 #m
 msglogs[,timesincelastmsg:=as.numeric(difftime(datesmssched, 
@@ -215,7 +229,9 @@ xtabs(~msglogs$timesincelastmsg, addNA=T)
 #get rid of duplicates
 # we are losing messages this way which means the code we have used may not be correct
 
-msglogs <- msglogs[is.na(timesincelastmsg)|timesincelastmsg>0 |(timesincelastmsg==0 & prevmsgname==msgname)]
+msglogs <- msglogs[is.na(timesincelastmsg)|
+                     timesincelastmsg!=0 |
+                     (timesincelastmsg==0 & prevmsgname!=msgname)]
 #when we get rid of duplicates, we end up losing some important messages
 #so, maybe we should include the name of the template instead?
 
@@ -232,21 +248,13 @@ sort(unique(msglogsraw$msg_name))
 
 
 names(msglogs)
-xtabs(~msglogs$timesincelastmsg)
+xtabs(~msglogs$timesincelastmsg,addNA=T)
 
 #want to decast to wide to say if its first message, second message
-msglogs[,msgnumber:=1:.N, by=anevent]
-
-#melt the small data set we have if we need to for the ReshapaheToWideAndMerge formula
-#t2 already wide format
-#t2long <- melt.data.table(t2, id.vars="uniqueid")
-
-#valueVarsRegex and other variables after this
+msglogs[,msgnumber:=1:.N, by="event_id"]
+xtabs(~msglogs$msgnumber, addNA=T)
 
 
-###### 
-# schedevents events scheduled
-# msglogs= messages sent
 
 nrow(msglogs)
 times <-msglogs[,c("msgname",
@@ -278,13 +286,13 @@ msglogs[stringr::str_detect(msgname,"MISSEDAppt_[0-9]$"), msgtype:= "Missed_Appt
 # recap
 msglogs[stringr::str_detect(msgname,"Recapture$"), msgtype:= "Recap"]
 
-msglogs[stringr::str_detect(msgname,"^SMS: 24$"), msgtype:= "Remove Template"]
+# not sure about this one
+msglogs[stringr::str_detect(msgname,"^SMS: 24$"), msgtype:= "24-hour reminder"]
 
 
 xtabs(~msglogs$msgtype, addNA=T)
 
 msglogs[,ident_schedsms:=T]
-
 
 
 
@@ -302,8 +310,8 @@ msglogs[msgschedb4visit==F & timeschedb4visit>0 , msgschedb4visit:=TRUE]
 
 
 ########### dhis2 messages sent ###########
+setnames(allsmssentraw,4,"phone")
 
-setnames(allsmssentraw,"Phone","phone")
 
 allsmssent <- allsmssentraw[,processed:=stringr::str_sub(processed,1,10)]
 allsmssent[,processed:=as.Date(processed)]
@@ -313,99 +321,118 @@ allsmssent[,ident_sms_sent:=T]
 
 ############ enrollment data ############
 
+# enrollments
 enrollments <- t2[,c("bookorgname",
                      "bookdate",
                      "bookgestage",
                      "anevent_0",
                      "ident_dhis2_booking",
-                     "uniqueid")]
-
-#install.packages("tidyverse")
-#library(tidyverse)
-
-schedevents[,ident_schedevent:=T]
-
-sentandsched <- merge(allsmssent[processed>="2019-12-01"], 
-                      schedevents, 
-                      by=c("event_id"), all=T)
-
-xtabs(~sentandsched$ident_sms_sent, addNA=T)
-xtabs(~sentandsched$ident_schedevent, addNA=T)
-
-xtabs(~ident_schedevent + ident_sms_sent, data=sentandsched, addNA=T)
-nrow(sentandsched)
-
-setDT(sentandsched)
+                     "uniqueid",
+                     "TrialArm")]
 
 
-sentschedenroll <- merge(sentandsched, enrollments, by=c("uniqueid"))
 
-#= scheduled messages with enrollment date
-#Among the women booked December to March and July-August, how many 1) 1-week messages were scheduled 2) how many recapture messages were scheduled?"
+# first reshape wide data and want each variable to be a heading because want to do analysis by event
 
-opportunities <- sentschedenroll[(bookdate>="2019-12-01" &
-                                    bookdate<="2020-03-30")|
-                                   bookdate>="2020-06-22",.(
-                                     N=.N),
-                                 keyby=.(prettyExposure,msgtype)
-                                 ]
-
+long <- melt(t2, id.vars = c("uniqueid", 
+                             "bookevent",
+                             "TrialArm",
+                             "bookorgname",
+                             "bookdate",
+                             "ident_dhis2_booking"),
+             measure = patterns("^andate_", 
+                                "^anevent_",
+                                "^angestage"), 
+             value.name = c("andate", 
+                            "anevent",
+                            "angestage"))
 
 
 
 ######## END enrollment data ######## 
 
 
+
+
+########## COMBINING SMALLER DATA SETS TO GET ONES WE WANT ########## 
+
+# merge schedevents with sched sms to get templates that we want
+schedev_schedsms <- merge(schedevents,
+                          msglogs,
+                          by="event_id", all=T)
+
+
+# getting an idea of the numbers
+xtabs(~ident_schedsms + ident_schedevent, data=schedev_schedsms, addNA=T)
+
+
+# merging scheduled events and scheduled messages with bookings
+schedev_schedsms_bookings <- merge(schedev_schedsms,
+                                   long,
+                                   by="uniqueid", all=T)
+
+xtabs(~ident_dhis2_booking + ident_schedevent, 
+                    data=schedev_schedsms_bookings, addNA=T)
+
+xtabs(~ident_dhis2_booking + ident_schedsms, 
+      data=schedev_schedsms_bookings, addNA=T)
+
+#= scheduled messages with enrollment date
+#Among the women booked December to March and July-August, how many 1) 1-week messages were scheduled 2) how many recapture messages were scheduled?"
+
+
+setnames(schedev_schedsms_bookings,"event_id.x","event_id")
+sched_ev_sms_sent_booked <- merge(allsmssent,
+                                  schedev_schedsms_bookings, 
+                                  by="event_id",
+                                  all=T)
+
+
+
+# missing msg types havent been sent yet
+opportunities <- sched_ev_sms_sent_booked[,.(
+                                     N=.N),
+                                 keyby=.(TrialArm,bookorgname,msgtype)
+                                 ]
+
+xtabs(~msgtype+anstatus, data=sched_ev_sms_sent_booked,addNA=T)
+
+
+
 ########## Scheduled events with anc data ########## 
 
+ancdata <- sched_ev_sms_sent_booked[(bookdate>="2019-12-01" &
+                                      bookdate<="2020-03-30") &
+                                      ident_dhis2_booking==T &
+                                      ident_sms_sched==T &
+                                       ident_sms_sent==T,]
 
-# first reshape wide data and want each variable to be a heading because want to do analysis by event
-
-long <- melt(t2, id.vars = c("uniqueid", 
-                               "bookevent",
-                               "TrialArm",
-                               "bookorgname"),
-               measure = patterns("^andate_", 
-                                   "^anevent_",
-                                   "^angestage"), 
-               value.name = c("andate", 
-                              "anevent",
-                              "angestage"))
-
-
-setnames(schedevents,"event_id","anevent")
-
-ancdata <- merge(long, schedevents, by="anevent")
+nrow(sched_ev_sms_sent_booked[ident_sms_sched==T &
+                                ident_sms_sent==T,])
 
 
 
+# could make the data set this way but its better to use what we have made before
+# 
+# ancdata <- merge(schedevents,
+#                  long, 
+#                  by="uniqueid", all=T)
+# 
+# xtabs(~ident_schedevent+bookorgname, data=ancdata)
 
 
+# scheduling patterns by orgunit
 
-# if add all.y=T the number of rows goes from 21,069 to 42171
-joined <- merge(schedevents,msglogs, by="anevent", all.x=T)
-
-setnames(joined,"schedev_orgname","bookorgname")
+##### Brians way ######
 
 
 
 
-######## clean bookorgname structural data sheet to merge here
-
-# merge by tracked entity instance
-
-
-joined <- merge(joined, sData, by="bookorgname")
-
-joined <- joined[,TrialArm:=as.character(NA)]
 
 
 
-uglytable <- joined[,.(N=.N,
-                       numschedbeforevisit=sum(timeschedb4visit>0,na.rm=T),
-                       numNotscheduled=sum(timeschedb4visit==0, na.rm=T),
-                       numschedAftervisit=sum(timeschedb4visit<0, na.rm=T)),
-                    keyby=.(TrialArm,bookorgname)]
+
+
 
 if(IS_GAZA==FALSE){
   
