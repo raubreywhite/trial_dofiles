@@ -1,5 +1,62 @@
 ### Need to import data set saved from attendance script
 
+# need opportunity of visits first
+
+#need to seperate control and intervention seperately
+#for intervention add the trialmanperf
+
+#control
+smallD[(TrialOne_refHosp_35_37==T | TrialOne_refHR_35_37),
+       OpportunityofVisits:=OpportunityofVisits-0]
+
+smallD[(TrialOne_refHosp_34_34==T | TrialOne_refHR_34_34),
+       OpportunityofVisits:=OpportunityofVisits-1]
+
+smallD[(TrialOne_refHosp_31_33==T | TrialOne_refHR_31_33),
+       OpportunityofVisits:=OpportunityofVisits-1]
+
+smallD[(TrialOne_refHosp_24_28==T | TrialOne_refHR_24_28),
+       OpportunityofVisits:=OpportunityofVisits-2]
+
+smallD[(TrialOne_refHosp_23_23==T | TrialOne_refHR_23_23),
+       OpportunityofVisits:=OpportunityofVisits-3]
+
+smallD[(TrialOne_refHosp_18_22==T | TrialOne_refHR_18_22),
+       OpportunityofVisits:=OpportunityofVisits-3]
+
+smallD[(TrialOne_refHosp_15_17==T | TrialOne_refHR_15_17),
+       OpportunityofVisits:=OpportunityofVisits-4]
+
+smallD[(TrialOne_refHosp_00_14==T | TrialOne_refHR_00_14),
+       OpportunityofVisits:=OpportunityofVisits-5]
+
+
+# Intervention
+smallD[ident_dhis2_control==F & (TrialOne_refHosp_35_37==T | TrialOne_refHR_35_37),
+       OpportunityofVisits:=OpportunityofVisits-0]
+
+smallD[ident_dhis2_control==F & (TrialOne_refHosp_34_34==T | TrialOne_refHR_34_34),
+       OpportunityofVisits:=OpportunityofVisits-1]
+
+smallD[ident_dhis2_control==F & (TrialOne_refHosp_31_33==T | TrialOne_refHR_31_33),
+       OpportunityofVisits:=OpportunityofVisits-1]
+
+smallD[ident_dhis2_control==F & (TrialOne_refHosp_24_28==T | TrialOne_refHR_24_28),
+       OpportunityofVisits:=OpportunityofVisits-2]
+
+smallD[ident_dhis2_control==F & (TrialOne_refHosp_23_23==T | TrialOne_refHR_23_23),
+       OpportunityofVisits:=OpportunityofVisits-3]
+
+smallD[ident_dhis2_control==F & (TrialOne_refHosp_18_22==T | TrialOne_refHR_18_22),
+       OpportunityofVisits:=OpportunityofVisits-3]
+
+smallD[ident_dhis2_control==F & (TrialOne_refHosp_15_17==T | TrialOne_refHR_15_17),
+       OpportunityofVisits:=OpportunityofVisits-4]
+
+smallD[ident_dhis2_control==F & (TrialOne_refHosp_00_14==T | TrialOne_refHR_00_14),
+       OpportunityofVisits:=OpportunityofVisits-5]
+
+
 
 ########## Hypertension ########## 
 #define chronic?

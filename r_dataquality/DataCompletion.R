@@ -94,7 +94,7 @@ DataCompletion <- function(){
   xtabs(~ident_gaza+bookyear, data=res)
   
   # turn it into long format
-  res <- melt.data.table(res, id.vars=c("ident_gaza", "bookyear"))
+  res2 <- melt.data.table(res, id.vars=c("ident_gaza", "bookyear"))
   
   #cross tabs to look at how many variables 
   # split the variable name into 2 variables ("variable name", and "function")

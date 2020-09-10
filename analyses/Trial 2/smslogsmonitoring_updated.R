@@ -32,7 +32,7 @@ if(IS_GAZA==F){
   ###### Load in Data Set ###### 
   d <- LoadDataFileFromNetwork()
   
-  
+  fileTag <- "WB"
   
   
   
@@ -40,6 +40,20 @@ if(IS_GAZA==F){
   
   
   # put gazas stuff here
+  fileTag <- "GAZA"
+  
+  # all scheduled events
+  schedeventsraw <- fread("C:/data processing/gaza_data_raw/smslogs/schedevents/2020-08-25.csv")
+  
+  # all scheduled messages
+  msglogsraw <- fread("C:/data processing/gaza_data_raw/smslogs/dhis2allschedmsgs/2020-08-25.csv")
+  
+  
+  # all sent sms
+  allsmssentraw <-fread("C:/data processing/gaza_data_raw/smslogs/dhis2allmsgssent/2020-08-25.csv")
+  
+  # Load in data from network
+  d <- LoadDataFileFromNetworkGaza()
   
   
 }
@@ -52,8 +66,8 @@ varsancgestage <- names(d)[stringr::str_detect(names(d),"^angestage")]
 
 
 # check these definitions
-t2 <- d[bookyear>=2019 & 
-          ident_dhis2_booking==T & 
+t2 <- d[bookdate>="2019-03-01" & 
+          (ident_dhis2_booking==T | ident_dhis2_an==T) & 
           ident_TRIAL_2_and_3==T,
         c("uniqueid",
           "bookevent",
@@ -65,6 +79,7 @@ t2 <- d[bookyear>=2019 &
           "ident_TRIAL_2_3_Control",
           "ident_TRIAL_2",
           "ident_TRIAL_3",
+          "str_TRIAL_2_Cluster",
           varsancevent,
           varsancdate,
           varsancgestage), with=F]
@@ -84,21 +99,31 @@ t2[ident_TRIAL_2==F &
 t2[ident_TRIAL_2==T & 
      ident_TRIAL_3==T,TrialArm:="SMS and QID"]
 
-t2 <- t2[bookdate>="2019-12-01" &
-           bookdate<="2020-03-30",c("uniqueid",
+
+
+t2[,precovid:=as.logical(NA)]
+t2[bookdate>="2019-12-01" &
+     bookdate<="2020-03-30",precovid:=TRUE]
+t2[bookdate>="2020-06-22", precovid:=FALSE]
+nrow(t2)
+
+t2 <- t2[,c("uniqueid",
             "bookevent",
             "bookorgname",
             "bookdate",
             "bookgestage",
+            "precovid",
             "anevent_0",
             "andate_0",
             "ident_dhis2_booking",
+            "str_TRIAL_2_Cluster",
             "TrialArm",
             varsancevent,
             varsancdate,
             varsancgestage), with=F]
 
-nrow(t2)
+
+
 
 
 
@@ -143,6 +168,21 @@ schedevents[1]
 schedevents[,schedev_dateapptcreated:=stringr::str_sub(schedev_dateapptcreated,1,10)]
 schedevents[,schedev_dateapptcreated:=as.Date(schedev_dateapptcreated)]
 xtabs(~schedevents$schedev_dateapptcreated)
+
+
+
+
+
+schedevents[,schedev_dateapptcreatedyyyymm:=format(as.Date(schedev_dateapptcreated,
+                                              "%Y-%m-%d"), "%Y-%m")] 
+
+
+
+
+schedevents[,apptcreateddate:=stringr::str_sub(apptcreateddate,1,10)]
+schedevents[,apptcreateddate:=as.Date(apptcreateddate)]
+xtabs(~schedevents$apptcreateddate)
+
 
 
 
@@ -205,7 +245,9 @@ msglogs[,datesmsgenerated:=stringr::str_sub(datesmsgenerated,1,10)]
 msglogs[,datesmsgenerated:=as.Date(datesmsgenerated)]
 xtabs(~msglogs$datesmsgenerated)
 
-xtabs(~msglogs$msgname)
+msglogs[,datesmsgeneratedmmyy:=format(as.Date(datesmsgenerated,
+                                              "%Y-%m-%d"), "%Y-%m")] 
+xtabs(~msglogs$datesmsgeneratedmmyy)
 
 nrow(msglogs)
 
@@ -227,9 +269,8 @@ msglogs[,timesincelastmsg:=as.numeric(difftime(datesmssched,
 xtabs(~msglogs$timesincelastmsg, addNA=T)
 
 #get rid of duplicates
-# we are losing messages this way which means the code we have used may not be correct
 
-msglogs <- msglogs[is.na(timesincelastmsg)|
+msglogs<- msglogs[is.na(timesincelastmsg)|
                      timesincelastmsg!=0 |
                      (timesincelastmsg==0 & prevmsgname!=msgname)]
 #when we get rid of duplicates, we end up losing some important messages
@@ -339,7 +380,9 @@ long <- melt(t2, id.vars = c("uniqueid",
                              "TrialArm",
                              "bookorgname",
                              "bookdate",
-                             "ident_dhis2_booking"),
+                             "precovid",
+                             "ident_dhis2_booking",
+                             "str_TRIAL_2_Cluster"),
              measure = patterns("^andate_", 
                                 "^anevent_",
                                 "^angestage"), 
@@ -365,6 +408,37 @@ schedev_schedsms <- merge(schedevents,
 # getting an idea of the numbers
 xtabs(~ident_schedsms + ident_schedevent, data=schedev_schedsms, addNA=T)
 
+xtabs(~msgtype +
+        datesmsgeneratedmmyy, 
+      data=schedev_schedsms[datesmsschedfor>="2019-12-01"], addNA=T)
+
+# num schedev by msgtype
+schedevmsgtype <- schedev_schedsms[datesmsschedfor>="2019-12-01",.(
+                                    N=.N),
+                                   keyby=.(schedev_orgname,
+                                           msgtype,
+                                           datesmsgeneratedmmyy)]
+openxlsx::write.xlsx(schedevmsgtype, 
+                     file.path(FOLDER_DATA_RESULTS,
+                               "T2",
+                               "monitoring",
+                               sprintf(
+                                 "scheduled_sms_events_smsgeneratedandmsglogs_%s_%s.xlsx",
+                                 fileTag,lubridate::today())))
+
+
+xtabs(~uniqueid+anstatus, data=schedev_schedsms[is.na(ident_schedevent) & 
+                                                 ident_schedsms==T],addNA=T)
+
+
+xtabs(~schedev_schedsms$schedev_dateapptcreatedyyyymm, addNA=T)
+
+xtabs(~schedev_schedsms$datesmsgenerated, addNA=T)
+
+xtabs(~datesmsgenerated+schedev_orgname, data=schedev_schedsms)
+
+xtabs(~datesmsschedfor+schedev_orgname, data=schedev_schedsms[datesmsschedfor>="2019-12-01"])
+
 
 # merging scheduled events and scheduled messages with bookings
 schedev_schedsms_bookings <- merge(schedev_schedsms,
@@ -377,38 +451,282 @@ xtabs(~ident_dhis2_booking + ident_schedevent,
 xtabs(~ident_dhis2_booking + ident_schedsms, 
       data=schedev_schedsms_bookings, addNA=T)
 
+
+#############################################################################
+
 #= scheduled messages with enrollment date
 #Among the women booked December to March and July-August, how many 1) 1-week messages were scheduled 2) how many recapture messages were scheduled?"
 
+xtabs(~d[ident_dhis2_booking==T &
+        (bookdate >="2019-12-01" & bookdate<="2020-03-30") &
+         areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits==1 &
+         ident_TRIAL_2_and_3==T]$bookorgname, addNA=T)
 
-setnames(schedev_schedsms_bookings,"event_id.x","event_id")
-sched_ev_sms_sent_booked <- merge(allsmssent,
-                                  schedev_schedsms_bookings, 
-                                  by="event_id",
-                                  all=T)
 
+smsrecruitment <- d[ident_dhis2_booking==T &
+                      (bookdate>="2019-12-01" &
+                         bookdate<="2020-03-30") &
+                      ident_TRIAL_2_and_3==T,.(
+                        
+                            N=.N,
+    wantsms=sum(areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits==1, na.rm=T),
+    noSMS=sum(areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits==0, na.rm=T),
+                            missingSMS=sum(is.na(
+                              areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits))),
+            keyby=.(ident_TRIAL_2,bookorgname)]
+
+openxlsx::write.xlsx(smsrecruitment, 
+                     file.path(FOLDER_DATA_RESULTS,
+                               "T2",
+                               "monitoring",
+                               sprintf(
+                                "SMS_recruitment_from_Data_Dec_to_Mar_%s_%s.xlsx",
+                                 fileTag,lubridate::today())))
+
+
+
+
+
+#appointments scheduled dates
+xtabs(~TrialArm+schedev_dateapptcreatedyyyymm,
+              data=schedev_schedsms_bookings[schedev_dateapptcreatedyyyymm>"2019-11"], addNA=T)
+
+
+
+# sms generated dates
+xtabs(~msgtype+datesmsgeneratedmmyy,
+      data=schedev_schedsms_bookings[datesmsgeneratedmmyy>"2019-11" & is.na(TrialArm)], addNA=T)
+
+
+# msg generated by trial arm, bookorgname
+
+crosstabs <- schedev_schedsms_bookings[!is.na(TrialArm) & 
+                                         bookdate>="2019-12-01" &
+                            datesmsgeneratedmmyy>"2019-11",.(
+                                            N=.N),
+                          
+                          keyby=.(TrialArm,
+                                  str_TRIAL_2_Cluster,
+                                  datesmsgeneratedmmyy,
+                                  msgtype)]
+
+
+  openxlsx::write.xlsx(crosstabs, 
+                       file.path(FOLDER_DATA_RESULTS,
+                                 "T2",
+                                 "monitoring",
+                                 sprintf(
+                                   "generatedsms_by_type_and_cluster_%s_%s.xlsx",
+                                   fileTag,lubridate::today())))
+
+
+
+#### define the data set we want to analyze #### 
+
+schedev_schedsms_bookings <-schedev_schedsms_bookings[
+                            (datesmsgenerated>="2019-12-01" &
+                             datesmsgenerated<="2020-03-30")|
+                            (datesmsgenerated>="2020-06-22") & 
+                              !is.na(precovid),]
+
+  
+  
+schedev_schedsms_bookings1 <-schedev_schedsms_bookings[bookdate>="2019-12-01" &
+    (datesmsgenerated>="2019-12-01" &
+       datesmsgenerated<="2020-03-30")|
+      (datesmsgenerated>="2020-06-22"),]
 
 
 # missing msg types havent been sent yet
-opportunities <- sched_ev_sms_sent_booked[,.(
-                                     N=.N),
-                                 keyby=.(TrialArm,bookorgname,msgtype)
-                                 ]
+# al lof those who have been scheduled
+opportunities <- schedev_schedsms_bookings1[,.(
+                                        N=.N),
+                            keyby=.(TrialArm,
+                                    precovid,
+                                    bookorgname,
+                                    msgtype)
+                                  ]
 
-xtabs(~msgtype+anstatus, data=sched_ev_sms_sent_booked,addNA=T)
+if(IS_GAZA==F){
+openxlsx::write.xlsx(opportunities, 
+                     file.path(FOLDER_DATA_RESULTS,
+                                              "T2",
+                                              "monitoring",
+                                              sprintf(
+                                        "scheduled_sms_events_removed_precovid_var_%s_%s.xlsx",
+                                        fileTag,lubridate::today())))
+} else {
+  
+  openxlsx::write.xlsx(opportunities, 
+                       file.path(FOLDER_DATA_RESULTS_GAZA,
+                                 "T2",
+                                 "monitoring",
+                                 sprintf(
+                                   "scheduled_sms_events_%s_%s.xlsx",
+                                   fileTag,lubridate::today())))
+  
+  
+}
+
+
+descriptives <- schedev_schedsms_bookings1[,.(
+                                               N=.N),
+                                         keyby=.(TrialArm,
+                                                 precovid,
+                                                 #anstatus,
+                                                 #datesmsgeneratedmmyy,
+                                                 msgtype)]
+
+if(IS_GAZA==F){
+openxlsx::write.xlsx(descriptives, 
+                     file.path(FOLDER_DATA_RESULTS,
+                               "T2",
+                               "monitoring",
+                               sprintf(
+                           "scheduled_sms_events__%s_%s.xlsx",
+                                 fileTag,lubridate::today())))
+} else {
+  openxlsx::write.xlsx(descriptives, 
+                       file.path(FOLDER_DATA_RESULTS_GAZA,
+                                 "T2",
+                                 "monitoring",
+                                 sprintf(
+                                   "scheduled_sms_events__%s_%s.xlsx",
+                                   fileTag,lubridate::today())))
+  
+  
+}
+
+xtabs(~msgtype+anstatus, data=schedev_schedsms_bookings,addNA=T)
 
 
 
+
+
+
+
+
+basic <- schedev_schedsms_bookings[!is.na(TrialArm),.(
+  N=.N),
+  keyby=.(TrialArm,
+          precovid,
+          #anstatus,
+          #datesmsgeneratedmmyy,
+          msgtype)]
+
+if(IS_GAZA==F){
+  openxlsx::write.xlsx(descriptives, 
+                       file.path(FOLDER_DATA_RESULTS,
+                                 "T2",
+                                 "monitoring",
+                                 sprintf(
+                                   "scheduled_sms_byarm__%s_%s.xlsx",
+                                   fileTag,lubridate::today())))
+} else {
+  openxlsx::write.xlsx(descriptives, 
+                       file.path(FOLDER_DATA_RESULTS_GAZA,
+                                 "T2",
+                                 "monitoring",
+                                 sprintf(
+                                   "scheduled_sms_byarm__%s_%s.xlsx",
+                                   fileTag,lubridate::today())))
+  
+  
+}
+
+
+### number of bookings and bookevents?
+
+bookings <- t2[!is.na(precovid) & 
+                 !is.na(TrialArm),.(
+                        N=.N,
+                        NumBooked=sum(ident_dhis2_booking, na.rm=T)),
+                                        keyby=.(TrialArm,
+                                                bookorgname,
+                                                precovid)]
+
+
+
+if(IS_GAZA==F){
+  openxlsx::write.xlsx(bookings, 
+                       file.path(FOLDER_DATA_RESULTS,
+                                 "T2",
+                                 "monitoring",
+                                 sprintf(
+                                   "sms_bookings__%s_%s.xlsx",
+                                   fileTag,lubridate::today())))
+} else {
+  openxlsx::write.xlsx(bookings, 
+                       file.path(FOLDER_DATA_RESULTS_GAZA,
+                                 "T2",
+                                 "monitoring",
+                                 sprintf(
+                                   "sms_bookings__%s_%s.xlsx",
+                                   fileTag,lubridate::today())))
+  
+  
+}
+
+
+
+
+ancstatusandmsgtype <- schedev_schedsms_bookings[,.(
+  N=.N),
+  keyby=.(TrialArm,
+          precovid,
+          anstatus,
+          datesmsgeneratedmmyy,
+          msgtype)]
+
+if(IS_GAZA==F){
+  openxlsx::write.xlsx(ancstatusandmsgtype, 
+                       file.path(FOLDER_DATA_RESULTS,
+                                 "T2",
+                                 "monitoring",
+                                 sprintf(
+                                   "sched_sms_events_status_msgtype__%s_%s.xlsx",
+                                   fileTag,lubridate::today())))
+} else {
+  openxlsx::write.xlsx(ancstatusandmsgtype, 
+                       file.path(FOLDER_DATA_RESULTS_GAZA,
+                                 "T2",
+                                 "monitoring",
+                                 sprintf(
+                                   "sched_sms_events_status_msgtype_%s_%s.xlsx",
+                                   fileTag,lubridate::today())))
+  
+  
+}
+
+
+
+
+
+
+# recap anc event is the same as the booking event
 ########## Scheduled events with anc data ########## 
 
-ancdata <- sched_ev_sms_sent_booked[(bookdate>="2019-12-01" &
-                                      bookdate<="2020-03-30") &
-                                      ident_dhis2_booking==T &
-                                      ident_sms_sched==T &
+xtabs(~ident_schedsms+ident_schedevent, 
+      data=schedev_schedsms_bookings, addNA=T)
+
+# missing scheduled event but scheduled sms means:
+
+# possible usemsg generated
+# look into women who have scheduled messages in april may june
+
+# num bookings in same time period per orgunit and arm
+
+
+
+
+ancdata <- schedev_schedsms_bookings[(bookdate>="2019-12-01" &
+                                        bookdate<="2020-03-30") &
+                                       ident_dhis2_booking==T &
+                                       ident_sms_sched==T &
                                        ident_sms_sent==T,]
 
-nrow(sched_ev_sms_sent_booked[ident_sms_sched==T &
-                                ident_sms_sent==T,])
+nrow(schedev_schedsms_bookings[ident_sms_sched==T &
+                                 ident_sms_sent==T,])
 
 
 
@@ -423,7 +741,32 @@ nrow(sched_ev_sms_sent_booked[ident_sms_sched==T &
 
 # scheduling patterns by orgunit
 
-##### Brians way ######
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#might not need this anymore
+# setnames(schedev_schedsms_bookings,"event_id.x","event_id")
+# sched_ev_sms_sent_booked <- merge(allsmssent,
+#                                   schedev_schedsms_bookings, 
+#                                   by="event_id",
+#                                   all=T)
+# 
+
+
+
 
 
 
