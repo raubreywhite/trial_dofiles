@@ -331,6 +331,7 @@ gAconcordance <- gA[(USorLMPdateCombogAdays<=308 &
                                                        abs(gAdif)<7, na.rm=T),
                                       twoweekdiff=sum(abs(gAdif)>=7 &
                                                         abs(gAdif)<14, na.rm=T),
+                                      morethan3weeks=sum(gAdif>=14, na.rm=T),
                                       morethan1wkdif=sum(abs(gAdif)>=7, na.rm=T))]
 
 openxlsx::write.xlsx(gAconcordance,
@@ -734,7 +735,7 @@ gA[lga3==FALSE &
 sgalga <-gA[,.(N=.N,
                notmissbw=sum(!is.na(bw)),
                missingbw=sum(is.na(bw)),
-               notmissusorlmpdays=sum(!is.na(USorLMPdateCombogAdays) &
+               notmissbwusorlmpdays=sum(!is.na(USorLMPdateCombogAdays) &
                                         !is.na(bw)),
                sgacomboT=sum(sga==T, na.rm=T),
                sgacomboF=sum(sga==F, na.rm=T),
@@ -751,7 +752,7 @@ sgalga <-gA[,.(N=.N,
                missingsgaUS=sum(is.na(sga3)),
                lgaT=sum(lga==T, na.rm=T),
                lgaF=sum(lga==F, na.rm=T),
-               missingsga=sum(is.na(lga2)),
+               missinglgacombo=sum(is.na(lga)),
                lgaentT=sum(lga2==T, na.rm=T),
                lgaentF=sum(lga2==F, na.rm=T),
                missingsgaent=sum(is.na(lga2)),
@@ -771,17 +772,17 @@ openxlsx::write.xlsx(sgalga,file.path(org::PROJ$SHARED_TODAY,
 #at 24 weeks
 #dev.off() try to run this code if get weird graphic errors
 p <- ggplot(gA, 
-            aes(x=comboUSandLMPgAdays, y=bw))
+            aes(x=comboUSandLMPgA, y=bw))
 
 p <- ggplot(gA[bw>10 & bw<6000 & 
-                 comboUSandLMPgAdays>0 &
-                 comboUSandLMPgAdays<308], 
-            aes(x=comboUSandLMPgAdays, y=bw))
+                 comboUSandLMPgA>0 &
+                 comboUSandLMPgA<44], 
+            aes(x=comboUSandLMPgA, y=bw))
 p <- p + geom_point()
 p <- p + labs(title="Gestational age vs. Birthweight",
               xlab="Calculated Gestational Ages",
               ylab="Birth Weight")
-p <- p + scale_x_continuous("Calculated Gestational Ages", lim=c(24,24.86))
+p <- p + scale_x_continuous("Calculated Gestational Ages", lim=c(24,24.9))
 p <- p + theme_grey (base_size = 16)
 p10 <- 555
 p90 <- 756
@@ -1250,6 +1251,58 @@ ggsave(file.path(
 
 
 
+################ Scatter plots with all of gestage cats ################ 
+
+tab <- gA[,c("comboUSandLMPgA",
+             "mahima_hospenteredgestage_1",
+             "first_1_21_usedd_gA",
+             "bw",
+             "uniqueid")]
+
+
+long <- melt.data.table(tab, id.vars=c("uniqueid", 
+                                       "bw"),
+                        measure.vars = c("comboUSandLMPgA",
+                                         "mahima_hospenteredgestage_1",
+                                         "first_1_21_usedd_gA"),
+                        
+                        variable.name="Gestational age category",
+                        value.name="Gestational age")
+
+
+
+
+
+#at 24 weeks
+#dev.off() try to run this code if get weird graphic errors
+p <- ggplot(long, 
+            aes(x='Gestational age', y=bw))
+
+p <- ggplot(gA[bw>10 & bw<6000 & 
+                 'Gestational age'>0 &
+                 'Gestational age'<44], 
+            aes(x='Gestational age', y=bw,color='Gestational age category'))
+p <- p + geom_point()
+p <- p + labs(title="Gestational age vs. Birthweight",
+              xlab="Calculated Gestational Ages",
+              ylab="Birth Weight")
+p <- p + scale_x_continuous("Calculated Gestational Ages", lim=c(24,24.9))
+p <- p + theme_grey (base_size = 16)
+p10 <- 555
+p90 <- 756
+
+p <- p + geom_hline(yintercept = p10, color="red")
+p <- p + geom_hline(yintercept = p90, color="red")
+
+
+ggsave(file.path(
+  org::PROJ$SHARED_TODAY,
+  "BW_24 weeks.png"
+), plot = p, width = 297, height = 210, unit = "mm")
+
+
+
+
 
 ################ gA Paper Distribution Graphs ################ 
 
@@ -1384,20 +1437,12 @@ ggsave(file.path(
 
 
 
+###### hypothesis testing ###### 
 
+# do restrictions on data set to see the differences
+chisq.test(xtabs(~gA$termcatcombo+gA$termcathospavg))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#restrictions 
+chisq.test(xtabs(~termcatcombo+termcathospavg, 
+                 data=gA[USorLMPdateCombogAdays>=167 & 
+                           USorLMPdateCombogAdays<=308]))

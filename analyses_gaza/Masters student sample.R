@@ -1,53 +1,28 @@
+#### ANC people who scheduled for sms and got messages
 
-####################  Trial 2 Outcomes #################### 
-
-
-###### SETUP STARTS ######
-setwd("C:/data processing/trial_dofiles")
-
-fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
-sapply(fileSources, source, .GlobalEnv)
-
-Setup(IS_GAZA=FALSE)
-###### SETUP ENDS ######
-
-
-# LOAD in data
-if(IS_GAZA==F){
-  
-  
-  d <- LoadDataFileFromNetworkWB()
-  fileTag <- "WB"
-  
-}else {
-  
-  d <- LoadDataFileFromNetworkGaza()
-  fileTag <- "GAZA"
-  
-  
-  
-  
-}
-
-
+# rename sms variable to something shorter
+setnames(d,
+         "areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits", 
+         "smsyes")
 
 # trial arms
 d[ident_TRIAL_2_3_Control==T,TrialArm:="Control"]
 
 d[ident_TRIAL_2==T & 
-     ident_TRIAL_3==F,TrialArm:="SMS only"]
+    ident_TRIAL_3==F,TrialArm:="SMS only"]
 
 d[ident_TRIAL_2==F & 
-     ident_TRIAL_3==T,TrialArm:="QID only"]
+    ident_TRIAL_3==T,TrialArm:="QID only"]
 
 d[ident_TRIAL_2==T & 
-     ident_TRIAL_3==T,TrialArm:="SMS and QID"]
+    ident_TRIAL_3==T,TrialArm:="SMS and QID"]
+
 
 
 
 d[,precovid:=as.logical(NA)]
 d[bookdate>="2019-12-01" &
-     bookdate<="2020-03-30" & 
+    bookdate<="2020-03-30" & 
     !is.na(TrialArm),precovid:=TRUE]
 d[bookdate>="2020-06-22" &
     !is.na(TrialArm), precovid:=FALSE]
@@ -55,7 +30,8 @@ xtabs(~d$TrialArm, addNA=T)
 nrow(d)
 
 
-if(IS_GAZA==T){
+
+##### making variables we want
   
   nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
   num <- stringr::str_replace(nam,"usedd_","")
@@ -80,8 +56,8 @@ if(IS_GAZA==T){
   
   #Making gA for first_1_21_usedd
   
- 
-
+  
+  
   
   d[,usedddays:=first_1_21_usedd - as.difftime(280, unit="days")]
   
@@ -206,18 +182,12 @@ if(IS_GAZA==T){
   
   
   
-  
-  
-} else{
-  
-  # do notghing
-}
-
-
 
 # defining dataset
-smallD  <- d[(ident_dhis2_booking==T | ident_dhis2_an==T) &
-               !is.na(TrialArm),]
+smallD  <- d[bookdate>="2019-12-01" & 
+               (ident_dhis2_booking==T | ident_dhis2_an==T) &
+               !is.na(TrialArm) & 
+               smsyes==1,]
 
 
 
@@ -441,6 +411,7 @@ for(i in seq_along(an_date)){
 
 smallD[,anT2gestagedays_0:=bookgestagedays]
 
+
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
@@ -454,54 +425,20 @@ smallD[,anT1gestagedays_0:=NULL]
 xtabs(~smallD$T2_anT2visit_00_14)
 
 
-
-
-# need to make a risktype_0 variable
-
-smallD
-
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
-  variableOfInterestName="risktype",
-  variableOfInterestPattern="risktype",
-  TruevaluesMin=NULL,
-  TruevaluesMax=NULL,
-  TruevaluesDiscrete = c("GDM","LikelyGDM","MildAnemia",
-                         "SevereAnemia","MildAnemia","ModerateAnemia",
-                         "ChronicHypertension","UrineStickProtein2"),
+  variableOfInterestName="anT2visit",
+  variableOfInterestPattern="anT2gestagedays",
+  TruevaluesMin=-500,
+  TruevaluesMax=260,
   gestagedaysVariable="anT2gestagedays")
 
 smallD[,anT1gestagedays_0:=NULL]
-xtabs(~smallD$T2_riskT_00_33, addNA=T)
-
-
-#### fix risk factors
-
-# get atleast one risk factor true and false
-
-# add selection criterial here
-sms <- smallD[smsyes==1]
-
-#### choose sample
-set.seed(7)
-
-#give everyone random number
-sms[,rand_num:=runif(.N)]
-
-#sort according to random number
-setorder(satstudy, str_TRIAL_2_ClusSize)
-#assign them a row number/order within bookorgname
-satstudy[,rand_order:=1:.N,by=str_TRIAL_2_Cluster]
-#select cases with 4 or less
-#satstudy[,rand_num:=NULL]
-satstudy <- satstudy[rand_order<=4]
-
-
-
-
-
-######################### BP ######################### 
+xtabs(~smallD$T2_anT2visit_00_14)
+  
+  
+  ######################### BP ######################### 
 
 
 
@@ -517,22 +454,22 @@ satstudy <- satstudy[rand_order<=4]
 # create directory  per date ran for folder and save in that folder with the dates to load in outcomes
 
 if(IS_GAZA==F){
- saveRDS(smallD,file.path(FOLDER_DATA_CLEAN,
+  saveRDS(smallD,file.path(FOLDER_DATA_CLEAN,
+                           "T2_clean",
+                           "WB",
+                           sprintf("T2_dataset_%s_%s.rds",
+                                   CLINIC_INTERVENTION_DATE,
+                                   fileTag)))
+  
+  
+  fwrite(smallD,file.path(FOLDER_DATA_CLEAN,
                           "T2_clean",
                           "WB",
-                          sprintf("T2_dataset_%s_%s.rds",
+                          sprintf("T2_dataset_%s_%s.csv",
                                   CLINIC_INTERVENTION_DATE,
                                   fileTag)))
- 
-
-fwrite(smallD,file.path(FOLDER_DATA_CLEAN,
-                        "T2_clean",
-                        "WB",
-                        sprintf("T2_dataset_%s_%s.csv",
-                                CLINIC_INTERVENTION_DATE,
-                                fileTag)))
-
-
+  
+  
 } else{
   saveRDS(smallD,file.path(FOLDER_DATA_CLEAN_GAZA,
                            "T2_clean",

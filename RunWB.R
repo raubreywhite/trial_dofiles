@@ -54,9 +54,7 @@ if(!IS_GAZA) SaveCISMACDataBase()
 
 ####LOAD d from Network####
 d <- LoadDataFileFromNetwork()
-#### bookvisitspec shouldnt be known  pcnidnumber_1  amdmotherbirthdate_1
-###previdnumber_1   manidnumber  riskidnumber   d$hbodaltidnum_1   hbodaltidnum_1
-###anidnumber_1     labid     usid     
+    
 
 # in theory, this should give an avicenna dataset:
 d[ident_abb==TRUE,stringr::str_subset(names(d),"^a"),with=F]

@@ -773,7 +773,8 @@ openxlsx::write.xlsx(uglytable,
                        FOLDER_DATA_RESULTS_WB,
                        "demographics_and_history",
                        sprintf("ObstetricHistory_%s.xlsx", lubridate::today())))
-d#baseline (character formats)
+
+#baseline (character formats)
 
 smallD <- d[bookdate >= "2017-01-15"&
               bookdate<="2017-09-15" &

@@ -639,6 +639,8 @@ DHIS2_BookingVisit <- function(isControl,
   print("000000")
   print(nrow(d))
   
+  #d <- CleanOrgName(data=d,nameToReplace="bookorgname", IS_GAZA)
+  
   return(d)
   
 }

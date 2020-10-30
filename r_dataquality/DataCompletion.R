@@ -94,7 +94,7 @@ DataCompletion <- function(){
   xtabs(~ident_gaza+bookyear, data=res)
   
   # turn it into long format
-  res2 <- melt.data.table(res, id.vars=c("ident_gaza", "bookyear"))
+  res <- melt.data.table(res, id.vars=c("ident_gaza", "bookyear"))
   
   #cross tabs to look at how many variables 
   # split the variable name into 2 variables ("variable name", and "function")
@@ -116,13 +116,14 @@ DataCompletion <- function(){
   res[key %in% "nb", key:=key3]
   
   denoms <- res[stringr::str_detect(var,"event")]
-  denoms <- unique(denoms[,c("key","ident_gaza","xNotNA")])
+  denoms <- unique(denoms[,c("key","ident_gaza","bookyear","xNotNA")])
   setnames(denoms,"xNotNA","denom")
+  # check each row if identiyin by above
   
   # fix denom for booking (because booking is booking+demographics)
   denomsBook <- long[ident_dhis2_booking==T,
                      .(denom=sum(!is.na(bookevent))),
-       keyby=.(ident_gaza)]
+       keyby=.(ident_gaza,bookyear)]
   denomsBook[,key:="bo"]
   
   # delete the "wrong booking" (which is really booking+demon)
@@ -131,7 +132,11 @@ DataCompletion <- function(){
   denoms <- rbind(denoms,denomsBook)
   
   nrow(res)
-  res <- merge(res,denoms,by=c("key","ident_gaza"))
+  
+  # only keeping the rows that have the same "key" as those in our denominators
+  res <- res[key %in% denoms$key]
+  nrow(res)
+  res <- merge(res,denoms,by=c("key","ident_gaza", "bookyear"))
   nrow(res)
   ## end denominators
   
@@ -190,6 +195,7 @@ DataCompletion <- function(){
   setorder(res,ident_gaza,key,varType,var)
   setcolorder(res,c(
     "ident_gaza",
+    "bookyear",
     "key",
     "varType",
     "var",

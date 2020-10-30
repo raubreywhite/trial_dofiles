@@ -1,5 +1,31 @@
 LoadDataLongFromNetworkPal <- function(){
   d <- LoadDataFileFromNetworkPal()
+
+  # renaming variables that were identified 
+  #as duplicates bcuz similar stubs at bottom
+  
+  setnames(d,"bookyear", "bookyearx")
+  setnames(d,"bookbmicat","bookcatbmix")
+  
+  setnames(d,"bookorgdistricthashed","bookhashedorgdistrictx")
+  setnames(d,"bookgestagedays","bookgAdays")
+  setnames(d,"bookhistotherchronic","bookchronicotherhistx")
+  setnames(d,"bookhistbloodspec","bookspecbloodhistx")
+  setnames(d,"bookdatelastbirth","booklastbdayx")
+  setnames(d,"bookallersevspec","booksevspecx")
+  setnames(d,"bookallerdrugspec","bookdrugspecall")
+  setnames(d,"bookhistcscompl","bookcomplhistcsx")
+  setnames(d,"bookexambreastabn","bookbreastabnx")
+  setnames(d,"bookexamlimbabn","booklimbabnex")
+  setnames(d,"bookexamheadabn","bookheadabnexam")
+  setnames(d,"bookexamheartabn","bookheartabnexam")
+  setnames(d,"bookhisthtnsymp","booksymphtnhistx")
+  setnames(d,"bookcounsfamhist","bookcounsfamxhist")
+  setnames(d,"booklmpknown","bookknownlmpx")
+  setnames(d,"bookgestagedays_cats","bookdaysgacatsx")
+  setnames(d,"bookexamabdabn","bookabdabnexams")
+  setnames(d,"bookexamlungabn","booklungabnexamx")
+  setnames(d,"bookhistutesur","bookutesurhistx")
   
   d[,uniquepregid_1:=1:.N]
   d[,uniquepregid_2:=1:.N]
@@ -46,6 +72,33 @@ LoadDataLongFromNetworkPal <- function(){
   long = melt(d[,c(ident,unlist(widenames)),with=F],
                  measure = widenames,
                  value.name = longnames)
+  
+  # renaming possible duplicates to original
+  setnames(long,"bookyearx","bookyear")
+  
+  # add others here
+  setnames(long,"bookcatbmix","bookbmicat")
+  setnames(long,"bookhashedorgdistrictx","bookorgdistricthashed")
+  setnames(long,"bookgadays","bookgestagedays")
+  setnames(long,"bookchronicotherhistx","bookhistotherchronic")
+  setnames(long,"bookspecbloodhistx","bookhistbloodspec")
+  setnames(long,"booklastbdayx","bookdatelastbirth")
+  setnames(long,"booksevspecx","bookallersevspec")
+  setnames(long,"bookdrugspecall","bookallerdrugspec")
+  setnames(long,"bookcomplhistcsx","bookhistcscompl")
+  setnames(long,"bookbreastabnx","bookexambreastabn")
+  setnames(long,"booklimbabnex","bookexamlimbabn")
+  setnames(long,"bookheadabnexam","bookexamheadabn")
+  setnames(long,"bookheartabnexam","bookexamheartabn")
+  setnames(long,"booksymphtnhistx","bookhisthtnsymp")
+  setnames(long,"bookcounsfamxhist","bookcounsfamhist")
+  setnames(long,"bookknownlmpx","booklmpknown")
+  setnames(long,"bookdaysgacatsx","bookgestagedays_cats")
+  setnames(long,"bookabdabnexams","bookexamabdabn")
+  setnames(long,"booklungabnexamx","bookexamlungabn")
+  setnames(long,"bookutesurhistx","bookhistutesur")
+  
+  
   
   xtabs(~long$variable)
   

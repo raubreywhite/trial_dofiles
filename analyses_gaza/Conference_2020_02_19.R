@@ -13,13 +13,14 @@ Setup(IS_GAZA=TRUE)
 d <- LoadDataFileFromNetwork()
 
 #making small data set for PPC in 2019
-gaza2019data <- d[bookyear>=2018,]
+gaza2019data <- d[(bookyear>=2018)| ppcdate_1>="2018-01-01",]
+xtabs(~gaza2019data$ident_dhis2_ppc, addNA =T)
 
 # ANC Anemia
 
 #### labhb at 35-37 weeks #####
 
-gaza2019data[,haslabhbtermgA:=FALSE]
+gaza2019data[bookyear>=2018,haslabhbtermgA:=FALSE]
 
 vars <- stringr::str_subset(names(gaza2019data),"^labgestage")
 for (i in vars){
@@ -53,7 +54,7 @@ anemia <- gaza2019data[,.(N=.N,
                    validvalues=sum(labhbatterm>0 & labhbatterm<16, na.rm=T),
                    MildAnemia=sum(labhbatterm>=9 &
                                     labhbatterm<11,na.rm=T),
-                   ModerateAnemia=sum(labhbatterm>7 &
+                   ModerateAnemia=sum(labhbatterm>=7 &
                                         labhbatterm<=8.9,na.rm=T),
                    sevAnemia=sum(labhbatterm>0 & 
                                    labhbatterm<7,na.rm=T)),
@@ -64,6 +65,57 @@ openxlsx::write.xlsx(anemia,
                        FOLDER_DATA_RESULTS_GAZA,
                        "conferences",
                        sprintf("%s_anemia.xlsx", lubridate::today())))
+
+
+
+#### Anemia ####
+toplot <- anemia[bookyear>=2019,c("bookyear",
+                                  "N",
+                                  "MildAnemia",
+                                  "ModerateAnemia",
+                                  "sevAnemia")]
+
+setnames(toplot,c("bookyear",
+                  "N",
+                  "MildAnemia",
+                  "ModerateAnemia",
+                  "sevAnemia"),
+              c("Year",
+                "Booked",
+                "Mild Anemia",
+                "Moderate Anemia",
+                "Severe Anemia"))
+
+uglytable <- melt.data.table(toplot,id.vars = c("Year","Booked"))
+uglytable <- uglytable[,denom:=round(100*Booked/value, digits=1), by="Year"]
+
+maxYVAL <- max(uglytable$N)
+labelAdjust <- maxYVAL*0.01
+
+p <- ggplot(uglytable, aes(x=prettyX, y=N, fill=prettyX, label=N))
+p <- p + geom_col(alpha=0.75)
+p <- p + geom_text(mapping=aes(y=N+labelAdjust),vjust=0)
+p <- p + scale_fill_brewer("Referal services",palette = "Set1")
+p <- p + scale_x_discrete("")
+p <- p + scale_y_continuous("Number of Newborns(up to 28 days old) with Risk")
+p <- p + theme_gray(20)
+p <- p + theme(legend.key = element_rect(size = 7),
+               legend.key.size = unit(2, 'lines'))
+p
+ggsave(file.path(
+  FOLDER_DROPBOX_RESULTS,
+  "pniph",
+  "abstracts_2018",
+  "risktypes.png"
+), plot = p, width = 297, height = 210, units = "mm")
+
+
+
+
+
+
+
+
 
 
 
@@ -104,8 +156,7 @@ HTN <- gaza2019data[,.(N=sum(ident_dhis2_booking==T, na.rm=T),
                                    anbpdiasthigh>=100 &
                                    anbpdiasthigh<=109, na.rm=T),
                       sevHTN=sum(anbpsysthigh>=160 & 
-                                 anbpdiasthigh>=110, na.rm=T)
-)]
+                                 anbpdiasthigh>=110, na.rm=T)),keyby=.(bookyear)]
 
 table(gaza2019data$anbpsysthigh)
 table(gaza2019data$anbpdiasthigh)
@@ -159,7 +210,8 @@ xtabs(~gaza2019data$fbslikelygdm, addNA=T)
 GDM <- gaza2019data[,.(N=.N,
                        posbooklaburglu=sum(booklaburglu=="POS", na.rm=T),
                        hastimelylab=sum(hastimelylab==T, na.rm=T),
-                       likelyGDM=sum(fbslikelygdm==T, na.rm=T))]
+                       likelyGDM=sum(fbslikelygdm==T, na.rm=T)),
+                    keyby=.(bookyear)]
 
 openxlsx::write.xlsx(GDM, 
                      file.path(
@@ -267,13 +319,17 @@ smallD <- gaza2019data[ident_dhis2_ppc==T,c("bookorgdistrict",
                                             vars_ppcbreastswelling,
                                             vars_ppcbreasttenderness,
                                             vars_ppcincisiontearbleeding,
-                                            vars_ppcincisiontearabnormaldischarge,
+                                        vars_ppcincisiontearabnormaldischarge,
                                             vars_ppcincisiontearpain,
                                             vars_ppcincisiontearswelling,
                                             vars_ppcdefecation,
                                             vars_ppcabnormurination,
                                             vars_ppcclammyskin ), 
                                             with=F]
+
+
+
+smallD
 
 smallD[,id:=1:.N]
 long <- melt.data.table(smallD,
@@ -283,6 +339,9 @@ long <- melt.data.table(smallD,
                           "bookyear"
                           ))
 
+# long with key and try aggregating that way
+long  <-long[,varKey:=stringr::str_remove(variable,"_[1-9]$")]
+
 uglytable <- long[,.(
                     denominator=.N,
                     is_NA=sum(is.na(value)),
@@ -291,7 +350,30 @@ uglytable <- long[,.(
                     value1=sum(value==1,na.rm=T),
                     value2=sum(value==2,na.rm=T),
                     value3=sum(value==3,na.rm=T)),
-                    keyby=.(bookyear,variable)]
+                    keyby=.(varKey,bookyear)]
+
+
+
+openxlsx::write.xlsx(uglytable, 
+                     file.path(
+                       FOLDER_DATA_RESULTS_GAZA,
+                       "conferences",
+                       sprintf("%s_PPCComps_Conference.xlsx",lubridate::today())))
+
+# create stubs for each variable to aggregate
+uglytable[,varKey:=stringr::str_remove(variable,"_[1-9]$")]
+uglytable[,varKey:=stringr::str_remove(varKey,"^ppc")]
+uglytable[,varKeyFactor:=as.factor(varKey)]
+
+uglytable_fix<- uglytable[,variable:=NULL]
+
+# aggregate by variable type
+uglytabfix <- uglytable_fix[,.(denom=denominator,
+                        missing=sum(is_NA, na.rm=T),
+                        NotMissing=sum(not_NA,na.rm=T),
+                        No=sum(value0, na.rm=T),
+                        Yes=sum(value1,na.rm=T)),
+                        keyby=.(bookyear,denominator,varKey)]
 
 openxlsx::write.xlsx(uglytable, 
                      file.path(
@@ -309,6 +391,11 @@ ppctab <- gaza2019data[,.(
                           Booked=sum(ident_dhis2_booking==T, na.rm=T),
                           AttendenANC=sum(ident_dhis2_an==T, na.rm=T),
                           AttendedPPC=sum(ident_dhis2_ppc==T,na.rm=T),
+                          AttendedPPCandnobooking=sum(ident_dhis2_booking==0 &
+                                                      ident_dhis2_ppc==T,
+                                                      na.rm=T),
+                          PPCandBooked=sum(ident_dhis2_booking==1 & 
+                                             ident_dhis2_ppc==T, na.rm=T),
                           ANCandPPC=sum(ident_dhis2_an==T &
                                           ident_dhis2_ppc==T, na.rm=T)),
                         
@@ -320,7 +407,6 @@ openxlsx::write.xlsx(ppctab,
                        FOLDER_DATA_RESULTS_GAZA,
                        "conferences",
                        sprintf("%s_PPC.xlsx",lubridate::today())))
-
 
 ### NBC ### 
 
@@ -334,8 +420,10 @@ gaza2019data[ident_dhis2_nbc==T, nbcconheart:=FALSE]
 gaza2019data[ident_dhis2_nbc==T, nbcneuraltubedef:=FALSE]
 gaza2019data[ident_dhis2_nbc==T, nbcnone:=FALSE]
 gaza2019data[ident_dhis2_nbc==T, nbcother:=FALSE]
+gaza2019data[ident_dhis2_nbc==T, nbcMissing:=FALSE]
 
 varsnbcsuspectedcong <-names(gaza2019data)[stringr::str_detect(names(gaza2019data),"^nbcsuspectedcongenitalmalformation_")]
+
 
 for (i in varsnbcsuspectedcong){
   gaza2019data[get(i)=="Down syndrome", nbcdownsyndrome:=TRUE]
@@ -343,15 +431,44 @@ for (i in varsnbcsuspectedcong){
   gaza2019data[get(i)=="Congenital heart defect",nbcconheart:= TRUE]
   gaza2019data[get(i)=="Other",nbcother:= TRUE]
   gaza2019data[get(i)=="None",nbcnone:= TRUE]
+  gaza2019data[get(i)=="NA"| get(i)=="",nbcMissing:= TRUE]
+  
 }
 
-nbc <- gaza2019data[,.(N=.N,
+
+# check unique values
+paste0(unique(gaza2019data$nbmandetail_1))
+paste0(unique(gaza2019data$nbmandetail_2))
+paste0(unique(gaza2019data$nbmandetail_3))
+
+
+gaza2019data[ident_dhis2_nbc==T, ddh:=FALSE]
+
+
+
+
+varsnbcmandetail <-names(gaza2019data)[stringr::str_detect(names(gaza2019data),"^nbmandetail_")]
+
+for (i in varsnbcmandetail){
+ 
+  gaza2019data[stringr::str_detect(tolower(get(i)),"hip"), 
+               ddh:=TRUE]
+
+}
+
+xtabs(~gaza2019data$ddh, addNA=T)
+
+
+
+nbc <- gaza2019data[,.(Numbooked=.N,
                        numNBC=sum(ident_dhis2_nbc==T, na.rm=T),
                        none=sum(nbcnone==T, na.rm=T),
                        downsyndrome=sum(nbcdownsyndrome==T, na.rm=T),
                        neuraltubedefect=sum(nbcneuraltubedef==T, na.rm=T),
                        congenheart=sum(nbcconheart==T, na.rm=T),
-                       other=sum(nbcother==T, na.rm=T))]
+                       other=sum(nbcother==T, na.rm=T),
+                       managedddh=sum(ddh==T, na.rm=T)),
+                    keyby=.(bookyear)]
 
 openxlsx::write.xlsx(nbc, 
                      file.path(
@@ -362,9 +479,10 @@ openxlsx::write.xlsx(nbc,
 
 
 
-
 xtabs(~gaza2019data$nbcdownsyndrome, addNA=T)
 xtabs(~gaza2019data$nbcneuraltubedef, addNA=T)
 xtabs(~gaza2019data$nbcconheart, addNA=T)
 xtabs(~gaza2019data$nbcother, addNA=T)
 xtabs(~gaza2019data$nbcnone, addNA=T)
+
+

@@ -16,12 +16,17 @@ CleanOrgName <- function(data,nameToReplace="bookorgname", IS_GAZA){
   setDT(sData)
   setnames(sData,"bookorgname",oldName)
   setnames(sData,"NEW_bookorgname",newName)
-  sData[is.na(get(newName)),(newName):=get(oldName)]
+  sData <- sData[is.na(get(newName)),(newName):=get(oldName)]
   
   toChangeToBool <- names(sData)[stringr::str_detect(names(sData),"^ident")]
   for(i in toChangeToBool) sData[[i]] <- !is.na(sData[[i]])
   
   missingNames <- data.table("bookorgname"=unique(data[[oldName]])[!unique(data[[oldName]]) %in% sData[[oldName]]])
+  
+  missinNames <- missingNames[,bookorgname:=ExtractOnlyEnglishLetters(bookorgname)]
+  
+  
+  
   openxlsx::write.xlsx(missingNames,
                        sprintf("../data_raw/structural_data/to_be_processed_%s.xlsx",nameToReplace))
   
@@ -617,6 +622,5 @@ DHIS2_Master <- function(
   # fixing trial 1 indicator
   #d[,ident_TRIAL_1:=ident_TRIAL_1 & ]
  
-  
   return(d)
 }
