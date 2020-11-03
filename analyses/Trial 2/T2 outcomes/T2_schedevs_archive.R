@@ -21,7 +21,7 @@ if(IS_GAZA==F){
   
   # all scheduled events
   # setting header=FALSE bc doesnt have column names, so specifying them ourselves and dont want to read in first row of data as
-  schedeventsraw <- fread("C:/data processing/data_raw/smslogs/schedevents/2020-10-07.csv", header=FALSE)
+  schedeventsraw <- fread("C:/data processing/data_raw/smslogs/schedevents/2020-10-26.csv", header=FALSE)
   
   
   # all scheduled messages
@@ -77,30 +77,33 @@ varsancgestage <- names(d)[stringr::str_detect(names(d),"^angestage")]
 
 # only adding bookdate here to decrease size of the data
 
+# 
+# # check these definitions
+# t2 <- d[,
+#         c("uniqueid",
+#           "bookevent",
+#           "bookorgname",
+#           "bookdate",
+#           "bookgestage",
+#           "ident_dhis2_booking",
+#           "ident_TRIAL_2_and_3",
+#           "ident_TRIAL_2_3_Control",
+#           "ident_TRIAL_2",
+#           "ident_TRIAL_3",
+#           "str_TRIAL_2_Cluster",
+#           "lmpT1",
+#           "areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits",
+#           varsancevent,
+#           varsancdate,
+#           varsancgestage), with=F]
+# 
+# 
 
-# check these definitions
-t2 <- d[,
-        c("uniqueid",
-          "bookevent",
-          "bookorgname",
-          "bookdate",
-          "bookgestage",
-          "ident_dhis2_booking",
-          "ident_TRIAL_2_and_3",
-          "ident_TRIAL_2_3_Control",
-          "ident_TRIAL_2",
-          "ident_TRIAL_3",
-          "str_TRIAL_2_Cluster",
-          "lmpT1",
-          "areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits",
-          varsancevent,
-          varsancdate,
-          varsancgestage), with=F]
-
+t2 <-d[bookdate>="2019-01-01"]
 
 setnames(t2,
-         "areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits",
-         "wantSMS")
+          "areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits",
+          "wantSMS")
 
 
 # trial arms
@@ -161,11 +164,29 @@ long <- melt(t2,
                                  "TrialArm",
                                  "wantSMS"),
             measure.vars=patterns("^anevent_",
-                                   "^andate_",
-                                  "^angestage_"), 
+                                  "^andate_",
+                                  "^angestage_",
+                                  "^labevent",
+                                  "^labdate_",
+                                  "^labgestage_",
+                                  "^usevent_",
+                                  "^usdate_",
+                                  "^usgestage_",
+                                  "*manevent_",
+                                  "^mandate_",
+                                  "^mangestage_"), 
             value.name=c("anevent",
                          "andate",
-                         "angestage"))
+                         "angestage",
+                         "^labevent",
+                         "^labdate",
+                         "^labgestage",
+                         "^usevent",
+                         "^usdate",
+                         "^usgestage",
+                         "*manevent",
+                         "^mandate",
+                         "^mangestage"))
 
 nrow(long)==length(unique(long$anevent))
 
@@ -204,19 +225,27 @@ schedeventsraw[1:3]
 # based on sql query, these are the names
 setnames(schedeventsraw,1,"event")
 setnames(schedeventsraw,2,"status")
-setnames(schedeventsraw,3,"dueDate")
-setnames(schedeventsraw,4,"createddate")
-setnames(schedeventsraw,5,"enrollmentid")
-setnames(schedeventsraw,6,"programStagename")
-setnames(schedeventsraw,7,"programstageid")
-setnames(schedeventsraw,8,"eventdate")
-setnames(schedeventsraw,9,"orgunitcode")
-setnames(schedeventsraw,10,"orgname")
-setnames(schedeventsraw,11,"completeddate")
+setnames(schedeventsraw,3,"deleted")
+setnames(schedeventsraw,4,"dueDate")
+setnames(schedeventsraw,5,"createddate")
+setnames(schedeventsraw,6,"enrollmentid")
+setnames(schedeventsraw,7,"tei")
+setnames(schedeventsraw,8,"programStagename")
+setnames(schedeventsraw,9,"programstageid")
+setnames(schedeventsraw,10,"eventdate")
+setnames(schedeventsraw,11,"orgunitcode")
+setnames(schedeventsraw,12,"orgname")
+setnames(schedeventsraw,13,"completeddate")
 
 schedevents <- schedeventsraw
 
 ### cleaning var types
+#deleted
+schedevents[deleted=="t",deleted:="TRUE"]
+schedevents[deleted=="f",deleted:="FALSE"]
+schedevents[,deleted:=as.logical(deleted)]
+xtabs(~schedevents$deleted)
+
 
 #duedate
 schedevents[,dueDate:=stringr::str_sub(dueDate,1,10)]
@@ -308,7 +337,7 @@ nrow(schedevents)
 merged <- merge(test,
                 long,
                 by="event",
-                all=T)
+                all.x=T)
 nrow(merged)
 
 write.csv(merged,file=sprintf("%s_T2_events_and_dhis2_data.csv",
@@ -316,8 +345,8 @@ write.csv(merged,file=sprintf("%s_T2_events_and_dhis2_data.csv",
 
 
 # identify duplicate bookevents
-merged[,eventnumbyevent:=0]
-merged[,eventnumbyevent:=.N,by=event]
+merged[,eventnum:=0]
+merged[,eventnumbyevent:=.N,by=enrollmentid]
 
 length(unique(merged$event))==nrow(merged)
 
