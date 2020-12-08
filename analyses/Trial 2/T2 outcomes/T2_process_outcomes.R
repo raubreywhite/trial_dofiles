@@ -481,21 +481,6 @@ xtabs(~smallD$T2_riskT_00_33, addNA=T)
 # get atleast one risk factor true and false
 
 # add selection criterial here
-sms <- smallD[smsyes==1]
-
-#### choose sample
-set.seed(7)
-
-#give everyone random number
-sms[,rand_num:=runif(.N)]
-
-#sort according to random number
-setorder(satstudy, str_TRIAL_2_ClusSize)
-#assign them a row number/order within bookorgname
-satstudy[,rand_order:=1:.N,by=str_TRIAL_2_Cluster]
-#select cases with 4 or less
-#satstudy[,rand_num:=NULL]
-satstudy <- satstudy[rand_order<=4]
 
 
 
