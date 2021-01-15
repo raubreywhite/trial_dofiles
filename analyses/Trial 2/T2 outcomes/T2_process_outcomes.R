@@ -56,7 +56,13 @@ nrow(d)
 
 
 if(IS_GAZA==T){
+  ### Trial 2 Variables
+  #gestagedaysCats
   
+  
+  ###Making first usedd if its at <=21 gA variable
+  # to mimick the  eRegistry, we have used the eReg rule
+  # the rule takes an ultrasound less than 23 weeks and an lmp if no ultrasound is present
   nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
   num <- stringr::str_replace(nam,"usedd_","")
   d[,first_1_21_usedd:=as.Date(NA)]
@@ -77,12 +83,10 @@ if(IS_GAZA==T){
   #unique(d$usgestage_1)
   #unique(d$first_1_21_usedd)
   #sum(!is.na(d$first_1_21_usedd))
-  
-  #Making gA for first_1_21_usedd
-  
  
-
   
+  
+  #TO DO: make sure we get the 87 women who are missing an lmp or bookdate
   d[,usedddays:=first_1_21_usedd - as.difftime(280, unit="days")]
   
   d[,USorLMPdate:=booklmp]
@@ -90,18 +94,10 @@ if(IS_GAZA==T){
   #d[is.na(USorLMPdate), USorLMPdate:=]
   
   
-  
+  #recalculating bookgestational age into days
   d[,bookgestagedays:=round(as.numeric(difftime(
     bookdate,USorLMPdate, units="days")))]
   
-  d[,bookgestagedays_cats:=cut(bookgestagedays,
-                               breaks=c(-500,0,104,
-                                        125,160,167,202,
-                                        216,237,244,265,293),
-                               include.lowest=T)]
-  
-  
-  #gestagedaysCats
   ### making gestational ages based on usedd=<20, then lmp, then us>20 ###
   # + means repeat, $ means the end of the entire string
   d[,lmpT1:=as.Date(NA)]
@@ -142,7 +138,7 @@ if(IS_GAZA==T){
   ##looping through to make gestages for each of the program stages
   #Us gAs
   us_date <- stringr::str_subset(names(d), "^usdate_[0-9]+")
-  usT1_gA <- stringr::str_replace(us_date, "usdate","usT1gestagedays")
+  usT1_gA <- stringr::str_replace(us_date, "usdate","usT2gestagedays")
   
   for(i in seq_along(us_date)){
     var_us_gestage <- usT1_gA[i]
@@ -168,7 +164,7 @@ if(IS_GAZA==T){
   #Lab gAs
   ##NEED TO ROUND OR USE FLOOR
   lab_date <- stringr::str_subset(names(d), "^labdate_[0-9]+")
-  labT1_gA <- stringr::str_replace(lab_date, "labdate","labT1gestagedays")
+  labT1_gA <- stringr::str_replace(lab_date, "labdate","labT2gestagedays")
   
   for(i in seq_along(lab_date)){
     var_lab_gestage <- labT1_gA[i]
@@ -187,7 +183,24 @@ if(IS_GAZA==T){
     var_man_date<- man_date[i] 
     
     d[,(var_man_gestage):=as.numeric(floor(difftime(get(var_man_date),lmpT1, units="days")))]
+ 
+  #risk gAs
+  risk_date <- stringr::str_subset(names(d), "^riskdate_[0-9]+")
+  riskT1_gA <- stringr::str_replace(risk_date, "riskdate","riskT2gestagedays")
+  
+  for(i in seq_along(man_date)){
+    var_man_gestage <- riskT1_gA[i]
+    var_man_date<- risk_date[i] 
     
+    d[,(var_man_gestage):=as.numeric(floor(difftime(get(var_man_date),lmpT1, units="days")))]
+    
+  }
+  
+
+  # MAKE BOOK VISIT FOR ANEMIA
+  d[,booklabhb:=as.numeric(NA)]
+  d[abs(labT2gestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
+  
   }
   
   ##making categories of days for booking
@@ -199,10 +212,6 @@ if(IS_GAZA==T){
                                include.lowest=T)]
   
   
-  
-  # MAKE BOOK VISIT FOR ANEMIA
-  d[,booklabhb:=as.numeric(NA)]
-  d[abs(labT1gestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
   
   
   
@@ -223,29 +232,29 @@ smallD  <- d[(ident_dhis2_booking==T | ident_dhis2_an==T) &
 
 # MAKE BOOK VISIT FOR ANEMIA
 smallD[,booklabhb:=as.numeric(NA)]
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
+smallD[abs(labT2gestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
 
 # MAKE BOOK VISIT FOR Laburglu
 smallD[,booklaburglu:=as.character(NA)]
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & laburglu_1%in%c("NEG","POS"),
+smallD[abs(labT2gestagedays_1-bookgestagedays)<7 & laburglu_1%in%c("NEG","POS"),
        booklaburglu:=laburglu_1]
 
 smallD[,booklaburglu:=NULL]
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7,
+smallD[abs(labT2gestagedays_1-bookgestagedays)<7,
        booklaburglu:=laburglu_1]
 xtabs(~smallD$booklaburglu)
 str(smallD$booklaburglu)
 unique(smallD$booklaburglu)
 
 smallD[,booklaburglu:=NULL]
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & laburglu_1%in%c("NEG","POS"),
+smallD[abs(labT2gestagedays_1-bookgestagedays)<7 & laburglu_1%in%c("NEG","POS"),
        booklaburglu:=laburglu_1]
-xtabs(~smallD$booklaburglu)
+xtabs(~smallD$booklaburglu, addNA=T)
 
 
 # MAKE BOOK VISIT FOR LABBLOODGLU
 smallD[,booklabbloodglu:=as.integer(NA)]
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7,booklabbloodglu:=labbloodglu_1]
+smallD[abs(labT2gestagedays_1-bookgestagedays)<7,booklabbloodglu:=labbloodglu_1]
 xtabs(~smallD$booklabbloodglu, addNA=T)
 
 # MAKE BOOK VISIT FOR LABBLOODGLU_HIGH
@@ -256,7 +265,7 @@ xtabs(~smallD$booklabbloodglu_high, addNA=T)
 
 # MAKE BOOK VISIT FOR LABFASTBLOODGLU
 smallD[,booklabfastbloodglu:=as.numeric(NA)]
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7,booklabfastbloodglu:=labfastbloodglu_1]
+smallD[abs(labT2gestagedays_1-bookgestagedays)<7,booklabfastbloodglu:=labfastbloodglu_1]
 xtabs(~smallD$booklabfastbloodglu)
 
 # MAKE BOOK VISIT FOR LABfastBLOODGLU_HIGH
@@ -427,20 +436,6 @@ for(i in 0:(length(temp)-1)){
 xtabs(~TrialArm + firstvisitinT2, data=smallD, addNA=T)
 
 
-
-#ANC gAs
-an_date <- stringr::str_subset(names(smallD), "^andate_[0-9]+")
-anT2_gA <- stringr::str_replace(an_date, "andate","anT2gestagedays")
-
-for(i in seq_along(an_date)){
-  var_an_gestage <- anT2_gA[i]
-  var_an_date<- an_date[i] 
-  
-  smallD[,(var_an_gestage):=as.numeric(floor(difftime(get(var_an_date),lmpT1, units="days")))]
-  
-}
-
-
 ###ANC Visits####
 
 smallD[,anT2gestagedays_0:=bookgestagedays]
@@ -483,7 +478,7 @@ smallD<-VisitVariables(
   variableOfInterestName="anbpsyst_present",
   variableOfInterestPattern="anbpsyst",
   TruevaluesMin=60,
-  TruevaluesMax=170,
+  TruevaluesMax=200,
   gestagedaysVariable = "anT2gestagedays")
 
 smallD[,anT2gestagedays_0:=NULL]
@@ -616,7 +611,7 @@ xtabs(~smallD$T2_anbpdiast_modSevHTN_00_14)
 
 ### ANC Anemia ####
 # lab hb exists
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labhb_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -626,15 +621,15 @@ smallD <- VisitVariables(
   TruevaluesMin=1,
   TruevaluesMax=20,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labT1gestagedays")
+  gestagedaysVariable = "labT2gestagedays")
 
 nrow(smallD[labhb_1>=4 & labhb_1<=20])
-smallD[,labT1gestagedays_0:=NULL]
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labhb_0:=NULL]
 xtabs(~smallD$T2_labhb_exists_15_17)
 
 #normal hb
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labhb_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -644,14 +639,14 @@ smallD <- VisitVariables(
   TruevaluesMin=11,
   TruevaluesMax=20,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labT1gestagedays")
+  gestagedaysVariable = "labT2gestagedays")
 
-smallD[,labT1gestagedays_0:=NULL]
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labhb_0:=NULL]
 xtabs(~smallD$T2_labhb_normal_15_17)
 
 # sev anemia
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labhb_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -661,16 +656,16 @@ smallD <- VisitVariables(
   TruevaluesMin=1,
   TruevaluesMax=6.9,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labT1gestagedays")
+  gestagedaysVariable = "labT2gestagedays")
 
 nrow(smallD[labhb_1>=1 & labhb_1<7])
-smallD[,labT1gestagedays_0:=NULL]
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labhb_0:=NULL]
 xtabs(~smallD$T2_labhb_anemia_sev_15_17)
 
 
 # mild and moderate anemia
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labhb_0:=booklabhb]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -680,9 +675,9 @@ smallD <- VisitVariables(
   TruevaluesMin=7,
   TruevaluesMax=10.9,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labT1gestagedays")
+  gestagedaysVariable = "labT2gestagedays")
 nrow(smallD[labhb_1>=7 & labhb_1<11])
-smallD[,labT1gestagedays_0:=NULL]
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labhb_0:=NULL]
 nrow(smallD[labgestage_1<=15 & labgestage_1<=17 & labhb_1>7 & labhb_1<11])
 xtabs(~smallD$T2_labhb_anemia_mild_mod_15_17, addNA=T)
@@ -690,7 +685,7 @@ xtabs(~smallD$T2_labhb_anemia_mild_mod_15_17, addNA=T)
 
 
 ### Lab RBS Normal ####
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,laburglu_0:=booklaburglu]
 # normal urine glucose
 smallD <- VisitVariables(
@@ -701,13 +696,13 @@ smallD <- VisitVariables(
   TruevaluesMin=NULL,
   TruevaluesMax=NULL,
   TruevaluesDiscrete = c("POS", "NEG"),
-  gestagedaysVariable = "labT1gestagedays")
-smallD[,labT1gestagedays_0:=NULL]
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,laburglu_0:=NULL]
 xtabs(~smallD$T2_laburglu_exists_15_17)
 
 # lab urglu pos
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,laburglu_0:=booklaburglu]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -717,15 +712,15 @@ smallD <- VisitVariables(
   TruevaluesMin=NULL,
   TruevaluesMax=NULL,
   TruevaluesDiscrete =c("POS"),
-  gestagedaysVariable = "labT1gestagedays")
-smallD[,labT1gestagedays_0:=NULL]
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,laburglu_0:=NULL]
 nrow(smallD[laburglu_1=="POS" & labgestage_1>0 & labgestage_1<=14])
 xtabs(~smallD$T2_laburglu_pos_00_14)
 
 
 # labbloodglu exist
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labbloodglu_0:=booklabbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -735,13 +730,13 @@ smallD <- VisitVariables(
   TruevaluesMin=50,
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labT1gestagedays")
-smallD[,labT1gestagedays_0:=NULL]
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labbloodglu_0:=NULL]
 xtabs(~smallD$T2_labbloodglu_exists_15_17)
 
 # high blood glucose
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labbloodglu_0:=booklabbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -751,8 +746,8 @@ smallD <- VisitVariables(
   TruevaluesMin=140,
   TruevaluesMax=500,
   TruevaluesDiscrete =NULL,
-  gestagedaysVariable = "labT1gestagedays")
-smallD[,labT1gestagedays_0:=NULL]
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labbloodglu_0:=NULL]
 xtabs(~smallD$T2_labbloodglu_high_00_14)
 xtabs(~smallD$T2_labbloodglu_high_18_22)
@@ -760,7 +755,7 @@ xtabs(~smallD$T2_labbloodglu_high_18_22)
 
 # Lab FBS exists
 #http://perinatology.com/Reference/Reference%20Ranges/Glucose,%20fasting.htm
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labfastbloodglu_0:=booklabfastbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -770,13 +765,13 @@ smallD <- VisitVariables(
   TruevaluesMin=50,
   TruevaluesMax=200,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labT1gestagedays")
-smallD[,labT1gestagedays_0:=NULL]
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labfastbloodglu_0:=NULL]
 xtabs(~smallD$T2_labfastbloodglu_exists_15_17)
 
 # Lab FBS Normal
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labfastbloodglu_0:=booklabfastbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -786,30 +781,30 @@ smallD <- VisitVariables(
   TruevaluesMin=71,
   TruevaluesMax=91,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labT1gestagedays")
-smallD[,labT1gestagedays_0:=NULL]
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labfastbloodglu_0:=NULL]
 xtabs(~smallD$T2_labfastbloodglu_normal_15_17)
 
 # Lab FBS likely GDM
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labfastbloodglu_0:=booklabfastbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
   days=days,
   variableOfInterestName="labfastbloodglu_likelyGDM",
   variableOfInterestPattern="labfastbloodglu",
-  TruevaluesMin=92,
-  TruevaluesMax=125,
+  TruevaluesMin=95,
+  TruevaluesMax=126,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labT1gestagedays")
-smallD[,labT1gestagedays_0:=NULL]
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labfastbloodglu_0:=NULL]
 xtabs(~smallD$T2_labfastbloodglu_likelyGDM_24_28)
 
 
 # Lab FBS High 
-smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labfastbloodglu_0:=booklabfastbloodglu]
 smallD <- VisitVariables(
   smallD=smallD,
@@ -819,12 +814,13 @@ smallD <- VisitVariables(
   TruevaluesMin=126,
   TruevaluesMax=500,
   TruevaluesDiscrete = NULL,
-  gestagedaysVariable = "labT1gestagedays")
-smallD[,labT1gestagedays_0:=NULL]
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
 smallD[,labfastbloodglu_0:=NULL]
 xtabs(~smallD$T2_labfastbloodglu_high_24_28)
 
 
+# labogct
 
 
 # Referral variables
@@ -842,7 +838,6 @@ smallD <- VisitVariables(
   gestagedaysVariable = "manT2gestagedays")
 nrow(smallD[mantypex_1=="RefHighRisk" & manT2gestagedays_1>=15 & manT2gestagedays_1<=17])
 nrow(smallD[mantypex_1=="RefHighRisk" & mangestage_1>=0 & mangestage_1<=14])
-xtabs(~smallD[ident_dhis2_control==T]$T2_refHR_00_14)
 xtabs(~smallD[ident_dhis2_control==F]$T2_refHR_00_14)
 xtabs(~smallD$T2_refHR_35_37)
 
@@ -888,6 +883,103 @@ xtabs(~smallD$T2_manperf_18_22)
 
 
 
+#HTN
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="manSecBPMild",
+  variableOfInterestPattern="mantypex",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete =c("SecondBPMeasurement") ,
+  gestagedaysVariable = "manT2gestagedays")
+xtabs(~smallD$T2_manSecBPMild_18_22)
+
+
+
+
+############ 
+# risk vars 
+###########
+# mild/mod anemia
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="riskMildModAne",
+  variableOfInterestPattern="risktype",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete =c("MildAnemia","ModerateAnemia") ,
+  gestagedaysVariable = "riskT2gestagedays")
+xtabs(~smallD$T2_riskMildModAne_18_22)
+
+
+#sev anemia
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="riskSevAne",
+  variableOfInterestPattern="risktype",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete =c("SevereAnemia") ,
+  gestagedaysVariable = "riskT2gestagedays")
+xtabs(~smallD$T2_riskSevAne_18_22)
+
+
+#HGB not improved
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="riskAnemnotimp",
+  variableOfInterestPattern="risktype",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete =c("HGBNotImproved") ,
+  gestagedaysVariable = "riskT2gestagedays")
+xtabs(~smallD$T2_riskAnemnotimp_18_22)
+
+
+
+# GDM
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="riskGDM",
+  variableOfInterestPattern="risktype",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete =c("GDM") ,
+  gestagedaysVariable = "riskT2gestagedays")
+xtabs(~smallD$T2_riskGDM_18_22)
+
+
+# GDM
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="riskLikelyGDM",
+  variableOfInterestPattern="risktype",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete =c("LikelyGDM") ,
+  gestagedaysVariable = "riskT2gestagedays")
+xtabs(~smallD$T2_riskLikelyGDM_18_22)
+
+
+
+# RefDiabetes
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="refDiab",
+  variableOfInterestPattern="mantypex",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete ="RefDiabetes",
+  gestagedaysVariable = "manT2gestagedays")
+nrow(smallD[mantypex_1=="RefDiabetes" & mangestage_1>=0 & mangestage_1<=14])
+xtabs(~smallD$T2_refDiab_00_14)
 
 
 ###################################################################################################################
@@ -939,10 +1031,10 @@ for(i in 0:37){
   smallD[,(var_manhb):=as.logical(NA)]
   
   #control
-  smallD[ident_dhis2_control==T,(var_manhb):=get(var_temp_manhb)]
+  #smallD[ident_dhis2_control==T,(var_manhb):=get(var_temp_manhb)]
   
   #intervention
-  smallD[ident_dhis2_control==F,(var_manhb):=get(var_temp_manhb) & get(var_temp_manperf)]
+  smallD[,(var_manhb):=get(var_temp_manhb) & get(var_temp_manperf)]
   
   #delete these variables because will use them in the subsequent loops we make
   
@@ -973,12 +1065,12 @@ for(i in 0:37){
   weeks_later <- formatC(i+c(3:5), width=2, flag="0")
   
   #output variable
-  var_manhb <- sprintf("TrialOne_manhb_mildmodhbret_%s_%s", week_current, week_current)
+  var_manhb <- sprintf("T2_manhb_mildmodhbret_%s_%s", week_current, week_current)
   var_temp_manperf <- "temp_manperf"
   var_temp_manhb <- "temp_manhb"
   
   #id source
-  var_badhb <- sprintf("TrialOne_labhb_anemia_mild_mod_%s_%s", week_current, week_current)
+  var_badhb <- sprintf("T2_labhb_anemia_mild_mod_%s_%s", week_current, week_current)
   
   # no one has anything
   smallD[,(var_temp_manperf):=as.logical(NA)]
@@ -991,7 +1083,7 @@ for(i in 0:37){
   
   for(week_later in weeks_later){
     # working only on manerf check
-    var_secondcheck <- sprintf("TrialOne_labhb_exists_%s_%s", 
+    var_secondcheck <- sprintf("T2_labhb_exists_%s_%s", 
                                week_later, 
                                week_later)
     # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
@@ -1019,83 +1111,383 @@ for(i in 0:37){
   smallD[,(var_temp_manperf):=NULL]
   smallD[,(var_temp_manhb):=NULL]
 }
-xtabs(~smallD$TrialOne_manhb_mildmodhbret_32_32)
+xtabs(~smallD$T2_manhb_mildmodhbret_32_32)
 
-#mild htn
-#Urine stick AND LFT AND KFT AND ultrasound within a week 
-#refer to hospital if proteinuria
+#####################################
+# HTN #
+#####################################
 
+#ModsevGHTbpsyst
+for(i in 0:37){
+  #i=23
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(3:4), width=2, flag="0")
+  
+  #output variable
+  var_manght <- sprintf("T2_manhtn_ModSev_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_manght <- "temp_manght"
+  
+  #id source
+  var_badght <- sprintf("T2_anbpsyst_modSevHTN_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_manght):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badght)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badght)==TRUE, (var_temp_manght):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("T2_refHosp_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    # working only on second anemia check
+    var_secondcheck <- sprintf("T2_anbpsyst_present_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manght)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_manght):=TRUE]
+  }
+  #making var for sev anemia 
+  smallD[,(var_manght):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_manght):=get(var_temp_manght)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_manght):=get(var_temp_manght) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_manght):=NULL]
+}
+xtabs(~smallD$T2_manhtn_ModSev_18_18)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#### fix risk factors
-
-
-# need to make a risktype_0 variable
-smallD[,riskytype_0:=as.character(NA)]
-
-smallD[bookdate==riskdate_1,risktype_0:=risktype_1]
-
-smallD <- VisitVariables(
-  smallD=smallD,
-  days=days,
-  variableOfInterestName="risktype_",
-  variableOfInterestPattern="risktype",
-  TruevaluesMin=NULL,
-  TruevaluesMax=NULL,
-  TruevaluesDiscrete = c("GDM","LikelyGDM","MildAnemia",
-                         "SevereAnemia","MildAnemia","ModerateAnemia",
-                         "ChronicHypertension","UrineStickProtein2"),
-  gestagedaysVariable="anT2gestagedays")
-
-smallD[,anT2gestagedays_0:=NULL]
-xtabs(~smallD$T2_riskT_00_33, addNA=T)
-
-
-
-
-# get atleast one risk factor true and false
-
-# add selection criterial here
-
-
-
-
-
-######################### BP ######################### 
+################################################
+##### High Rbg
+################################################
 
 
+# High RBG, RefDIAB
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
+  
+  #output variable
+  var_mangdm <- sprintf("T2_manRBGHigh_Diab_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_mangdm <- "temp_mangdm"
+  
+  #id source
+  var_badgdm <- sprintf("T2_labbloodglu_high_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_mangdm):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badgdm)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badgdm)==TRUE, (var_temp_mangdm):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("T2_refDiab_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    smallD[get(var_temp_mangdm)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_mangdm):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_mangdm):=as.logical(NA)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_mangdm):=get(var_temp_mangdm) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_mangdm):=NULL]
+  
+}
+xtabs(~smallD$T2_manRBGHigh_Diab_24_24)
+
+
+
+
+###########################
+# FBS management for gaza
+###########################
+
+
+# High RBG, RefDIAB
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
+  
+  #output variable
+  var_mangdm <- sprintf("T2_manFBSHigh_Diab_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_mangdm <- "temp_mangdm"
+  
+  #id source
+  var_badgdm <- sprintf("T2_labfastbloodglu_high_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_mangdm):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badgdm)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badgdm)==TRUE, (var_temp_mangdm):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("T2_refDiab_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    smallD[get(var_temp_mangdm)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_mangdm):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_mangdm):=as.logical(NA)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_mangdm):=get(var_temp_mangdm) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_mangdm):=NULL]
+  
+}
+xtabs(~smallD$T2_manFBSHigh_Diab_26_26)
 
 
 
 
 
+#################################
+# management of likely diabetes #
+#################################
 
 
+
+# likely Diabetes 
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:3), width=2, flag="0")
+  
+  #output variable
+  var_mangdm <- sprintf("T2_manFBSLikelyGDM_Diab_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_mangdm <- "temp_mangdm"
+  
+  #id source
+  var_badgdm <- sprintf("T2_labfastbloodglu_likelyGDM_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_mangdm):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badgdm)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badgdm)==TRUE, (var_temp_mangdm):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("T2_labfastbloodglu_exists_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    smallD[get(var_temp_mangdm)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_mangdm):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_mangdm):=as.logical(NA)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_mangdm):=get(var_temp_mangdm) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_mangdm):=NULL]
+  
+}
+xtabs(~smallD$T2_manFBSLikelyGDM_Diab_26_26)
+
+
+###################################################################################################################
+#########################    Export data set for analysis    #########################
+##############################################################################################################
+
+varsKeep <- c(
+  "bookorgname",
+  "bookorgcode",
+  "bookorgdistricthashed",
+  "bookorgunit",
+  "agecat",
+  "agemarriagecat",
+  "agepregnancycat",
+  "incomecat",
+  "educationcat",
+  "paracat",
+  "motherismallDbooknum",
+  "uniqueid",
+  "bookevent",
+  
+  "bookgestage",
+  "bookgestagedays_cats",
+  "booklabhb",
+  "bookprimi",
+  "bookpprom",
+  "bookprom",
+  "bookeclamp",
+  "bookvagbleed",
+  "bookpallor",
+  "bookexamhead",
+  "bookexamheadabn",
+  "bookexamheart",
+  "bookexamheartabn",
+  "bookexamabd",
+  "bookexamabdabn",
+  "bookexamlimb",
+  "bookexamlimbabn",
+  "gravida",
+  "para",
+ 
+  "bookhistmed",
+  "bookhistdm",
+  "bookhistabort",
+  "bookhistperi",
+  "bookfamdm",
+  "bookhistcs",
+  "bookhistcscompl",
+  "bookparity",
+  "bookhistpuersep",
+  "bookhisteclamp",
+  "bookhistantparthemprevpreg",
+  "bookhistpph",
+  "bookhistgdm",
+  "bookhistghtn",
+  "bookhistpreecl",
+  "bookhistpreterm",
+  "bookhistaph",
+  "bookhisthtn",
+  "bookfamhtn",
+  "bookhistotherch",
+  "bookhistblood",
+  "bookhistotherchronic",
+  "bookhistbloodspec",
+  "bookheight",
+  "bookbpsyst",
+  "bookbpdiast",
+  "bookweight",
+
+  "bookfetalmove",
+  "bookexamsfh",
+  "bookexamedema",
+  "bookrefchronic",
+  "bookmedpres",
+  "bookhighrisk",
+  "bookseenby",
+  "ident_dhis2_booking",
+  "TrialArm",
+  "str_TRIAL_2_Cluster",
+  "str_TRIAL_2_ClusSize",
+  "ident_hr_clinic",
+  
+  names(smallD)[stringr::str_detect(names(smallD),"^anevent_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^anprogstage_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^anorgcode_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^anorgunit_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^anbpsyst_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^anbpdiast_[0-9]*")],
+ 
+  names(smallD)[stringr::str_detect(names(smallD),"^angestage_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^anT2gestagedays_[0-9]*")],
+ 
+  names(smallD)[stringr::str_detect(names(smallD),"^labevent_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labprogstage_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^laborgcode_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^laborgunit_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labrh_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labict_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labhb_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labhct_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labbloodglu_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labfastbloodglu_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^laburglu_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^laburpro_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labother1_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labotherres1_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labother2_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labotherres2_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labother3_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labotherres3_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labgestage_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labT1gestagedays_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labplace_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labplacespec_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labanemresp_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labogct_[0-9]*")],
+  "ident_dhis2_lab",
+ 
+  names(smallD)[stringr::str_detect(names(smallD),"^riskevent_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^riskprogstage_1[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^riskgestage_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^riskorgcode_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^riskorgunit_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^risktype_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^riskdesx_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^riskdesy_[0-9]*")],
+  "ident_dhis2_risk",
+  names(smallD)[stringr::str_detect(names(smallD),"^manevent_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^manprogstage_1[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^manorgcode_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^manorgunit_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^mangestage_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^manT1gestagedays_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^mandetail_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^mantypex_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^manperf_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^mantypey_[0-9]*")],
+  
+  names(smallD)[stringr::str_detect(names(smallD),"^T2_")])
+
+
+T2 <- smallD[!is.na(firstvisitinT2) & !is.na(TrialArm),vars,with=F]
+
+
+saveRDS(T2,file.path(FOLDER_DATA_CLEAN,"T2_eReg_newvars.rds"))
 
 
 # save smallD to be used for other outcomes

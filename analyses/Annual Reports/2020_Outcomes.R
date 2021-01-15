@@ -11,7 +11,7 @@ tab <- smallD[ident_dhis2_booking==1,
        .(meanage=mean(age, na.rm=T),
          meanagefirstpreg=mean(agepregnancy, na.rm=TRUE),
          meanagemarriage=mean(agemarriage, na.rm=T),
-         meanavgmonthlyincome= mean(income, na.rm=T),
+         meanavgmonthlyincome= mean(avgincome, na.rm=T),
          meaneducation= mean(education, na.rm=T),
          meanbookweight= mean(bookweight, na.rm=T),
          meanbookheight=mean(bookheight, na.rm=T),
@@ -41,14 +41,13 @@ tab <- smallD[ident_dhis2_booking==1,
          ProportionBookprimi=mean(bookprimi, na.rm=T),
          ProportionBookFamdm=mean(bookfamdm, na.rm=T),
          ProportionBookFamhtn=mean(bookfamhtn, na.rm=T),
-         ProportionBookFamhtn=mean(bookhistabort, na.rm=T),
+         ProportionBookhistabortion=mean(bookhistabort, na.rm=T),
          ProportionBookFamhtn=mean(bookfamhtn, na.rm=T),
-         ProportionBookFamhtn=mean(bookhistaph, na.rm=T),
-         ProportionBookFamhtn=mean(bookhistclex, na.rm=T),
-         ProportionBookFamhtn=mean(bookhistgdm, na.rm=T),
-         ProportionBookFamhtn=mean(bookhistghtn, na.rm=T),
-         ProportionBookFamhtn=mean(bookhistpreterm, na.rm=T),
-         ProportionBookFamhtn=mean(bookfamhtn, na.rm=T)), 
+         ProportionBookaph=mean(bookhistaph, na.rm=T),
+         ProportionBookhistclex=mean(bookhistclex, na.rm=T),
+         ProportionBookhistgdm=mean(bookhistgdm, na.rm=T),
+         ProportionBookhistghtn=mean(bookhistghtn, na.rm=T),
+         ProportionBookhistpreterm=mean(bookhistpreterm, na.rm=T)), 
        keyby=.(bookyear)
        
        ]
@@ -124,8 +123,26 @@ long <- histtab[,.(N=.N),
 
 
 demoage <- smallD[ident_dhis2_booking==T,.(
-                                    Bookprimi=sum(bookprimi==1, na.rm=T),
-                                    BookPrimiNo=sum(bookprimi==0, na.rm=T)),
+  Bookprimi=sum(bookprimi=="1", na.rm=T),
+  BookPrimiNo=sum(bookprimi=="0", na.rm=T),
+  BookPrimiNA=sum(is.na(bookprimi))),
+  keyby=.(bookyear)]
+
+
+openxlsx::write.xlsx(demoage,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "BookPrimi.xlsx"))
+
+
+
+
+demoage <- smallD[ident_dhis2_booking==T,.(
+                                    Bookprimi=sum(bookprimi=="1", na.rm=T),
+                                    BookPrimiNo=sum(bookprimi=="0", na.rm=T),
+                                    BookPrimiNA=sum(is.na(bookprimi))),
                   keyby=.(bookyear,agecat)]
 
 
@@ -137,9 +154,13 @@ openxlsx::write.xlsx(demoage,
                        "BookPrimivAgecat.xlsx"))
 
 
+
+
+
 demoagemarriage <- smallD[ident_dhis2_booking==T,.(
                       Bookprimi=sum(bookprimi==1, na.rm=T),
-                      BookPrimiNo=sum(bookprimi==0, na.rm=T)),
+                      BookPrimiNo=sum(bookprimi==0, na.rm=T),
+                      BookPrimiNA=sum(is.na(bookprimi))),
                keyby=.(bookyear,agemarriagecat)]
 
 openxlsx::write.xlsx(demoagemarriage,
@@ -170,7 +191,9 @@ openxlsx::write.xlsx(demoagepreg,
  
 
 bookings <- smallD[,.(Booked=sum(ident_dhis2_booking==T, na.rm=T),
-                      BookedPPC=sum(ident_dhis2_ppc==T, na.rm=T)),
+                      BookedPPC=sum(ident_dhis2_ppc==T, na.rm=T),
+                      BookePPCandANC=sum(ident_dhis2_PPC==T &
+                                         ident_dhis2_booking==1, na.rm=T)),
                    keyby=.(bookyear,bookorgdistrict)]
 
 openxlsx::write.xlsx(bookings,
@@ -178,10 +201,10 @@ openxlsx::write.xlsx(bookings,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookPrimivAgepregcat.xlsx"))
+                       "BookORdisvsYear.xlsx"))
 
 bookgA <- smallD[ident_dhis2_booking==T,.(N=.N),
-                                        keyby=.(bookgestagedays_cats)]
+                                        keyby=.(bookyear,bookgestagedays_cats)]
 
 openxlsx::write.xlsx(bookgA,
                      file.path(
@@ -203,10 +226,12 @@ bptab <- smallD[ident_dhis2_booking==T,.(NormalBP=sum((bookbpsyst>0 & bookbpsyst
                                          ModHTN=sum((bookbpsyst>=150 & bookbpsyst<=159) |
                                                       (bookbpdiast>100 & bookbpdiast<=110), na.rm=T),
                                          SevHTN=sum(bookbpsyst>=150 |
-                                                      bookbpdiast>110, na.rm=T)),
+                                                      bookbpdiast>110, na.rm=T),
+                                         MissingBookbp=sum(is.na(bookbpsyst)|
+                                                             is.na(bookbpdiast))),
                                       keyby=.(bookyear,bookgestagedays_cats)]
 
-xtabs(~bookbpsystcat+bookgestagedays_cats, data=smallD)
+xtabs(~bookbpsystcat+bookgestagedays_cats,addNA=T,data=smallD)
 
 
 
@@ -216,6 +241,30 @@ openxlsx::write.xlsx(bptab,
                        "annual reports",
                        "2020",
                        "BookBPbyBookgAcats.xlsx"))
+
+
+
+
+#################### 
+# bookbp categories
+####################  
+
+bookbpsystdiast <- smallD[ident_dhis2_booking==1,.(N=.N),
+                          keyby=.(bookyear,
+                                  bookgestagedays_cats,
+                                  bookbpsystcat,
+                                  bookbpdiastcat)]
+
+xtabs(~bookbpsystcat+bookgestagedays_cats,addNA=T,data=smallD)
+
+
+
+openxlsx::write.xlsx(bookbpsystdiast,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "BookBPCatsbygAcats.xlsx"))
 
 
 
@@ -397,7 +446,7 @@ robsongrps <- smallD[!is.na(cpoevent_1) &
                          group7=sum(robsgp_7, na.rm=T),
                          group8=sum(robsgp_8, na.rm=T),
                          group9=sum(robsgp_9, na.rm=T),
-                         group10=sum(robsp_10,na.rm=T)),
+                         group10=sum(robsgp_10, na.rm=T)),
                      
                      keyby=.(bookyear)]
 
@@ -464,7 +513,7 @@ sum(smallD[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
 
 #### Total visits #### 
 
-tab <- smallD[bookyear>=2017 & ident_dhis2_control==F,.(
+tab <- smallD[bookyear>=2019 & ident_dhis2_control==F,.(
   TotalRegisteredWomen=sum(ident_dhis2_booking==T, na.rm=T),
   TotalBookingandAncVisits=sum(anevent_x, na.rm=T),
   TotalPPCRegistrations=sum(ident_dhis2_ppc=T, na.rm=T),
@@ -1401,7 +1450,7 @@ prelimGDM <- smallD[,.(N=.N,
                        screenbtwnFalse=sum(GDMscreeningontime_4==F, na.rm=T),
                        Opportun_4=sum(Opportunity_GDM_screening_4==T, na.rm=T),
                        Succ_4=sum(GDMscreeningontime_4, na.rm=T)),
-                    keyby=.(ident_dhis2_control)]
+                    keyby=.(bookyear)]
 
 
 
@@ -1413,7 +1462,102 @@ openxlsx::write.xlsx(prelimGDM,file.path(FOLDER_DATA_RESULTS,
 
 
 
+
 # ultrasound
+
+smallD[,useventsx:=0]
+
+vars <- names(d)[stringr::str_detect(names(d),"^usevent_")]
+
+for (i in vars){
+  
+  smallD[!is.na(get(i)),useventsx:=useventsx+1]
+}
+xtabs(~smallD$useventsx, addNA=T)
+
+Usnums <- smallD[ident_dhis2_booking==T,
+                 .(N=.N,
+                   mean=mean(useventsx, na.rm=T),
+                   min=min(useventsx),
+                   max=max(useventsx)),
+                 keyby=.(bookyear)]
+
+openxlsx::write.xlsx(Usnums,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               "usnums.xlsx"))
+
+
+
+
+UsnumsbookgA <- smallD[ident_dhis2_booking==T,
+                 .(N=.N,
+                   mean=mean(useventsx, na.rm=T),
+                   min=min(useventsx),
+                   max=max(useventsx)),
+                 keyby=.(bookyear, bookgestagedays_cats)]
+
+
+openxlsx::write.xlsx(UsnumsbookgA,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               "usnumsbyGA.xlsx"))
+
+
+
+
+# ultrasounds on time
+
+usontime <-smallD[ident_dhis2_booking==1,.(N=.N,
+                                           FirstTrimesterUS=sum(TrialOne_us_exists_00_14==T,na.rm=T),
+                                           US15to17weejsUS=sum(TrialOne_us_exists_15_17==T, na.rm=T),
+                                           SeconTrimesterUS=sum(TrialOne_us_exists_18_22==T, na.rm=T),
+                                           US23To34=sum(TrialOne_us_exists_23_23==T|
+                                                          TrialOne_us_exists_24_28==T|
+                                                          TrialOne_us_exists_29_30==T|
+                                                          TrialOne_us_exists_31_33==T |
+                                                          TrialOne_us_exists_34_34==T, na.rm=T),
+                                           ThirdTrimesterUS=sum(TrialOne_us_exists_35_37==T, na.rm=T)),
+                  keyby=.(bookyear)]
+
+
+
+openxlsx::write.xlsx(usontime,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               "usOntime.xlsx"))
+
+
+
+
+
+
+# ultrasounds on time by bookgA
+
+usontimegAcats <-smallD[ident_dhis2_booking==1,.(N=.N,
+                                           FirstTrimesterUS=sum(TrialOne_us_exists_00_14==T,na.rm=T),
+                                           US15to17weejsUS=sum(TrialOne_us_exists_15_17==T, na.rm=T),
+                                           SeconTrimesterUS=sum(TrialOne_us_exists_18_22==T, na.rm=T),
+                                           US23To34=sum(TrialOne_us_exists_23_23==T|
+                                                          TrialOne_us_exists_24_28==T|
+                                                          TrialOne_us_exists_29_30==T|
+                                                          TrialOne_us_exists_31_33==T |
+                                                          TrialOne_us_exists_34_34==T, na.rm=T),
+                                           ThirdTrimesterUS=sum(TrialOne_us_exists_35_37==T, na.rm=T)),
+                  keyby=.(bookyear, bookgestagedays_cats)]
+
+
+
+openxlsx::write.xlsx(usontimegAcats,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               "usOntimeGACats.xlsx"))
+
+
 
 #smallD[,ussc_1:=sum(us exists 00-14)]
 # 1st 2nd and 3rd trimester USs
@@ -1447,4 +1591,4 @@ ppctab <- ppc[]
 
 ## first and second visits
 ## days after delivery
-#
+#Erase Everything and go home
