@@ -855,6 +855,24 @@ nrow(smallD[mantypex_1=="RefHosp" & mangestage_1>=0 & mangestage_1<=14])
 xtabs(~smallD[ident_dhis2_control==T]$T2_refHosp_00_14)
 xtabs(~smallD[ident_dhis2_control==F]$mantypex_1, addNA=T)
 
+
+
+# Ref to Specialist
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="RefSpec",
+  variableOfInterestPattern="mantypex",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete ="RefSpec",
+  gestagedaysVariable = "manT2gestagedays")
+nrow(smallD[mantypex_1=="RefSpec" & mangestage_1>=0 & mangestage_1<=14])
+xtabs(~smallD[ident_dhis2_control==T]$T2_RefSpec_00_14)
+xtabs(~smallD[ident_dhis2_control==F]$mantypex_1, addNA=T)
+
+
+
 # RefDiabetes
 smallD <- VisitVariables(
   smallD=smallD,

@@ -1,56 +1,51 @@
 # Demographics and risks at Booking
 
+ar <- readRDS(file.path(FOLDER_DATA_CLEAN,"annual reports","annualreportdata.RDS"))
 ########## 
 # demo
 ########## 
 
+ar[bookgestage>40, bookgestage:=as.integer(NA)]
+
+ar[is.infinite(bookbmi), bookbmi:=as.integer(NA)]
+
 ##making a table for data we want to analyze from the analysis data set
 ##for things like parity, make an ugly table because its not a box plot
 ##or histogram, so better to make a ugly table.
-tab <- smallD[ident_dhis2_booking==1,
-       .(meanage=mean(age, na.rm=T),
-         meanagefirstpreg=mean(agepregnancy, na.rm=TRUE),
-         meanagemarriage=mean(agemarriage, na.rm=T),
-         meanavgmonthlyincome= mean(avgincome, na.rm=T),
-         meaneducation= mean(education, na.rm=T),
-         meanbookweight= mean(bookweight, na.rm=T),
-         meanbookheight=mean(bookheight, na.rm=T),
-         meanBMI=mean(bookbmi, na.rm=T),
-         meabooksystbp= mean(bookbpsyst, na.rm=T),
-         meanbookdiastbp=mean(bookbpdiast, na.rm=T),
-         meanbookhb= mean(labhb_1, na.rm=T),
-         meanincome=mean(income, na.rm=T),
-         ProportionBookhbnotmissing=sum(!is.na(labhb_1)),
-         ProportionofWeightsis0= mean(bookweight==0, na.rm=T),
-         ProportionofWeightsOver100kg= mean(bookweight>100, na.rm=T),
-         ProportionofParity= mean(bookparity, na.rm=T),
-         MIssingConpara=sum(is.na(conpara)),
-         meanbookgestage= mean(bookgestage, na.rm=T),
-         ProportionofPrimi=mean(bookprimi, na.rm=T),
-         ProportionBookparity=mean(bookparity, na.rm=T),
-         meanbookgestage=mean(bookgestage, na.rm=T),
-         ProportionBookparity=mean(bookparity, na.rm=T),
-         ProportionBookbookhistperi=mean(bookhistperi, na.rm=T),
-         ProportionBookbookhistutesur=mean(bookhistutesur, na.rm=T),
-         ProportionBookbookhistcs=mean(bookhistcs, na.rm=T),
-         ProportionBookbookhistcscompl=mean(bookhistcscompl, na.rm=T),
-         ProportionBookbookhistpreterm=mean(bookhistpreterm, na.rm=T),
-         ProportionBookbookhistute=mean(bookhistute, na.rm=T),
-         ProportionBookbookhistabort=mean(bookhistabort, na.rm=T),
-         ProportionBookparity=mean(bookparity, na.rm=T),
-         ProportionBookprimi=mean(bookprimi, na.rm=T),
-         ProportionBookFamdm=mean(bookfamdm, na.rm=T),
-         ProportionBookFamhtn=mean(bookfamhtn, na.rm=T),
-         ProportionBookhistabortion=mean(bookhistabort, na.rm=T),
-         ProportionBookFamhtn=mean(bookfamhtn, na.rm=T),
-         ProportionBookaph=mean(bookhistaph, na.rm=T),
-         ProportionBookhistclex=mean(bookhistclex, na.rm=T),
-         ProportionBookhistgdm=mean(bookhistgdm, na.rm=T),
-         ProportionBookhistghtn=mean(bookhistghtn, na.rm=T),
-         ProportionBookhistpreterm=mean(bookhistpreterm, na.rm=T)), 
-       keyby=.(bookyear)
-       
-       ]
+tab <- ar[ident_dhis2_booking==1,
+       .("Mean Age"=mean(age, na.rm=T),
+         "Mean Age First Pregnancy"=mean(agepregnancy, na.rm=TRUE),
+         "Mean Age at Marriage"=mean(agemarriage, na.rm=T),
+         "Mean Average Monthly Income"= mean(avgincome, na.rm=T),
+        "Mean Education"= mean(education, na.rm=T),
+        "Mean Book Weight"= mean(bookweight, na.rm=T),
+        "Mean Book Height"=mean(bookheight, na.rm=T),
+        "Mean BMI"=mean(bookbmi, na.rm=T),
+        "Mean Systolic BP at booking"= mean(bookbpsyst, na.rm=T),
+        "Mean Diastolic BP at Booking"=mean(bookbpdiast, na.rm=T),
+        "Mean Hb at Booking"= mean(labhb_1, na.rm=T),
+        "Mean Income"=mean(income, na.rm=T),
+        "Proportion NOt missing Book HB"=sum(!is.na(labhb_1)),
+        "Proprtion Weights 0"= mean(bookweight==0, na.rm=T),
+        "Proportion of weights over 100 KG"= mean(bookweight>100, na.rm=T),
+        "Proprtion of Parity"= mean(bookparity, na.rm=T),
+        "Mean Bookgestage"= mean(bookgestage, na.rm=T),
+        "Proprtion Primi"=mean(bookprimi, na.rm=T),
+        "Book History of Perinatal Death"=mean(bookhistperi, na.rm=T),
+        "Proportion Uterine Surgery at Booking"=mean(bookhistutesur, na.rm=T),
+        "Proportion History of C-section"=mean(bookhistcs, na.rm=T),
+        "Proportion History of CS complications"=mean(bookhistcscompl, na.rm=T),
+        "Proprtion History of Preterm Birth"=mean(bookhistpreterm, na.rm=T),
+        "Proprtion History of Ute"=mean(bookhistute, na.rm=T),
+        "Proprtion History of Abortion"=mean(bookhistabort, na.rm=T),
+        "Proprtion History of DM in Family" =mean(bookfamdm, na.rm=T),
+        "Proprtion History of HTN in Family"=mean(bookfamhtn, na.rm=T),
+        "Proprtion History of APH"=mean(bookhistaph, na.rm=T),
+        "Proprtion History of Clexane Use"=mean(bookhistclex, na.rm=T),
+        "Proprtion History of GDM"=mean(bookhistgdm, na.rm=T),
+        "Proprtion History of GHTN"=mean(bookhistghtn, na.rm=T),
+       "Proprtion History of Preterm Birth"=mean(bookhistpreterm, na.rm=T)), 
+       keyby=.(bookyear)]
 
 openxlsx::write.xlsx(tab,
                      file.path(
@@ -59,7 +54,39 @@ openxlsx::write.xlsx(tab,
                        "2020",
                        "BackgroundAndHistory.xlsx"))
 
+# bookbmicat
 
+tab <- ar[ident_dhis2_booking==T,.(N=.N,
+             "2019"=sum(bookyear==2019, na.rm=T),
+             "2020"=sum(bookyear==2020, na.rm=T)),
+          keyby=.(bookbmicat)]
+
+
+
+openxlsx::write.xlsx(tab,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "BookBmiCats.xlsx"))
+
+
+
+# marriage cat
+
+tab <- ar[ident_dhis2_booking==T,.(N=.N,
+                                   "2019"=sum(bookyear==2019, na.rm=T),
+                                   "2020"=sum(bookyear==2020, na.rm=T)),
+          keyby=.(agemarriagecat)]
+
+
+
+openxlsx::write.xlsx(tab,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "ageatmarriagecat.xlsx"))
 
 
 
@@ -91,7 +118,7 @@ vars <- c("bookyear",
 
 
 #Making ugly tables for parity
-uglyTable <- smallD[ident_dhis2_booking==T,
+uglyTable <- ar[ident_dhis2_booking==T,
                     .(N=.N), 
                     keyby=.(bookyear,
                     bookparity,
@@ -122,7 +149,7 @@ long <- histtab[,.(N=.N),
 
 
 
-demoage <- smallD[ident_dhis2_booking==T,.(
+demoage <- ar[ident_dhis2_booking==T,.(
   Bookprimi=sum(bookprimi=="1", na.rm=T),
   BookPrimiNo=sum(bookprimi=="0", na.rm=T),
   BookPrimiNA=sum(is.na(bookprimi))),
@@ -139,7 +166,7 @@ openxlsx::write.xlsx(demoage,
 
 
 
-demoage <- smallD[ident_dhis2_booking==T,.(
+demoage <- ar[ident_dhis2_booking==T,.(
                                     Bookprimi=sum(bookprimi=="1", na.rm=T),
                                     BookPrimiNo=sum(bookprimi=="0", na.rm=T),
                                     BookPrimiNA=sum(is.na(bookprimi))),
@@ -157,7 +184,7 @@ openxlsx::write.xlsx(demoage,
 
 
 
-demoagemarriage <- smallD[ident_dhis2_booking==T,.(
+demoagemarriage <- ar[ident_dhis2_booking==T,.(
                       Bookprimi=sum(bookprimi==1, na.rm=T),
                       BookPrimiNo=sum(bookprimi==0, na.rm=T),
                       BookPrimiNA=sum(is.na(bookprimi))),
@@ -171,7 +198,7 @@ openxlsx::write.xlsx(demoagemarriage,
                        "BookPrimivAgemarriagecat.xlsx"))
 
 
-demoagepreg <- smallD[ident_dhis2_booking==T,.(
+demoagepreg <- ar[ident_dhis2_booking==T,.(
   Bookprimi=sum(bookprimi==1, na.rm=T),
   BookPrimiNo=sum(bookprimi==0, na.rm=T)),
   keyby=.(bookyear,agepregnancycat)]
@@ -190,7 +217,7 @@ openxlsx::write.xlsx(demoagepreg,
 ########## 
  
 
-bookings <- smallD[,.(Booked=sum(ident_dhis2_booking==T, na.rm=T),
+bookings <- ar[,.(Booked=sum(ident_dhis2_booking==T, na.rm=T),
                       BookedPPC=sum(ident_dhis2_ppc==T, na.rm=T),
                       BookePPCandANC=sum(ident_dhis2_PPC==T &
                                          ident_dhis2_booking==1, na.rm=T)),
@@ -203,7 +230,7 @@ openxlsx::write.xlsx(bookings,
                        "2020",
                        "BookORdisvsYear.xlsx"))
 
-bookgA <- smallD[ident_dhis2_booking==T,.(N=.N),
+bookgA <- ar[ident_dhis2_booking==T,.(N=.N),
                                         keyby=.(bookyear,bookgestagedays_cats)]
 
 openxlsx::write.xlsx(bookgA,
@@ -219,7 +246,7 @@ openxlsx::write.xlsx(bookgA,
 ########## 
 # bookbp and bookGA
 
-bptab <- smallD[ident_dhis2_booking==T,.(NormalBP=sum((bookbpsyst>0 & bookbpsyst<140) &
+bptab <- ar[ident_dhis2_booking==T,.(NormalBP=sum((bookbpsyst>0 & bookbpsyst<140) &
                                                         (bookbpdiast>0 & bookbpdiast<90), na.rm=T),
                                          MildHTN=sum((bookbpsyst>=140 & bookbpsyst<=149) |
                                            (bookbpdiast>90 & bookbpdiast<=100), na.rm=T),
@@ -231,7 +258,7 @@ bptab <- smallD[ident_dhis2_booking==T,.(NormalBP=sum((bookbpsyst>0 & bookbpsyst
                                                              is.na(bookbpdiast))),
                                       keyby=.(bookyear,bookgestagedays_cats)]
 
-xtabs(~bookbpsystcat+bookgestagedays_cats,addNA=T,data=smallD)
+xtabs(~bookbpsystcat+bookgestagedays_cats,addNA=T,data=ar)
 
 
 
@@ -249,13 +276,13 @@ openxlsx::write.xlsx(bptab,
 # bookbp categories
 ####################  
 
-bookbpsystdiast <- smallD[ident_dhis2_booking==1,.(N=.N),
+bookbpsystdiast <- ar[ident_dhis2_booking==1,.(N=.N),
                           keyby=.(bookyear,
                                   bookgestagedays_cats,
                                   bookbpsystcat,
                                   bookbpdiastcat)]
 
-xtabs(~bookbpsystcat+bookgestagedays_cats,addNA=T,data=smallD)
+xtabs(~bookbpsystcat+bookgestagedays_cats,addNA=T,data=ar)
 
 
 
@@ -274,7 +301,7 @@ openxlsx::write.xlsx(bookbpsystdiast,
 ########## 
 # bookus
 
-screenings <- smallD[ident_dhis2_booking==1,.(N=.N),
+screenings <- ar[ident_dhis2_booking==1,.(N=.N),
                                       keyby=.(bookyear,
                                       bookgestagedays_cats,
                                       bookexamfh,
@@ -293,12 +320,12 @@ openxlsx::write.xlsx(screenings,
 #ppcbw lga and sga
 
 #gA from ppcdeliv date or cpo gA, check them out
-smallD[,gestageatbirth:=difftime(cpodate_1,
+ar[,gestageatbirth:=difftime(cpodate_1,
                                  USorLMPdate,
                                  units="days"
                                  )]
 
-xtabs(~smallD$gestageatbirth, addNA=T)
+xtabs(~ar$gestageatbirth, addNA=T)
 
 
 
@@ -307,25 +334,25 @@ xtabs(~smallD$gestageatbirth, addNA=T)
 ############### 
  
 # uspres at 36 weeks 
-smallD[,hasan36plusweeks:=FALSE]
-#smallD[,hasanexampalp36:= FALSE]
-vars <- stringr::str_subset(names(smallD),"^angestage_")
+ar[,hasan36plusweeks:=FALSE]
+#ar[,hasanexampalp36:= FALSE]
+vars <- stringr::str_subset(names(ar),"^angestage_")
 for (i in vars){
   print(i)
-  smallD[get(i)>=36 & get(i)<=40, hasan36plusweeks:=TRUE]
+  ar[get(i)>=36 & get(i)<=40, hasan36plusweeks:=TRUE]
   
 }
 #fetal presentation at term
-smallD[,presatterm:=as.character(NA)]
+ar[,presatterm:=as.character(NA)]
 
-vars <- stringr::str_subset(names(smallD),"^uspres_")
+vars <- stringr::str_subset(names(ar),"^uspres_")
 
 
 for (var_pres in vars){
   
   vargestage <-stringr::str_replace(var_pres,"uspres", "usgestage")
   
-  smallD[hasan36plusweeks==TRUE &
+  ar[hasan36plusweeks==TRUE &
            get(vargestage)>=36 &
            get(vargestage)<=40 &
            !is.na(get(var_pres)) &
@@ -333,122 +360,132 @@ for (var_pres in vars){
          presatterm:=get(var_pres)]
 }
 
-xtabs(~smallD$presatterm, addNA=T)
+xtabs(~ar$presatterm, addNA=T)
 
 ############
 # multifetus
 ############
 
 # multifetus: cpo num (up to 3, the rest are empty) or us
-smallD[,multifet:=as.logical(NA)]
-vars <- names(smallD)[stringr::str_detect(names(smallD),"^usnumberfetus_")]
+ar[,multifet:=as.logical(NA)]
+vars <- names(ar)[stringr::str_detect(names(ar),"^usnumberfetus_")]
 
 for(i in vars){
   
-  smallD[get(i)>1, multifet:=TRUE]
-  smallD[get(i)<=1, multifet:=FALSE]
+  ar[get(i)>1, multifet:=TRUE]
+  ar[get(i)<=1, multifet:=FALSE]
   
 }
 
-xtabs(~smallD[ident_dhis2_booking==1]$multifet, addNA=T)
+xtabs(~ar[ident_dhis2_booking==1]$multifet, addNA=T)
 
 # gA validate self reported with those that come from ANC
-vars <- names(smallD)[stringr::str_detect(names(smallD),"^cpo")]
+vars <- names(ar)[stringr::str_detect(names(ar),"^cpo")]
 
 # robson classifications
 ## fix the variables
 #primi, single cephalic preg,at term (37 or more) & spont deliv
-smallD[bookprimi==1 &
+ar[bookprimi==1 &
          presatterm=="Cephalic" & 
          gestageatbirth>=259 &
          cpomodedelivery_1=="Spontaneous vaginal" &
          multifet==F,robsgp_1:=TRUE]
-xtabs(~smallD$robsgp_1, addNA=T)
+xtabs(~ar$robsgp_1, addNA=T)
 
 #primi, single cephalic preg,at term (37 or more) & deliv==csec or induced
-smallD[bookprimi==1 &
+ar[bookprimi==1 &
          presatterm=="Cephalic" & 
          gestageatbirth>=259 &
          cpomodedelivery_1 %in% c("Caesarian section") &
          multifet==F,robsgp_2:=TRUE]
 
-xtabs(~smallD$robsgp_2, addNA=T)
+xtabs(~ar$robsgp_2, addNA=T)
 
 
 #multiparous, single cephalic preg,at term (37 or more) & deliv= NVSD & no prev ut scar
-smallD[bookprimi==0 &
+ar[bookprimi==0 &
          presatterm=="Cephalic" & 
          gestageatbirth>=259 &
          cpomodedelivery_1=="Spontaneous vaginal" &
          (bookhistutesur==0 & bookhistcs==0) &
          multifet==F,robsgp_3:=TRUE]
-xtabs(~smallD$robsgp_3, addNA=T)
+xtabs(~ar$robsgp_3, addNA=T)
 
 #multiparous, single cephalic preg,at term (37 or more) & deliv= induced or cs & no prev ut scar
-smallD[bookprimi==0 &
+ar[bookprimi==0 &
          presatterm=="Cephalic" & 
          gestageatbirth>=259 &
          cpomodedelivery_1 %in% c("Caesarian section") &
          (bookhistutesur==0 |bookhistcs==0) &
          multifet==F,robsgp_4:=TRUE]
-xtabs(~smallD$robsgp_4, addNA=T)
+xtabs(~ar$robsgp_4, addNA=T)
 
 
 #multiparous,at term (37 or more) & deliv= induced or cs & no prev ut scar
-smallD[bookprimi==0 &
+ar[bookprimi==0 &
          presatterm=="Cephalic" & 
          gestageatbirth>=259 &
          cpomodedelivery_1 %in% c("Caesarian section","induced")&
         (bookhistutesur==1 | bookhistcs==1),robsgp_5:=TRUE]
-xtabs(~smallD$robsgp_5, addNA=T)
+xtabs(~ar$robsgp_5, addNA=T)
 
 #nulliparous,single preg, breech
-smallD[bookprimi==1 &
+ar[bookprimi==1 &
          presatterm %in% c("Breech","Trasverse") &
          multifet==F,robsgp_6:=TRUE]
-xtabs(~smallD$robsgp_6, addNA=T)
+xtabs(~ar$robsgp_6, addNA=T)
 
 #nulliparous,single preg, breech
-smallD[bookprimi==0 & 
+ar[bookprimi==0 & 
          presatterm %in% c("Breech","Trasverse") &
          (bookhistutesur==1 | bookhistcs==1) &
          multifet==F,robsgp_7:=TRUE]
-xtabs(~smallD$robsgp_7, addNA=T)
+xtabs(~ar$robsgp_7, addNA=T)
 
 
 # all women with multiple preg and uterine scars
-smallD[(bookhistutesur==1 | bookhistcs==1) &
+ar[(bookhistutesur==1 | bookhistcs==1) &
          multifet==T,robsgp_8:=TRUE]
-xtabs(~smallD$robsgp_8, addNA=T)
+xtabs(~ar$robsgp_8, addNA=T)
 
 # all women with single preg and uterine scar
-smallD[(bookhistutesur==1 | bookhistcs==1) &
+ar[(bookhistutesur==1 | bookhistcs==1) &
          multifet==F,robsgp_9:=TRUE]
-xtabs(~smallD$robsgp_9, addNA=T)
+xtabs(~ar$robsgp_9, addNA=T)
 
 # all women with single cephalic preg and less than 37 week 
 
-smallD[(gestageatbirth<259 & gestageatbirth>168) &
+ar[(gestageatbirth<259 & gestageatbirth>168) &
          presatterm=="Cephalic" & 
          multifet==F,robsgp_10:=TRUE]
-xtabs(~smallD$robsgp_10, addNA=T)
+xtabs(~ar$robsgp_10, addNA=T)
 
 
-robsongrps <- smallD[!is.na(cpoevent_1) & 
-                       ident_dhis2_booking==1,.(
+robsongrps <- ar[!is.na(cpoevent_1) ,.(
                          Denom=.N,
                          group1=sum(robsgp_1, na.rm=T),
+                         group1F=sum(robsgp_1==FALSE, na.rm=T),
                          group2=sum(robsgp_2, na.rm=T),
+                         group2F=sum(robsgp_2==F, na.rm=T),
                          group3=sum(robsgp_3, na.rm=T),
+                         group3F=sum(robsgp_3==F, na.rm=T),
                          group4=sum(robsgp_4, na.rm=T),
+                         group4F=sum(robsgp_4==F, na.rm=T),
                          group5=sum(robsgp_5, na.rm=T),
+                         group5F=sum(robsgp_5==F, na.rm=T),
                          group6=sum(robsgp_6, na.rm=T),
+                         group6F=sum(robsgp_6==F, na.rm=T),
                          group7=sum(robsgp_7, na.rm=T),
+                         group7F=sum(robsgp_7==F, na.rm=T),
                          group8=sum(robsgp_8, na.rm=T),
+                         group8F=sum(robsgp_8==F, na.rm=T),
                          group9=sum(robsgp_9, na.rm=T),
-                         group10=sum(robsgp_10, na.rm=T)),
+                         group9F=sum(robsgp_9==F, na.rm=T),
+                         group10=sum(robsgp_10, na.rm=T),
+                         group10=sum(robsgp_10==F, na.rm=T)
+),
                      
-                     keyby=.(bookyear)]
+                     keyby=.(bookyear,ident_dhis2_booking)]
 
 
 
@@ -469,51 +506,51 @@ openxlsx::write.xlsx(robsongrps,
 
 # Number of ANC, PPC, NBC per district per month
 
-smallD[,anevent_0:=bookevent]
-vars <- names(smallD)[stringr::str_detect(names(smallD),"^anevent_[0-9]+")]
-smallD[,anevent_x:=0]
+ar[,anevent_0:=bookevent]
+vars <- names(ar)[stringr::str_detect(names(ar),"^anevent_[0-9]+")]
+ar[,anevent_x:=0]
 
 print(vars)
 
 for(i in vars){
-  smallD[!is.na(get(i)), anevent_x:=anevent_x + 1]
+  ar[!is.na(get(i)), anevent_x:=anevent_x + 1]
 }
 
-sum(smallD[ident_dhis2_control==F]$anevent_x,na.rm=T)
+sum(ar[ident_dhis2_control==F]$anevent_x,na.rm=T)
 
 
 # total ppc events per woman
-vars <- names(smallD)[stringr::str_detect(names(smallD),"^ppcevent_[0-9]+")]
-smallD[,ppcevent_x:=0]
+vars <- names(ar)[stringr::str_detect(names(ar),"^ppcevent_[0-9]+")]
+ar[,ppcevent_x:=0]
 
 print(vars)
 
 for(i in vars){
-  smallD[!is.na(get(i)), ppcevent_x:=ppcevent_x + 1]
+  ar[!is.na(get(i)), ppcevent_x:=ppcevent_x + 1]
 }
 
-sum(smallD[ident_dhis2_control==F]$ppcevent_x,na.rm=T)
+sum(ar[ident_dhis2_control==F]$ppcevent_x,na.rm=T)
 
 
 # total nbc events per woman
 #making variable for total nbc visits
-vars <- names(smallD)[stringr::str_detect(names(smallD),"^nbcevent_[0-9]+")]
-smallD[,nbcevent_x:=0]
+vars <- names(ar)[stringr::str_detect(names(ar),"^nbcevent_[0-9]+")]
+ar[,nbcevent_x:=0]
 
 print(vars)
 
 for(i in vars){
-  smallD[!is.na(get(i)), nbcevent_x:=nbcevent_x + 1]
+  ar[!is.na(get(i)), nbcevent_x:=nbcevent_x + 1]
 }
 
-sum(smallD[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
+sum(ar[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
 
 
 
 
 #### Total visits #### 
 
-tab <- smallD[bookyear>=2019 & ident_dhis2_control==F,.(
+tab <- ar[bookyear>=2019 & ident_dhis2_control==F,.(
   TotalRegisteredWomen=sum(ident_dhis2_booking==T, na.rm=T),
   TotalBookingandAncVisits=sum(anevent_x, na.rm=T),
   TotalPPCRegistrations=sum(ident_dhis2_ppc=T, na.rm=T),
@@ -531,8 +568,8 @@ openxlsx::write.xlsx(tab, file.path(FOLDER_DATA_CLEAN,
 
 #################################  Attendance ################################
 # making vars
-smallD[,refHRhosp:= FALSE]
-smallD[(TrialOne_manRef_HR_00_00==T|
+ar[,refHRhosp:= FALSE]
+ar[(TrialOne_manRef_HR_00_00==T|
           TrialOne_manRef_HR_01_01==T|
           TrialOne_manRef_HR_02_02==T|
           TrialOne_manRef_HR_03_03==T|
@@ -563,44 +600,44 @@ smallD[(TrialOne_manRef_HR_00_00==T|
             TrialOne_manRef_Hosp_13_13==T|
             TrialOne_manRef_Hosp_14_14==T),refHRhosp:=TRUE]
 
-xtabs(~smallD$refHRhosp, addNA=T)
+xtabs(~ar$refHRhosp, addNA=T)
 
 ## Define Opportunities
 
 # oppt 16 week visit
-smallD[,Opp_1:= as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(0,104]"),Opp_1:=1]
-smallD[bookgestagedays_cats %in% c("(0,104]") &
+ar[,Opp_1:= as.numeric(NA)]
+ar[bookgestagedays_cats %in% c("(0,104]"),Opp_1:=1]
+ar[bookgestagedays_cats %in% c("(0,104]") &
          refHRhosp==T,Opp_1:=0]
-xtabs(~smallD$Opp_1, addNA=T)
+xtabs(~ar$Opp_1, addNA=T)
 
 
 
 # oppt 18-22 visit
-smallD[,Opp_2:=as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(104,125]")| Opp_1==1, Opp_2:=1]
+ar[,Opp_2:=as.numeric(NA)]
+ar[bookgestagedays_cats %in% c("(104,125]")| Opp_1==1, Opp_2:=1]
 
-xtabs(~smallD$Opp_2, addNA=T)
+xtabs(~ar$Opp_2, addNA=T)
 
 #removing opportunities
-smallD[Opp_2==1 & 
+ar[Opp_2==1 & 
          (TrialOne_manRef_HR_15_15==T|TrialOne_manRef_Hosp_15_15==T)|
          (TrialOne_manRef_HR_16_16==T|TrialOne_manRef_Hosp_16_16==T)|
          (TrialOne_manRef_HR_17_17==T|TrialOne_manRef_Hosp_17_17==T),
        Opp_2:=Opp_2-1]
 
-xtabs(~smallD$Opp_2, addNA=T)
+xtabs(~ar$Opp_2, addNA=T)
 
 
 # 24-28 week visit
-smallD[,Opp_3:=as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(125,160]",
+ar[,Opp_3:=as.numeric(NA)]
+ar[bookgestagedays_cats %in% c("(125,160]",
                                    "(160,167]") | Opp_2==1, Opp_3:=1]
 
-xtabs(~smallD$Opp_3, addNA=T)
+xtabs(~ar$Opp_3, addNA=T)
 
 # removing opportunities
-smallD[Opp_3==1 & ((TrialOne_manRef_HR_18_18==T|TrialOne_manRef_Hosp_18_18==T)|
+ar[Opp_3==1 & ((TrialOne_manRef_HR_18_18==T|TrialOne_manRef_Hosp_18_18==T)|
                      (TrialOne_manRef_HR_19_19==T|
                         TrialOne_manRef_Hosp_19_19==T)|
                      (TrialOne_manRef_HR_20_20==T|
@@ -612,20 +649,20 @@ smallD[Opp_3==1 & ((TrialOne_manRef_HR_18_18==T|TrialOne_manRef_Hosp_18_18==T)|
                      (TrialOne_manRef_HR_23_23==T|
                         TrialOne_manRef_Hosp_23_23==T)), 
        Opp_3:=Opp_3-1]
-xtabs(~smallD$Opp_3, addNA=T)
+xtabs(~ar$Opp_3, addNA=T)
 
 
 
 # 31-33 week visit
-smallD[,Opp_4:=as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(160,167]",
+ar[,Opp_4:=as.numeric(NA)]
+ar[bookgestagedays_cats %in% c("(160,167]",
                                    "(167,202]",
                                    "(202,216]")|Opp_3== 1, Opp_4:=1]
 
-xtabs(~smallD$Opp_4, addNA=T)
+xtabs(~ar$Opp_4, addNA=T)
 
 # removing opportunities 
-smallD[Opp_4==1 &
+ar[Opp_4==1 &
          ((TrialOne_manRef_HR_24_24==T|TrialOne_manRef_Hosp_24_24==T)|
             (TrialOne_manRef_HR_25_25==T|TrialOne_manRef_Hosp_25_25==T)|
             (TrialOne_manRef_HR_26_26==T|TrialOne_manRef_Hosp_26_26==T)|
@@ -635,63 +672,63 @@ smallD[Opp_4==1 &
             (TrialOne_manRef_HR_30_30==T|TrialOne_manRef_Hosp_30_30==T)), 
        Opp_4:=Opp_4-1]
 
-xtabs(~smallD$Opp_4, addNA=T)
+xtabs(~ar$Opp_4, addNA=T)
 
 # 35-37 week visit
-smallD[,Opp_5:=as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(216,237]",
+ar[,Opp_5:=as.numeric(NA)]
+ar[bookgestagedays_cats %in% c("(216,237]",
                                    "(237,244]") | Opp_4==1, Opp_5:=1]
-xtabs(~smallD$Opp_5, addNA=T)
+xtabs(~ar$Opp_5, addNA=T)
 
-smallD[Opp_5==1 &
+ar[Opp_5==1 &
          ((TrialOne_manRef_HR_31_31==T|TrialOne_manRef_Hosp_31_31==T)|
             (TrialOne_manRef_HR_32_32==T|TrialOne_manRef_Hosp_32_32==T)|
             (TrialOne_manRef_HR_33_33==T|TrialOne_manRef_Hosp_33_33==T)|
             (TrialOne_manRef_HR_34_34==T|TrialOne_manRef_Hosp_34_34==T)), 
        Opp_5:=Opp_5-1]
-xtabs(~smallD$Opp_5, addNA=T)
+xtabs(~ar$Opp_5, addNA=T)
 
 
 
 
 ################ successes ##########
 # 15-17 week visit
-smallD[,Succ_1:=as.logical(NA)]
-smallD[Opp_1==1, Succ_1:=FALSE]
-smallD[Succ_1==F & 
+ar[,Succ_1:=as.logical(NA)]
+ar[Opp_1==1, Succ_1:=FALSE]
+ar[Succ_1==F & 
          TrialOne_anvisitnew_15_17==T, Succ_1:=TRUE]
 
-xtabs(~smallD$Succ_1, addNA=T)
+xtabs(~ar$Succ_1, addNA=T)
 
 # 18-22 week visit
-smallD[,Succ_2:=as.logical(NA)]
-smallD[Opp_2==1, Succ_2:=FALSE]
-smallD[Succ_2==F & TrialOne_anvisitnew_18_22==T, Succ_2:=TRUE]
+ar[,Succ_2:=as.logical(NA)]
+ar[Opp_2==1, Succ_2:=FALSE]
+ar[Succ_2==F & TrialOne_anvisitnew_18_22==T, Succ_2:=TRUE]
 
-xtabs(~smallD$Succ_2, addNA=T)
+xtabs(~ar$Succ_2, addNA=T)
 
 # 24-28 week visit
-smallD[,Succ_3:=as.logical(NA)]
-smallD[Opp_3==1, Succ_3:=as.logical(FALSE)]
-smallD[Succ_3==F & TrialOne_anvisitnew_24_28==T, Succ_3:=TRUE]
+ar[,Succ_3:=as.logical(NA)]
+ar[Opp_3==1, Succ_3:=as.logical(FALSE)]
+ar[Succ_3==F & TrialOne_anvisitnew_24_28==T, Succ_3:=TRUE]
 
-xtabs(~smallD$Succ_3, addNA=T)
+xtabs(~ar$Succ_3, addNA=T)
 
 # 31-33 week visit
-smallD[,Succ_4:=as.logical(NA)]
-smallD[Opp_4==1, Succ_4:=FALSE]
-smallD[Succ_4==F & TrialOne_anvisitnew_31_33==T, Succ_4:=TRUE]
+ar[,Succ_4:=as.logical(NA)]
+ar[Opp_4==1, Succ_4:=FALSE]
+ar[Succ_4==F & TrialOne_anvisitnew_31_33==T, Succ_4:=TRUE]
 
-xtabs(~smallD$Succ_4, addNA=T)
+xtabs(~ar$Succ_4, addNA=T)
 
 # 35-37
-smallD[,Succ_5:=as.logical(NA)]
-smallD[Opp_5==1, Succ_5:=FALSE]
-smallD[Succ_5==F & TrialOne_anvisitnew_35_37==T, Succ_5:=TRUE]
+ar[,Succ_5:=as.logical(NA)]
+ar[Opp_5==1, Succ_5:=FALSE]
+ar[Succ_5==F & TrialOne_anvisitnew_35_37==T, Succ_5:=TRUE]
 
-xtabs(~smallD$Succ_5, addNA=T)
+xtabs(~ar$Succ_5, addNA=T)
 
-prelimAtt <- smallD[,.(N=.N,
+prelimAtt <- ar[ident_dhis2_booking==1,.(N=.N,
                        bookedb414=sum(bookgestagedays_cats=="(0,104]",
                                       na.rm = T),
                        ANC15_17Opps=sum(Opp_1,na.rm=T),
@@ -744,52 +781,52 @@ openxlsx::write.xlsx(prelimAtt,file.path(FOLDER_DATA_RESULTS,
 # Define opportunities at 3 different cut off points
 
 ## booked before 24
-smallD[,Opportunity_anemia_screening_1:=as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(0,104]",
+ar[,Opportunity_anemia_screening_1:=as.numeric(NA)]
+ar[bookgestagedays_cats %in% c("(0,104]",
                                    "(104,125]",
                                    "(125,160]",
                                    "(160,167]"),
        Opportunity_anemia_screening_1:=1]
 
-xtabs(~smallD$Opportunity_anemia_screening_1, addNA=T)
+xtabs(~ar$Opportunity_anemia_screening_1, addNA=T)
 
 
 ## booked 24 or has visit 
-smallD[,Opportunity_anemia_screening_2:=as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(167,202]")| 
+ar[,Opportunity_anemia_screening_2:=as.numeric(NA)]
+ar[bookgestagedays_cats %in% c("(167,202]")| 
          TrialOne_anvisitnew_24_28==T,
        Opportunity_anemia_screening_2:=1]
 
-xtabs(~smallD$Opportunity_anemia_screening_2, addNA=T)
+xtabs(~ar$Opportunity_anemia_screening_2, addNA=T)
 
 # booked 29-34 weeks or has visit
-smallD[,Opportunity_anemia_screening_3:=as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(202,216]",
+ar[,Opportunity_anemia_screening_3:=as.numeric(NA)]
+ar[bookgestagedays_cats %in% c("(202,216]",
                                    "(216,237]",
                                    "(237,244]"),
        Opportunity_anemia_screening_3:=1]
 
-xtabs(~smallD$Opportunity_anemia_screening_3, addNA=T)
+xtabs(~ar$Opportunity_anemia_screening_3, addNA=T)
 
 
 ## booked or visit at 35-37 weeks
-smallD[,Opportunity_anemia_screening_4:=as.numeric(NA)]
-smallD[bookgestagedays_cats %in% c("(244,265]") |
+ar[,Opportunity_anemia_screening_4:=as.numeric(NA)]
+ar[bookgestagedays_cats %in% c("(244,265]") |
          TrialOne_anvisitnew_35_37==T, 
        Opportunity_anemia_screening_4:=1]
 
-xtabs(~smallD$Opportunity_anemia_screening_4, addNA=T)
+xtabs(~ar$Opportunity_anemia_screening_4, addNA=T)
 
 
 
 ## severe anemia at booking and at any other visit after that
-smallD[,Opportunity_anemia_screening_5:=as.numeric(NA)]
-smallD[TrialOne_labhb_anemia_sev_00_14==T|
+ar[,Opportunity_anemia_screening_5:=as.numeric(NA)]
+ar[TrialOne_labhb_anemia_sev_00_14==T|
          TrialOne_labhb_anemia_sev_15_17==T|
          TrialOne_labhb_anemia_sev_18_22==T|
          TrialOne_labhb_anemia_sev_23_23==T,Opportunity_anemia_screening_5:=1]
 
-xtabs(~smallD$Opportunity_anemia_screening_5, addNA=T)
+xtabs(~ar$Opportunity_anemia_screening_5, addNA=T)
 
 
 
@@ -797,7 +834,7 @@ xtabs(~smallD$Opportunity_anemia_screening_5, addNA=T)
 ## Before 24 weeks
 
 #variable for man sev anemia anytime before 24 weeks
-smallD[,manhbsev:=(TrialOne_manhb_00_00 |
+ar[,manhbsev:=(TrialOne_manhb_00_00 |
                      TrialOne_manhb_01_01 |
                      TrialOne_manhb_02_02 |
                      TrialOne_manhb_03_03 |
@@ -821,12 +858,12 @@ smallD[,manhbsev:=(TrialOne_manhb_00_00 |
                      TrialOne_manhb_21_21 |
                      TrialOne_manhb_22_22 |
                      TrialOne_manhb_23_23)]
-xtabs(~smallD$manhbsev, addNA=T)
+xtabs(~ar$manhbsev, addNA=T)
 
 
-smallD[,RefHr:=as.logical(NA)]
-smallD[Opportunity_anemia_screening_1==1, RefHr:=FALSE]
-smallD[(TrialOne_manRef_HR_00_00==T|
+ar[,RefHr:=as.logical(NA)]
+ar[Opportunity_anemia_screening_1==1, RefHr:=FALSE]
+ar[(TrialOne_manRef_HR_00_00==T|
           TrialOne_manRef_HR_01_01==T|
           TrialOne_manRef_HR_02_02==T|
           TrialOne_manRef_HR_03_03==T|
@@ -851,10 +888,10 @@ smallD[(TrialOne_manRef_HR_00_00==T|
           TrialOne_manRef_HR_22_22==T|
           TrialOne_manRef_HR_23_23==T),
        RefHr:=TRUE]
-xtabs(~smallD$RefHr, addNA=T)
+xtabs(~ar$RefHr, addNA=T)
 
 ## At 24-28 weeks
-smallD[Opportunity_anemia_screening_2==1 &
+ar[Opportunity_anemia_screening_2==1 &
          (TrialOne_anvisitnew_24_24==T & 
             (RefHr==T))|
          (TrialOne_anvisitnew_25_25==T & 
@@ -874,10 +911,10 @@ smallD[Opportunity_anemia_screening_2==1 &
                TrialOne_manRef_HR_27_27==T)), 
        Opportunity_anemia_screening_2:=Opportunity_anemia_screening_2-1]
 
-xtabs(~smallD$Opportunity_anemia_screening_2, addNA=T)
+xtabs(~ar$Opportunity_anemia_screening_2, addNA=T)
 
 # 35-37 weeks
-smallD[Opportunity_anemia_screening_4==1 &
+ar[Opportunity_anemia_screening_4==1 &
          (TrialOne_anvisitnew_35_35==T & 
             (RefHr==T|
                TrialOne_manRef_HR_24_24==T|
@@ -921,65 +958,65 @@ smallD[Opportunity_anemia_screening_4==1 &
                TrialOne_manRef_HR_35_35==T|
                TrialOne_manRef_HR_36_36==T)), 
        Opportunity_anemia_screening_4:=Opportunity_anemia_screening_4-1]
-xtabs(~smallD$Opportunity_anemia_screening_4, addNA=T)
+xtabs(~ar$Opportunity_anemia_screening_4, addNA=T)
 
 #define different time cats for success
-smallD[, HbonTime_1a:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_1==1, HbonTime_1a:=FALSE]
+ar[, HbonTime_1a:= as.logical(NA)]
+ar[Opportunity_anemia_screening_1==1, HbonTime_1a:=FALSE]
 
-smallD[, HbonTime_1b:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_1==1 & 
+ar[, HbonTime_1b:= as.logical(NA)]
+ar[Opportunity_anemia_screening_1==1 & 
          booklabhb<7 & booklabhb>=2,HbonTime_1b:=FALSE]
 
 
-smallD[, HbonTime_1c:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_1==1 &
+ar[, HbonTime_1c:= as.logical(NA)]
+ar[Opportunity_anemia_screening_1==1 &
          booklabhb>=7 & booklabhb<11,HbonTime_1c:=FALSE ]
 
 
 
 # Hbontime_2
-smallD[,HbonTime_2a:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_2==1, HbonTime_2a:=FALSE]
+ar[,HbonTime_2a:= as.logical(NA)]
+ar[Opportunity_anemia_screening_2==1, HbonTime_2a:=FALSE]
 
-smallD[, HbonTime_2b:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_2==1 & 
+ar[, HbonTime_2b:= as.logical(NA)]
+ar[Opportunity_anemia_screening_2==1 & 
          TrialOne_labhb_anemia_sev_24_28==T, HbonTime_2b:=FALSE]
 
-smallD[,HbonTime_2c:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_2==1 & 
+ar[,HbonTime_2c:= as.logical(NA)]
+ar[Opportunity_anemia_screening_2==1 & 
          TrialOne_labhb_anemia_mild_mod_24_28==T, HbonTime_2c:=FALSE]
 
 # 29-34 weeks
 # Hbontime_3
-smallD[, HbonTime_3a:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_3==1 & 
+ar[, HbonTime_3a:= as.logical(NA)]
+ar[Opportunity_anemia_screening_3==1 & 
          (!is.na(booklabhb)), HbonTime_3a:=FALSE]
 
-smallD[, HbonTime_3b:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_3==1 &
+ar[, HbonTime_3b:= as.logical(NA)]
+ar[Opportunity_anemia_screening_3==1 &
          (booklabhb<7 & booklabhb>2), HbonTime_3b:=FALSE]
 
-smallD[, HbonTime_3c:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_3==1 &
+ar[, HbonTime_3c:= as.logical(NA)]
+ar[Opportunity_anemia_screening_3==1 &
          (booklabhb<11 & booklabhb>=7), HbonTime_3c:=FALSE]
 
-smallD[, HbonTime_4a:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_4==1, HbonTime_4a:=FALSE]
+ar[, HbonTime_4a:= as.logical(NA)]
+ar[Opportunity_anemia_screening_4==1, HbonTime_4a:=FALSE]
 
-smallD[, HbonTime_4b:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_4==1 &
+ar[, HbonTime_4b:= as.logical(NA)]
+ar[Opportunity_anemia_screening_4==1 &
          TrialOne_labhb_anemia_sev_35_37==T,HbonTime_4b:=FALSE]
 
-smallD[, HbonTime_4c:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_4==1 &
+ar[, HbonTime_4c:= as.logical(NA)]
+ar[Opportunity_anemia_screening_4==1 &
          TrialOne_labhb_anemia_mild_mod_35_37==T, HbonTime_4c:=FALSE]
 
-smallD[, HbonTime_5:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_5==1, HbonTime_5:=FALSE]
+ar[, HbonTime_5:= as.logical(NA)]
+ar[Opportunity_anemia_screening_5==1, HbonTime_5:=FALSE]
 
-smallD[, HbonTime_6:= as.logical(NA)]
-smallD[Opportunity_anemia_screening_6==1, HbonTime_6:=FALSE]
+ar[, HbonTime_6:= as.logical(NA)]
+ar[Opportunity_anemia_screening_6==1, HbonTime_6:=FALSE]
 
 
 
@@ -988,16 +1025,16 @@ smallD[Opportunity_anemia_screening_6==1, HbonTime_6:=FALSE]
 #check booklabhb values if normal etc
 
 # booked before 24 weeks
-smallD[HbonTime_1a==F & booklabhb>=11 & 
+ar[HbonTime_1a==F & booklabhb>=11 & 
          booklabhb<=18, HbonTime_1a:=TRUE]
-xtabs(~smallD$HbonTime_1a, addNA=T)
+xtabs(~ar$HbonTime_1a, addNA=T)
 
-smallD[HbonTime_1b==F & 
+ar[HbonTime_1b==F & 
          manhbsev==T,HbonTime_1b:=TRUE]
-xtabs(~smallD$HbonTime_1b, addNA=T)
+xtabs(~ar$HbonTime_1b, addNA=T)
 
 
-smallD[HbonTime_1c==F & 
+ar[HbonTime_1c==F & 
          (TrialOne_manhb_mildmodhbret_00_00==T|
             TrialOne_manhb_mildmodhbret_01_01==T|
             TrialOne_manhb_mildmodhbret_02_02==T|
@@ -1023,20 +1060,20 @@ smallD[HbonTime_1c==F &
             TrialOne_manhb_mildmodhbret_22_22==T|
             TrialOne_manhb_mildmodhbret_23_23==T),HbonTime_1c:=TRUE]
 
-xtabs(~smallD$HbonTime_1c, addNA=T)
+xtabs(~ar$HbonTime_1c, addNA=T)
 
 #24-28 screenings
-smallD[HbonTime_2a==F & 
+ar[HbonTime_2a==F & 
          TrialOne_labhb_normal_24_28==T, HbonTime_2a:=TRUE]
 
-smallD[HbonTime_2b==F & 
+ar[HbonTime_2b==F & 
          TrialOne_manhb_24_24==T|
          TrialOne_manhb_25_25==T|
          TrialOne_manhb_26_26==T|
          TrialOne_manhb_27_27==T|
          TrialOne_manhb_28_28==T, HbonTime_2b:=TRUE]
 
-smallD[HbonTime_2c==F & 
+ar[HbonTime_2c==F & 
          TrialOne_manhb_mildmodhbret_24_24==T|
          TrialOne_manhb_mildmodhbret_25_25==T|
          TrialOne_manhb_mildmodhbret_26_26==T|
@@ -1044,11 +1081,11 @@ smallD[HbonTime_2c==F &
          TrialOne_manhb_mildmodhbret_28_28==T, HbonTime_2c:=TRUE]
 
 #booked 29-30, 31-33, 34
-smallD[HbonTime_3a==F & Opportunity_anemia_screening_3==1 &
+ar[HbonTime_3a==F & Opportunity_anemia_screening_3==1 &
          (booklabhb<=18 & booklabhb>11), HbonTime_3a:=TRUE]
 
 
-smallD[HbonTime_3c==1 & 
+ar[HbonTime_3c==1 & 
          (TrialOne_manhb_mildmodhbret_29_29==T|
             TrialOne_manhb_mildmodhbret_30_30==T|
             TrialOne_manhb_mildmodhbret_31_31==T|
@@ -1057,7 +1094,7 @@ smallD[HbonTime_3c==1 &
             TrialOne_manhb_mildmodhbret_34_34==T), 
        HbonTime_3c:=TRUE]
 
-smallD[HbonTime_3b==F & 
+ar[HbonTime_3b==F & 
          (TrialOne_manhb_29_29==T|
             TrialOne_manhb_30_30==T|
             TrialOne_manhb_31_31==T|
@@ -1068,21 +1105,21 @@ smallD[HbonTime_3b==F &
 
 
 # 35-37 screenings
-smallD[HbonTime_4a==F & 
+ar[HbonTime_4a==F & 
          TrialOne_labhb_normal_35_37==T, HbonTime_4a:=TRUE]
 
-smallD[HbonTime_4b==F & 
+ar[HbonTime_4b==F & 
          TrialOne_manhb_35_35==T|
          TrialOne_manhb_36_36==T|
          TrialOne_manhb_37_37==T, HbonTime_4b:=TRUE]
 
-smallD[HbonTime_4c==F &
+ar[HbonTime_4c==F &
          TrialOne_manhb_mildmodhbret_35_35==T|
          TrialOne_manhb_mildmodhbret_36_36==T|
          TrialOne_manhb_mildmodhbret_37_37==T, HbonTime_4c:=TRUE]
 
 # severe anemia outside of time windows
-smallD[HbonTime_5==F & 
+ar[HbonTime_5==F & 
          (TrialOne_manhb_00_00==T|
             TrialOne_manhb_01_01==T|
             TrialOne_manhb_02_02==T|
@@ -1116,8 +1153,8 @@ smallD[HbonTime_5==F &
 
 ## mild mod anemia
 # if all of this is true and none of the other succcess (HBontime is true), then this #should be true. need to run all of the other success to get to that point first and #then calculate this
-smallD[,Opportunity_anemia_screening_6:=as.logical(FALSE)]
-smallD[(TrialOne_labhb_anemia_mild_mod_00_14==T|
+ar[,Opportunity_anemia_screening_6:=as.logical(FALSE)]
+ar[(TrialOne_labhb_anemia_mild_mod_00_14==T|
           TrialOne_labhb_anemia_mild_mod_15_17==T|
           TrialOne_labhb_anemia_mild_mod_18_22==T|
           TrialOne_labhb_anemia_mild_mod_23_23==T|
@@ -1138,11 +1175,11 @@ smallD[(TrialOne_labhb_anemia_mild_mod_00_14==T|
             HbonTime_5==F),
        Opportunity_anemia_screening_6:=TRUE]
 
-xtabs(~smallD$Opportunity_anemia_screening_6, addNA=T)
+xtabs(~ar$Opportunity_anemia_screening_6, addNA=T)
 
 
 #mild/mod anem retest
-smallD[HbonTime_6==F &
+ar[HbonTime_6==F &
          (TrialOne_manhb_mildmodhbret_00_00==T|
             TrialOne_manhb_mildmodhbret_01_01==T|
             TrialOne_manhb_mildmodhbret_02_02==T|
@@ -1177,7 +1214,7 @@ smallD[HbonTime_6==F &
        HbonTime_6:=TRUE]
 
 
-prelimHB <- smallD[,.(N=.N,
+prelimHB <- ar[ident_dhis2_booking==1,.(N=.N,
                       Opportun_1=sum(Opportunity_anemia_screening_1, na.rm=T),
                       Success_1a=sum(HbonTime_1a, na.rm=T),
                       Success_1aFalse=sum(HbonTime_1a==FALSE, na.rm=T),
@@ -1208,7 +1245,7 @@ prelimHB <- smallD[,.(N=.N,
                       Screening4cF=sum(HbonTime_4c==F, na.rm=T),
                       Opportun_5=sum(Opportunity_anemia_screening_5, na.rm=T),
                       Success_5=sum(HbonTime_5, na.rm=T),
-                      success_5F=sum(HbonTime_5==F),
+                      success_5F=sum(HbonTime_5==FALSE, na.rm=T),
                       Opportun_6=sum(Opportunity_anemia_screening_6, na.rm=T),
                       Success_6=sum(HbonTime_6, na.rm=T),
                       success_6F=sum(HbonTime_6==F, na.rm=T)),
@@ -1229,28 +1266,28 @@ openxlsx::write.xlsx(prelimHB,file.path(FOLDER_DATA_RESULTS,
 
 
 ###Redefining opportinites
-smallD[,Opportunity_GDM_screening_1:=as.numeric(NA)]
-smallD[,Opportunity_GDM_screening_2:=as.numeric(NA)]
-smallD[,Opportunity_GDM_screening_3:=as.numeric(NA)]
-smallD[,Opportunity_GDM_screening_4:=as.numeric(NA)]
-#smallD[,Opportunity_GDM_Screening_5:=as.numeric(NA)]
+ar[,Opportunity_GDM_screening_1:=as.numeric(NA)]
+ar[,Opportunity_GDM_screening_2:=as.numeric(NA)]
+ar[,Opportunity_GDM_screening_3:=as.numeric(NA)]
+ar[,Opportunity_GDM_screening_4:=as.numeric(NA)]
+#ar[,Opportunity_GDM_Screening_5:=as.numeric(NA)]
 
 # before 24
-smallD[bookgestagedays_cats %in% c("(0,104]",
+ar[bookgestagedays_cats %in% c("(0,104]",
                                    "(104,125]", 
                                    "(125,160]",
                                    "(160,167]"),Opportunity_GDM_screening_1:=1]
 #24-28
-smallD[bookgestagedays_cats %in% c("(167,202]")|
+ar[bookgestagedays_cats %in% c("(167,202]")|
          TrialOne_anvisitnew_24_28==T,Opportunity_GDM_screening_2:=1]
 # after 28
-smallD[bookgestagedays_cats %in% c("(202,216]",
+ar[bookgestagedays_cats %in% c("(202,216]",
                                    "(216,237]", 
                                    "(237,244]",
                                    "(244,265]"), Opportunity_GDM_screening_3:=1]
 
 # high rbs anywhere outside of the 24-28
-smallD[(TrialOne_labbloodglu_high_00_14==T|
+ar[(TrialOne_labbloodglu_high_00_14==T|
           TrialOne_labbloodglu_high_15_17==T|
           TrialOne_labbloodglu_high_18_22==T|
           TrialOne_labbloodglu_high_23_23==T|
@@ -1259,19 +1296,19 @@ smallD[(TrialOne_labbloodglu_high_00_14==T|
           TrialOne_labbloodglu_high_34_34==T|
           TrialOne_labbloodglu_high_35_37==T), Opportunity_GDM_screening_4:=1]
 
-xtabs(~smallD$Opportunity_GDM_screening_1, addNA=T)
-xtabs(~smallD$Opportunity_GDM_screening_2, addNA=T)
-xtabs(~smallD$Opportunity_GDM_screening_3, addNA=T)
-xtabs(~smallD$Opportunity_GDM_screening_4, addNA=T)
+xtabs(~ar$Opportunity_GDM_screening_1, addNA=T)
+xtabs(~ar$Opportunity_GDM_screening_2, addNA=T)
+xtabs(~ar$Opportunity_GDM_screening_3, addNA=T)
+xtabs(~ar$Opportunity_GDM_screening_4, addNA=T)
 
 
 
 
 ## Remove opportunities for people who were referred to HR or Hosp
 #refHRHospmanRBG_1 rename to RefHr
-smallD[,RefHr:=as.logical(NA)]
-smallD[Opportunity_GDM_screening_1==1, RefHr:=FALSE]
-smallD[(TrialOne_manRef_HR_00_00==T|
+ar[,RefHr:=as.logical(NA)]
+ar[Opportunity_GDM_screening_1==1, RefHr:=FALSE]
+ar[(TrialOne_manRef_HR_00_00==T|
           TrialOne_manRef_HR_01_01==T|
           TrialOne_manRef_HR_02_02==T|
           TrialOne_manRef_HR_03_03==T|
@@ -1296,10 +1333,10 @@ smallD[(TrialOne_manRef_HR_00_00==T|
           TrialOne_manRef_HR_22_22==T|
           TrialOne_manRef_HR_23_23==T),
        RefHr:=TRUE]
-xtabs(~smallD$RefHr, addNA=T)
+xtabs(~ar$RefHr, addNA=T)
 
 #refHrHosp_2 rename to refHr_2
-smallD[,refHr_2:=(
+ar[,refHr_2:=(
   TrialOne_refHR_29_29==T|
     TrialOne_refHR_30_30==T|
     TrialOne_refHR_31_31==T|
@@ -1311,7 +1348,7 @@ smallD[,refHr_2:=(
     TrialOne_refHR_35_37==T)]
 
 
-smallD[Opportunity_GDM_screening_2==1 &
+ar[Opportunity_GDM_screening_2==1 &
          (TrialOne_anvisitnew_24_24==T & 
             (RefHr==T))|
          (TrialOne_anvisitnew_25_25==T & 
@@ -1332,54 +1369,54 @@ smallD[Opportunity_GDM_screening_2==1 &
        Opportunity_GDM_screening_2:=Opportunity_GDM_screening_2-1]
 
 # checks
-xtabs(~smallD$Opportunity_GDM_screening_2, addNA=T)
+xtabs(~ar$Opportunity_GDM_screening_2, addNA=T)
 
 #Screening before 24 weeks: Creating one var for 3 possibilities
-smallD[,screenb424:=as.logical(NA)]
-smallD[bookgestagedays_cats %in% c("(0,104]","(104,125]","(125,160]","(160,167]"),
+ar[,screenb424:=as.logical(NA)]
+ar[bookgestagedays_cats %in% c("(0,104]","(104,125]","(125,160]","(160,167]"),
        screenb424:=F]
-smallD[screenb424==F &
+ar[screenb424==F &
          (booklabbloodglu_high==F | is.na(booklabbloodglu_high)) &
          (!is.na(booklaburglu) | !is.na(booklabbloodglu)|!is.na(booklabfastbloodglu)),
        screenb424:=T]
-xtabs(~smallD$screenb424, addNA=T)
+xtabs(~ar$screenb424, addNA=T)
 
-scrb424 <- smallD[,.(A=sum(ident_dhis2_control==T),
+scrb424 <- ar[,.(A=sum(ident_dhis2_control==T),
                      B=sum(ident_dhis2_control==F)),
                   keyby=.(screenb424)]
 
 ##Defining Successes 
-smallD[,GDMscreeningontime_1A:=as.logical(NA)]
-smallD[,GDMscreeningontime_1B:=as.logical(NA)]
-smallD[,GDMscreeningontime_1C:=as.logical(NA)]
-smallD[screenb424==F, 
+ar[,GDMscreeningontime_1A:=as.logical(NA)]
+ar[,GDMscreeningontime_1B:=as.logical(NA)]
+ar[,GDMscreeningontime_1C:=as.logical(NA)]
+ar[screenb424==F, 
        GDMscreeningontime_1:=FALSE]
-smallD[screenb424==T, 
+ar[screenb424==T, 
        GDMscreeningontime_1:=TRUE]
 
-xtabs(~smallD$GDMscreeningontime_1, addNA=T)
+xtabs(~ar$GDMscreeningontime_1, addNA=T)
 
 
-smallD[,GDMscreeningontime_1A:=as.logical(NA)]
-smallD[Opportunity_GDM_screening_1==1 & 
+ar[,GDMscreeningontime_1A:=as.logical(NA)]
+ar[Opportunity_GDM_screening_1==1 & 
          booklaburglu=="NEG", 
        GDMscreeningontime_1A:=TRUE]
 
-smallD[,GDMscreeningontime_1B:=as.logical(NA)]
-smallD[Opportunity_GDM_screening_1==1 &
+ar[,GDMscreeningontime_1B:=as.logical(NA)]
+ar[Opportunity_GDM_screening_1==1 &
          booklaburglu=="POS" & 
          !is.na(booklabbloodglu), GDMscreeningontime_1B:=TRUE]
 
-smallD[,GDMscreeningontime_1C:=as.logical(NA)]
-smallD[booklabbloodglu_high==T &
+ar[,GDMscreeningontime_1C:=as.logical(NA)]
+ar[booklabbloodglu_high==T &
          !is.na(booklabbloodglu) &
          RefHr==T, GDMscreeningontime_1C:=TRUE]
 
 
 
 #24-28 weeks
-smallD[,GDMscreeningontime_2:=as.logical(NA)]
-smallD[Opportunity_GDM_screening_2==1 &
+ar[,GDMscreeningontime_2:=as.logical(NA)]
+ar[Opportunity_GDM_screening_2==1 &
          (TrialOne_labbloodglu_exists_24_24==F &
             TrialOne_labbloodglu_exists_25_25==F &
             TrialOne_labbloodglu_exists_26_26==F &
@@ -1390,7 +1427,7 @@ smallD[Opportunity_GDM_screening_2==1 &
             TrialOne_labfastbloodglu_exists_26_26==F &
             TrialOne_labfastbloodglu_exists_27_27==F &
             TrialOne_labfastbloodglu_exists_28_28==F), GDMscreeningontime_2:=F]
-smallD[Opportunity_GDM_screening_2==1 & 
+ar[Opportunity_GDM_screening_2==1 & 
          (TrialOne_labbloodglu_exists_24_24==T|
             TrialOne_labbloodglu_exists_25_25==T|
             TrialOne_labbloodglu_exists_26_26==T|
@@ -1406,34 +1443,34 @@ smallD[Opportunity_GDM_screening_2==1 &
             TrialOne_labfastbloodglu_exists_26_26==T|
             TrialOne_labfastbloodglu_exists_27_27==T|
             TrialOne_labfastbloodglu_exists_28_28==T),GDMscreeningontime_2:=TRUE]
-xtabs(~smallD$GDMscreeningontime_2, addNA=T)
+xtabs(~ar$GDMscreeningontime_2, addNA=T)
 
 
 #Screening after 28 weeks: Creating one var for 3 possibilities
-smallD[,screenafter28:=as.logical(NA)]
-smallD[bookgestagedays_cats %in% c("(202,216]","(216,237]","(237,244]","(244,265]"),
+ar[,screenafter28:=as.logical(NA)]
+ar[bookgestagedays_cats %in% c("(202,216]","(216,237]","(237,244]","(244,265]"),
        screenafter28:=F]
-smallD[screenafter28==F &
+ar[screenafter28==F &
          (booklabbloodglu_high==F | is.na(booklabbloodglu_high)) &
          (!is.na(booklabbloodglu)|!is.na(booklabfastbloodglu)),
        screenafter28:=T]
-xtabs(~smallD$screenafter28, addNA=T)
+xtabs(~ar$screenafter28, addNA=T)
 
 ##Defining Success
-smallD[,GDMscreeningontime_3:=as.logical(NA)]
-smallD[screenafter28==F, 
+ar[,GDMscreeningontime_3:=as.logical(NA)]
+ar[screenafter28==F, 
        GDMscreeningontime_3:=FALSE]
-smallD[screenafter28==T,GDMscreeningontime_3:=TRUE]
-xtabs(~smallD$GDMscreeningontime_3, addNA=T)
+ar[screenafter28==T,GDMscreeningontime_3:=TRUE]
+xtabs(~ar$GDMscreeningontime_3, addNA=T)
 
 #management fo high RBG outside of time windows
-smallD[, GDMscreeningontime_4:=as.logical(NA)]
-smallD[Opportunity_GDM_screening_4==1, GDMscreeningontime_4:= FALSE]
-smallD[GDMscreeningontime_4==F & 
+ar[, GDMscreeningontime_4:=as.logical(NA)]
+ar[Opportunity_GDM_screening_4==1, GDMscreeningontime_4:= FALSE]
+ar[GDMscreeningontime_4==F & 
          (RefHr==T|refHr_2==T),GDMscreeningontime_4:=TRUE]
 
 
-prelimGDM <- smallD[,.(N=.N,
+prelimGDM <- ar[ident_dhis2_booking==1,.(N=.N,
                        Opportun_1=sum(Opportunity_GDM_screening_1==T, na.rm=T),
                        Success_1A=sum(GDMscreeningontime_1A==T, na.rm=T),
                        Success_1B=sum(GDMscreeningontime_1B==T, na.rm=T),
@@ -1465,17 +1502,17 @@ openxlsx::write.xlsx(prelimGDM,file.path(FOLDER_DATA_RESULTS,
 
 # ultrasound
 
-smallD[,useventsx:=0]
+ar[,useventsx:=0]
 
 vars <- names(d)[stringr::str_detect(names(d),"^usevent_")]
 
 for (i in vars){
   
-  smallD[!is.na(get(i)),useventsx:=useventsx+1]
+  ar[!is.na(get(i)),useventsx:=useventsx+1]
 }
-xtabs(~smallD$useventsx, addNA=T)
+xtabs(~ar$useventsx, addNA=T)
 
-Usnums <- smallD[ident_dhis2_booking==T,
+Usnums <- ar[ident_dhis2_booking==T,
                  .(N=.N,
                    mean=mean(useventsx, na.rm=T),
                    min=min(useventsx),
@@ -1491,7 +1528,7 @@ openxlsx::write.xlsx(Usnums,
 
 
 
-UsnumsbookgA <- smallD[ident_dhis2_booking==T,
+UsnumsbookgA <- ar[ident_dhis2_booking==T,
                  .(N=.N,
                    mean=mean(useventsx, na.rm=T),
                    min=min(useventsx),
@@ -1510,16 +1547,43 @@ openxlsx::write.xlsx(UsnumsbookgA,
 
 # ultrasounds on time
 
-usontime <-smallD[ident_dhis2_booking==1,.(N=.N,
+usontime <-ar[ident_dhis2_booking==1,.(N=.N,
                                            FirstTrimesterUS=sum(TrialOne_us_exists_00_14==T,na.rm=T),
-                                           US15to17weejsUS=sum(TrialOne_us_exists_15_17==T, na.rm=T),
-                                           SeconTrimesterUS=sum(TrialOne_us_exists_18_22==T, na.rm=T),
-                                           US23To34=sum(TrialOne_us_exists_23_23==T|
-                                                          TrialOne_us_exists_24_28==T|
+                                           US15to17weeksUS=sum(TrialOne_us_exists_15_17==T, na.rm=T),
+                                           US18to18weeks=sum(TrialOne_us_exists_18_22==T, na.rm=T),
+                                           SeconTrimesterUS=sum(TrialOne_us_exists_15_17==T|
+                                                                  TrialOne_us_exists_18_22==T|
+                                                                  TrialOne_us_exists_23_23==T|
+                                                                  TrialOne_us_exists_24_24==T|
+                                                                  TrialOne_us_exists_25_25==T|
+                                                                  TrialOne_us_exists_26_26==T, na.rm=T),
+                                       FirstandsecTrimes=sum(TrialOne_us_exists_00_14==T &
+                                                               (TrialOne_us_exists_15_17==T|
+                                                               TrialOne_us_exists_18_22==T|
+                                                               TrialOne_us_exists_23_23==T|
+                                                               TrialOne_us_exists_24_24==T|
+                                                               TrialOne_us_exists_25_25==T|
+                                                               TrialOne_us_exists_26_26==T), na.rm=T),
+                                          ThirdTrimester=sum(TrialOne_us_exists_27_27==T|
+                                                          TrialOne_us_exists_28_28==T|
                                                           TrialOne_us_exists_29_30==T|
                                                           TrialOne_us_exists_31_33==T |
-                                                          TrialOne_us_exists_34_34==T, na.rm=T),
-                                           ThirdTrimesterUS=sum(TrialOne_us_exists_35_37==T, na.rm=T)),
+                                                          TrialOne_us_exists_34_34==T|
+                                                          TrialOne_us_exists_35_37==T, na.rm=T),
+                                       All3US=sum(TrialOne_us_exists_00_14==T &
+                                                    (TrialOne_us_exists_15_17==T|
+                                                       TrialOne_us_exists_18_22==T|
+                                                       TrialOne_us_exists_23_23==T|
+                                                       TrialOne_us_exists_24_24==T|
+                                                       TrialOne_us_exists_25_25==T|
+                                                       TrialOne_us_exists_26_26==T) &
+                                                    (TrialOne_us_exists_27_27==T|
+                                                    TrialOne_us_exists_28_28==T|
+                                                    TrialOne_us_exists_29_30==T|
+                                                    TrialOne_us_exists_31_33==T |
+                                                    TrialOne_us_exists_34_34==T|
+                                                    TrialOne_us_exists_35_37==T), na.rm=T),
+                                           US35to37Only=sum(TrialOne_us_exists_35_37==T, na.rm=T)),
                   keyby=.(bookyear)]
 
 
@@ -1537,29 +1601,81 @@ openxlsx::write.xlsx(usontime,
 
 # ultrasounds on time by bookgA
 
-usontimegAcats <-smallD[ident_dhis2_booking==1,.(N=.N,
-                                           FirstTrimesterUS=sum(TrialOne_us_exists_00_14==T,na.rm=T),
-                                           US15to17weejsUS=sum(TrialOne_us_exists_15_17==T, na.rm=T),
-                                           SeconTrimesterUS=sum(TrialOne_us_exists_18_22==T, na.rm=T),
-                                           US23To34=sum(TrialOne_us_exists_23_23==T|
-                                                          TrialOne_us_exists_24_28==T|
-                                                          TrialOne_us_exists_29_30==T|
-                                                          TrialOne_us_exists_31_33==T |
-                                                          TrialOne_us_exists_34_34==T, na.rm=T),
-                                           ThirdTrimesterUS=sum(TrialOne_us_exists_35_37==T, na.rm=T)),
-                  keyby=.(bookyear, bookgestagedays_cats)]
+usontimeGAcats <-ar[ident_dhis2_booking==1,.(N=.N,
+                                             FirstTrimesterUS=sum(TrialOne_us_exists_00_14==T,na.rm=T),
+                                             US15to17weeksUS=sum(TrialOne_us_exists_15_17==T, na.rm=T),
+                                             US18to18weeks=sum(TrialOne_us_exists_18_22==T, na.rm=T),
+                                             SeconTrimesterUS=sum(TrialOne_us_exists_15_17==T|
+                                                                    TrialOne_us_exists_18_22==T|
+                                                                    TrialOne_us_exists_23_23==T|
+                                                                    TrialOne_us_exists_24_24==T|
+                                                                    TrialOne_us_exists_25_25==T|
+                                                                    TrialOne_us_exists_26_26==T, na.rm=T),
+                                             FirstandsecTrimes=sum(TrialOne_us_exists_00_14==T &
+                                                                     (TrialOne_us_exists_15_17==T|
+                                                                        TrialOne_us_exists_18_22==T|
+                                                                        TrialOne_us_exists_23_23==T|
+                                                                        TrialOne_us_exists_24_24==T|
+                                                                        TrialOne_us_exists_25_25==T|
+                                                                        TrialOne_us_exists_26_26==T), na.rm=T),
+                                             ThirdTrimester=sum(TrialOne_us_exists_27_27==T|
+                                                                  TrialOne_us_exists_28_28==T|
+                                                                  TrialOne_us_exists_29_30==T|
+                                                                  TrialOne_us_exists_31_33==T |
+                                                                  TrialOne_us_exists_34_34==T|
+                                                                  TrialOne_us_exists_35_37==T, na.rm=T),
+                                             All3US=sum(TrialOne_us_exists_00_14==T &
+                                                          (TrialOne_us_exists_15_17==T|
+                                                             TrialOne_us_exists_18_22==T|
+                                                             TrialOne_us_exists_23_23==T|
+                                                             TrialOne_us_exists_24_24==T|
+                                                             TrialOne_us_exists_25_25==T|
+                                                             TrialOne_us_exists_26_26==T) &
+                                                          (TrialOne_us_exists_27_27==T|
+                                                             TrialOne_us_exists_28_28==T|
+                                                             TrialOne_us_exists_29_30==T|
+                                                             TrialOne_us_exists_31_33==T |
+                                                             TrialOne_us_exists_34_34==T|
+                                                             TrialOne_us_exists_35_37==T), na.rm=T),
+                                             US35to37Only=sum(TrialOne_us_exists_35_37==T, na.rm=T)),
+                    keyby=.(bookyear, bookgestagedays_cats)]
 
-
-
-openxlsx::write.xlsx(usontimegAcats,
+openxlsx::write.xlsx(usontimeGAcats,
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
                                "2020",
-                               "usOntimeGACats.xlsx"))
+                               "usOntimeBookGAcats.xlsx"))
 
 
 
-#smallD[,ussc_1:=sum(us exists 00-14)]
+
+nums <- ar[,.("Total Number of women"=.N,
+              "Booked for ANC"=sum(ident_dhis2_booking==T, na.rm=T),
+              "Booked ANC and no PPC"=sum(ident_dhis2_booking==1 &
+                                            is.na(ident_dhis2_ppc)),
+              "Booked for ANC and PPC"=sum(ident_dhis2_booking==1 &
+                                             ident_dhis2_ppc==T, na.rm=T),
+              "PPC only"=sum(ident_dhis2_booking==0 &
+                               ident_dhis2_ppc==T, na.rm=T),
+              "CPO and Booking"=sum(ident_dhis2_cpo==T &
+                                      ident_dhis2_booking==T, na.rm=T),
+              "CPO"=sum(ident_dhis2_cpo==T, na.rm=T),
+              "CPO PPC and Booking"=sum(ident_dhis2_booking==T &
+                                          ident_dhis2_cpo==T & 
+                                          ident_dhis2_ppc==T, na.rm=T)),
+           keyby=.(bookyear)]
+
+
+
+openxlsx::write.xlsx(nums,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               "NumVisits.xlsx"))
+
+
+
+#ar[,ussc_1:=sum(us exists 00-14)]
 # 1st 2nd and 3rd trimester USs
 ## overall
 ## fgr screening
@@ -1569,10 +1685,10 @@ openxlsx::write.xlsx(usontimegAcats,
 ## availability of data from cpo and nbc
 
 
-vars <- stringr::str_subset(names(smallD),"^cpopregoutcome_")
+vars <- stringr::str_subset(names(ar),"^cpopregoutcome_")
 
 
-vars <- stringr::str_subset(names(smallD),"^cpomodeofdeliv_")
+vars <- stringr::str_subset(names(ar),"^cpomodeofdeliv_")
 
 
 
@@ -1581,7 +1697,7 @@ vars <- stringr::str_subset(names(smallD),"^cpomodeofdeliv_")
 ### how many return from anc and how many dont
 ### cs based on robson guideines
 
-ppc <- smallD[ident_dhis2_ppc=T]
+ppc <- ar[ident_dhis2_ppc=T]
 
 ppc[,ppcbookdate:=ppcdate_1]
 ppc[,ppcbookyear:=stringr::str_extract(ppcdate_1,"[0-9][0-9][0-9][0-9]")]
