@@ -29,22 +29,24 @@ tab <- ar[ident_dhis2_booking==1,
         "Proprtion Weights 0"= mean(bookweight==0, na.rm=T),
         "Proportion of weights over 100 KG"= mean(bookweight>100, na.rm=T),
         "Proprtion of Parity"= mean(bookparity, na.rm=T),
+        "Number book parity"=sum(bookparity==1, na.rm=T),
         "Mean Bookgestage"= mean(bookgestage, na.rm=T),
         "Proprtion Primi"=mean(bookprimi, na.rm=T),
-        "Book History of Perinatal Death"=mean(bookhistperi, na.rm=T),
-        "Proportion Uterine Surgery at Booking"=mean(bookhistutesur, na.rm=T),
-        "Proportion History of C-section"=mean(bookhistcs, na.rm=T),
-        "Proportion History of CS complications"=mean(bookhistcscompl, na.rm=T),
-        "Proprtion History of Preterm Birth"=mean(bookhistpreterm, na.rm=T),
-        "Proprtion History of Ute"=mean(bookhistute, na.rm=T),
-        "Proprtion History of Abortion"=mean(bookhistabort, na.rm=T),
-        "Proprtion History of DM in Family" =mean(bookfamdm, na.rm=T),
-        "Proprtion History of HTN in Family"=mean(bookfamhtn, na.rm=T),
-        "Proprtion History of APH"=mean(bookhistaph, na.rm=T),
-        "Proprtion History of Clexane Use"=mean(bookhistclex, na.rm=T),
-        "Proprtion History of GDM"=mean(bookhistgdm, na.rm=T),
-        "Proprtion History of GHTN"=mean(bookhistghtn, na.rm=T),
-       "Proprtion History of Preterm Birth"=mean(bookhistpreterm, na.rm=T)), 
+        "NUmber of Primi at booking"=sum(bookprimi==1, na.rm=T),
+        "Number of Perinatal Death"=sum(bookhistperi, na.rm=T),
+        "Number Uterine Surgery at Booking"=sum(bookhistutesur==1, na.rm=T),
+        "Number History of C-section"=sum(bookhistcs==1, na.rm=T),
+        "Number History of CS complications"=sum(bookhistcscompl==1, na.rm=T),
+        "Number History of Preterm Birth"=sum(bookhistpreterm, na.rm=T),
+        "Number History of Ute"=sum(bookhistute==1, na.rm=T),
+        "Number History of Abortion"=sum(bookhistabort==1, na.rm=T),
+        "Number History of DM in Family" =sum(bookfamdm==1, na.rm=T),
+        "Number History of HTN in Family"=sum(bookfamhtn==1, na.rm=T),
+        "Number History of APH"=sum(bookhistaph==1, na.rm=T),
+        "Number of Women with History of Clexane Use"=sum(bookhistclex==1, na.rm=T),
+        "Number History of GDM"=sum(bookhistgdm==1, na.rm=T),
+        "Number History of GHTN"=sum(bookhistghtn==1, na.rm=T),
+       "Number History of Preterm Birth"=sum(bookhistpreterm==1, na.rm=T)), 
        keyby=.(bookyear)]
 
 openxlsx::write.xlsx(tab,
@@ -56,7 +58,8 @@ openxlsx::write.xlsx(tab,
 
 # bookbmicat
 
-tab <- ar[ident_dhis2_booking==T,.(N=.N,
+tab <- ar[ident_dhis2_booking==T &
+            bookgestage<15 & bookgestage>0,.(N=.N,
              "2019"=sum(bookyear==2019, na.rm=T),
              "2020"=sum(bookyear==2020, na.rm=T)),
           keyby=.(bookbmicat)]
@@ -74,10 +77,18 @@ openxlsx::write.xlsx(tab,
 
 # marriage cat
 
+ar[bookorgdistrict=="Tulk", bookorgdistrict:="TULK"]
+
+ar[,agemarriagecat_ar:=cut(agemarriage,
+                           breaks=c(0,15,17,19,25,30,35,40,100),
+                           include.lowest = T)]
+
+xtabs(~ar$agemarriagecat_ar, addNA=T)
+
 tab <- ar[ident_dhis2_booking==T,.(N=.N,
                                    "2019"=sum(bookyear==2019, na.rm=T),
                                    "2020"=sum(bookyear==2020, na.rm=T)),
-          keyby=.(agemarriagecat)]
+          keyby=.(agemarriagecat_ar)]
 
 
 
@@ -87,6 +98,23 @@ openxlsx::write.xlsx(tab,
                        "annual reports",
                        "2020",
                        "ageatmarriagecat.xlsx"))
+
+
+marriageDistricts <- ar[ident_dhis2_booking==T,.(N=.N,
+                                                 "2019"=sum(bookyear==2019, na.rm=T),
+                                                 "2020"=sum(bookyear==2020, na.rm=T)),
+                        keyby=.(bookorgdistrict,agemarriagecat_ar)]
+
+
+
+openxlsx::write.xlsx(marriageDistricts,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "ageatmarriagecatDistricts.xlsx"))
+
+
 
 
 
@@ -239,6 +267,46 @@ openxlsx::write.xlsx(bookgA,
                        "annual reports",
                        "2020",
                        "BookgACats.xlsx"))
+
+
+
+
+bookgA <- ar[ident_dhis2_booking==T,.(N=.N),
+             keyby=.(bookyear,bookgestagedays_cats,incomecat)]
+
+openxlsx::write.xlsx(bookgA,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "BookgACats_incomeCats.xlsx"))
+
+
+
+
+bookgAHR <- ar[ident_dhis2_booking==T,.(N=.N),
+             keyby=.(bookyear,bookgestagedays_cats,ident_dhis2_risk)]
+
+openxlsx::write.xlsx(bookgAHR,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "BookgACats_HR.xlsx"))
+
+
+
+
+bookgAprimi <- ar[ident_dhis2_booking==T,.(N=.N),
+               keyby=.(bookyear,bookgestagedays_cats,bookprimi)]
+
+openxlsx::write.xlsx(bookgAHR,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "BookgACats_bookprimi.xlsx"))
+
 
 
 ########## 
@@ -507,40 +575,82 @@ openxlsx::write.xlsx(robsongrps,
 # Number of ANC, PPC, NBC per district per month
 
 ar[,anevent_0:=bookevent]
+ar[,andate_0:=bookdate]
+
 vars <- names(ar)[stringr::str_detect(names(ar),"^anevent_[0-9]+")]
 ar[,anevent_x:=0]
+
+ar[,anevent_x_1:=0]
 
 print(vars)
 
 for(i in vars){
-  ar[!is.na(get(i)), anevent_x:=anevent_x + 1]
+  
+  varsdate <- names(ar)[stringr::str_detect(names(ar),"andate")]
+  
+  ar[!is.na(get(i)) &
+       get(varsdate)>="2020-01-01", anevent_x:=anevent_x + 1]
+  
+  
+  ar[!is.na(get(i)) &
+       get(varsdate)>="2019-01-01" &
+       get(varsdate)<"2020-01-01", anevent_x_1:=anevent_x_1 + 1]
+  
+  
+  
+  
 }
 
 sum(ar[ident_dhis2_control==F]$anevent_x,na.rm=T)
+sum(ar[ident_dhis2_control==F]$anevent_x_1,na.rm=T)
 
 
 # total ppc events per woman
 vars <- names(ar)[stringr::str_detect(names(ar),"^ppcevent_[0-9]+")]
 ar[,ppcevent_x:=0]
+ar[,ppcevent_x_1:=0]
 
 print(vars)
 
 for(i in vars){
-  ar[!is.na(get(i)), ppcevent_x:=ppcevent_x + 1]
+  
+  ppcdate <- names(ar)[stringr::str_detect(names(ar),"ppcdate")]
+  ar[!is.na(get(i)) & 
+       get(ppcdate)>="2020-01-01" &
+       get(ppcdate)<="2020-12-31", ppcevent_x:=ppcevent_x + 1]
+  
+  ar[!is.na(get(i)) & 
+       get(ppcdate)>="2019-01-01" &
+       get(ppcdate)<="2019-12-31", ppcevent_x_1:=ppcevent_x_1 + 1]
+  
+  
 }
 
 sum(ar[ident_dhis2_control==F]$ppcevent_x,na.rm=T)
-
+sum(ar[ident_dhis2_control==F]$ppcevent_x_1,na.rm=T)
 
 # total nbc events per woman
 #making variable for total nbc visits
 vars <- names(ar)[stringr::str_detect(names(ar),"^nbcevent_[0-9]+")]
 ar[,nbcevent_x:=0]
+ar[,nbcevent_x_1:=0]
 
 print(vars)
 
 for(i in vars){
-  ar[!is.na(get(i)), nbcevent_x:=nbcevent_x + 1]
+  
+  nbcdate <- names(ar)[stringr::str_detect(names(ar),"^nbcdate")]
+  
+  
+  ar[!is.na(get(i)) &
+       get(nbcdate)>="2020-01-01" &
+       get(nbcdate)<="2020-12-31", nbcevent_x:=nbcevent_x + 1]
+  
+  ar[!is.na(get(i)) &
+       get(nbcdate)>="2019-01-01" &
+       get(nbcdate)<="2019-12-31", nbcevent_x_1:=nbcevent_x_1 + 1]
+  
+  
 }
 
 sum(ar[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
@@ -551,15 +661,20 @@ sum(ar[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
 #### Total visits #### 
 
 tab <- ar[bookyear>=2019 & ident_dhis2_control==F,.(
-  TotalRegisteredWomen=sum(ident_dhis2_booking==T, na.rm=T),
-  TotalBookingandAncVisits=sum(anevent_x, na.rm=T),
-  TotalPPCRegistrations=sum(ident_dhis2_ppc=T, na.rm=T),
-  TotalNBCregistrations=sum(ident_dhis2_nbc==T, na.rm=T),
-  TotalPPCvisits=sum(ppcevent_x, na.rm=T),
-  TotalNBCvisits=sum(nbcevent_x, na.rm=T)),
-  keyby=.(bookyear)]
+  #TotalRegisteredWomen=sum(ident_dhis2_booking==T, na.rm=T),
+  #TotalBookingandAncVisits=sum(anevent_x, na.rm=T),
+  #TotalPPCRegistrations=sum(ident_dhis2_ppc==T, na.rm=T),
+  #TotalNBCregistrations=sum(ident_dhis2_nbc==T, na.rm=T),
+  #TotalPPCvisits=sum(ppcevent_x, na.rm=T),
+ # TotalNBCvisits=sum(nbcevent_x, na.rm=T),
+  ANCvisits2019=sum(anevent_x_1, na.rm=T),
+  ANCvisits2020=sum(anevent_x, na.rm=T),
+  PPCvisits2019=sum(ppcevent_x_1,na.rm=T),
+  PPCvisits2020=sum(ppcevent_x, na.rm=T),
+  NBCvisits2019=sum(nbcevent_x, na.rm = T),
+  NBCvisits2020=sum(nbcevent_x_1,na.rm=T))]
 
-openxlsx::write.xlsx(tab, file.path(FOLDER_DATA_CLEAN,
+openxlsx::write.xlsx(tab, file.path(FOLDER_DATA_RESULTS,
                                     "annual reports",
                                     "2020",
                                     "VisitsTotal.xlsx"))
@@ -770,6 +885,88 @@ openxlsx::write.xlsx(prelimAtt,file.path(FOLDER_DATA_RESULTS,
                                          sprintf("%s_Attendance.xlsx",
                                                  lubridate::today()))) 
 
+
+
+att <- ar[ident_dhis2_booking==T,.(N=.N,
+             ANC15_17Opps=sum(Opp_1,na.rm=T),
+             Attendance_15_17=sum(Succ_1, na.rm=T),
+             booked1822=sum(bookgestagedays_cats=="(125,160]",
+                            na.rm = T),
+             booked2323=sum(bookgestagedays_cats=="(160,167]",
+                            na.rm = T),
+             Attendance_15_22=sum(Succ_1==T &
+                                    Succ_2==T, na.rm=T),
+             booked2323=sum(bookgestagedays_cats=="(160,167]",
+                            na.rm = T),
+             booked2428=sum(bookgestagedays_cats=="(167,202]",
+                            na.rm = T),
+             Attendance_15_28=sum(Succ_1==T &
+                                    Succ_2==T &
+                                    Succ_3==T, na.rm=T),
+             booked2930=sum(bookgestagedays_cats=="(202,216]", 
+                            na.rm = T),
+             Booked31_33=sum(bookgestagedays_cats=="(216,237]",
+                             na.rm = T),
+             Attendance_15_33=sum(Succ_1==T &
+                                    Succ_2==T &
+                                    Succ_3==T &
+                                    Succ_4==T, na.rm=T),
+             Booked34_34=sum(bookgestagedays_cats=="(237,244]", 
+                             na.rm = T),
+             ANC3537Opps=sum(Opp_5, na.rm=T),
+             Attendance_15_37=sum(Succ_1==T &
+                                    Succ_2==T, 
+                                    Succ_3==T &
+                                    Succ_4==T &
+                                    Succ_5==T, na.rm=T)),
+          
+          keyby=.(bookyear)]
+
+
+openxlsx::write.xlsx(att,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               "AllVisitsAttendance.xlsx"))
+
+
+
+####################
+# Hypertension
+####################
+
+prelimHTN <- ar[ident_dhis2_booking==T,
+                .(N=.N,
+                  "16 Week Visit"=sum(Succ_1==T, na.rm=T),
+                  "BP_16"=sum(Succ_1==T &
+                                 TrialOne_anbpsyst_present_15_17==T &
+                                 TrialOne_anbpdiast_present_15_17==T, na.rm=T),
+                  "20 Week Visit"=sum(Succ_2==T, na.rm=T),
+                  "BP_20"=sum(Succ_2==T &
+                                   TrialOne_anbpsyst_present_18_22==T &
+                                   TrialOne_anbpdiast_present_18_22==T, na.rm=T),
+                  "24_28 Week Visit"=sum(Succ_3==T, na.rm=T),
+                  "BP_24_28"=sum(Succ_3==T &
+                                 TrialOne_anbpsyst_present_24_28==T &
+                                   TrialOne_anbpdiast_present_24_28==T,na.rm=T),
+                  "32 Week Visit"=sum(Succ_4==T, na.rm=T),
+                  "BP_32"=sum(Succ_4==T &
+                              TrialOne_anbpsyst_present_24_28==T &
+                              TrialOne_anbpdiast_present_24_28==T, na.rm=T),
+                  
+                  "36 Week Visit"=sum(Succ_5==T, na.rm=T),
+                  "Bp_36 weeks"=sum(Succ_5 &
+                                      TrialOne_anbpsyst_present_35_37==T &
+                                      TrialOne_anbpdiast_present_35_37==T, na.rm=T)
+                  ),
+                
+                keyby=.(bookyear)]
+
+openxlsx::write.xlsx(prelimHTN,file.path(FOLDER_DATA_RESULTS,
+                                         "annual reports",
+                                         "2020",
+                                         sprintf("%s_BpOntime.xlsx",
+                                                 lubridate::today()))) 
 
 
 

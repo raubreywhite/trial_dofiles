@@ -24,7 +24,7 @@ smallD[T2_anvisitnew_29_30==T|
          T2_anvisitnew_35_37==T, Opportunity_GDM_screening_3:=1]
 
 # high rbs anywhere outside of the 24-28
-smallD[(TrialOne_labbloodglu_high_00_14==T|
+smallD[(T2_labbloodglu_high_00_14==T|
           T2_labbloodglu_high_15_17==T|
           T2_labbloodglu_high_18_22==T|
           T2_labbloodglu_high_23_23==T|
@@ -32,14 +32,14 @@ smallD[(TrialOne_labbloodglu_high_00_14==T|
           T2_labbloodglu_high_31_33==T|
           T2_labbloodglu_high_34_34==T|
           T2_labbloodglu_high_35_37==T) |
-         (TrialOne_labbloodglu_high_00_14==T|
-            T2_labbloodglu_high_15_17==T|
-            T2_labbloodglu_high_18_22==T|
-            T2_labbloodglu_high_23_23==T|
-            T2_labbloodglu_high_29_30==T|
-            T2_labbloodglu_high_31_33==T|
-            T2_labbloodglu_high_34_34==T|
-            T2_labbloodglu_high_35_37==T), Opportunity_GDM_screening_4:=1]
+         (T2_labfastbloodglu_high_00_14==T|
+            T2_labfastbloodglu_high_15_17==T|
+            T2_labfastbloodglu_high_18_22==T|
+            T2_labfastbloodglu_high_23_23==T|
+            T2_labfastbloodglu_high_29_30==T|
+            T2_labfastbloodglu_high_31_33==T|
+            T2_labfastbloodglu_high_34_34==T|
+            T2_labfastbloodglu_high_35_37==T), Opportunity_GDM_screening_4:=1]
 
 xtabs(~smallD$Opportunity_GDM_screening_1, addNA=T)
 xtabs(~smallD$Opportunity_GDM_screening_2, addNA=T)
@@ -53,7 +53,7 @@ xtabs(~smallD$Opportunity_GDM_screening_4, addNA=T)
 #refHRHospmanRBG_1 rename to RefHr
 smallD[,RefHr:=as.logical(NA)]
 smallD[Opportunity_GDM_screening_1==1, RefHr:=FALSE]
-smallD[(T2_manRef_HR_00_00==T|
+smallD[((T2_manRef_HR_00_00==T|
           T2_manRef_HR_01_01==T|
           T2_manRef_HR_02_02==T|
           T2_manRef_HR_03_03==T|
@@ -76,22 +76,128 @@ smallD[(T2_manRef_HR_00_00==T|
           T2_manRef_HR_20_20==T|
           T2_manRef_HR_21_21==T|
           T2_manRef_HR_22_22==T|
-          T2_manRef_HR_23_23==T),
-       RefHr:=TRUE]
+          T2_manRef_HR_23_23==T)|
+          (T2_manRBGHigh_Diab_00_00==T|
+             T2_manRBGHigh_Diab_01_01==T|
+             T2_manRBGHigh_Diab_02_02==T|
+             T2_manRBGHigh_Diab_03_03==T|
+             T2_manRBGHigh_Diab_04_04==T|
+             T2_manRBGHigh_Diab_05_05==T|
+             T2_manRBGHigh_Diab_06_06==T|
+             T2_manRBGHigh_Diab_07_07==T|
+             T2_manRBGHigh_Diab_08_08==T|
+             T2_manRBGHigh_Diab_09_09==T|
+             T2_manRBGHigh_Diab_10_10==T|
+             T2_manRBGHigh_Diab_11_11==T|
+             T2_manRBGHigh_Diab_12_12==T|
+             T2_manRBGHigh_Diab_13_13==T|
+             T2_manRBGHigh_Diab_14_14==T|
+             T2_manRBGHigh_Diab_15_15==T|
+             T2_manRBGHigh_Diab_16_16==T|
+             T2_manRBGHigh_Diab_17_17==T|
+             T2_manRBGHigh_Diab_18_18==T|
+             T2_manRBGHigh_Diab_19_19==T|
+             T2_manRBGHigh_Diab_20_20==T|
+             T2_manRBGHigh_Diab_21_21==T|
+             T2_manRBGHigh_Diab_22_22==T|
+             T2_manRBGHigh_Diab_23_23==T)|
+        (T2_manFBSHigh_Diab_00_00==T|
+           T2_manFBSHigh_Diab_01_01==T|
+           T2_manFBSHigh_Diab_02_02==T|
+           T2_manFBSHigh_Diab_03_03==T|
+           T2_manFBSHigh_Diab_04_04==T|
+           T2_manFBSHigh_Diab_05_05==T|
+           T2_manFBSHigh_Diab_06_06==T|
+           T2_manFBSHigh_Diab_07_07==T|
+           T2_manFBSHigh_Diab_08_08==T|
+           T2_manFBSHigh_Diab_09_09==T|
+           T2_manFBSHigh_Diab_10_10==T|
+           T2_manFBSHigh_Diab_11_11==T|
+           T2_manFBSHigh_Diab_12_12==T|
+           T2_manFBSHigh_Diab_13_13==T|
+           T2_manFBSHigh_Diab_14_14==T|
+           T2_manFBSHigh_Diab_15_15==T|
+           T2_manFBSHigh_Diab_16_16==T|
+           T2_manFBSHigh_Diab_17_17==T|
+           T2_manFBSHigh_Diab_18_18==T|
+           T2_manFBSHigh_Diab_19_19==T|
+           T2_manFBSHigh_Diab_20_20==T|
+           T2_manFBSHigh_Diab_21_21==T|
+           T2_manFBSHigh_Diab_22_22==T|
+           T2_manFBSHigh_Diab_23_23==T)|
+          (T2_manFBSHigh_spec_00_00==T|
+             T2_manFBSHigh_spec_01_01==T|
+             T2_manFBSHigh_spec_02_02==T|
+             T2_manFBSHigh_spec_03_03==T|
+             T2_manFBSHigh_spec_04_04==T|
+             T2_manFBSHigh_spec_05_05==T|
+             T2_manFBSHigh_spec_06_06==T|
+             T2_manFBSHigh_spec_07_07==T|
+             T2_manFBSHigh_spec_08_08==T|
+             T2_manFBSHigh_spec_09_09==T|
+             T2_manFBSHigh_spec_10_10==T|
+             T2_manFBSHigh_spec_11_11==T|
+             T2_manFBSHigh_spec_12_12==T|
+             T2_manFBSHigh_spec_13_13==T|
+             T2_manFBSHigh_spec_14_14==T|
+             T2_manFBSHigh_spec_15_15==T|
+             T2_manFBSHigh_spec_16_16==T|
+             T2_manFBSHigh_spec_17_17==T|
+             T2_manFBSHigh_spec_18_18==T|
+             T2_manFBSHigh_spec_19_19==T|
+             T2_manFBSHigh_spec_20_20==T|
+             T2_manFBSHigh_spec_21_21==T|
+             T2_manFBSHigh_spec_22_22==T|
+             T2_manFBSHigh_spec_23_23==T)),RefHr:=TRUE]
+
 xtabs(~smallD$RefHr, addNA=T)
 
 #refHrHosp_2 rename to refHr_2
-smallD[,refHr_2:=(
-    T2_refHR_29_29==T|
-    T2_refHR_30_30==T|
-    T2_refHR_31_31==T|
-    T2_refHR_32_32==T|
-      T2_refHR_33_33==T|
-      T2_refHR_34_34==T|
-      T2_refHR_35_35==T|
-      T2_refHR_36_36==T|
-      T2_refHR_35_37==T)]
 
+smallD[,refHr_2:=((T2_manRef_HR_29_29==T|
+           T2_manRef_HR_30_30==T|
+           T2_manRef_HR_31_31==T|
+           T2_manRef_HR_32_32==T|
+           T2_manRef_HR_33_33==T|
+           T2_manRef_HR_34_34==T|
+           T2_manRef_HR_35_35==T|
+           T2_manRef_HR_36_36==T|
+           T2_manRef_HR_37_37==T|
+           T2_manRef_HR_38_38==T|
+           T2_manRef_HR_39_39==T)|
+          (T2_manRBGHigh_Diab_29_29==T|
+             T2_manRBGHigh_Diab_30_30==T|
+             T2_manRBGHigh_Diab_31_31==T|
+             T2_manRBGHigh_Diab_32_32==T|
+             T2_manRBGHigh_Diab_33_33==T|
+             T2_manRBGHigh_Diab_34_34==T|
+             T2_manRBGHigh_Diab_35_35==T|
+             T2_manRBGHigh_Diab_36_36==T|
+             T2_manRBGHigh_Diab_37_37==T|
+             T2_manRBGHigh_Diab_38_38==T|
+             T2_manRBGHigh_Diab_39_39==T)|
+          (T2_manFBSHigh_Diab_30_30==T|
+             T2_manFBSHigh_Diab_31_31==T|
+             T2_manFBSHigh_Diab_32_32==T|
+             T2_manFBSHigh_Diab_33_33==T|
+             T2_manFBSHigh_Diab_34_34==T|
+             T2_manFBSHigh_Diab_35_35==T|
+             T2_manFBSHigh_Diab_36_36==T|
+             T2_manFBSHigh_Diab_37_37==T|
+             T2_manFBSHigh_Diab_38_38==T|
+             T2_manFBSHigh_Diab_39_39==T|
+             T2_manFBSHigh_Diab_29_29==T)|
+            (T2_manFBSHigh_Diab_30_30==T|
+               T2_manFBSHigh_spec_31_31==T|
+               T2_manFBSHigh_spec_32_32==T|
+               T2_manFBSHigh_spec_33_33==T|
+               T2_manFBSHigh_spec_34_34==T|
+               T2_manFBSHigh_spec_35_35==T|
+               T2_manFBSHigh_spec_36_36==T|
+               T2_manFBSHigh_spec_37_37==T|
+               T2_manFBSHigh_spec_38_38==T|
+               T2_manFBSHigh_spec_39_39==T|
+               T2_manFBSHigh_spec_29_29==T)),refHr_2:=TRUE]
 
 smallD[Opportunity_GDM_screening_2==1 &
          (T2_anvisitnew_24_24==T & 
@@ -122,22 +228,14 @@ smallD[,screenb424:=as.logical(NA)]
 smallD[Opportunity_GDM_screening_1==1,
        screenb424:=F]
 smallD[screenb424==F &
-         (T2_labfastbloodglu_high_00_14==F|
-         T2_labfastbloodglu_high_15_17==F |
-         T2_labfastbloodglu_high_18_22==F |
-         T2_labfastbloodglu_high_23_23==F|
-         T2_labbloodglu_high_00_14==F|
-         T2_labbloodglu_high_15_17==F|
-         T2_labbloodglu_high_18_22==F|
-         T2_labbloodglu_high_23_23==F)|
-         (T2_labbloodglu_high_00_14==F|
-            T2_labbloodglu_high_15_17==F |
-            T2_labbloodglu_high_18_22==F |
-            T2_labbloodglu_high_23_23==F|
-            T2_labbloodglu_high_00_14==F|
-            T2_labbloodglu_high_15_17==F|
-            T2_labbloodglu_high_18_22==F|
-            T2_labbloodglu_high_23_23==F)|
+         (T2_labfastbloodglu_exists_00_14==T|
+         T2_labfastbloodglu_exists_15_17==T |
+         T2_labfastbloodglu_exists_18_22==T |
+         T2_labfastbloodglu_exists_23_23==T|
+         T2_labbloodglu_exists_00_14==T|
+         T2_labbloodglu_exists_15_17==T|
+         T2_labbloodglu_exists_18_22==T|
+         T2_labbloodglu_exists_23_23==T)|
          (T2_laburglu_exists_00_14==T|
             T2_laburglu_exists_15_17==T |
             T2_laburglu_exists_18_22==T|
@@ -145,11 +243,14 @@ smallD[screenb424==F &
 
 xtabs(~smallD$screenb424, addNA=T)
 
-scrb424 <- smallD[,.(A=sum(ident_dhis2_control==T),
-                        B=sum(ident_dhis2_control==F)),
-                     keyby=.(screenb424)]
 
 ##Defining Successes 
+
+################
+# B4 24 weeks
+################
+
+
 smallD[,GDMscreeningontime_1A:=as.logical(NA)]
 smallD[,GDMscreeningontime_1B:=as.logical(NA)]
 smallD[,GDMscreeningontime_1C:=as.logical(NA)]
@@ -160,39 +261,57 @@ smallD[screenb424==T,
 
 xtabs(~smallD$GDMscreeningontime_1, addNA=T)
 
-#normal Values
+#normal Values/ negative values
 smallD[,GDMscreeningontime_1A:=as.logical(NA)]
+
+
 smallD[Opportunity_GDM_screening_1==1 & 
-         screenb424==T &
-          (T2_laburglu_00_14=="NEG"|
-             T2_laburglu_15_17=="NEG"|
-             T2_laburglu_18_22=="NEG"|
-             T2_laburglu_23_23=="NEG"), 
+         (T2_laburglu_exists_00_14==TRUE|
+            T2_laburglu_exists_15_17==TRUE|
+            T2_laburglu_exists_18_22==TRUE|
+            T2_laburglu_exists_23_23==TRUE), 
+       GDMscreeningontime_1A:=FALSE]
+
+
+smallD[Opportunity_GDM_screening_1==1 & 
+        (T2_laburglu_neg_00_14==TRUE|
+             T2_laburglu_neg_15_17==TRUE|
+             T2_laburglu_neg_18_22==TRUE|
+             T2_laburglu_neg_23_23==TRUE), 
        GDMscreeningontime_1A:=TRUE]
 
 # high urglu or blood glu
+
+# gdm screening if have pos urglu and have h
 smallD[,GDMscreeningontime_1B:=as.logical(NA)]
 smallD[Opportunity_GDM_screening_1==1 &
-         (T2_laburglu_00_14=="POS"|
-            T2_laburglu_15_17=="POS"|
-            T2_laburglu_18_22=="POS"|
-            T2_laburglu_23_23=="POS")|
-         (T2_labbloodglu_high_00_14==T|
-         T2_labbloodglu_high_15_17==T|
-         T2_labbloodglu_high_18_22==T|
-         T2_labbloodglu_high_23_23==T)|
-         (T2_labfastbloodglu_high_00_14==T|
-            T2_labfastbloodglu_high_15_17==T|
-            T2_labfastbloodglu_high_18_22==T|
-            T2_labfastbloodglu_high_23_23==T), GDMscreeningontime_1B:=FALSE]
+         (T2_laburglu_pos_00_14==TRUE|
+            T2_laburglu_pos_15_17==TRUE|
+            T2_laburglu_pos_18_22==TRUE|
+            T2_laburglu_pos_23_23==TRUE),GDMscreeningontime_1B:=FALSE]
 
-smallD[,GDMscreeningontime_1C:=as.logical(NA)]
-smallD[GDMscreeningontime_1B==FALSE &
-         RefHr==T, GDMscreeningontime_1B:=TRUE]
+smallD[GDMscreeningontime_1B==F &
+         (T2_labbloodglu_exists_00_14==T|
+         T2_labbloodglu_exists_15_17==T|
+         T2_labbloodglu_exists_18_22==T|
+         T2_labbloodglu_exists_23_23==T)|
+         (T2_labfastbloodglu_exists_00_14==T|
+            T2_labfastbloodglu_exists_15_17==T|
+            T2_labfastbloodglu_exists_18_22==T|
+            T2_labfastbloodglu_exists_23_23==T), GDMscreeningontime_1B:=TRUE]
+
+xtabs(~smallD$GDMscreeningontime_1B, addNA=T)
+
+
+################
+# 24- 28  weeks
+################
+
+
 
 
 if(IS_GAZA==F){
-#24-28 weeks
+
 smallD[,GDMscreeningontime_2:=as.logical(NA)]
 smallD[Opportunity_GDM_screening_2==1 &
             (T2_labbloodglu_exists_24_24==F &
@@ -206,96 +325,292 @@ smallD[Opportunity_GDM_screening_2==1 &
                T2_labfastbloodglu_exists_27_27==F &
                T2_labfastbloodglu_exists_28_28==F), GDMscreeningontime_2:=F]
 
-smallD[Opportunity_GDM_screening_2==1 & 
-            (T2_labbloodglu_exists_24_24==T|
-               T2_labbloodglu_exists_25_25==T|
-               T2_labbloodglu_exists_26_26==T|
-               T2_labbloodglu_exists_27_27==T|
-               T2_labbloodglu_exists_28_28==T) &
-            (T2_labbloodglu_high_24_24==F|
-               T2_labbloodglu_high_25_25==F|
-               T2_labbloodglu_high_26_26==F|
-               T2_labbloodglu_high_27_27==F|
-               T2_labbloodglu_high_28_28==F)|
-            (T2_labfastbloodglu_exists_24_24==T|
-               T2_labfastbloodglu_exists_25_25==T|
-               T2_labfastbloodglu_exists_26_26==T|
-               T2_labfastbloodglu_exists_27_27==T|
-               T2_labfastbloodglu_exists_28_28==T),GDMscreeningontime_2:=TRUE]
+
+smallD[,GDMscreeningontime_2A:=as.logical(NA)]
+smallD[GDMscreeningontime_2==F,GDMscreeningontime_2A:=F]
+
+smallD[GDMscreeningontime_2==F &
+            (T2_labbloodglu_normal_24_24==T|
+               T2_labbloodglu_normal_25_25==T|
+               T2_labbloodglu_normal_26_26==T|
+               T2_labbloodglu_normal_27_27==T|
+               T2_labbloodglu_normal_28_28==T)|
+            
+            (T2_labfastbloodglu_normal_24_24==T|
+               T2_labfastbloodglu_normal_25_25==T|
+               T2_labfastbloodglu_normal_26_26==T|
+               T2_labfastbloodglu_normal_27_27==T|
+               T2_labfastbloodglu_normal_28_28==T),GDMscreeningontime_2A:=TRUE]
+
 xtabs(~smallD$GDMscreeningontime_2, addNA=T)
+
+
+# high rbg at 24-28 weeks
+smallD[,GDMscreeningontime_2B:=as.logical(NA)]
+
+#identified as high blood sugar and not managed yet = F
+# true value = managed
+smallD[GDMscreeningontime_2==F &
+         (T2_labbloodglu_high_24_24==T|
+            T2_labbloodglu_high_25_25==T|
+            T2_labbloodglu_high_26_26==T|
+            T2_labbloodglu_high_27_27==T|
+            T2_labbloodglu_high_28_28==T)|
+         
+         (T2_labfastbloodglu_high_24_24==T|
+            T2_labfastbloodglu_high_25_25==T|
+            T2_labfastbloodglu_high_26_26==T|
+            T2_labfastbloodglu_high_27_27==T|
+            T2_labfastbloodglu_high_28_28==T),GDMscreeningontime_2B:=FALSE]
+
+xtabs(~smallD$GDMscreeningontime_2B, addNA=T)
+
+
+# high value managed
+
+smallD[GDMscreeningontime_2B==F &
+        (T2_manRBGHigh_Diab_24_24==T|
+         T2_manRBGHigh_Diab_25_25==T|
+         T2_manRBGHigh_Diab_26_26==T|
+         T2_manRBGHigh_Diab_27_27==T|
+         T2_manRBGHigh_Diab_28_28==T) |
+       (T2_manFBSHigh_Diab_24_24==T|
+            T2_manFBSHigh_Diab_25_25==T|
+            T2_manFBSHigh_Diab_26_26==T|
+            T2_manFBSHigh_Diab_27_27==T|
+            T2_manFBSHigh_Diab_28_28==T)|
+         (T2_manRef_HR_24_24==T|
+            T2_manRef_HR_25_25==T|
+            T2_manRef_HR_26_26==T|
+            T2_manRef_HR_27_27==T|
+            T2_manRef_HR_28_28==T)|
+         (T2_manRef_spec_24_24==T|
+            T2_manRef_spec_25_25==T|
+            T2_manRef_spec_26_26==T|
+            T2_manRef_spec_27_27==T|
+            T2_manRef_spec_28_28==T), GDMscreeningontime_2B:=T]
+
+
+# intermediate values
+
+
+smallD[,GDMscreeningontime_2C:=as.logical(NA)]
+
+
+smallD[Opportunity_GDM_screening_2==1 &
+         GDMscreeningontime_2==F &
+         T2_labbloodglu_likelyGDM_24_28==T,GDMscreeningontime_2C:=FALSE]
+
+# need management for this???? with ogct or not??
+
+xtabs(~smallD$GDMscreeningontime_2, addNA=T)
+
+
 } else {
+  
   
   smallD[,GDMscreeningontime_2:=as.logical(NA)]
   smallD[Opportunity_GDM_screening_2==1 &
-        (T2_labfastbloodglu_exists_24_24==F &
+           (T2_labfastbloodglu_exists_24_24==F &
               T2_labfastbloodglu_exists_25_25==F &
               T2_labfastbloodglu_exists_26_26==F &
               T2_labfastbloodglu_exists_27_27==F &
               T2_labfastbloodglu_exists_28_28==F), GDMscreeningontime_2:=F]
   
+  
+  
+  smallD[,GDMscreeningontime_2A:=as.logical(NA)]
+  smallD[GDMscreeningontime_2==F,GDMscreeningontime_2A:=F]
+  
+  smallD[GDMscreeningontime_2==F &
+        (T2_labfastbloodglu_exists_24_24==F &
+              T2_labfastbloodglu_exists_25_25==F &
+              T2_labfastbloodglu_exists_26_26==F &
+              T2_labfastbloodglu_exists_27_27==F &
+              T2_labfastbloodglu_exists_28_28==F), GDMscreeningontime_2A:=F]
+  
   smallD[Opportunity_GDM_screening_2==1 & 
-          (T2_labfastbloodglu_high_24_24==F|
-              T2_labfastbloodglu_high_25_25==F|
-              T2_labfastbloodglu_high_26_26==F|
-              T2_labfastbloodglu_high_27_27==F|
-              T2_labfastbloodglu_high_28_28==F),GDMscreeningontime_2:=TRUE]
+           GDMscreeningontime_2A==T &
+          (T2_labfastbloodglu_normal_24_24==T|
+              T2_labfastbloodglu_normal_25_25==T|
+              T2_labfastbloodglu_normal_26_26==T|
+              T2_labfastbloodglu_normal_27_27==T|
+              T2_labfastbloodglu_normal_28_28==T),GDMscreeningontime_2A:=TRUE]
+  
+  
+  
+  # high rbg at 24-28 weeks
+  smallD[,GDMscreeningontime_2B:=as.logical(NA)]
+  
+  #identified as high blood sugar and not managed yet = F
+  # true value = managed
+  smallD[Opportunity_GDM_screening_2==1 & 
+           GDMscreeningontime_2==F &
+           (T2_labfastbloodglu_high_24_24==T|
+              T2_labfastbloodglu_high_25_25==T|
+              T2_labfastbloodglu_high_26_26==T|
+              T2_labfastbloodglu_high_27_27==T|
+              T2_labfastbloodglu_high_28_28==T),GDMscreeningontime_2B:=FALSE]
+  
+  xtabs(~smallD$GDMscreeningontime_2B, addNA=T)
+  
+  
+  # high value managed
+  
+  smallD[GDMscreeningontime_2B==F &
+           (T2_manFBSHigh_Diab_24_24==T|
+              T2_manFBSHigh_Diab_25_25==T|
+              T2_manFBSHigh_Diab_26_26==T|
+              T2_manFBSHigh_Diab_27_27==T|
+              T2_manFBSHigh_Diab_28_28==T)|
+           (T2_manFBSHigh_spec_24_24==T|
+           T2_manFBSHigh_spec_25_25==T|
+           T2_manFBSHigh_spec_26_26==T|
+           T2_manFBSHigh_spec_27_27==T|
+           T2_manFBSHigh_spec_28_28==T)|
+           (T2_manRef_HR_24_24==T|
+              T2_manRef_HR_25_25==T|
+              T2_manRef_HR_26_26==T|
+              T2_manRef_HR_27_27==T|
+              T2_manRef_HR_28_28==T), GDMscreeningontime_2B:=T]
+  
+  xtabs(~smallD$GDMscreeningontime_2B, addNA=T)
+  
+  
+  # intermediate values
+
+  smallD[,GDMscreeningontime_2C:=as.logical(NA)]
+  
+  
+  smallD[Opportunity_GDM_screening_2==1 &
+           GDMscreeningontime_2==F &
+           T2_labfastbloodglu_likelyGDM_24_28==T,GDMscreeningontime_2C:=FALSE]
+  
+  # managment is repeat FBS with in 3 weeks
+  
+  smallD[GDMscreeningontime_2C==F &
+           T2_repeatFBS_24_24==T|
+           T2_repeatFBS_25_25==T|
+           T2_repeatFBS_26_26==T|
+           T2_repeatFBS_27_27==T|
+           T2_repeatFBS_28_28==T|
+           T2_repeatFBS_29_29==T|
+           T2_repeatFBS_30_30==T|
+           T2_repeatFBS_31_31==T,GDMscreeningontime_2C==T]
+  
+  
+
   
   
 }
 
 
+################
+# > 28 weeks
+################
 
 
-# referral to HR for high glucose values
-smallD[,refHr24_28weeks:=as.logical(NA)]
-smallD[GDMscreeningontime_2==F,refHr24_28weeks:=FALSE]
-smallD[refHr24_28weeks]
+###########################
+# referred at 24-28 weeks
+# remove from denominator
+###########################
 
 
 #Screening after 28 weeks: Creating one var for 3 possibilities
 smallD[,screenafter28:=as.logical(NA)]
+smallD[Opportunity_GDM_screening_3==1 & 
+         refHr24_28weeks==T|
+         RefHr==T,
+       Opportunity_GDM_screening_3:=0]
+
 smallD[Opportunity_GDM_screening_3==1, screenafter28:=F]
 smallD[screenafter28==F &
-         ((T2_labbloodglu_high_29_30==F|
-         T2_labbloodglu_high_31_33==F|
-         T2_labbloodglu_high_34_34==F|
-         T2_labbloddglu_high_35_37==F)),
+         ((T2_labbloodglu_exists_29_30==T|
+             T2_labbloodglu_exists_31_33==T|
+             T2_labbloodglu_exists_34_34==T|
+             T2_labbloodglu_exists_35_37==T)|
+            (T2_labfastbloodglu_exists_29_30==T|
+               T2_labfastbloodglu_exists_31_33==T|
+               T2_labfastbloodglu_exists_34_34==T|
+               T2_labfastbloodglu_exists_35_37==T)),
        screenafter28:=T]
 xtabs(~smallD$screenafter28, addNA=T)
 
 
+
+
 ##Defining Success
 smallD[,GDMscreeningontime_3:=as.logical(NA)]
-smallD[screenafter28==F, 
+smallD[Opportunity_GDM_screening_3==1, 
        GDMscreeningontime_3:=FALSE]
 smallD[screenafter28==T,GDMscreeningontime_3:=TRUE]
 xtabs(~smallD$GDMscreeningontime_3, addNA=T)
 
+# normal values 3A
+smallD[,GDMscreeningontime_3A:=as.logical(NA)]
+smallD[screenafter28==T &
+         ((T2_labbloodglu_normal_29_30==T|
+             T2_labbloodglu_normal_31_33==T|
+             T2_labbloodglu_normal_34_34==T|
+             T2_labbloodglu_normal_35_37==T)|
+            (T2_labfastbloodglu_normal_29_30==T|
+               T2_labfastbloodglu_normal_31_33==T|
+               T2_labfastbloodglu_normal_34_34==T|
+               T2_labfastbloodglu_normal_35_37==T)),GDMscreeningontime_3A:=TRUE]
+
+
+# high values
+smallD[,GDMscreeningontime_3B:=as.logical(NA)]
+
+smallD[GDMscreeningontime_3==F &
+         ((T2_labbloodglu_high_29_30==T|
+             T2_labbloodglu_high_31_33==T|
+             T2_labbloodglu_high_34_34==T|
+             T2_labbloodglu_high_35_37==T)|
+            (T2_labfastbloodglu_high_29_30==T|
+               T2_labfastbloodglu_high_31_33==T|
+               T2_labfastbloodglu_high_34_34==T|
+               T2_labfastbloodglu_high_35_37==T)), GDMscreeningontime_3B:=FALSE]
+
+
+smallD[GDMscreeningontime_3B==F & 
+         refHr_2==T,
+       GDMscreeningontime_3B:=TRUE]
+
+
+
 #management fo high RBG outside of time windows
 smallD[, GDMscreeningontime_4:=as.logical(NA)]
 smallD[Opportunity_GDM_screening_4==1, GDMscreeningontime_4:= FALSE]
+
 smallD[GDMscreeningontime_4==F & 
          (RefHr==T|refHr_2==T),GDMscreeningontime_4:=TRUE]
 
 
 prelimGDM <- smallD[,.(N=.N,
-                       Opportun_1=sum(Opportunity_GDM_screening_1==T, na.rm=T),
-                       Success_1A=sum(GDMscreeningontime_1A==T, na.rm=T),
-                       Success_1B=sum(GDMscreeningontime_1B==T, na.rm=T),
-                       Success_1C=sum(GDMscreeningontime_1C==T, na.rm=T),
-                       Screenb424=sum(screenb424==T, na.rm=T),
-                       Screenb424False=sum(screenb424==F, na.rm=T),
-                       Opportun_2=sum(Opportunity_GDM_screening_2==T, na.rm=T),
-                       Success_2=sum(GDMscreeningontime_2==T, na.rm=T),
-                       Opportun_3=sum(Opportunity_GDM_screening_3==T, na.rm=T),
-                       Success_3=sum(GDMscreeningontime_3==T, na.rm=T),
-                       screenafter28=sum(screenafter28==T, na.rm=T),
-                       screenafter28False=sum(screenafter28==F, na.rm=T),
-                       screenbtwn=sum(GDMscreeningontime_4==T, na.rm=T),
-                       screenbtwnFalse=sum(GDMscreeningontime_4==F, na.rm=T),
-                       Opportun_4=sum(Opportunity_GDM_screening_4==T, na.rm=T),
-                       Succ_4=sum(GDMscreeningontime_4, na.rm=T)),
-                       keyby=.(ident_dhis2_control)]
+                       "Denom_Screened Before 24"=sum(Opportunity_GDM_screening_1==T, na.rm=T),
+                       "Before 24 laburglu exists"=sum(GDMscreeningontime_1A==F, na.rm=T),
+                       "Screened before 24_Negative urglu"=sum(GDMscreeningontime_1A==T, na.rm=T),
+                       "Screened and Managed before 24_laburglupos&FBSRBG"=sum(GDMscreeningontime_1B==T, na.rm=T),
+                       "Screened but not managed Before 24-has pos laburglu"=sum(GDMscreeningontime_1B==F, na.rm=T),
+                       "All screened before 24"=sum(screenb424==T, na.rm=T),
+                       "Not screened before 24"=sum(screenb424==F, na.rm=T),
+                       "Denominator Screened 24-28"=sum(Opportunity_GDM_screening_2==T, na.rm=T),
+                       "24-28 Weeks RBS and FBS exist"=sum(GDMscreeningontime_2==F, na.rm=T),
+                       "24-28 Weeks Normal Values_Screening"=sum(GDMscreeningontime_2A==T, na.rm=T),
+                       "24-28 Weeks not normal values_screening"=sum(GDMscreeningontime_2A==F, na.rm=T),
+                       "24-28 Week High FBS/RBG_screened not managed"=sum(GDMscreeningontime_2B==F, na.rm=T),
+                       "24-28 High FBS/RBG managed"=sum(GDMscreeningontime_2B==T, na.rm=T),
+                       "24-28 Intmd RBG/FBS_screened not managed"=sum(GDMscreeningontime_2c==F, na.rm=T),
+                       "24-28 Intm RBG/FBS Management"=sum(GDMscreeningontime_2c==T, na.rm=T),
+                       "After 28 weeks_opportunities"=sum(GDMscreeningontime_3==F, na.rm=T),
+                       "After 28 weeks_normal FBS RBG"=sum(GDMscreeningontime_3A==T, na.rm=T),
+                       "After 28 weeks_high RBG or FBS and not managed"=sum(GDMscreeningontime_3B==F, na.rm=T),
+                       "After 28 weeks high RBG or FBS and managed"=sum(GDMscreeningontime_3B==T, na.rm=T),
+                       "High RBG or FBS outside of timewindows"=sum(GDMscreeningontime_4==F, na.rm=T),
+                       "High RBG or FBS outside of timewindows and Managed"=sum(GDMscreeningontime_4==T, na.rm=T)),
+                       keyby=.(bookyear,
+                               TrialArm)]
                               
                                
 

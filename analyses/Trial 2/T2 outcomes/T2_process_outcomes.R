@@ -42,7 +42,7 @@ d[ident_TRIAL_2==F &
 
 d[ident_TRIAL_2==T & 
      ident_TRIAL_3==T,TrialArm:="SMS and QID"]
-
+xtabs(~d$TrialArm, addNA=T)
 
 
 d[,precovid:=as.logical(NA)]
@@ -183,12 +183,13 @@ if(IS_GAZA==T){
     var_man_date<- man_date[i] 
     
     d[,(var_man_gestage):=as.numeric(floor(difftime(get(var_man_date),lmpT1, units="days")))]
- 
+  }
+  
   #risk gAs
   risk_date <- stringr::str_subset(names(d), "^riskdate_[0-9]+")
   riskT1_gA <- stringr::str_replace(risk_date, "riskdate","riskT2gestagedays")
   
-  for(i in seq_along(man_date)){
+  for(i in seq_along(risk_date)){
     var_man_gestage <- riskT1_gA[i]
     var_man_date<- risk_date[i] 
     
@@ -201,7 +202,7 @@ if(IS_GAZA==T){
   d[,booklabhb:=as.numeric(NA)]
   d[abs(labT2gestagedays_1-bookgestagedays)<7,booklabhb:=labhb_1]
   
-  }
+  
   
   ##making categories of days for booking
   
@@ -228,7 +229,7 @@ if(IS_GAZA==T){
 smallD  <- d[(ident_dhis2_booking==T | ident_dhis2_an==T) &
                !is.na(TrialArm),]
 
-
+#smallD <- d
 
 # MAKE BOOK VISIT FOR ANEMIA
 smallD[,booklabhb:=as.numeric(NA)]
@@ -701,6 +702,25 @@ smallD[,labT2gestagedays_0:=NULL]
 smallD[,laburglu_0:=NULL]
 xtabs(~smallD$T2_laburglu_exists_15_17)
 
+
+
+### Lab urglu neg Normal ####
+smallD[,labT2gestagedays_0:=bookgestagedays]
+smallD[,laburglu_0:=booklaburglu]
+# normal urine glucose
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="laburglu_neg",
+  variableOfInterestPattern="laburglu",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete = c("NEG"),
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
+smallD[,laburglu_0:=NULL]
+xtabs(~smallD$T2_laburglu_neg_15_17)
+
 # lab urglu pos
 smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,laburglu_0:=booklaburglu]
@@ -751,6 +771,24 @@ smallD[,labT2gestagedays_0:=NULL]
 smallD[,labbloodglu_0:=NULL]
 xtabs(~smallD$T2_labbloodglu_high_00_14)
 xtabs(~smallD$T2_labbloodglu_high_18_22)
+
+
+
+# Lab RBS likely GDM
+smallD[,labT2gestagedays_0:=bookgestagedays]
+smallD[,labbloodglu_0:=booklabbloodglu]
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="labbloodglu_likelyGDM",
+  variableOfInterestPattern="labbloodglu",
+  TruevaluesMin=105,
+  TruevaluesMax=139,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
+smallD[,labbloodglu_0:=NULL]
+xtabs(~smallD$T2_labbloodglu_likelyGDM_24_28)
 
 
 # Lab FBS exists
@@ -984,6 +1022,31 @@ smallD <- VisitVariables(
   gestagedaysVariable = "riskT2gestagedays")
 xtabs(~smallD$T2_riskLikelyGDM_18_22)
 
+
+# refSpec
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="refSpec",
+  variableOfInterestPattern="mantypex",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete =c("RefSpec") ,
+  gestagedaysVariable = "manT2gestagedays")
+xtabs(~smallD$T2_refSpec_18_22)
+
+
+# LabPPC
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="ppclab",
+  variableOfInterestPattern="labanpp",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete =c("PPC") ,
+  gestagedaysVariable = "labT2gestagedays")
+xtabs(~smallD$T2_ppclab_18_22)
 
 
 # RefDiabetes
@@ -1361,6 +1424,211 @@ for(i in 0:37){
   
 }
 xtabs(~smallD$T2_manFBSLikelyGDM_Diab_26_26)
+
+
+
+
+
+
+
+
+##########
+# manrefHR
+##########
+
+########## Ref HR for any reason at any time point #########
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:0), width=2, flag="0")
+  
+  #output variable
+  var_refHR <- sprintf("T2_manRef_HR_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_refHR <- "temp_refHR"
+  
+  #id source
+  var_refHRsource <- sprintf("T2_refHR_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_refHR):=as.logical(NA)]
+  
+  # is false, if you have a referral
+  # intervention
+  smallD[get(var_refHRsource)==TRUE, (var_temp_manperf):=FALSE]
+  
+  
+  # control
+  smallD[get(var_refHRsource)==TRUE, (var_temp_refHR):=TRUE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manperf check
+    var_manperf <- sprintf("T2_manperf_%s_%s", 
+                           week_later, 
+                           week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_manperf)==TRUE, (var_temp_manperf):=TRUE]
+    
+    
+  }
+  #making var for high blood glu 
+  smallD[,(var_refHR):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_refHR):=get(var_temp_refHR)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_refHR):=get(var_temp_manperf) & 
+           get(var_temp_refHR)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_refHR):=NULL]
+  
+}
+xtabs(~smallD$T2_manRef_HR_35_35)
+
+
+
+
+
+# referred to specialist
+xtabs(~smallD$T2_refSpec_18_22)
+
+
+
+##########
+# manrefHR
+##########
+
+########## Ref HR for any reason at any time point #########
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:0), width=2, flag="0")
+  
+  #output variable
+  var_refHR <- sprintf("T2_manRef_spec_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_refHR <- "temp_refHR"
+  
+  #id source
+  var_refHRsource <- sprintf("T2_refSpec_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_refHR):=as.logical(NA)]
+  
+  # is false, if you have a referral
+  # intervention
+  smallD[get(var_refHRsource)==TRUE, (var_temp_manperf):=FALSE]
+  
+  
+  # control
+  smallD[get(var_refHRsource)==TRUE, (var_temp_refHR):=TRUE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manperf check
+    var_manperf <- sprintf("T2_manperf_%s_%s", 
+                           week_later, 
+                           week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_manperf)==TRUE, (var_temp_manperf):=TRUE]
+    
+    
+  }
+  #making var for high blood glu 
+  smallD[,(var_refHR):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_refHR):=get(var_temp_refHR)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_refHR):=get(var_temp_manperf) & 
+           get(var_temp_refHR)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_refHR):=NULL]
+  
+}
+
+xtabs(~smallD$T2_manRef_spec_35_35)
+
+
+
+
+########## Ref HR for any reason at any time point #########
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:3), width=2, flag="0")
+  
+  #output variable
+  var_refHR <- sprintf("T2_repeatFBS_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_refHR <- "temp_refHR"
+  
+  #id source
+  var_refHRsource <- sprintf("T2_labfastbloodglu_likelyGDM_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_refHR):=as.logical(NA)]
+  
+  # is false, if you have a referral
+  # intervention
+  smallD[get(var_refHRsource)==TRUE, (var_temp_manperf):=FALSE]
+  
+  
+  # control
+  smallD[get(var_refHRsource)==TRUE, (var_temp_refHR):=TRUE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manperf check
+    var_manperf <- sprintf("T2_labfastbloodglu_exists_%s_%s", 
+                           week_later, 
+                           week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_manperf)==TRUE, (var_temp_manperf):=TRUE]
+    
+    
+  }
+  #making var for high blood glu 
+  smallD[,(var_refHR):=as.logical(NA)]
+  
+  #control
+  smallD[ident_dhis2_control==T,(var_refHR):=get(var_temp_refHR)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_refHR):=get(var_temp_manperf) & 
+           get(var_temp_refHR)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_refHR):=NULL]
+  
+}
+
+xtabs(~smallD$T2_repeatFBS_24_24, addNA=T)
+
+
+
+
+
 
 
 ###################################################################################################################
