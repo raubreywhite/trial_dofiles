@@ -1228,7 +1228,7 @@ openxlsx::write.xlsx(attendance,
 ####### check merges
 ####### may have to use bookdate as second factor
 
-# merge this w (wide) by uniqueid and bookdate into the entire dataset
+# merge this w (wide) by uniqueid and bookdate into the entire dataset 
 T2small <- d[bookdate>="2019-01-01"]
 nrow(T2small)
 

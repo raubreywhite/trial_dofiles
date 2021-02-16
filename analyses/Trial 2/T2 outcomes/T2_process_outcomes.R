@@ -229,7 +229,7 @@ if(IS_GAZA==T){
 smallD  <- d[(ident_dhis2_booking==T | ident_dhis2_an==T) &
                !is.na(TrialArm),]
 
-#smallD <- d
+smallD <- d
 
 # MAKE BOOK VISIT FOR ANEMIA
 smallD[,booklabhb:=as.numeric(NA)]
@@ -260,9 +260,16 @@ xtabs(~smallD$booklabbloodglu, addNA=T)
 
 # MAKE BOOK VISIT FOR LABBLOODGLU_HIGH
 smallD[,booklabbloodglu_high:=as.logical(NA)]
-smallD[!is.na(booklabbloodglu),booklabbloodglu_high:=FALSE]
+smallD[!is.na(booklabbloodglu) & booklabbloodglu>0 & booklabbloodglu<140,booklabbloodglu_high:=FALSE]
 smallD[booklabbloodglu>=140 & booklabbloodglu<500,booklabbloodglu_high:=TRUE]
 xtabs(~smallD$booklabbloodglu_high, addNA=T)
+
+
+# MAKE BOOK VISIT FOR LABBLOODGLU_HIGH
+smallD[,booklabbloodglu_intmd:=as.logical(NA)]
+smallD[!is.na(booklabbloodglu) & booklabbloodglu>0 & booklabbloodglu<126,booklabbloodglu_high:=FALSE]
+smallD[booklabbloodglu>=126 & booklabbloodglu<140,booklabbloodglu_high:=TRUE]
+xtabs(~smallD$booklabbloodglu_intmd, addNA=T)
 
 # MAKE BOOK VISIT FOR LABFASTBLOODGLU
 smallD[,booklabfastbloodglu:=as.numeric(NA)]
@@ -271,9 +278,28 @@ xtabs(~smallD$booklabfastbloodglu)
 
 # MAKE BOOK VISIT FOR LABfastBLOODGLU_HIGH
 smallD[,booklabfastbloodglu_high:=as.logical(NA)]
-smallD[!is.na(booklabfastbloodglu),booklabfastbloodglu_high:=FALSE]
-smallD[booklabfastbloodglu>126 ,booklabfastbloodglu_high:=TRUE]
+smallD[!is.na(booklabfastbloodglu) & 
+         booklabfastbloodglu>0 & 
+         booklabfastbloodglu<126,booklabfastbloodglu_high:=FALSE]
+
+smallD[booklabfastbloodglu>=126 ,booklabfastbloodglu_high:=TRUE]
 xtabs(~smallD$booklabfastbloodglu_high, addNA=T)
+
+
+
+# MAKE BOOK VISIT FOR LABfastBLOODGLU_HIGH
+smallD[,booklabfastbloodglu_intmd:=as.logical(NA)]
+smallD[!is.na(booklabfastbloodglu) &
+         booklabfastbloodglu>0 & booklabfastbloodglu<95,booklabfastbloodglu_intmd:=FALSE]
+
+smallD[booklabfastbloodglu>=95 & booklabfastbloodglu<126 ,booklabfastbloodglu_intmd:=TRUE]
+xtabs(~smallD$booklabfastbloodglu_intmd, addNA=T)
+
+
+
+
+
+
 
 VisitVariables <- function(smallD,days,variableOfInterestName,variableOfInterestPattern,TruevaluesMin=NULL,TruevaluesMax=NULL,TruevaluesDiscrete=NULL,gestagedaysVariable="anT2gestagedays" ){
   
@@ -1365,6 +1391,66 @@ for(i in 0:37){
   
 }
 xtabs(~smallD$T2_manFBSHigh_Diab_26_26)
+
+
+
+
+###########################
+# FBS management for gaza
+###########################
+
+
+# High RBG, RefDIAB
+for(i in 0:37){
+  
+  # make sure everything has 2 digits (with 0 in front)
+  week_current <- formatC(i, width=2, flag="0")
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
+  
+  #output variable
+  var_mangdm <- sprintf("T2_manFBSHigh_spec_%s_%s", week_current, week_current)
+  var_temp_manperf <- "temp_manperf"
+  var_temp_mangdm <- "temp_mangdm"
+  
+  #id source
+  var_badgdm <- sprintf("T2_labfastbloodglu_high_%s_%s", week_current, week_current)
+  
+  # no one has anything
+  smallD[,(var_temp_manperf):=as.logical(NA)]
+  smallD[,(var_temp_mangdm):=as.logical(NA)]
+  
+  # is false, if you have a bad hb
+  smallD[get(var_badgdm)==TRUE, (var_temp_manperf):=FALSE]
+  smallD[get(var_badgdm)==TRUE, (var_temp_mangdm):=FALSE]
+  
+  
+  for(week_later in weeks_later){
+    # working only on manerf check
+    var_secondcheck <- sprintf("T2_refSpec_%s_%s", 
+                               week_later, 
+                               week_later)
+    # if they have “bad management” (currently) and “good second check” then turn their management into “good management”
+    smallD[get(var_temp_manperf)==FALSE & 
+             get(var_secondcheck)==TRUE, (var_temp_manperf):=TRUE]
+    
+    smallD[get(var_temp_mangdm)==FALSE  & get(var_secondcheck)==TRUE, (var_temp_mangdm):=TRUE]
+  }
+  #making var for high blood glu 
+  smallD[,(var_mangdm):=as.logical(NA)]
+  
+  #intervention
+  smallD[ident_dhis2_control==F,(var_mangdm):=get(var_temp_mangdm) & get(var_temp_manperf)]
+  
+  #delete these variables because will use them in the subsequent loops we make
+  
+  smallD[,(var_temp_manperf):=NULL]
+  smallD[,(var_temp_mangdm):=NULL]
+  
+}
+xtabs(~smallD$T2_manFBSHigh_spec_26_26)
+
+
+
 
 
 

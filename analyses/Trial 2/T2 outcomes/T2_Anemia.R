@@ -20,6 +20,7 @@ nrow(T2)
 # need to remove anyone who had anemia prior to 24-28 weeks
 # 00-23 weeks
 T2[,denom_anemia_00_23:=as.logical(NA)]
+
 T2[(T2_anvisitnew_00_14==T & T2_labhb_anemia_mild_mod_00_14==F & T2_labhb_anemia_sev_00_14==F) |
       (T2_anvisitnew_15_17==T & T2_labhb_anemia_mild_mod_15_17==F & T2_labhb_anemia_sev_15_17==F)|
       (T2_anvisitnew_18_22==T & T2_labhb_anemia_mild_mod_18_22==F & T2_labhb_anemia_sev_18_22==F)|
