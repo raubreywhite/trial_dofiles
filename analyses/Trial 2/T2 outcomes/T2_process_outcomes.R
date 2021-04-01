@@ -55,7 +55,7 @@ xtabs(~d$TrialArm, addNA=T)
 nrow(d)
 
 
-if(IS_GAZA==T){
+
   ### Trial 2 Variables
   #gestagedaysCats
   
@@ -211,17 +211,20 @@ if(IS_GAZA==T){
                                         125,160,167,202,
                                         216,237,244,265,293),
                                include.lowest=T)]
+ 
   
+# defining TrialArms 
+  # trial arms
+  d[ident_TRIAL_2_3_Control==T,TrialArm:="Control"]
   
+  d[ident_TRIAL_2==T & 
+       ident_TRIAL_3==F,TrialArm:="SMS only"]
   
+  d[ident_TRIAL_2==F & 
+       ident_TRIAL_3==T,TrialArm:="QID only"]
   
-  
-  
-  
-} else{
-  
-  # do notghing
-}
+  d[ident_TRIAL_2==T & 
+       ident_TRIAL_3==T,TrialArm:="SMS and QID"]
 
 
 
@@ -229,7 +232,7 @@ if(IS_GAZA==T){
 smallD  <- d[(ident_dhis2_booking==T | ident_dhis2_an==T) &
                !is.na(TrialArm),]
 
-smallD <- d
+#smallD <- d
 
 # MAKE BOOK VISIT FOR ANEMIA
 smallD[,booklabhb:=as.numeric(NA)]
@@ -781,6 +784,26 @@ smallD[,labT2gestagedays_0:=NULL]
 smallD[,labbloodglu_0:=NULL]
 xtabs(~smallD$T2_labbloodglu_exists_15_17)
 
+
+
+# labbloodglu normal
+smallD[,labT2gestagedays_0:=bookgestagedays]
+smallD[,labbloodglu_0:=booklabbloodglu]
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="labbloodglu_normal",
+  variableOfInterestPattern="labbloodglu",
+  TruevaluesMin=50,
+  TruevaluesMax=105,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "labT2gestagedays")
+smallD[,labT2gestagedays_0:=NULL]
+smallD[,labbloodglu_0:=NULL]
+xtabs(~smallD$T2_labbloodglu_exists_15_17)
+
+
+
 # high blood glucose
 smallD[,labT2gestagedays_0:=bookgestagedays]
 smallD[,labbloodglu_0:=booklabbloodglu]
@@ -842,8 +865,8 @@ smallD <- VisitVariables(
   days=days,
   variableOfInterestName="labfastbloodglu_normal",
   variableOfInterestPattern="labfastbloodglu",
-  TruevaluesMin=71,
-  TruevaluesMax=91,
+  TruevaluesMin=50,
+  TruevaluesMax=95,
   TruevaluesDiscrete = NULL,
   gestagedaysVariable = "labT2gestagedays")
 smallD[,labT2gestagedays_0:=NULL]
@@ -1731,8 +1754,7 @@ varsKeep <- c(
   "agepregnancycat",
   "incomecat",
   "educationcat",
-  "paracat",
-  "motherismallDbooknum",
+  #"paracat",
   "uniqueid",
   "bookevent",
   
@@ -1826,7 +1848,7 @@ varsKeep <- c(
   names(smallD)[stringr::str_detect(names(smallD),"^labother3_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^labotherres3_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^labgestage_[0-9]*")],
-  names(smallD)[stringr::str_detect(names(smallD),"^labT1gestagedays_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^labT2gestagedays_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^labplace_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^labplacespec_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^labanemresp_[0-9]*")],
@@ -1836,6 +1858,7 @@ varsKeep <- c(
   names(smallD)[stringr::str_detect(names(smallD),"^riskevent_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^riskprogstage_1[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^riskgestage_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^riskT2gestagedays_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^riskorgcode_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^riskorgunit_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^risktype_[0-9]*")],
@@ -1847,20 +1870,24 @@ varsKeep <- c(
   names(smallD)[stringr::str_detect(names(smallD),"^manorgcode_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^manorgunit_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^mangestage_[0-9]*")],
-  names(smallD)[stringr::str_detect(names(smallD),"^manT1gestagedays_[0-9]*")],
+  names(smallD)[stringr::str_detect(names(smallD),"^manT2gestagedays_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^mandetail_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^mantypex_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^manperf_[0-9]*")],
   names(smallD)[stringr::str_detect(names(smallD),"^mantypey_[0-9]*")],
-  
+
   names(smallD)[stringr::str_detect(names(smallD),"^T2_")])
 
 
-T2 <- smallD[!is.na(firstvisitinT2) & !is.na(TrialArm),vars,with=F]
+
+T2 <- smallD[!is.na(firstvisitinT2) & !is.na(TrialArm),c(varsKeep),with=F]
 
 
 saveRDS(T2,file.path(FOLDER_DATA_CLEAN,"T2_eReg_newvars.rds"))
 
+# save below with restrictions:
+T2 <- T2[!is.na(firstvisitinT2) & !is.na(TrialArm)]
+nrow(T2)
 
 # save smallD to be used for other outcomes
 # create directory  per date ran for folder and save in that folder with the dates to load in outcomes

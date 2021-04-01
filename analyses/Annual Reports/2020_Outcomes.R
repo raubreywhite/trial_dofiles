@@ -243,6 +243,12 @@ openxlsx::write.xlsx(demoagepreg,
 ########## 
 # book gA
 ########## 
+
+ar[,booktrimester:=cut(bookgestagedays,
+                       breaks=c(0,91,189,280),
+                       include.lowest=T)]
+
+xtabs(~ar$booktrimester, addNA=T)
  
 
 bookings <- ar[,.(Booked=sum(ident_dhis2_booking==T, na.rm=T),
@@ -259,53 +265,53 @@ openxlsx::write.xlsx(bookings,
                        "BookORdisvsYear.xlsx"))
 
 bookgA <- ar[ident_dhis2_booking==T,.(N=.N),
-                                        keyby=.(bookyear,bookgestagedays_cats)]
+                                        keyby=.(bookyear,booktrimester)]
 
 openxlsx::write.xlsx(bookgA,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookgACats.xlsx"))
+                       "BooTrimester.xlsx"))
 
 
 
 
 bookgA <- ar[ident_dhis2_booking==T,.(N=.N),
-             keyby=.(bookyear,bookgestagedays_cats,incomecat)]
+             keyby=.(bookyear,booktrimester,incomecat)]
 
 openxlsx::write.xlsx(bookgA,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookgACats_incomeCats.xlsx"))
+                       "BookTrimester_incomeCats.xlsx"))
 
 
 
 
 bookgAHR <- ar[ident_dhis2_booking==T,.(N=.N),
-             keyby=.(bookyear,bookgestagedays_cats,ident_dhis2_risk)]
+             keyby=.(bookyear,booktrimester,ident_dhis2_risk)]
 
 openxlsx::write.xlsx(bookgAHR,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookgACats_HR.xlsx"))
+                       "BookTrimester_HR.xlsx"))
 
 
 
 
 bookgAprimi <- ar[ident_dhis2_booking==T,.(N=.N),
-               keyby=.(bookyear,bookgestagedays_cats,bookprimi)]
+               keyby=.(bookyear,booktrimester,bookprimi)]
 
-openxlsx::write.xlsx(bookgAHR,
+openxlsx::write.xlsx(bookgAprimi,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookgACats_bookprimi.xlsx"))
+                       "BookTM_bookprimi.xlsx"))
 
 
 
@@ -320,13 +326,13 @@ bptab <- ar[ident_dhis2_booking==T,.(NormalBP=sum((bookbpsyst>0 & bookbpsyst<140
                                            (bookbpdiast>90 & bookbpdiast<=100), na.rm=T),
                                          ModHTN=sum((bookbpsyst>=150 & bookbpsyst<=159) |
                                                       (bookbpdiast>100 & bookbpdiast<=110), na.rm=T),
-                                         SevHTN=sum(bookbpsyst>=150 |
+                                         SevHTN=sum(bookbpsyst>=160 |
                                                       bookbpdiast>110, na.rm=T),
-                                         MissingBookbp=sum(is.na(bookbpsyst)|
-                                                             is.na(bookbpdiast))),
-                                      keyby=.(bookyear,bookgestagedays_cats)]
+                                         MissingBookbp=sum(bookbpsyst==0|
+                                                           bookbpdiast==0)),
+                                      keyby=.(bookyear,booktrimester)]
 
-xtabs(~bookbpsystcat+bookgestagedays_cats,addNA=T,data=ar)
+xtabs(~bookbpsystcat+booktrimester,addNA=T,data=ar)
 
 
 
@@ -335,7 +341,7 @@ openxlsx::write.xlsx(bptab,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookBPbyBookgAcats.xlsx"))
+                       "BookBPbyBookTM.xlsx"))
 
 
 
@@ -346,11 +352,11 @@ openxlsx::write.xlsx(bptab,
 
 bookbpsystdiast <- ar[ident_dhis2_booking==1,.(N=.N),
                           keyby=.(bookyear,
-                                  bookgestagedays_cats,
+                                  booktrimester,
                                   bookbpsystcat,
                                   bookbpdiastcat)]
 
-xtabs(~bookbpsystcat+bookgestagedays_cats,addNA=T,data=ar)
+xtabs(~bookbpsystcat+booktrimester,addNA=T,data=ar)
 
 
 
@@ -359,7 +365,7 @@ openxlsx::write.xlsx(bookbpsystdiast,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookBPCatsbygAcats.xlsx"))
+                       "BookBPCatsbybookTM.xlsx"))
 
 
 
@@ -371,7 +377,7 @@ openxlsx::write.xlsx(bookbpsystdiast,
 
 screenings <- ar[ident_dhis2_booking==1,.(N=.N),
                                       keyby=.(bookyear,
-                                      bookgestagedays_cats,
+                                      booktrimester,
                                       bookexamfh,
                                       bookexamsfh)]
 
@@ -565,7 +571,18 @@ openxlsx::write.xlsx(robsongrps,
                        "2020",
                        "Robsongps.xlsx"))
 
+####################
+# Bookmonths
+####################
 
+tab <- ar[ident_dhis2_booking==T,.(N=.N),
+          keyby=.(bookyear,bookmonth)]
+
+openxlsx::write.xlsx(tab,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               "bookingspermonth.xlsx"))
 
 
 
@@ -682,6 +699,8 @@ openxlsx::write.xlsx(tab, file.path(FOLDER_DATA_RESULTS,
 
 
 #################################  Attendance ################################
+
+################################  Attendance ################################
 # making vars
 ar[,refHRhosp:= FALSE]
 ar[(TrialOne_manRef_HR_00_00==T|
@@ -753,16 +772,11 @@ xtabs(~ar$Opp_3, addNA=T)
 
 # removing opportunities
 ar[Opp_3==1 & ((TrialOne_manRef_HR_18_18==T|TrialOne_manRef_Hosp_18_18==T)|
-                     (TrialOne_manRef_HR_19_19==T|
-                        TrialOne_manRef_Hosp_19_19==T)|
-                     (TrialOne_manRef_HR_20_20==T|
-                        TrialOne_manRef_Hosp_20_20==T)|
-                     (TrialOne_manRef_HR_21_21==T |
-                        TrialOne_manRef_Hosp_21_21==T)|
-                     (TrialOne_manRef_HR_22_22==T|
-                        TrialOne_manRef_Hosp_22_22==T)|
-                     (TrialOne_manRef_HR_23_23==T|
-                        TrialOne_manRef_Hosp_23_23==T)), 
+                     (TrialOne_manRef_HR_19_19==T|TrialOne_manRef_Hosp_19_19==T)|
+                     (TrialOne_manRef_HR_20_20==T|TrialOne_manRef_Hosp_20_20==T)|
+                     (TrialOne_manRef_HR_21_21==T |TrialOne_manRef_Hosp_21_21==T)|
+                     (TrialOne_manRef_HR_22_22==T|TrialOne_manRef_Hosp_22_22==T)|
+                     (TrialOne_manRef_HR_23_23==T|TrialOne_manRef_Hosp_23_23==T)), 
        Opp_3:=Opp_3-1]
 xtabs(~ar$Opp_3, addNA=T)
 
@@ -843,91 +857,6 @@ ar[Succ_5==F & TrialOne_anvisitnew_35_37==T, Succ_5:=TRUE]
 
 xtabs(~ar$Succ_5, addNA=T)
 
-prelimAtt <- ar[ident_dhis2_booking==1,.(N=.N,
-                       bookedb414=sum(bookgestagedays_cats=="(0,104]",
-                                      na.rm = T),
-                       ANC15_17Opps=sum(Opp_1,na.rm=T),
-                       ANC15_17=sum(Succ_1, na.rm=T),
-                       ANC15_17FALSE=sum(Succ_1==F, na.rm=T),
-                       booked1515=sum(bookgestagedays_cats=="(104,125]",
-                                      na.rm = T),
-                       ANC18_22Opps=sum(Opp_2, na.rm=T),
-                       ANC18_22=sum(Succ_2, na.rm=T),
-                       ANC18_22FALSE=sum(Succ_2==F, na.rm=T),
-                       booked1822=sum(bookgestagedays_cats=="(125,160]",
-                                      na.rm = T),
-                       booked2323=sum(bookgestagedays_cats=="(160,167]",
-                                      na.rm = T),
-                       ANC2428Opps=sum(!is.na(Opp_3), na.rm=T),
-                       ANC24_28TRUE=sum(Succ_3, na.rm=T),
-                       ANC24_28FALSE=sum(Succ_3==F, na.rm=T),
-                       booked2428=sum(bookgestagedays_cats=="(167,202]",
-                                      na.rm = T),
-                       booked2930=sum(bookgestagedays_cats=="(202,216]", 
-                                      na.rm = T),
-                       ANC31_33Opps=sum(Opp_4, na.rm=T),
-                       ANC31_33=sum(Succ_4, na.rm=T),
-                       ANC31_33FALSE=sum(Succ_4==F, na.rm=T),
-                       Booked31_33=sum(bookgestagedays_cats=="(216,237]",
-                                       na.rm = T),
-                       Booked34_34=sum(bookgestagedays_cats=="(237,244]", 
-                                       na.rm = T),
-                       ANC3537Opps=sum(Opp_5, na.rm=T),
-                       ANC3537=sum(Succ_5, na.rm=T),
-                       Booked35_37=sum(bookgestagedays_cats=="(244,265]",
-                                       na.rm = T)),
-                    
-                    keyby=.(bookyear)]
-
-openxlsx::write.xlsx(prelimAtt,file.path(FOLDER_DATA_RESULTS,
-                                         "annual reports",
-                                         "2020",
-                                         sprintf("%s_Attendance.xlsx",
-                                                 lubridate::today()))) 
-
-
-
-att <- ar[ident_dhis2_booking==T,.(N=.N,
-             ANC15_17Opps=sum(Opp_1,na.rm=T),
-             Attendance_15_17=sum(Succ_1, na.rm=T),
-             booked1822=sum(bookgestagedays_cats=="(125,160]",
-                            na.rm = T),
-             booked2323=sum(bookgestagedays_cats=="(160,167]",
-                            na.rm = T),
-             Attendance_15_22=sum(Succ_1==T &
-                                    Succ_2==T, na.rm=T),
-             booked2323=sum(bookgestagedays_cats=="(160,167]",
-                            na.rm = T),
-             booked2428=sum(bookgestagedays_cats=="(167,202]",
-                            na.rm = T),
-             Attendance_15_28=sum(Succ_1==T &
-                                    Succ_2==T &
-                                    Succ_3==T, na.rm=T),
-             booked2930=sum(bookgestagedays_cats=="(202,216]", 
-                            na.rm = T),
-             Booked31_33=sum(bookgestagedays_cats=="(216,237]",
-                             na.rm = T),
-             Attendance_15_33=sum(Succ_1==T &
-                                    Succ_2==T &
-                                    Succ_3==T &
-                                    Succ_4==T, na.rm=T),
-             Booked34_34=sum(bookgestagedays_cats=="(237,244]", 
-                             na.rm = T),
-             ANC3537Opps=sum(Opp_5, na.rm=T),
-             Attendance_15_37=sum(Succ_1==T &
-                                    Succ_2==T, 
-                                    Succ_3==T &
-                                    Succ_4==T &
-                                    Succ_5==T, na.rm=T)),
-          
-          keyby=.(bookyear)]
-
-
-openxlsx::write.xlsx(att,
-                     file.path(FOLDER_DATA_RESULTS,
-                               "annual reports",
-                               "2020",
-                               "AllVisitsAttendance.xlsx"))
 
 
 
@@ -951,8 +880,8 @@ prelimHTN <- ar[ident_dhis2_booking==T,
                                    TrialOne_anbpdiast_present_24_28==T,na.rm=T),
                   "32 Week Visit"=sum(Succ_4==T, na.rm=T),
                   "BP_32"=sum(Succ_4==T &
-                              TrialOne_anbpsyst_present_24_28==T &
-                              TrialOne_anbpdiast_present_24_28==T, na.rm=T),
+                              TrialOne_anbpsyst_present_31_33==T &
+                              TrialOne_anbpdiast_present_31_33==T, na.rm=T),
                   
                   "36 Week Visit"=sum(Succ_5==T, na.rm=T),
                   "Bp_36 weeks"=sum(Succ_5 &
@@ -968,11 +897,193 @@ openxlsx::write.xlsx(prelimHTN,file.path(FOLDER_DATA_RESULTS,
                                          sprintf("%s_BpOntime.xlsx",
                                                  lubridate::today()))) 
 
+###################
+# Attendance
+###################
+
+
+
+# making vars
+ar[,refHRhosp:= FALSE]
+ar[(TrialOne_manRef_HR_00_00==T|
+      TrialOne_manRef_HR_01_01==T|
+      TrialOne_manRef_HR_02_02==T|
+      TrialOne_manRef_HR_03_03==T|
+      TrialOne_manRef_HR_04_04==T|
+      TrialOne_manRef_HR_05_05==T|
+      TrialOne_manRef_HR_06_06==T|
+      TrialOne_manRef_HR_07_07==T|
+      TrialOne_manRef_HR_08_08==T|
+      TrialOne_manRef_HR_09_09==T|
+      TrialOne_manRef_HR_10_10==T|
+      TrialOne_manRef_HR_11_11==T|
+      TrialOne_manRef_HR_12_12==T)|
+     TrialOne_manRef_HR_13_13==T|
+     (TrialOne_manRef_Hosp_00_00==T|
+        TrialOne_manRef_Hosp_01_01==T|
+        TrialOne_manRef_Hosp_02_02==T|
+        TrialOne_manRef_Hosp_03_03==T|
+        TrialOne_manRef_Hosp_04_04==T|
+        TrialOne_manRef_Hosp_05_05==T|
+        TrialOne_manRef_Hosp_06_06==T|
+        TrialOne_manRef_Hosp_07_07==T|
+        TrialOne_manRef_Hosp_08_08==T|
+        TrialOne_manRef_Hosp_09_09==T|
+        TrialOne_manRef_Hosp_10_10==T|
+        TrialOne_manRef_Hosp_11_11==T|
+        TrialOne_manRef_Hosp_12_12==T|
+        TrialOne_manRef_Hosp_13_13==T),refHRhosp:=TRUE]
+
+xtabs(~ar$refHRhosp, addNA=T)
+
+## Define Opportunities
+ar[,Trimester1booking:=as.numeric(NA)]
+
+ar[booktrimester=="[0,91]",Trimester1booking:=1]
+
+xtabs(~ar$Trimester1booking, addNA=T)
+
+
+# opportunity 2nd trimester
+ar[,Trimester2visitopp:=as.numeric(NA)]
+ar[Trimester1booking==1, Trimester2visitopp:=1]
+ar[Trimester1booking==1 & refHRhosp==T,
+   Trimester2visitopp:=0]
+
+xtabs(~ar$Trimester2visitopp, addNA=T)
+
+
+# opportunity third trimester
+ar[,Trimester3visitopp:=as.numeric(NA)]
+ar[booktrimester %in% c("[0,91]",
+                        "(91,189]"),
+   Trimester3visitopp:=1]
+
+xtabs(~ar$Trimester3visitopp, addNA=T)
+
+#removing opportunities
+ar[Trimester3visitopp==1 & 
+     ((TrialOne_manRef_HR_14_14==T|TrialOne_manRef_Hosp_14_14==T)|
+        (TrialOne_manRef_HR_15_15==T|TrialOne_manRef_Hosp_15_15==T)|
+        (TrialOne_manRef_HR_16_16==T|TrialOne_manRef_Hosp_16_16==T)|
+        (TrialOne_manRef_HR_17_17==T|TrialOne_manRef_Hosp_17_17==T)|
+        (TrialOne_manRef_HR_18_18==T|TrialOne_manRef_Hosp_18_18==T)|
+        (TrialOne_manRef_HR_19_19==T|TrialOne_manRef_Hosp_19_19==T)|
+        (TrialOne_manRef_HR_20_20==T|TrialOne_manRef_Hosp_20_20==T)|
+        (TrialOne_manRef_HR_21_21==T|TrialOne_manRef_Hosp_21_21==T)|
+        (TrialOne_manRef_HR_22_22==T|TrialOne_manRef_Hosp_22_22==T)|
+        (TrialOne_manRef_HR_23_23==T|TrialOne_manRef_Hosp_23_23==T)|
+        (TrialOne_manRef_HR_24_24==T|TrialOne_manRef_Hosp_24_24==T)|
+        (TrialOne_manRef_HR_25_25==T|TrialOne_manRef_Hosp_25_25==T)|
+        (TrialOne_manRef_HR_26_26==T|TrialOne_manRef_Hosp_26_26==T)), Trimester3visitopp:=Trimester3visitopp-1]
+
+xtabs(~ar$Trimester3visitopp, addNA=T)
+
+
+
+# create referral in 3rd trimester
+
+ar[,ref3rdTr:=as.logical(NA)]
+
+ar[Trimester3visitopp==1 &
+     ((TrialOne_manRef_HR_27_27==T|TrialOne_manRef_Hosp_27_27==T)|
+        (TrialOne_manRef_HR_29_29==T|TrialOne_manRef_Hosp_29_29==T)|
+        (TrialOne_manRef_HR_28_28==T|TrialOne_manRef_Hosp_28_28==T)|
+        (TrialOne_manRef_HR_30_30==T|TrialOne_manRef_Hosp_30_30==T)|
+        (TrialOne_manRef_HR_31_31==T|TrialOne_manRef_Hosp_31_31==T)|
+        (TrialOne_manRef_HR_32_32==T|TrialOne_manRef_Hosp_32_32==T)|
+        (TrialOne_manRef_HR_33_33==T|TrialOne_manRef_Hosp_33_33==T)|
+        (TrialOne_manRef_HR_34_34==T|TrialOne_manRef_Hosp_34_34==T)|
+        (TrialOne_manRef_HR_35_35==T|TrialOne_manRef_Hosp_35_35==T)|
+        (TrialOne_manRef_HR_36_36==T|TrialOne_manRef_Hosp_36_36==T)|
+        (TrialOne_manRef_HR_37_37==T|TrialOne_manRef_Hosp_37_37==T)), ref3rdTr:=TRUE]
+
+xtabs(~ar$ref3rdTr, addNA=T)
+
+
+
+################ successes ##########
+
+# second Trimester
+ar[,T2visit:=as.logical(NA)]
+ar[Trimester2visitopp==1, T2visit:=FALSE]
+ar[Trimester2visitopp==1 &
+     (TrialOne_anvisitnew_14_14==T|
+        TrialOne_anvisitnew_15_17==T|
+        TrialOne_anvisitnew_18_22==T|
+        TrialOne_anvisitnew_23_23==T|
+        TrialOne_anvisitnew_24_24==T|
+        TrialOne_anvisitnew_25_25==T|
+        TrialOne_anvisitnew_26_26==T), T2visit:=TRUE]
+
+xtabs(~ar$T2visit, addNA=T)
+
+
+
+
+# third Trimester
+ar[,T3visit:=as.logical(NA)]
+ar[Trimester3visitopp==1, T3visit:=FALSE]
+ar[Trimester3visitopp==1 &
+     (TrialOne_anvisitnew_27_27==T|
+        TrialOne_anvisitnew_29_29==T|
+        TrialOne_anvisitnew_28_28==T|
+        TrialOne_anvisitnew_29_29==T|
+        TrialOne_anvisitnew_30_30==T|
+        TrialOne_anvisitnew_31_31==T|
+        TrialOne_anvisitnew_32_32==T|
+        TrialOne_anvisitnew_33_33==T|
+        TrialOne_anvisitnew_34_34==T|
+        TrialOne_anvisitnew_35_35==T|
+        TrialOne_anvisitnew_36_36==T|
+        TrialOne_anvisitnew_37_37==T), T3visit:=TRUE]
+
+xtabs(~ar$T3visit, addNA=T)
+
+
+
+prelimAtt <- ar[ident_dhis2_booking==1,.(
+  "First Trimester Bookings"=sum(Trimester1booking==1, na.rm=T),
+  "Number Referred in First Trimester"=sum(refHRhosp==T, na.rm=T),
+  "Opportunity 2nd Trimester Visited"=sum(Trimester2visitopp==1, na.rm=T),
+  "Number Booked 2nd Trimester"=sum(booktrimester=="(91,189]", na.rm=T),
+  "Number Visited 2nd Trimester"=sum(T2visit==T, na.rm=T),
+  "Number Not Visited 2nd Trimester"=sum(T2visit==F, na.rm=T),
+  "Number Referred 2nd Trimester"=sum(Trimester3visitopp==0, na.rm=T),
+  "Opportunity 3rd Trimester"=sum(Trimester3visitopp==1, na.rm=T),
+  "Number Booked 3rd Trimester"=sum(booktrimester=="(189,280]",na.rm=T),
+  "Visited 3rd Trimester"=sum(T3visit==T, na.rm=T),
+  "Not Visited 3rd Trimester"=sum(T3visit==F, na.rm=T)),
+  
+  keyby=.(bookyear)]
+
+openxlsx::write.xlsx(prelimAtt,file.path(FOLDER_DATA_RESULTS,
+                                         "annual reports",
+                                         "2020",
+                                         sprintf("%s_Attendance.xlsx",
+                                                 lubridate::today()))) 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ##########
 # Anemia
 ##########
+
+
+
+
 
 ########## Anemia ########## 
 # Define opportunities at 3 different cut off points
@@ -1024,6 +1135,30 @@ ar[TrialOne_labhb_anemia_sev_00_14==T|
          TrialOne_labhb_anemia_sev_23_23==T,Opportunity_anemia_screening_5:=1]
 
 xtabs(~ar$Opportunity_anemia_screening_5, addNA=T)
+
+ar[,Opportunity_anemia_screening_6:=as.logical(FALSE)]
+ar[(TrialOne_labhb_anemia_mild_mod_00_14==T|
+          TrialOne_labhb_anemia_mild_mod_15_17==T|
+          TrialOne_labhb_anemia_mild_mod_18_22==T|
+          TrialOne_labhb_anemia_mild_mod_23_23==T|
+          TrialOne_labhb_anemia_mild_mod_29_30==T|
+          TrialOne_labhb_anemia_mild_mod_34_34==T) &
+         (HbonTime_1a==F &
+            HbonTime_1b==F &
+            HbonTime_1c==F &
+            HbonTime_2a==F &
+            HbonTime_2b==F &
+            HbonTime_2c==F &
+            HbonTime_3a==F &
+            HbonTime_3b==F &
+            HbonTime_3c==F &
+            HbonTime_4a==F &
+            HbonTime_4b==F &
+            HbonTime_4c==F &
+            HbonTime_5==F),
+       Opportunity_anemia_screening_6:=TRUE]
+
+xtabs(~ar$Opportunity_anemia_screening_6, addNA=T)
 
 
 
@@ -1282,14 +1417,16 @@ ar[HbonTime_3a==F & Opportunity_anemia_screening_3==1 &
          (booklabhb<=18 & booklabhb>11), HbonTime_3a:=TRUE]
 
 
-ar[HbonTime_3c==1 & 
-         (TrialOne_manhb_mildmodhbret_29_29==T|
-            TrialOne_manhb_mildmodhbret_30_30==T|
-            TrialOne_manhb_mildmodhbret_31_31==T|
-            TrialOne_manhb_mildmodhbret_32_32==T|
-            TrialOne_manhb_mildmodhbret_33_33==T|
-            TrialOne_manhb_mildmodhbret_34_34==T), 
+ar[HbonTime_3c==FALSE & 
+         (TrialOne_manhb_mildmodhbret_29_29==TRUE|
+            TrialOne_manhb_mildmodhbret_30_30==TRUE|
+            TrialOne_manhb_mildmodhbret_31_31==TRUE|
+            TrialOne_manhb_mildmodhbret_32_32==TRUE|
+            TrialOne_manhb_mildmodhbret_33_33==TRUE|
+            TrialOne_manhb_mildmodhbret_34_34==TRUE), 
        HbonTime_3c:=TRUE]
+
+xtabs(~ar$HbonTime_3c, addNA=T)
 
 ar[HbonTime_3b==F & 
          (TrialOne_manhb_29_29==T|
