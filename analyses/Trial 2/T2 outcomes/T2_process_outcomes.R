@@ -8,7 +8,8 @@ setwd("C:/data processing/trial_dofiles")
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 sapply(fileSources, source, .GlobalEnv)
 
-Setup(IS_GAZA=FALSE)
+#Setup(IS_GAZA=FALSE)
+Setup(IS_GAZA=TRUE)
 ###### SETUP ENDS ######
 
 
@@ -1250,10 +1251,14 @@ xtabs(~smallD$T2_manhb_mildmodhbret_32_32)
 #ModsevGHTbpsyst
 for(i in 0:37){
   #i=23
+ 
   
   # make sure everything has 2 digits (with 0 in front)
   week_current <- formatC(i, width=2, flag="0")
-  weeks_later <- formatC(i+c(3:4), width=2, flag="0")
+  #weeks_later <- formatC(i+c(3:4), width=2, flag="0")
+  # check this change
+  weeks_later <- formatC(i+c(0:1), width=2, flag="0")
+  
   
   #output variable
   var_manght <- sprintf("T2_manhtn_ModSev_%s_%s", week_current, week_current)
@@ -1744,6 +1749,116 @@ xtabs(~smallD$T2_repeatFBS_24_24, addNA=T)
 #########################    Export data set for analysis    #########################
 ##############################################################################################################
 
+# create variables missing in gaza data previously
+
+
+if(IS_GAZA){
+  
+  #agecat
+  smallD[,agecat:=cut(age,
+                 breaks=c(0,20,25,30,35,40,100),
+                 include.lowest=T)]
+  
+  
+  smallD[,agemarriagecat:=cut(agemarriage,
+                              breaks=c(0,20,25,30,35,40,100),
+                              include.lowest=T)]
+  
+  ##agepreg
+  smallD[,agepregnancycat:=cut(agepregnancy,
+                               breaks=c(0,20,25,30,35,40,100),
+                               include.lowest=T)]
+  
+  ##education is already less than 0 or missing
+  smallD[education<0, education:=NA]
+  smallD[,educationcat:=cut(education,
+                            breaks=c(0,9,13,100),
+                            include.lowest=T)]
+  xtabs(~smallD$agecat)
+  xtabs(~smallD$agemarriagecat)
+  xtabs(~smallD$agepregnancycat)
+  xtabs(~smallD$educationcat)
+  
+  # average income
+  smallD[,avgincome := income/members]
+  xtabs(~smallD$avgincome, addNA=T)
+  
+  smallD[,avgincomecat:=cut(avgincome,
+                       breaks=c(0,200,900,1824,3054,100000),
+                       include.lowest=T)]
+  
+  xtabs(~smallD$avgincomecat, addNA=T)
+  
+  
+  smallD[,incomecat:=cut(income,
+                         breaks=c(0,200,900,1824,3054,100000),
+                         include.lowest=T)]
+  
+  
+  
+  
+  # para variable
+  vars <- stringr::str_subset(names(smallD), "^prevoutcome_")
+  
+  #delete prevoutcome_ from it to get the actual number
+  vars <- stringr::str_remove(vars, "prevoutcome_")
+  
+  smallD[,para:=0]
+  
+  
+  for(i in vars){
+    print(i)
+    prevoutcome <-sprintf("prevoutcome_%s",i)
+    prevdate <- sprintf("prevdate_%s",i)
+    smallD[!is.na(get(prevoutcome)) & 
+        get(prevoutcome)!="" & 
+        get(prevoutcome)=="LIVE" |get(prevoutcome)=="STILL" &
+        get(prevdate)<bookdate, para:=para+1]
+    
+    
+    
+  }
+  
+  #checking to see if code works
+  xtabs(~smallD$para)
+  
+  
+  #delete prevoutcome_ from it to get the actual number
+  vars <- stringr::str_remove(vars, "prevoutcome_")
+  
+  smallD[,gravida:=1]
+  
+  
+  for(i in vars){
+    print(i)
+    prevoutcome <-sprintf("prevoutcome_%s",i)
+    prevdate <- sprintf("prevdate_%s",i)
+    smallD[!is.na(get(prevoutcome)) &
+        get(prevoutcome)!="" & 
+        get(prevdate)<bookdate, 
+      gravida:=gravida+1]
+    
+    
+    
+  }
+  
+  #checking to see if code works
+  xtabs(~smallD$gravida)
+  
+  
+  
+  
+}
+
+# change want sms variable name
+
+setnames(smallD,
+         "areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits",
+         "wantSMS")
+
+
+
+
 varsKeep <- c(
   "bookorgname",
   "bookorgcode",
@@ -1752,8 +1867,10 @@ varsKeep <- c(
   "agecat",
   "agemarriagecat",
   "agepregnancycat",
-  "incomecat",
+  "avgincomecat",
   "educationcat",
+  "wantSMS",
+  "firstvisitinT2",
   #"paracat",
   "uniqueid",
   "bookevent",
@@ -1761,58 +1878,15 @@ varsKeep <- c(
   "bookgestage",
   "bookgestagedays_cats",
   "booklabhb",
-  "bookprimi",
-  "bookpprom",
-  "bookprom",
-  "bookeclamp",
-  "bookvagbleed",
-  "bookpallor",
-  "bookexamhead",
-  "bookexamheadabn",
-  "bookexamheart",
-  "bookexamheartabn",
-  "bookexamabd",
-  "bookexamabdabn",
-  "bookexamlimb",
-  "bookexamlimbabn",
-  "gravida",
-  "para",
- 
-  "bookhistmed",
-  "bookhistdm",
-  "bookhistabort",
-  "bookhistperi",
-  "bookfamdm",
-  "bookhistcs",
-  "bookhistcscompl",
-  "bookparity",
-  "bookhistpuersep",
-  "bookhisteclamp",
-  "bookhistantparthemprevpreg",
-  "bookhistpph",
-  "bookhistgdm",
-  "bookhistghtn",
-  "bookhistpreecl",
-  "bookhistpreterm",
-  "bookhistaph",
-  "bookhisthtn",
-  "bookfamhtn",
-  "bookhistotherch",
-  "bookhistblood",
-  "bookhistotherchronic",
-  "bookhistbloodspec",
-  "bookheight",
   "bookbpsyst",
   "bookbpdiast",
-  "bookweight",
-
-  "bookfetalmove",
-  "bookexamsfh",
-  "bookexamedema",
-  "bookrefchronic",
-  "bookmedpres",
   "bookhighrisk",
-  "bookseenby",
+  "booklaburglu",
+  "booklaburglu_high",
+  "booklabbloodglu",
+  "booklabbloodglu_high",
+  "booklabbloodglu_intmd",
+ 
   "ident_dhis2_booking",
   "TrialArm",
   "str_TRIAL_2_Cluster",
@@ -1877,7 +1951,6 @@ varsKeep <- c(
   names(smallD)[stringr::str_detect(names(smallD),"^mantypey_[0-9]*")],
 
   names(smallD)[stringr::str_detect(names(smallD),"^T2_")])
-
 
 
 T2 <- smallD[!is.na(firstvisitinT2) & !is.na(TrialArm),c(varsKeep),with=F]

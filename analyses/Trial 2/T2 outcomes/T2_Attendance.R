@@ -20,6 +20,8 @@ Setup(IS_GAZA=FALSE)
 
 if(IS_GAZA==F){
   
+  fileTag <- "WB"
+  
   # read in logs #
   
   # all scheduled events
@@ -37,12 +39,15 @@ if(IS_GAZA==F){
   ###### Load in Data Set ###### 
   d <- LoadDataFileFromNetwork()
   
-  t2 <- readRDS(file.path(FOLDER_DATA_CLEAN,
-                          "T2_clean",
-                          "WB",
-                          "T2_dataset_2020-12-19_WB.rds"))
+  tt2 <-  readRDS(file.path(FOLDER_DATA_CLEAN,
+                           "T2_clean",
+                           sprintf("T2_outcomes_dataset_%s_%s.rds", 
+                                   CLINIC_INTERVENTION_DATE,
+                                   fileTag)))
+  tt2[,ident_WB:=T]
   
-  fileTag <- "WB"
+  
+ 
   
   
   
@@ -68,19 +73,28 @@ if(IS_GAZA==F){
  
   # Load in data from network
   d <- LoadDataFileFromNetworkGaza()
+
   
+  tt2 <- readRDS(file.path(FOLDER_DATA_CLEAN_GAZA,
+                    "T2_clean",
+                    sprintf("T2_outcomes_dataset_%s_%s.rds", CLINIC_INTERVENTION_DATE,
+                            fileTag)))
+  
+  tt2[,ident_WB:=F]
+  
+  
+  nrow(tt2)
   
 }
 
 ############ Trial 2 SMS Monitoring ############  ###############
 
+# add vars for all fo the trial 2 variables and outcomes that we  have in our opportunities
+# could also just a a T2_ in front of all the outcome variables that we have made in the process outcomes
 
+t2 <- tt2
 
 varsT2 <- names(t2)[stringr::str_detect(names(t2),"^T2")]
-
-setnames(t2,
-         "areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits",
-         "wantSMS")
 
 
 t2[,andate_0:=bookdate]
@@ -92,21 +106,26 @@ varsancdate <- names(t2)[stringr::str_detect(names(t2),"^andate")]
 varsancgestage <- names(t2)[stringr::str_detect(names(t2),"^angestage")]
 
 
-
 #52705
-t2 <- t2[!is.na(firstvisitinT2) & !is.na(TrialArm)]
+#t2 <- t2[!is.na(firstvisitinT2) & !is.na(TrialArm)]
 nrow(t2)
 
 
-t2 <- t2[,c("uniqueid",
+
+t2 <- t2[,c("ident_WB",
+            "uniqueid",
             "bookevent",
             "bookorgname",
+            "bookorgcode",
+            "bookorgunit",
             "bookdate",
             "bookgestage",
+            "bookgestagedays_cats",
             "firstvisitinT2",
             "USorLMPdate",
             "ident_dhis2_booking",
             "str_TRIAL_2_Cluster",
+            "str_TRIAL_2_ClusSize",
             "TrialArm",
             "wantSMS",
             varsancevent,
@@ -118,21 +137,24 @@ t2 <- t2[,c("uniqueid",
 
 nrow(t2)
 
-
+# 
 #test <- t2[1:2]
 # reshape dataset to long so we can merge with events data
 
 longA <- melt(t2,
-            id.vars=c("uniqueid",
+            id.vars=c("ident_WB",
+                      "uniqueid",
                                  "bookevent",
                                  "bookorgname",
                                  "bookdate",
                                  "bookgestage",
+                                 "bookgestagedays_cats",
                                  "USorLMPdate",
                                  "ident_dhis2_booking",
                                  "str_TRIAL_2_Cluster",
+                                 "str_TRIAL_2_ClusSize",
                                  "TrialArm",
-                                 "wantSMS"),
+                                 "wantSMS" ),
             measure.vars=patterns("firstvisitinT2",
                                   "^anevent_",
                                   "^andate_",
@@ -242,6 +264,8 @@ eventsData[,completeddate:=as.Date(completeddate, formmat="%Y-%m-%d")]
 
 xtabs(~eventsData$completeddate, addNA=T)
 
+
+
 } else {
   #duedate
    # remove time 
@@ -264,6 +288,8 @@ xtabs(~eventsData$completeddate, addNA=T)
   eventsData[,completeddate:=stringr::str_remove_all(completeddate," [0-9]*:[0-9][0-9]")]
   eventsData[,completeddate:=lubridate::mdy(completeddate)]
   xtabs(~eventsData$completeddate, addNA=T)
+  
+ 
   
 }
 
@@ -389,34 +415,34 @@ setorder(z,uniqueid,andate,na.last=T)
 # save data sets to send out an email
 ##########################################
 
-t2 <- readRDS(file.path(FOLDER_DATA_CLEAN,
-                        "T2_clean",
-                        "WB",
-                        "T2_dataset_2020-12-19_WB.rds"))
+# t2 <- readRDS(file.path(FOLDER_DATA_CLEAN,
+#                        "T2_clean",
+#                        "WB",
+#                        "T2_dataset_2020-12-19_WB.rds"))
 
 
-smallD <- t2[1:1000]
-saveRDS(smallD,file.path(FOLDER_DATA_CLEAN,
-                         "T2_clean",
-                         "WB",
-                         sprintf("T2_dataset_sample_%s.rds",
-                                 CLINIC_INTERVENTION_DATE)))
+# smallD <- t2[1:1000]
+# saveRDS(smallD,file.path(FOLDER_DATA_CLEAN,
+#                       "T2_clean",
+#                         "WB",
+#                         sprintf("T2_dataset_sample_%s.rds",
+#                                 CLINIC_INTERVENTION_DATE)))
+#
 
 
 
-
-tz <- z[!is.na(TrialArm) &
-         ((dueDate>="2019-12-01" &
-             dueDate<="2020-03-22")|
-            (eventdate>="2019-12-01" &
-               eventdate<="2020-03-22"))]
-saveRDS(tz,
-        file.path(
-          FOLDER_DATA_CLEAN,
-          "T2_clean",
-          "WB",
-          "T2_attendance_sample.rds"
-        ))
+#tz <- z[!is.na(TrialArm) &
+ #        ((dueDate>="2019-12-01" &
+ #            dueDate<="2020-03-22")|
+#            (eventdate>="2019-12-01" &
+ #              eventdate<="2020-03-22"))]
+#saveRDS(tz,
+ #       file.path(
+  #        FOLDER_DATA_CLEAN,
+   #       "T2_clean",
+    #      "WB",
+     #     "T2_attendance_sample.rds"
+      #  ))
 
 ###############################
 # idenfify sched & attended evs
@@ -610,11 +636,209 @@ y <- z[!is.na(TrialArm) &
             (eventdate>="2019-12-01" &
                eventdate<="2020-03-22"))]
 
+
+y[,bookdate:=bookdate.x]
+
 length(unique(y$uniqueid))
 
 
+colnames(y) <- paste("evs", colnames(y),sep="_")
 
 
+
+setnames(y,c("evs_uniqueid"), 
+             c("uniqueid"))
+
+
+
+
+y[,eventnum:=1:.N, by="uniqueid"]
+xtabs(~y$eventnum)
+
+
+
+yw <- ReshapeToWideAndMerge(
+  base=tt2,
+  additional=y,
+  valueVarsRegex="^evs",
+  dcastFormula="uniqueid~eventnum",
+  mergeVars=c("uniqueid"),
+  identName="ident_events"
+)
+
+xtabs(~yw$ident_events)
+xtabs(~yw$ident_dhis2_booking)
+nrow(yw)==length(unique(y$uniqueid))
+nrow(t2)==length(unique(y$uniqueid))
+
+# cleaning up vars for numerators and denominators #
+
+#"evs_denom_15_17"          "evs_num_15_17"           
+# "evs_denom_18_22"          "evs_num_18_22"            "evs_denom_24_28"         
+# "evs_num_24_28"            "evs_denom_31_33"          "evs_num_31_33"           
+# "evs_denom_35_37"          "evs_num_35_37"            "evs_bookdate"            
+
+# 15_17 
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_15_17")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_15_17")] 
+
+for(i in denoms){
+  
+  yw[get(i)==T, denom_15_17:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_15_17, addNA=T)
+
+for(i in nums){
+  
+  #yw[denom_15_17==T &
+   #    !is.na(get(i)), num_15_17:=get(i)]
+  
+  yw[denom_15_17==T &
+       get(i)==F, num_15_17:=FALSE]
+  
+  
+  
+  yw[denom_15_17==T &
+       get(i)==T, num_15_17:=TRUE]
+
+  
+}
+
+xtabs(~yw$num_15_17, addNA=T)
+
+
+
+
+# 18-22
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_18_22")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_18_22")] 
+
+for(i in denoms){
+  
+  yw[!is.na(get(i)), denom_18_22:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_18_22, addNA=T)
+
+
+for(i in nums){
+ 
+  
+  yw[denom_18_22==T &
+       get(i)==F, num_18_22:=FALSE]
+  
+  
+  
+  yw[denom_18_22==T &
+       get(i)==T, num_18_22:=TRUE]
+  
+  
+}
+
+xtabs(~yw$num_18_22, addNA=T)
+
+
+
+
+# 24-28
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_24_28")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_24_28")] 
+
+for(i in denoms){
+  
+  yw[!is.na(get(i)), denom_24_28:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_24_28, addNA=T)
+
+for(i in nums){
+  
+  yw[denom_24_28==T &
+       get(i)==F, num_24_28:=FALSE]
+  
+  
+  
+  yw[denom_24_28==T &
+       get(i)==T, num_24_28:=TRUE]
+  
+}
+
+xtabs(~yw$num_24_28, addNA=T)
+
+
+
+# 31-33
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_31_33")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_31_33")] 
+
+for(i in denoms){
+  
+  yw[!is.na(get(i)), denom_31_33:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_31_33, addNA=T)
+
+for(i in nums){
+  
+  yw[denom_31_33==T &
+       get(i)==F, num_31_33:=FALSE]
+  
+  
+  
+  yw[denom_31_33==T &
+       get(i)==T, num_31_33:=TRUE]
+  
+  
+  
+}
+
+xtabs(~yw$num_31_33, addNA=T)
+
+
+
+
+# 35_37
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_35_37")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_35_37")] 
+
+for(i in denoms){
+  
+  yw[!is.na(get(i)), denom_35_37:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_35_37, addNA=T)
+
+for(i in nums){
+  
+  yw[denom_35_37==T &
+       get(i)==F, num_35_37:=FALSE]
+  
+  
+  
+  yw[denom_35_37==T &
+       get(i)==T, num_35_37:=TRUE]
+  
+  
+  
+  
+}
+
+xtabs(~yw$num_35_37, addNA=T)
+
+
+
+xtabs(~yw$ident_events, addNA=T)
 
 attendance <- z[,.(
                   "15-17 week numeratorT"=sum(num_15_17==T, na.rm=T),
@@ -638,22 +862,41 @@ attendance <- z[,.(
 
 
 
+
+
+
+
+
+
 if(IS_GAZA==F){
   
-openxlsx::write.xlsx(attendance,
-                     file.path(FOLDER_DATA_RESULTS,
-                               "T2",
-                               "Outcomes",
-                               "Attendance_eventsData.xlsx"))
+  openxlsx::write.xlsx(attendance,
+                       file.path(FOLDER_DATA_CLEAN,
+                                 "T2_clean",
+                                 sprintf("T2_attendance_outcomes_WB.xlsx")))
+  
+  yw[,ident_WB:=TRUE]
+  
+                saveRDS(yw,
+                     file.path(FOLDER_DATA_CLEAN,
+                               "T2_clean",
+                               sprintf("T2_complete_dataset_%s_WB.rds", 
+                                       CLINIC_INTERVENTION_DATE)))
   
  } else{
-  
+   
    openxlsx::write.xlsx(attendance,
-                        file.path(FOLDER_DATA_RESULTS_GAZA,
-                                  "T2",
-                                  "Outcomes",
-                                  "Attendance_eventsData.xlsx"))
-  
+                        file.path(FOLDER_DATA_CLEAN_GAZA,
+                                  "T2_clean",
+                                  sprintf("T2_attendance_outcomes_Gaza.xlsx")))
+   
+   yw[,ident_WB:=FALSE]
+   
+                saveRDS(yw,
+                        file.path(FOLDER_DATA_CLEAN_GAZA,
+                                  "T2_clean",
+                                  sprintf("T2_complete_dataset_%s_Gaza.rds",
+                                          CLINIC_INTERVENTION_DATE)))
 }
 
 
@@ -661,98 +904,8 @@ openxlsx::write.xlsx(attendance,
 
 
 
-### get trial arm for each of the rows
-
-########## Attendance Tables ########## 
-
-####### check merges
-####### may have to use bookdate as second factor
-
-# merge this w (wide) by uniqueid and bookdate into the entire dataset 
-T2small <- d[bookdate>="2019-01-01"]
-nrow(T2small)
-
-wyy[,ident_schedev:=T]
-nrow(wyy)
-
-t2merged <- merge(T2small,
-                   wyy,
-                   by=c("uniqueid"),
-                   all.x=T)
-nrow(t2merged)
-xtabs(~t2merged$ident_schedev, addNA=T)
-
-t2merged[,bookT2Arm:=as.character(NA)]
-t2merged[ident_TRIAL_2_3_Control==T,bookT2Arm:="control" ]
-t2merged[ident_TRIAL_3==T & ident_TRIAL_2==F,bookT2Arm:="qidonly" ]
-t2merged[ident_TRIAL_2==T & ident_TRIAL_3==F,bookT2Arm:="smsonly" ]
-t2merged[ident_TRIAL_2==T & ident_TRIAL_3==T,bookT2Arm:="smsandqid" ]
-xtabs(~t2merged$bookT2Arm, addNA = T)
-
-t2merged <- t2merged[bookorgname!="ppconly"]
-
-att <- t2merged[,.(
-  "15-17 week numeratorT"=sum(num_15_17==T, na.rm=T),
-  "15-17 week numeratorF"=sum(num_15_17==F, na.rm=T),
-  "15-17 Denom"=sum(num_15_17==T |
-                      num_15_17==F, na.rm=T),
-  "18-22 week numeratorT"=sum(num_18_22==T, na.rm=T),
-  "18-22 week numeratorF"=sum(num_18_22==F, na.rm=T),
-  "18-22 Denom"=sum(num_18_22==T |
-                      num_18_22==F, na.rm=T),
-  
-  "24-28 week numeratorT"=sum(num_24_28==T, na.rm=T),
-  "24-28 week numeratorF"=sum(num_24_28==F, na.rm=T),
-  "24-28 Denom"=sum(num_24_28==T |
-                      num_24_28==F, na.rm=T),
-  "31-33 week numeratorT"=sum(num_31_33==T, na.rm=T),
-  "31-33 week numeratorF"=sum(num_31_33==F, na.rm=T),
-  "31-33 Denom"=sum(num_31_33==T |
-                      num_31_33==F, na.rm=T),
-  "35-37 week numeratorT"=sum(num_35_37==T, na.rm=T),
-  "35-37 week numeratorF"=sum(num_35_37==F, na.rm=T),
-  "35-37 Denom"=sum(num_35_37==T |
-                      num_35_37==F, na.rm=T)),
-  keyby=.(bookT2Arm)]
 
 
-openxlsx::write.xlsx(att,
-                     file.path(FOLDER_DATA_RESULTS,
-                               "T2",
-                               "Outcomes",
-                               "Attendance_eventsData.xlsx"))
-
-
-####
-xtabs(~t2merged$num_15_17)
-xtabs(~t2merged$num_18_22)
-xtabs(~t2merged$num_24_28)
-xtabs(~t2merged$num_31_33)
-xtabs(~t2merged$num_35_37)
-
-
-
-saveRDS(t2merged,file.path(FOLDER_DATA_CLEAN,"t2merged_eReg.rds"))
-saveRDS(longcut,file.path(FOLDER_DATA_CLEAN,"t2_long.rds"))
-saveRDS(eventsData,file.path(FOLDER_DATA_CLEAN,"eventsdata.rds"))
-saveRDS(z,file.path(FOLDER_DATA_CLEAN,"mergedfile.rds"))
-saveRDS(wyy,file.path(FOLDER_DATA_CLEAN,"eventswide.rds"))
-
-
-############################################################
-# maybe shoud merge in structural sheet to get clusternum, etc
-############################################################
-
-T2 <- readRDS(file.path(FOLDER_DATA_CLEAN,
-                        "T2_clean",
-                        "WB",
-                        "T2_dataset_2020-12-19_WB.rds"))
-
-
-# compare uniqueids
-length(unique(T2$uniqueid) %in% unique(z$uniqueid))
-nrow(T2)
-nrow(z)
 
 
 
