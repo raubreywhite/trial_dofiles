@@ -169,7 +169,7 @@ d[,labhb_x:=0]
 for(i in vars){
   
   #varslabanpp <- names(d)[stringr::str_detect(names(d),"^labanpp_[0-9]+")]
-  d[!is.na(get(i)) & get(i)>0 & get(varslabanpp)=="ANC",labhb_x:=labhb_x+1]
+  d[!is.na(get(i)) & get(i)>0,labhb_x:=labhb_x+1]
   
 }
 

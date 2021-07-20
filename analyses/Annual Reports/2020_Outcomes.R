@@ -1,6 +1,21 @@
-# Demographics and risks at Booking
+
+
+###### SETUP STARTS ######
+
+setwd("C:/data processing/trial_dofiles")
+
+fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
+
+fileSources=file.path(getwd(),fileSources)
+sapply(fileSources, debugSource)
+
+Setup(IS_GAZA=FALSE)
+
+
+###### SETUP ENDS ######
 
 ar <- readRDS(file.path(FOLDER_DATA_CLEAN,"annual reports","annualreportdata.RDS"))
+
 ########## 
 # demo
 ########## 
@@ -75,6 +90,25 @@ openxlsx::write.xlsx(tab,
 
 
 
+# bookbmicat primi
+
+tab <- ar[ident_dhis2_booking==T &
+            bookgestage<15 & bookgestage>0,.(N=.N,
+                                             "2019"=sum(bookyear==2019, na.rm=T),
+                                             "2020"=sum(bookyear==2020, na.rm=T)),
+          keyby=.(bookbmicat,bookprimi)]
+
+
+
+openxlsx::write.xlsx(tab,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "BookBmiCatsBookPrimi.xlsx"))
+
+
+
 # marriage cat
 
 ar[bookorgdistrict=="Tulk", bookorgdistrict:="TULK"]
@@ -84,6 +118,8 @@ ar[,agemarriagecat_ar:=cut(agemarriage,
                            include.lowest = T)]
 
 xtabs(~ar$agemarriagecat_ar, addNA=T)
+
+xtabs(~bookyear+agemarriagecat_ar, data=ar[booknum==1 & ident_dhis2_booking==1],addNA=T)
 
 tab <- ar[ident_dhis2_booking==T,.(N=.N,
                                    "2019"=sum(bookyear==2019, na.rm=T),
@@ -100,20 +136,41 @@ openxlsx::write.xlsx(tab,
                        "ageatmarriagecat.xlsx"))
 
 
-marriageDistricts <- ar[ident_dhis2_booking==T,.(N=.N,
-                                                 "2019"=sum(bookyear==2019, na.rm=T),
-                                                 "2020"=sum(bookyear==2020, na.rm=T)),
-                        keyby=.(bookorgdistrict,agemarriagecat_ar)]
+# find women who were booked the previous year
+setorder(ar,motheridno,bookdate)
+ar[,prevbookyear:=as.numeric(NA)]
+ar[ident_dhis2_booking==1,prevbookyear:=0]
+
+ar[ident_dhis2_booking==1,prevbookyear:=shift(bookyear), by=motheridno]
+
+nrow(ar[!is.na(prevbookyear)])
+xtabs(~bookyear+prevbookyear, data=ar[ident_dhis2_booking==1], addNA=T)
+
+
+ar[,minbookyear:=as.numeric(NA)]
+ar[ident_dhis2_booking==1,minbookyear:=min(bookyear), by=motheridno]
+xtabs(~minbookyear+bookyear, data=ar[ident_dhis2_booking==T], addNA=T)
+
+nrow(ar[minbookyear<bookyear])
+
+# only include woman one time
+
+
+tab <- ar[ident_dhis2_booking==T & 
+            minbookyear==bookyear,.(N=.N,
+                                   "2019"=sum(bookyear==2019, na.rm=T),
+                                   "2020"=sum(bookyear==2020, na.rm=T)),
+          keyby=.(agemarriagecat_ar)]
 
 
 
-openxlsx::write.xlsx(marriageDistricts,
+
+openxlsx::write.xlsx(tab,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "ageatmarriagecatDistricts.xlsx"))
-
+                       "ageatmarriagecat_perwoman.xlsx"))
 
 
 
@@ -249,20 +306,7 @@ ar[,booktrimester:=cut(bookgestagedays,
                        include.lowest=T)]
 
 xtabs(~ar$booktrimester, addNA=T)
- 
 
-bookings <- ar[,.(Booked=sum(ident_dhis2_booking==T, na.rm=T),
-                      BookedPPC=sum(ident_dhis2_ppc==T, na.rm=T),
-                      BookePPCandANC=sum(ident_dhis2_PPC==T &
-                                         ident_dhis2_booking==1, na.rm=T)),
-                   keyby=.(bookyear,bookorgdistrict)]
-
-openxlsx::write.xlsx(bookings,
-                     file.path(
-                       FOLDER_DATA_RESULTS,
-                       "annual reports",
-                       "2020",
-                       "BookORdisvsYear.xlsx"))
 
 bookgA <- ar[ident_dhis2_booking==T,.(N=.N),
                                         keyby=.(bookyear,booktrimester)]
@@ -277,15 +321,18 @@ openxlsx::write.xlsx(bookgA,
 
 
 
+
 bookgA <- ar[ident_dhis2_booking==T,.(N=.N),
-             keyby=.(bookyear,booktrimester,incomecat)]
+             keyby=.(bookyear,booktrimester,booklmpknown)]
 
 openxlsx::write.xlsx(bookgA,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookTrimester_incomeCats.xlsx"))
+                       "BooTrimesterbyBF.xlsx"))
+
+
 
 
 
@@ -346,6 +393,112 @@ openxlsx::write.xlsx(bptab,
 
 
 
+# making bookgA to differentiate between chronic and ghtn
+ar[,bookHTNgAcutoff:=cut(bookgestagedays,
+                  breaks=c(0,140,280),
+                  include.lowest=T)]
+
+
+
+
+bptab <- ar[ident_dhis2_booking==T,.(NormalBP=sum((bookbpsyst>0 & bookbpsyst<140) &
+                                                    (bookbpdiast>0 & bookbpdiast<90), na.rm=T),
+                                     MildHTN=sum((bookbpsyst>=140 & bookbpsyst<=149) |
+                                                   (bookbpdiast>90 & bookbpdiast<=100), na.rm=T),
+                                     ModHTN=sum((bookbpsyst>=150 & bookbpsyst<=159) |
+                                                  (bookbpdiast>100 & bookbpdiast<=110), na.rm=T),
+                                     SevHTN=sum(bookbpsyst>=160 |
+                                                  bookbpdiast>110, na.rm=T),
+                                     MissingBookbp=sum(bookbpsyst==0|
+                                                         bookbpdiast==0)),
+            keyby=.(bookyear,bookHTNgAcutoff)]
+
+xtabs(~bookbpsystcat+bookHTNgAcutoff,addNA=T,data=ar)
+
+bptab[bookHTNgAcutoff=="[0,140]",bookHTNgAcutoff:="<=20 weeks"]
+bptab[bookHTNgAcutoff=="(140,280]",bookHTNgAcutoff:=">20 weeks"]
+
+setnames(bptab,c("bookyear",
+                 "bookHTNgAcutoff",
+                 "NormalBP",
+                 "MildHTN",
+                 "ModHTN",
+                 "SevHTN",
+                 "MissingBookbp"),
+               c("Year",
+                 "Gestational Age",
+                 "Normal",
+                 "Mild",
+                 "Moderate",
+                 "Severe",
+                 "Missing"))
+
+
+
+
+openxlsx::write.xlsx(bptab,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "BookBPbyHTNcutoff.xlsx"))
+
+
+
+
+# age groups htn
+
+
+
+bptab <- ar[ident_dhis2_booking==T,.(NormalBP=sum((bookbpsyst>0 & bookbpsyst<140) &
+                                                    (bookbpdiast>0 & bookbpdiast<90), na.rm=T),
+                                     MildHTN=sum((bookbpsyst>=140 & bookbpsyst<=149) |
+                                                   (bookbpdiast>90 & bookbpdiast<=100), na.rm=T),
+                                     ModHTN=sum((bookbpsyst>=150 & bookbpsyst<=159) |
+                                                  (bookbpdiast>100 & bookbpdiast<=110), na.rm=T),
+                                     SevHTN=sum(bookbpsyst>=160 |
+                                                  bookbpdiast>110, na.rm=T),
+                                     MissingBookbp=sum(bookbpsyst==0|
+                                                         bookbpdiast==0)),
+            keyby=.(bookyear,bookHTNgAcutoff,agecat)]
+
+xtabs(~bookbpsystcat+bookHTNgAcutoff,addNA=T,data=ar)
+
+bptab[bookHTNgAcutoff=="[0,140]",bookHTNgAcutoff:="<=20 weeks"]
+bptab[bookHTNgAcutoff=="(140,280]",bookHTNgAcutoff:=">20 weeks"]
+
+setnames(bptab,c("bookyear",
+                 "bookHTNgAcutoff",
+                 "agecat",
+                 "NormalBP",
+                 "MildHTN",
+                 "ModHTN",
+                 "SevHTN",
+                 "MissingBookbp"),
+         c("Year",
+           "Gestational Age",
+           "Age category",
+           "Normal",
+           "Mild",
+           "Moderate",
+           "Severe",
+           "Missing"))
+
+
+
+
+openxlsx::write.xlsx(bptab,
+                     file.path(
+                       FOLDER_DATA_RESULTS,
+                       "annual reports",
+                       "2020",
+                       "BookBPbyHTNcutoffwithAge.xlsx"))
+
+
+
+
+
+
 #################### 
 # bookbp categories
 ####################  
@@ -366,6 +519,10 @@ openxlsx::write.xlsx(bookbpsystdiast,
                        "annual reports",
                        "2020",
                        "BookBPCatsbybookTM.xlsx"))
+
+
+
+
 
 
 
@@ -696,6 +853,90 @@ openxlsx::write.xlsx(tab, file.path(FOLDER_DATA_RESULTS,
                                     "2020",
                                     "VisitsTotal.xlsx"))
 
+
+
+
+
+# visits by month and year for anc, ppc, and nbc by month and year
+
+
+# Number of ANC, PPC, NBC per district per month
+
+ar[,andate_0:=bookdate]
+
+andate <- names(ar)[stringr::str_detect(names(ar),"^andate_[0-9]+")]
+nbcdate <- names(ar)[stringr::str_detect(names(ar),"^nbcdate_[0-9]+")]
+ppcdate <- names(ar)[stringr::str_detect(names(ar),"^ppcdate_[0-9]+")]
+
+visits <- ar[,c("uniqueid",
+                andate,
+                nbcdate,
+                ppcdate),
+              with=F]
+
+# melt it to long format to make the curve
+
+
+
+long <- melt(visits,
+     id.vars = c("uniqueid"),
+     measure.vars = patterns("^andate", "^nbcdate","^ppcdate"),
+     variable.name = "value",
+     value.name = c("andate", "nbcdate","ppcdate"))
+
+long[,value:=NULL]
+
+# month and year for andate
+long[,anmonth:=as.numeric(substr(andate,6,7))]
+long[,anyear:=as.numeric(stringr::str_extract(andate,"^[0-9][0-9][0-9][0-9]"))]
+xtabs(~long$anyear, addNA=T)
+xtabs(~long$anmonth, addNA=T)
+
+
+# month and year for nbcdate
+long[,nbcmonth:=as.numeric(substr(nbcdate,6,7))]
+long[,nbcyear:=as.numeric(stringr::str_extract(nbcdate,"^[0-9][0-9][0-9][0-9]"))]
+xtabs(~long$nbcyear, addNA=T)
+xtabs(~long$nbcmonth, addNA=T)
+
+
+# month and year for ppc
+long[,ppcmonth:=as.numeric(substr(ppcdate,6,7))]
+long[,ppcyear:=as.numeric(stringr::str_extract(ppcdate,"^[0-9][0-9][0-9][0-9]"))]
+xtabs(~long$ppcyear, addNA=T)
+xtabs(~long$ppcmonth, addNA=T)
+
+anc <- long[,.(ancvisits=.N),
+            keyby=.(anyear, anmonth)]
+
+
+nbc <- long[,.(nbcvisits=.N),
+            keyby=.(nbcyear, nbcmonth)]
+
+
+ppc <- long[,.(ppcvisits=.N),
+            keyby=.(ppcyear, ppcmonth)]
+
+all <- cbind(anc,
+             nbc)
+
+complete <- cbind(all,
+             ppc)
+
+# remove other years and months stuff
+complete[,nbcyear:=NULL]
+complete[,nbcmonth:=NULL]
+
+complete[,ppcyear:=NULL]
+complete[,ppcmonth:=NULL]
+
+setnames(complete,c("anyear","anmonth"),
+         c("Year","Month"))
+
+openxlsx::write.xlsx(complete, file.path(FOLDER_DATA_RESULTS,
+                                     "annual reports",
+                                     "2020",
+                                     "VisitsbymonthandYear.xlsx"))
 
 
 #################################  Attendance ################################

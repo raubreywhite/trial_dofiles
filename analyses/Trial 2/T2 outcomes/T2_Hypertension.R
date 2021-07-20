@@ -46,8 +46,6 @@ xtabs(~T2$T2_manchronichtn_00_14, addNA=T)
 ################
 #15-17 weeks
 ################
-# T2_anvisitnew: take opportunity and success from the attendance script
-
 
 #screening
 T2[,T2_Oppt_bp_15_17:=as.logical(NA)]
@@ -78,10 +76,10 @@ T2[T2_Oppt_bp_15_17==T & (T2_anbpdiast_mildHTN_15_17==T|
 
 xtabs(~T2$T2_manchronichtn_15_17, addNA=T)
 
-7
+
 T2[T2_manchronichtn_15_17==F & (T2_refHR_15_15==T|
                                   T2_refHR_16_16|
-                                  T2_refHR_1_17|
+                                  T2_refHR_17_17|
                             T2_refHosp_15_15==T|
                             T2_refHosp_16_16==T|
                             T2_refHosp_17_17==T|

@@ -11,7 +11,7 @@
 if(IS_GAZA==F){  
   ww <- readRDS(file.path(FOLDER_DATA_CLEAN,
                           "T2_clean",
-                          "T2_complete_dataset_2020-12-19_WB.rds"))
+                          sprintf("T2_complete_dataset_%s_WB.rds",CLINIC_INTERVENTION_DATE)))
   
 
   
@@ -22,16 +22,15 @@ if(IS_GAZA==F){
   
   ww <- readRDS(file.path(FOLDER_DATA_CLEAN_GAZA,
                           "T2_clean",
-                          "T2_complete_dataset_2020-10-01_Gaza.rds"))
+                          sprintf("T2_complete_dataset_%s_Gaza.rds",CLINIC_INTERVENTION_DATE)))
   
   
   
 }
 
+
+
 TT2 <- ww
-
-
-
 
 ###################################################################################################
                                             # Anemia #
@@ -203,9 +202,9 @@ TT2[T2_qidsms_Oppt_bp_15_17==T & (T2_anbpdiast_mildHTN_15_17==T|
 xtabs(~TT2$T2_qidsms_manchronichtn_15_17, addNA=T)
 
 # add the rest of the values for refHR
-TT2[T2_qidsms_manchronichtn_15_17==F & (T2_refHR_15_15==T|
-                                  T2_refHosp_16_16==T|
-                                  T2_refSpec_17_17==T),T2_qidsms_manchronichtn_15_17:=T]
+TT2[T2_qidsms_manchronichtn_15_17==F & (T2_refHR_15_17==T|
+                                  T2_refHosp_15_17==T|
+                                  T2_refSpec_15_17==T),T2_qidsms_manchronichtn_15_17:=T]
 
 xtabs(~TT2$T2_qidsms_manchronichtn_15_17, addNA=T)
 
@@ -572,15 +571,15 @@ xtabs(~TT2$T2_qidsms_RefHr, addNA=T)
 # denominator
 
 
-TT2[,T2_qidsms_Opportunity_GDM_screening_1:=as.logical(NA)]
+TT2[,T2_qidsms_Opportunity_GDM_screening_24_28:=as.logical(NA)]
 
-TT2[denom_24_28==T, T2_qidsms_Opportunity_GDM_screening_1:=FALSE]
+TT2[denom_24_28==T, T2_qidsms_Opportunity_GDM_screening_24_28:=FALSE]
 
-TT2[T2_qidsms_Opportunity_GDM_screening_1==FALSE &
+TT2[T2_qidsms_Opportunity_GDM_screening_24_28==FALSE &
       is.na(T2_qidsms_RefHr) &
-      num_24_28==T,T2_qidsms_Opportunity_GDM_screening_1:=TRUE] 
+      num_24_28==T,T2_qidsms_Opportunity_GDM_screening_24_28:=TRUE] 
 
-xtabs(~TT2$T2_qidsms_Opportunity_GDM_screening_1, addNA=T)
+xtabs(~TT2$T2_qidsms_Opportunity_GDM_screening_24_28, addNA=T)
 
 
 
@@ -588,37 +587,37 @@ xtabs(~TT2$T2_qidsms_Opportunity_GDM_screening_1, addNA=T)
 
 if(IS_GAZA==F){
   
-  TT2[,T2_qidsms_GDMscreeningontime_1:=as.logical(NA)]
-  TT2[T2_qidsms_Opportunity_GDM_screening_1==TRUE &
+  TT2[,T2_qidsms_GDMscreeningontime_24_28:=as.logical(NA)]
+  TT2[T2_qidsms_Opportunity_GDM_screening_24_28==TRUE &
        ((T2_labbloodglu_exists_24_28=T|
-           T2_labfastbloodglu_exists_24_28==T)), T2_qidsms_GDMscreeningontime_1:=F]
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1, addNA=T)
+           T2_labfastbloodglu_exists_24_28==T)), T2_qidsms_GDMscreeningontime_24_28:=F]
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28, addNA=T)
   
   
-  TT2[,T2_qidsms_GDMscreeningontime_1A:=as.logical(NA)]
-  TT2[T2_qidsms_GDMscreeningontime_1==F,T2_qidsms_GDMscreeningontime_1A:=F]
+  TT2[,T2_qidsms_GDMscreeningontime_24_28_normal:=as.logical(NA)]
+  TT2[T2_qidsms_GDMscreeningontime_24_28==F,T2_qidsms_GDMscreeningontime_24_28_normal:=F]
   
-  TT2[T2_qidsms_GDMscreeningontime_1==F &
-       (T2_labbloodglu_normal_24_28==T),T2_qidsms_GDMscreeningontime_1A:=TRUE]
+  TT2[T2_qidsms_GDMscreeningontime_24_28==F &
+       (T2_labbloodglu_normal_24_28==T),T2_qidsms_GDMscreeningontime_24_28_normal:=TRUE]
   
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1A, addNA=T)
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_normal, addNA=T)
   
   
   # high rbg at 24-28 weeks
-  TT2[,T2_qidsms_GDMscreeningontime_1B:=as.logical(NA)]
+  TT2[,T2_qidsms_GDMscreeningontime_24_28_high:=as.logical(NA)]
   
   #identified as high blood sugar and not managed yet = F
   # true value = managed
-  TT2[T2_qidsms_GDMscreeningontime_1==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28==F &
        (T2_labbloodglu_high_24_28==T|
-          T2_labfastbloodglu_high_24_28==T),T2_qidsms_GDMscreeningontime_1B:=FALSE]
+          T2_labfastbloodglu_high_24_28==T),T2_qidsms_GDMscreeningontime_24_28_high:=FALSE]
   
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1B, addNA=T)
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_high, addNA=T)
   
   
   # high value managed
   
-  TT2[T2_qidsms_GDMscreeningontime_1B==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28_high==F &
        ((T2_manRBGHigh_Diab_24_24==T|
            T2_manRBGHigh_Diab_25_25==T|
            T2_manRBGHigh_Diab_26_26==T|
@@ -638,57 +637,57 @@ if(IS_GAZA==F){
              T2_manRef_spec_25_25==T|
              T2_manRef_spec_26_26==T|
              T2_manRef_spec_27_27==T|
-             T2_manRef_spec_28_28==T)), T2_qidsms_GDMscreeningontime_1B:=T]
+             T2_manRef_spec_28_28==T)), T2_qidsms_GDMscreeningontime_24_28_high:=T]
   
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1B, addNA=T)
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_high, addNA=T)
   
   
   # intermediate values,  but dont want them for WB because management is in free text
-  TT2[,T2_qidsms_GDMscreeningontime_1C:=as.logical(NA)]
+  TT2[,T2_qidsms_GDMscreeningontime_24_28_intmd:=as.logical(NA)]
   
   
   
 } else {
   
   
-  TT2[,T2_qidsms_GDMscreeningontime_1:=as.logical(NA)]
-  TT2[T2_qidsms_Opportunity_GDM_screening_1==TRUE &
+  TT2[,T2_qidsms_GDMscreeningontime_24_28:=as.logical(NA)]
+  TT2[T2_qidsms_Opportunity_GDM_screening_24_28==TRUE &
        (T2_labfastbloodglu_exists_24_28==T|
-          T2_labbloodglu_exists_24_28==T), T2_qidsms_GDMscreeningontime_1:=F]
+          T2_labbloodglu_exists_24_28==T), T2_qidsms_GDMscreeningontime_24_28:=F]
   
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1, addNA=T)
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28, addNA=T)
   
-  TT2[,T2_qidsms_GDMscreeningontime_1A:=as.logical(NA)]
+  TT2[,T2_qidsms_GDMscreeningontime_24_28_normal:=as.logical(NA)]
   
   
-  TT2[T2_qidsms_GDMscreeningontime_1==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28==F &
        (T2_labfastbloodglu_exists_24_28==T|
-          T2_labbloodglu_exists_24_28==T), T2_qidsms_GDMscreeningontime_1A:=F]
+          T2_labbloodglu_exists_24_28==T), T2_qidsms_GDMscreeningontime_24_28_normal:=F]
   
-  TT2[T2_qidsms_Opportunity_GDM_screening_1==TRUE & 
-       T2_qidsms_GDMscreeningontime_1A==F &
+  TT2[T2_qidsms_Opportunity_GDM_screening_24_28==TRUE & 
+        T2_qidsms_GDMscreeningontime_24_28_normal==F &
        (T2_labfastbloodglu_normal_24_28==T|
-          T2_labbloodglu_normal_24_28==T),T2_qidsms_GDMscreeningontime_1A:=TRUE]
+          T2_labbloodglu_normal_24_28==T),T2_qidsms_GDMscreeningontime_24_28_normal:=TRUE]
   
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1A, addNA=T)
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_normal, addNA=T)
   
   
   
   # high rbg at 24-28 weeks
-  TT2[,T2_qidsms_GDMscreeningontime_1B:=as.logical(NA)]
+  TT2[,T2_qidsms_GDMscreeningontime_24_28_high:=as.logical(NA)]
   
   #identified as high blood sugar and not managed yet = F
   # true value = managed
-  TT2[T2_qidsms_GDMscreeningontime_1==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28==F &
         (T2_labbloodglu_high_24_28==T|
-           T2_labfastbloodglu_high_24_28==T),T2_qidsms_GDMscreeningontime_1B:=FALSE]
+           T2_labfastbloodglu_high_24_28==T),T2_qidsms_GDMscreeningontime_24_28_high:=FALSE]
   
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1B, addNA=T)
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_high, addNA=T)
   
   
   # high value managed
   
-  TT2[T2_qidsms_GDMscreeningontime_1B==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28_high==F &
         ((T2_manRBGHigh_Diab_24_24==T|
             T2_manRBGHigh_Diab_25_25==T|
             T2_manRBGHigh_Diab_26_26==T|
@@ -708,25 +707,25 @@ if(IS_GAZA==F){
               T2_manRef_spec_25_25==T|
               T2_manRef_spec_26_26==T|
               T2_manRef_spec_27_27==T|
-              T2_manRef_spec_28_28==T)), T2_qidsms_GDMscreeningontime_1B:=T]
+              T2_manRef_spec_28_28==T)), T2_qidsms_GDMscreeningontime_24_28_high:=T]
   
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1B, addNA=T)
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_high, addNA=T)
   
   # intermediate values
   # 
-  TT2[,T2_qidsms_GDMscreeningontime_1C:=as.logical(NA)]
+  TT2[,T2_qidsms_GDMscreeningontime_24_28_intmd:=as.logical(NA)]
   
   
-  TT2[T2_qidsms_Opportunity_GDM_screening_1==TRUE &
-       T2_qidsms_GDMscreeningontime_1==F &
+  TT2[T2_qidsms_Opportunity_GDM_screening_24_28==TRUE &
+        T2_qidsms_GDMscreeningontime_24_28==F &
        #is.na(T2_GDMscreeningontime_2) & 
        (T2_labfastbloodglu_likelyGDM_24_28==T |
-          T2_labbloodglu_likelyGDM_24_28==T),T2_qidsms_GDMscreeningontime_1C:=FALSE]
+          T2_labbloodglu_likelyGDM_24_28==T),T2_qidsms_GDMscreeningontime_24_28_intmd:=FALSE]
   
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1C, addNA=T)
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_intmd, addNA=T)
   # managment is repeat FBS with in 3 weeks
   
-  TT2[T2_qidsms_GDMscreeningontime_1C==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28_intmd==F &
        (T2_repeatFBS_24_24==T|
           T2_repeatFBS_25_25==T|
           T2_repeatFBS_26_26==T|
@@ -734,9 +733,9 @@ if(IS_GAZA==F){
           T2_repeatFBS_28_28==T|
           T2_repeatFBS_29_29==T|
           T2_repeatFBS_30_30==T|
-          T2_repeatFBS_31_31==T),T2_qidsms_GDMscreeningontime_1C:=T]
+          T2_repeatFBS_31_31==T),T2_qidsms_GDMscreeningontime_24_28_intmd:=T]
   
-  xtabs(~TT2$T2_qidsms_GDMscreeningontime_1C, addNA=T)
+  xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_intmd, addNA=T)
   
   
   
@@ -744,10 +743,10 @@ if(IS_GAZA==F){
   
 }
 
-xtabs(~TT2$T2_qidsms_GDMscreeningontime_1, addNA = T)
-xtabs(~TT2$T2_qidsms_GDMscreeningontime_1A, addNA = T)
-xtabs(~TT2$T2_qidsms_GDMscreeningontime_1B, addNA = T)
-xtabs(~TT2$T2_qidsms_GDMscreeningontime_1C, addNA = T)
+xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28, addNA = T)
+xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_normal, addNA = T)
+xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_high, addNA = T)
+xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_intmd, addNA = T)
 
 
 

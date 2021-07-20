@@ -1,11 +1,12 @@
 ###### SETUP STARTS ######
 
-setwd("C:/data processing/trial_dofiles")
+#setwd("C:/data processing/trial_dofiles")
 
-fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
-sapply(fileSources, source, .GlobalEnv)
+#fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
+#sapply(fileSources, source, .GlobalEnv)
 
-Setup(IS_GAZA=FALSE)
+#Setup(IS_GAZA=FALSE)
+#Setup(IS_GAZA=TRUE)
 
 
 # run set up from runwb or run gaza
@@ -37,7 +38,7 @@ if(IS_GAZA==F){
   allsmssentraw <-fread("C:/data processing/data_raw/smslogs/dhis2allmsgssent/2020-09-22.csv")
   
   ###### Load in Data Set ###### 
-  d <- LoadDataFileFromNetwork()
+  #d <- LoadDataFileFromNetwork()
   
   tt2 <-  readRDS(file.path(FOLDER_DATA_CLEAN,
                            "T2_clean",
@@ -72,7 +73,7 @@ if(IS_GAZA==F){
  
  
   # Load in data from network
-  d <- LoadDataFileFromNetworkGaza()
+  #d <- LoadDataFileFromNetworkGaza()
 
   
   tt2 <- readRDS(file.path(FOLDER_DATA_CLEAN_GAZA,
@@ -650,6 +651,8 @@ setnames(y,c("evs_uniqueid"),
              c("uniqueid"))
 
 
+# order data set before creating eventnum
+setorder(y,uniqueid,evs_bookdate)
 
 
 y[,eventnum:=1:.N, by="uniqueid"]

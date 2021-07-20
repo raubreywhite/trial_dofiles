@@ -8,8 +8,8 @@ setwd("C:/data processing/trial_dofiles")
 fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 sapply(fileSources, source, .GlobalEnv)
 
-#Setup(IS_GAZA=FALSE)
-Setup(IS_GAZA=TRUE)
+Setup(IS_GAZA=FALSE)
+#Setup(IS_GAZA=TRUE)
 ###### SETUP ENDS ######
 
 
@@ -1860,29 +1860,42 @@ setnames(smallD,
 
 
 varsKeep <- c(
+  "uniqueid",
+  "bookevent",
+  "booknum",
   "bookorgname",
   "bookorgcode",
   "bookorgdistricthashed",
   "bookorgunit",
+  "bookgestage",
+  "bookgestagedays_cats",
   "agecat",
   "agemarriagecat",
   "agepregnancycat",
   "avgincomecat",
   "educationcat",
+  "bookgestage", 
+  "bookbmicat",
+  "para", 
+  "paracat",
+  "gravida",
+  "bookhistdm", 
+  "bookhistcs", 
+  "bookhistgdm",
+  "bookhistpreecl", 
+  "bookhistghtn", 
+  "bookhistperi", 
+  "bookhistpph", 
+  "bookhistaph",
+  "bookhistabort",
+  "bookhistpreterm",
   "wantSMS",
   "firstvisitinT2",
-  #"paracat",
-  "uniqueid",
-  "bookevent",
-  
-  "bookgestage",
-  "bookgestagedays_cats",
   "booklabhb",
   "bookbpsyst",
   "bookbpdiast",
   "bookhighrisk",
   "booklaburglu",
-  "booklaburglu_high",
   "booklabbloodglu",
   "booklabbloodglu_high",
   "booklabbloodglu_intmd",

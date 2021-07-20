@@ -47,7 +47,8 @@ WBAnalyses(d=LoadDataFileFromNetwork())
 ##################
 ##################
 
-if(!IS_GAZA) SaveCISMACDataBase()
+# did those two functions  for Trial 1, BUT dont need it anymore
+#if(!IS_GAZA) SaveCISMACDataBase()
 
 #MissingHBO()
 

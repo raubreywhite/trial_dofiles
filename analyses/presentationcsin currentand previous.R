@@ -9,7 +9,7 @@ Setup(IS_GAZA=FALSE)
 
 ###### SETUP ENDS ######
 #loading in raw data
-currentpregout <- fread("C:/data processing/data_raw/e.reg-intervention/2019-04-03/Clinical Current pregnancy outcome.csv", encoding="UTF-8")
+currentpregout <- fread("C:/data processing/data_raw/e.reg-intervention/2021-05-21/Clinical Current pregnancy outcome.csv", encoding="UTF-8")
 
 for (i in names(currentpregout)){
   setnames(currentpregout, i, ExtractOnlyEnglishLettersAndNumbers(i)[[1]])
@@ -23,7 +23,7 @@ setnames(currentpregout,"ancmodeofpreviousdelivery", "MODCURRENT")
 
 
 sink()
-sink("C:/data processing/a research hRHR/presenting data/CPO_Crosstabs.txt")
+sink("C:/data processing/results/presenting data/CPO_Crosstabs.txt")
 
 # extracting data
 
