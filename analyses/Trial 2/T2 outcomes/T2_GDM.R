@@ -1,9 +1,9 @@
 
 ###Redefining opportinites
-T2[,T2_Opportunity_GDM_screening_b4_24:=as.numeric(NA)]
-T2[,T2_Opportunity_GDM_screening_24_28:=as.numeric(NA)]
-T2[,T2_Opportunity_GDM_screening_after_28:=as.numeric(NA)]
-T2[,T2_Opportunity_GDM_screening_high:=as.numeric(NA)]
+T2[,T2_Opportunity_GDM_screening_b4_24:=as.logical(NA)]
+T2[,T2_Opportunity_GDM_screening_24_28:=as.logical(NA)]
+T2[,T2_Opportunity_GDM_screening_after_28:=as.logical(NA)]
+T2[,T2_Opportunity_GDM_screening_high:=as.logical(NA)]
 
 
 # B4 24 weeks
@@ -14,7 +14,7 @@ T2[,T2_Opportunity_GDM_screening_high:=as.numeric(NA)]
 T2[bookgestagedays_cats %in% c("(0,104]",
                                "(104,125]",
                                "(125,160]",
-                               "(160,167]"),T2_Opportunity_GDM_screening_b4_24:=1]
+                               "(160,167]"),T2_Opportunity_GDM_screening_b4_24:=TRUE]
 
 xtabs(~T2$T2_Opportunity_GDM_screening_b4_24, addNA=T)
 
@@ -22,7 +22,7 @@ xtabs(~T2$T2_Opportunity_GDM_screening_b4_24, addNA=T)
 ## Remove opportunities for people who were referred to HR or Hosp
 #T2_RefHrHospmanRBG_1 rename to T2_RefHr
 T2[,T2_RefHr:=as.logical(NA)]
-T2[T2_Opportunity_GDM_screening_b4_24==1, T2_RefHr:=FALSE]
+T2[T2_Opportunity_GDM_screening_b4_24==TRUE, T2_RefHr:=FALSE]
 T2[((T2_manRef_HR_00_00==T|
           T2_manRef_HR_01_01==T|
           T2_manRef_HR_02_02==T|
@@ -131,7 +131,7 @@ xtabs(~T2$T2_RefHr, addNA=T)
 
 #Screening before 24 weeks: Creating one var for 3 possibilities
 T2[,screenb424:=as.logical(NA)]
-T2[T2_Opportunity_GDM_screening_b4_24==1,
+T2[T2_Opportunity_GDM_screening_b4_24==TRUE,
    screenb424:=F]
 T2[screenb424==F &
      (T2_labfastbloodglu_exists_00_14==T|
@@ -165,12 +165,12 @@ xtabs(~T2$T2_GDMscreeningontime_b4_24, addNA=T)
 T2[,T2_GDMscreeningontime_b4_24_normal:=as.logical(NA)]
 
 
-T2[T2_Opportunity_GDM_screening_b4_24==1 & 
+T2[T2_Opportunity_GDM_screening_b4_24==TRUE & 
      !is.na(booklaburglu), 
    T2_GDMscreeningontime_b4_24_normal:=FALSE]
 
 
-T2[T2_Opportunity_GDM_screening_b4_24==1 & 
+T2[T2_Opportunity_GDM_screening_b4_24==TRUE & 
      booklaburglu=="NEG", 
    T2_GDMscreeningontime_b4_24_normal:=TRUE]
 
@@ -180,7 +180,7 @@ T2[T2_Opportunity_GDM_screening_b4_24==1 &
 # managements
 # gdm screening if have pos urglu and have h
 T2[,T2_GDMscreeningontime_b4_24_posurglu:=as.logical(NA)]
-T2[T2_Opportunity_GDM_screening_b4_24==1 &
+T2[T2_Opportunity_GDM_screening_b4_24==TRUE &
      booklaburglu=="POS",T2_GDMscreeningontime_b4_24_posurglu:=FALSE]
 
 T2[T2_GDMscreeningontime_b4_24_posurglu==F &
@@ -202,9 +202,9 @@ xtabs(~T2$T2_GDMscreeningontime_b4_24_posurglu, addNA=T)
 
 #24-28
 T2[T2_anvisitnew_24_28==T |
-     bookgestagedays_cats %in% c("(167,202]"),T2_Opportunity_GDM_screening_24_28:=1]
+     bookgestagedays_cats %in% c("(167,202]"),T2_Opportunity_GDM_screening_24_28:=TRUE]
 
-T2[T2_Opportunity_GDM_screening_24_28==1 &
+T2[T2_Opportunity_GDM_screening_24_28==TRUE &
      (T2_labbloodglu_high_00_14==T|
         T2_labbloodglu_high_15_17==T|
         T2_labbloodglu_high_18_22==T|
@@ -213,7 +213,7 @@ T2[T2_Opportunity_GDM_screening_24_28==1 &
         T2_labfastbloodglu_high_15_17==T|
         T2_labfastbloodglu_high_18_22==T|
         T2_labfastbloodglu_high_23_23==T),
-   T2_Opportunity_GDM_screening_24_28:=T2_Opportunity_GDM_screening_24_28-1]
+   T2_Opportunity_GDM_screening_24_28:=FALSE]
 
 
 
@@ -221,7 +221,7 @@ T2[T2_Opportunity_GDM_screening_24_28==1 &
 if(IS_GAZA==F){
 
 T2[,T2_GDMscreeningontime_24_28:=as.logical(NA)]
-T2[T2_Opportunity_GDM_screening_24_28==1 &
+T2[T2_Opportunity_GDM_screening_24_28==TRUE &
             ((T2_labbloodglu_exists_24_28=T|
                 T2_labfastbloodglu_exists_24_28==T)), T2_GDMscreeningontime_24_28:=T]
 xtabs(~T2$T2_GDMscreeningontime_24_28, addNA=T)
@@ -285,7 +285,7 @@ xtabs(~T2$T2_GDMscreeningontime_24_28_highrbg, addNA=T)
   
   
   T2[,T2_GDMscreeningontime_24_28:=as.logical(NA)]
-  T2[T2_Opportunity_GDM_screening_24_28==1 &
+  T2[T2_Opportunity_GDM_screening_24_28==TRUE &
           (T2_labfastbloodglu_exists_24_28==T), T2_GDMscreeningontime_24_28:=T]
   
   
@@ -297,7 +297,7 @@ xtabs(~T2$T2_GDMscreeningontime_24_28_highrbg, addNA=T)
         (T2_labfastbloodglu_exists_24_28==T|
            T2_labbloodglu_exists_24_28==T), T2_GDMscreeningontime_24_28_normal:=F]
   
-  T2[T2_Opportunity_GDM_screening_24_28==1 & 
+  T2[T2_Opportunity_GDM_screening_24_28==TRUE & 
            T2_GDMscreeningontime_24_28_normal==F &
           (T2_labfastbloodglu_normal_24_28==T|
              T2_labbloodglu_normal_24_28==T),T2_GDMscreeningontime_24_28_normal:=TRUE]
@@ -309,7 +309,7 @@ xtabs(~T2$T2_GDMscreeningontime_24_28_highrbg, addNA=T)
   
   #identified as high blood sugar and not managed yet = F
   # true value = managed
-  T2[T2_Opportunity_GDM_screening_24_28==1 & 
+  T2[T2_Opportunity_GDM_screening_24_28==TRUE & 
            #is.na(T2_GDMscreeningontime_2) &
            T2_GDMscreeningontime_24_28== TRUE &
            (T2_labfastbloodglu_high_24_28==T|
@@ -355,7 +355,7 @@ xtabs(~T2$T2_GDMscreeningontime_24_28_highrbg, addNA=T)
   T2[,T2_GDMscreeningontime_24_28_intmbg:=as.logical(NA)]
    
    
-   T2[T2_Opportunity_GDM_screening_24_28==1 &
+   T2[T2_Opportunity_GDM_screening_24_28==TRUE &
             T2_GDMscreeningontime_24_28==TRUE &
             #is.na(T2_GDMscreeningontime_2) & 
         (T2_labfastbloodglu_likelyGDM_24_28==T |
@@ -445,11 +445,11 @@ xtabs(~T2$T2_Opportunity_GDM_screening_24_28, addNA=T)
 T2[bookgestagedays_cats %in% c("(202,216]",
                                "(216,237]",
                                "(237,244]",
-                               "(244,265]"), T2_Opportunity_GDM_screening_after_28:=1]
+                               "(244,265]"), T2_Opportunity_GDM_screening_after_28:=TRUE]
 #Screening before 24 weeks: Creating one var for 3 possibilities
 T2[,screenafter28:=as.logical(NA)]
-T2[T2_Opportunity_GDM_screening_after_28==1,
-       screenafter28:=F]
+T2[T2_Opportunity_GDM_screening_after_28==TRUE,
+       screenafter28:=FALSE]
 T2[screenafter28==F &
          (T2_labfastbloodglu_exists_29_30==T|
             T2_labfastbloodglu_exists_31_33==T |
@@ -480,13 +480,13 @@ xtabs(~T2$T2_GDMscreeningontime_after_28, addNA=T)
 T2[,T2_GDMscreeningontime_after_28_normal:=as.logical(NA)]
 
 
-T2[T2_Opportunity_GDM_screening_after_28==1 & 
+T2[T2_Opportunity_GDM_screening_after_28==TRUE & 
      T2_GDMscreeningontime_after_28==T,
    T2_GDMscreeningontime_after_28_normal:=FALSE]
 
 
 T2[,T2_GDMscreeningontime_after_28_high:=as.logical(NA)]
-T2[T2_Opportunity_GDM_screening_after_28==1 & 
+T2[T2_Opportunity_GDM_screening_after_28==TRUE & 
      T2_GDMscreeningontime_after_28==T,
    T2_GDMscreeningontime_after_28_high:=FALSE]
 
@@ -550,7 +550,7 @@ T2[(T2_labbloodglu_high_00_14==T|
         T2_labfastbloodglu_high_31_33==T|
         T2_labfastbloodglu_high_34_34==T|
         T2_labfastbloodglu_high_35_37==T) &
-     booklabbloodglu_high==F, T2_Opportunity_GDM_screening_high:=1]
+     booklabbloodglu_high==F, T2_Opportunity_GDM_screening_high:=TRUE]
 
 xtabs(~T2$T2_Opportunity_GDM_screening_24_28, addNA=T)
 xtabs(~T2$T2_Opportunity_GDM_screening_after_28, addNA=T)
@@ -559,7 +559,7 @@ xtabs(~T2$T2_Opportunity_GDM_screening_high, addNA=T)
 
 #management fo high RBG outside of time windows
 T2[, T2_GDMscreeningontime_4:=as.logical(NA)]
-T2[T2_Opportunity_GDM_screening_high==1 &
+T2[T2_Opportunity_GDM_screening_high==TRUE &
          (T2_labbloodglu_high_00_14==T|
             T2_labbloodglu_high_15_17==T|
             T2_labbloodglu_high_18_22==T|

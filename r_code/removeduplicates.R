@@ -70,6 +70,7 @@ Removeduplicate <- function(d,tag,isControl,maxObsPerWomanDate=1){
   saveRDS(tab,file = file.path(FOLDER_DATA_RAW,
                                "possible_duplicates", 
                                sprintf("autodup_%s_%s.RDS", tag, isControl)))
+  
  d <- d[isDuplicate==F] 
  d[,n:=NULL ]
  d[,minNumMissing:=NULL ]

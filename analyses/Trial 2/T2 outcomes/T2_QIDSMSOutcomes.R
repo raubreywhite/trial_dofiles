@@ -446,19 +446,7 @@ xtabs(~TT2$T2_qidsms_manmodsevhtn_35_37, addNA=T)
 ###################################################################################################
                                              # GDM #
 ###################################################################################################
-# who do we look at for these ? only the 24-28 week values?
 
-#remove referrals for people who were referred for diabetes before 24 weeks?
-# and do we have to remove those with high glucose values before or just those that were referred previously?
-# TT2[T2_qidsms_Opportunity_GDM_screening_2==1 &
-#      (T2_labbloodglu_high_00_14==T|
-#         T2_labbloodglu_high_15_17==T|
-#         T2_labbloodglu_high_18_22==T|
-#         T2_labbloodglu_high_23_23==T|
-#         T2_labfastbloodglu_high_00_14==T|
-#         T2_labfastbloodglu_high_15_17==T|
-#         T2_labfastbloodglu_high_18_22==T|
-#         T2_labfastbloodglu_high_23_23==T),T2_qidsms_Opportunity_GDM_screening_2:=FALSE]
 
 ## Remove opportunities for people who were referred to HR or Hosp
 #T2_RefHrHospmanRBG_1 rename to T2_RefHr
@@ -590,14 +578,14 @@ if(IS_GAZA==F){
   TT2[,T2_qidsms_GDMscreeningontime_24_28:=as.logical(NA)]
   TT2[T2_qidsms_Opportunity_GDM_screening_24_28==TRUE &
        ((T2_labbloodglu_exists_24_28=T|
-           T2_labfastbloodglu_exists_24_28==T)), T2_qidsms_GDMscreeningontime_24_28:=F]
+           T2_labfastbloodglu_exists_24_28==T)), T2_qidsms_GDMscreeningontime_24_28:=T]
   xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28, addNA=T)
   
   
   TT2[,T2_qidsms_GDMscreeningontime_24_28_normal:=as.logical(NA)]
-  TT2[T2_qidsms_GDMscreeningontime_24_28==F,T2_qidsms_GDMscreeningontime_24_28_normal:=F]
+  TT2[T2_qidsms_GDMscreeningontime_24_28==T,T2_qidsms_GDMscreeningontime_24_28_normal:=F]
   
-  TT2[T2_qidsms_GDMscreeningontime_24_28==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28==T &
        (T2_labbloodglu_normal_24_28==T),T2_qidsms_GDMscreeningontime_24_28_normal:=TRUE]
   
   xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28_normal, addNA=T)
@@ -608,7 +596,7 @@ if(IS_GAZA==F){
   
   #identified as high blood sugar and not managed yet = F
   # true value = managed
-  TT2[T2_qidsms_GDMscreeningontime_24_28==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28==T &
        (T2_labbloodglu_high_24_28==T|
           T2_labfastbloodglu_high_24_28==T),T2_qidsms_GDMscreeningontime_24_28_high:=FALSE]
   
@@ -653,14 +641,14 @@ if(IS_GAZA==F){
   TT2[,T2_qidsms_GDMscreeningontime_24_28:=as.logical(NA)]
   TT2[T2_qidsms_Opportunity_GDM_screening_24_28==TRUE &
        (T2_labfastbloodglu_exists_24_28==T|
-          T2_labbloodglu_exists_24_28==T), T2_qidsms_GDMscreeningontime_24_28:=F]
+          T2_labbloodglu_exists_24_28==T), T2_qidsms_GDMscreeningontime_24_28:=T]
   
   xtabs(~TT2$T2_qidsms_GDMscreeningontime_24_28, addNA=T)
   
   TT2[,T2_qidsms_GDMscreeningontime_24_28_normal:=as.logical(NA)]
   
   
-  TT2[T2_qidsms_GDMscreeningontime_24_28==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28==T &
        (T2_labfastbloodglu_exists_24_28==T|
           T2_labbloodglu_exists_24_28==T), T2_qidsms_GDMscreeningontime_24_28_normal:=F]
   
@@ -678,7 +666,7 @@ if(IS_GAZA==F){
   
   #identified as high blood sugar and not managed yet = F
   # true value = managed
-  TT2[T2_qidsms_GDMscreeningontime_24_28==F &
+  TT2[T2_qidsms_GDMscreeningontime_24_28==T &
         (T2_labbloodglu_high_24_28==T|
            T2_labfastbloodglu_high_24_28==T),T2_qidsms_GDMscreeningontime_24_28_high:=FALSE]
   
@@ -717,7 +705,7 @@ if(IS_GAZA==F){
   
   
   TT2[T2_qidsms_Opportunity_GDM_screening_24_28==TRUE &
-        T2_qidsms_GDMscreeningontime_24_28==F &
+        T2_qidsms_GDMscreeningontime_24_28==T &
        #is.na(T2_GDMscreeningontime_2) & 
        (T2_labfastbloodglu_likelyGDM_24_28==T |
           T2_labbloodglu_likelyGDM_24_28==T),T2_qidsms_GDMscreeningontime_24_28_intmd:=FALSE]
@@ -793,198 +781,21 @@ if(IS_GAZA==F){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ###################################################################################################
-# # Attendance #
-# ###################################################################################################
-# 
-# # anyone who was scheduled , then those who attended and werent referred to HR?
-# 
-# ####################
-# # 15-17
-# ####################
-# 
-# # referred before 15 weeks to remove from these visits
-# 
-# TT2[,refHRhosp_1:=as.logical(NA)]
-# TT2[(T2_manRef_HR_00_00==T|
-#        T2_manRef_HR_01_01==T|
-#        T2_manRef_HR_02_02==T|
-#        T2_manRef_HR_03_03==T|
-#        T2_manRef_HR_04_04==T|
-#        T2_manRef_HR_05_05==T|
-#        T2_manRef_HR_06_06==T|
-#        T2_manRef_HR_07_07==T|
-#        T2_manRef_HR_08_08==T|
-#        T2_manRef_HR_09_09==T|
-#        T2_manRef_HR_10_10==T|
-#        T2_manRef_HR_11_11==T|
-#        T2_manRef_HR_12_12==T|
-#        T2_manRef_HR_13_13==T|
-#        T2_manRef_HR_14_14==T)|
-#       (T2_manRef_Hosp_00_00==T|
-#          T2_manRef_Hosp_01_01==T|
-#          T2_manRef_Hosp_02_02==T|
-#          T2_manRef_Hosp_03_03==T|
-#          T2_manRef_Hosp_04_04==T|
-#          T2_manRef_Hosp_05_05==T|
-#          T2_manRef_Hosp_06_06==T|
-#          T2_manRef_Hosp_07_07==T|
-#          T2_manRef_Hosp_08_08==T|
-#          T2_manRef_Hosp_09_09==T|
-#          T2_manRef_Hosp_10_10==T|
-#          T2_manRef_Hosp_11_11==T|
-#          T2_manRef_Hosp_12_12==T|
-#          T2_manRef_Hosp_13_13==T|
-#          T2_manRef_Hosp_14_14==T),refHRhosp_1:=TRUE]
-# # opportunity
-# TT2[,T2_qidsms_Oppt_att_15_17:=as.logical(NA)]
-# TT2[denom_15_17==T,T2_qidsms_Oppt_att_15_17:=FALSE]
-# TT2[is.na(refHRhosp_1) &
-#       T2_qidsms_Oppt_att_15_17==FALSE, 
-#     T2_qidsms_Oppt_att_15_17:=TRUE]
-# 
-# # success
-# TT2[,T2_qidsms_attontime_15_17:=as.logical(NA)]
-# TT2[num_15_17==T,T2_qidsms_attontime_15_17:=TRUE]
 # 
 # 
 # 
 # 
 # 
-# ####################
-# # 18-22
-# ####################
+# FOLDER_DATA_RAW <<- file.path(getwd(),"../data_raw")
 # 
-# TT2[,refHrhosp_2:=as.logical(NA)]
-# TT2[(T2_manRef_HR_15_15==T | T2_manRef_Hosp_15_15==T) |
-#       (T2_manRef_HR_16_16==T | T2_manRef_Hosp_16_16==T)|
-#       (T2_manRef_HR_17_17==T | T2_manRef_Hosp_17_17==T), refHRhosp_2:=TRUE]
+# labandus <- data.table(readxl::read_excel(file.path(
+#   FOLDER_DATA_RAW,
+#   "structural_data",
+#   "clinics_for_randomization_100718.xlsx")))
 # 
 # 
-# # opportunity
-# TT2[,T2_qidsms_Oppt_att_18_22:=as.logical(NA)]
-# TT2[denom_18_22==T,T2_qidsms_Oppt_att_18_22:=FALSE]
-# TT2[refHRhosp_2!=TRUE &
-#       T2_qidsms_Oppt_att_18_22==FALSE,
-#     T2_qidsms_Oppt_att_18_22:=TRUE]
-# 
-# # success
-# TT2[,T2_qidsms_attontime_18_22:=as.logical(NA)]
-# TT2[T2_qidsms_Oppt_att_18_22==T,T2_qidsms_attontime_18_22:=FALSE]
-# TT2[num_18_22==T,T2_qidsms_attontime_18_22:=TRUE]
-# 
-# 
-# 
-# 
-# ####################
-# # 24-28
-# ####################
-# 
-# 
-# # opportunity
-# TT2[,T2_qidsms_Oppt_att_24_28:=as.logical(NA)]
-# TT2[denom_24_28==T,T2_qidsms_Oppt_att_24_28:=FALSE]
-# TT2[(T2_manRef_HR_18_18!=T & T2_manRef_Hosp_18_18!=T) &
-#       (T2_manRef_HR_19_19!=T & T2_manRef_Hosp_19_19!=T) &
-#       (T2_manRef_HR_20_20!=T & T2_manRef_Hosp_20_20!=T) &
-#       (T2_manRef_HR_21_21!=T & T2_manRef_Hosp_21_21!=T) &
-#       (T2_manRef_HR_22_22!=T & T2_manRef_Hosp_22_22!=T) &
-#       (T2_manRef_HR_23_23!=T & T2_manRef_Hosp_23_23!=T) &
-#       T2_qidsms_Oppt_att_24_28==FALSE,
-#     T2_qidsms_Oppt_att_24_28:=TRUE]
-# 
-# # success
-# TT2[,T2_qidsms_attontime_24_28:=as.logical(NA)]
-# TT2[T2_qidsms_Oppt_att_24_28==T,T2_qidsms_attontime_24_28:=FALSE]
-# TT2[num_24_28==T,T2_qidsms_attontime_24_28:=TRUE]
-# 
-# 
-# 
-# 
-# ####################
-# # 31-33
-# ####################
-# 
-# 
-# # opportunity
-# TT2[,T2_qidsms_Oppt_att_31_33:=as.logical(NA)]
-# TT2[denom_31_33==T,T2_qidsms_Oppt_att_31_33:=FALSE]
-# TT2[(T2_manRef_HR_18_18!=T & T2_manRef_Hosp_18_18!=T) &
-#       (T2_manRef_HR_19_19!=T & T2_manRef_Hosp_19_19!=T) &
-#       (T2_manRef_HR_20_20!=T & T2_manRef_Hosp_20_20!=T) &
-#       (T2_manRef_HR_21_21!=T & T2_manRef_Hosp_21_21!=T) &
-#       (T2_manRef_HR_22_22!=T & T2_manRef_Hosp_22_22!=T) &
-#       (T2_manRef_HR_23_23!=T & T2_manRef_Hosp_23_23!=T) &
-#       T2_qidsms_Oppt_att_31_33==FALSE,
-#     T2_qidsms_Oppt_att_31_33:=TRUE]
-# 
-# # success
-# TT2[,T2_qidsms_attontime_31_33:=as.logical(NA)]
-# TT2[T2_qidsms_Oppt_att_31_33==T,T2_qidsms_attontime_31_33:=FALSE]
-# TT2[num_31_33==T,T2_qidsms_attontime_31_33:=TRUE]
-# 
-# 
-# 
-# 
-# ####################
-# # 35-37
-# ####################
-# 
-# 
-# # opportunity
-# TT2[,T2_qidsms_Oppt_att_35_37:=as.logical(NA)]
-# TT2[denom_35_37==T,T2_qidsms_Oppt_att_35_37:=FALSE]
-# TT2[(T2_manRef_HR_18_18!=T & T2_manRef_Hosp_18_18!=T) &
-#       (T2_manRef_HR_19_19!=T & T2_manRef_Hosp_19_19!=T) &
-#       (T2_manRef_HR_20_20!=T & T2_manRef_Hosp_20_20!=T) &
-#       (T2_manRef_HR_21_21!=T & T2_manRef_Hosp_21_21!=T) &
-#       (T2_manRef_HR_22_22!=T & T2_manRef_Hosp_22_22!=T) &
-#       (T2_manRef_HR_23_23!=T & T2_manRef_Hosp_23_23!=T) &
-#       T2_qidsms_Oppt_att_35_37==FALSE,
-#     T2_qidsms_Oppt_att_35_37:=TRUE]
-# 
-# # success
-# TT2[,T2_qidsms_attontime_35_37:=as.logical(NA)]
-# TT2[T2_qidsms_Oppt_att_35_37==T,T2_qidsms_attontime_35_37:=FALSE]
-# TT2[num_35_37==T,T2_qidsms_attontime_35_37:=TRUE]
-# 
-# 
-
-
+# gazamerged <- merge(TT2,
+#                     labandus,
+#                     by="str_TRIAL_2_Cluster",
+#                     all.x=T)
+# nrow(gazamerged[is.na(labavailability)])

@@ -1,7 +1,8 @@
 
 
 
-####LOAD d from Network####
+#### LOAD d from Network####
+
 d <- LoadDataFileFromNetwork()
 
 nrow(d)
@@ -38,6 +39,21 @@ cpoplace[,perCS:=round(CSdeliv/numcsperyear, digits=2)]
 openxlsx::write.xlsx(cpoplace, file.path(FOLDER_DATA_RESULTS,
                                         "cs",
                                         "cs_placeofdeliv.xlsx"))
+
+
+
+
+
+# high risk at booking
+
+cpoplace <- d[yearofexpdeliv>=2016 &
+                !is.na(cpoevent_1),.(N=.N,
+                                     hasmodedeliv=sum(!is.na(cpomodedelivery_1)),
+                                     CSdeliv=sum(cpomodedelivery_1=="Caesarian section",na.rm=T)),
+              keyby=.(yearofexpdeliv,bookhighrisk,cpoplaceofbirth_1)]
+
+cpoplace[,numcsperyear:=sum(CSdeliv), by=c("yearofexpdeliv","bookhighrisk")]
+cpoplace[,perCS:=round(CSdeliv/numcsperyear, digits=2)]
 
 
 

@@ -38,6 +38,8 @@
 # APPEND
 ###################
 
+FOLDER_DATA_RAW <<- file.path(getwd(),"../data_raw")
+
 FOLDER_DATA_CLEAN <<- file.path(getwd(),"../data_clean")
  
 WB <- readRDS(file.path(FOLDER_DATA_CLEAN,
@@ -49,7 +51,7 @@ nrow(WB)
 FOLDER_DATA_CLEAN_GAZA <<- file.path(getwd(),"../gaza_data_clean")
 
 
-
+# make sure correct data for this file before running
 Gaza <-readRDS(file.path(FOLDER_DATA_CLEAN_GAZA,
                          "T2_clean",
                          "T2_FINAL_dataset_2020-10-01_Gaza.rds"))
@@ -133,7 +135,7 @@ fullT2data[,bookdate:=NULL]
 fullT2data[,booklong:=NULL]
 fullT2data[,booklat:=NULL]
 fullT2data[,bookorgname:=NULL]
-fullT2data[,bookorgcode:=NULL]
+#fullT2data[,bookorgcode:=NULL]
 #fullT2data[,bookorgunit:=NULL]
 fullT2data[,bookidnumber:=NULL]
 fullT2data[,demoorgname:=NULL]
@@ -176,16 +178,61 @@ fullT2data[,expecteddateofdelivery:=NULL]
 fullT2data[,calc_expected_due_delivery:=NULL]
 fullT2data[,avgincome:=NULL]
 
-saveRDS(fullT2data,
+
+
+# merge data for US and lab availability
+
+labandus <- data.table(readxl::read_excel(file.path(
+                                FOLDER_DATA_RAW,
+                                "structural_data",
+                                "clinics_for_randomization_100718.xlsx")))
+
+length(unique(labandus$clustername))
+
+
+
+labandus[,lab:=as.numeric(NA)]
+labandus[labavailability=="Yes",lab:=1]
+labandus[labavailability=="No",lab:=0]
+
+labandus[,us:=as.numeric(NA)]
+labandus[usavailability=="Yes",us:=1]
+labandus[usavailability=="No",us:=0]
+
+
+merged <- merge(fullT2data,
+                labandus,
+                by="str_TRIAL_2_Cluster",
+                all.x=T)
+
+
+nrow(fullT2data)
+nrow(merged)
+nrow(labandus)
+
+nrow(merged[is.na(str_TRIAL_2_Cluster)])
+nrow(merged[is.na(clustername)])
+
+#unique(merged[is.na(clustername)]$bookorgname)
+
+
+merged[,districts:=NULL]
+merged[,clustername:=NULL]
+
+
+
+saveRDS(merged,
         file.path(FOLDER_DATA_CLEAN,
                   "T2_clean",
                   "T2_FINAL_dataset.rds"))
-write.csv(fullT2data,file.path(
+write.csv(merged,file.path(
                    FOLDER_DATA_CLEAN,
                   "T2_clean",
                   "T2_FINAL_dataset.csv"))
 
+merged[,str_TRIAL_2_ClusSize:=NULL]
 
+merged[,str_TRIAL_2_ClusSize:=clussize]
 
 #################################################
 # save data set with vars we want
@@ -206,8 +253,7 @@ outcomes <- fullT2data[,
                          "agepregnancycat",
                          "avgincomecat",
                          "educationcat",
-                         "bookgestage", 
-                         "bookbmicat",
+                        "bookbmicat",
                          "para",
                          "gravida",
                          "bookhistdm", 
@@ -252,7 +298,6 @@ outcomes <- fullT2data[,
                          "T2_mansevanemia_29_34",
                          "T2_manmilmodane_29_34",
                          "T2_Oppt_anemia_35_37",
-                         "T2_screeniningontime_anemia_35_37",
                          "T2_screeniningontime_anemia_35_37",
                          "T2_mansevanemia_35_37",
                          "T2_Oppt_bp_00_14",
@@ -340,12 +385,21 @@ outcomes <- fullT2data[,
 
 
 
-saveRDS(outcomes,
+mergedoutcomes <- merge(outcomes,
+                labandus,
+                by="str_TRIAL_2_Cluster",
+                all.x=T)
+
+nrow(mergedoutcomes)
+nrow(outcomes)
+nrow(mergedoutcomes[is.na(lab)])
+
+saveRDS(mergedoutcomes,
         file.path(FOLDER_DATA_CLEAN,
                   "T2_clean",
                   "T2_FINAL_dataset_outcomes.rds"))
 
-write.csv(outcomes,file.path(
+write.csv(mergedoutcomes,file.path(
                             FOLDER_DATA_CLEAN,
                             "T2_clean",
                             "T2_FINAL_dataset_outcomes.csv"))

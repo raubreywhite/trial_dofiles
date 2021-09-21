@@ -20,7 +20,7 @@ Setup(IS_GAZA=FALSE)
 #Setup(IS_GAZA=TRUE)
 
 
-#Setup(IS_GAZA=TRUE)
+
 ###### SETUP ENDS ######
 #IS_GAZA=T
 
@@ -30,7 +30,7 @@ if(IS_GAZA==F){
   T2 <- readRDS(file.path(FOLDER_DATA_CLEAN,
                             "T2_clean",
                             "WB",
-                            "T2_dataset_2020-12-19_WB.rds"))
+                            sprintf("T2_dataset_%s_WB.rds",CLINIC_INTERVENTION_DATE)))
   nrow(T2)
 
   T2 <- T2[!is.na(firstvisitinT2) & !is.na(TrialArm)]
@@ -81,7 +81,7 @@ xtabs(~TrialArm+T2_Oppt_anemia_00_23, data=T2,addNA=T)
 # 00_23
 T2[,T2_screeniningontime_anemia_00_23:=as.logical(NA)]
 T2[T2_Oppt_anemia_00_23==T,T2_screeniningontime_anemia_00_23:=FALSE]
-T2[T2_screeniningontime_anemia_00_23==T & !is.na(booklabhb),T2_screeniningontime_anemia_00_23:=TRUE]
+T2[T2_screeniningontime_anemia_00_23==F & !is.na(booklabhb),T2_screeniningontime_anemia_00_23:=TRUE]
 
 xtabs(~TrialArm+T2_screeniningontime_anemia_00_23, data=T2, addNA=T)
 
@@ -189,7 +189,8 @@ xtabs(~T2$T2_screeniningontime_anemia_24_28, addNA=T)
 
 T2[,T2_screeniningontime_no_anemia_24_28:=as.logical(NA)]
 T2[T2_screeniningontime_anemia_24_28==TRUE, T2_screeniningontime_no_anemia_24_28:=FALSE]
-T2[T2_screeniningontime_no_anemia_24_28==F & T2_labhb_normal_24_28==T, T2_screeniningontime_no_anemia_24_28:=TRUE]
+T2[T2_screeniningontime_no_anemia_24_28==F & T2_labhb_normal_24_28==T, 
+   T2_screeniningontime_no_anemia_24_28:=TRUE]
 
 xtabs(~T2$T2_screeniningontime_no_anemia_24_28, addNA=T)
 
@@ -199,7 +200,7 @@ xtabs(~T2$T2_screeniningontime_no_anemia_24_28, addNA=T)
 ##########
 
 T2[,T2_manmildmodanemia_24_28:=as.logical(NA)]
-T2[T2_Oppt_anemia_24_28==F & T2_riskMildModAne_24_28==T,T2_manmildmodanemia_24_28:=F]
+T2[T2_Oppt_anemia_24_28==T & T2_riskMildModAne_24_28==T,T2_manmildmodanemia_24_28:=F]
 xtabs(~T2$T2_manmildmodanemia_24_28, addNA=T)
 
 T2[T2_manmildmodanemia_24_28==F &
@@ -214,7 +215,7 @@ xtabs(~T2$T2_manmildmodanemia_24_28, addNA=T)
 
 # 24-28 weeks severe anemia
 T2[,T2_mansevanemia_24_28:=as.logical(NA)]
-T2[T2_Oppt_anemia_24_28==F & 
+T2[T2_Oppt_anemia_24_28==T & 
      T2_riskSevAne_24_28==T,T2_mansevanemia_24_28:=F]
 xtabs(~T2$T2_mansevanemia_24_28, addNA=T)
 
@@ -261,7 +262,7 @@ T2[T2_screeniningontime_no_anemia_29_34==F & booklabhb>10.9, T2_screeniningontim
 
 # 29_34 weeks severe anemia
 T2[,T2_mansevanemia_29_34:=as.logical(NA)]
-T2[T2_Oppt_anemia_29_34==T & booklabhb<7,T2_mansevanemia_29_34:=F]
+T2[T2_Oppt_anemia_29_34==T & booklabhb<7 & booklabhb>0,T2_mansevanemia_29_34:=F]
 xtabs(~T2$T2_mansevanemia_29_34, addNA=T)
 
 # should probably use manhb variable here
@@ -355,7 +356,6 @@ vars <- c("T2_Oppt_anemia_00_23",
           "T2_mansevanemia_29_34",
           "T2_manmilmodane_29_34",
           "T2_Oppt_anemia_35_37",
-          "T2_screeniningontime_anemia_35_37",
           "T2_screeniningontime_anemia_35_37",
           "T2_mansevanemia_35_37")
 
