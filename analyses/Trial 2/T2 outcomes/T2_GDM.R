@@ -166,8 +166,13 @@ T2[,T2_GDMscreeningontime_b4_24_normal:=as.logical(NA)]
 
 
 T2[T2_Opportunity_GDM_screening_b4_24==TRUE & 
-     !is.na(booklaburglu), 
-   T2_GDMscreeningontime_b4_24_normal:=FALSE]
+    (!is.na(booklaburglu)|
+       (!is.na(booklabfastbloodglu) & booklabfastbloodglu_high==FALSE)|
+          (!is.na(booklabbloodglu) & booklabbloodglu_high==FALSE)|
+       (T2_laburglu_exists_00_14==T|
+          T2_laburglu_exists_15_17==T |
+          T2_laburglu_exists_18_22==T|
+          T2_laburglu_exists_23_23==T)), T2_GDMscreeningontime_b4_24_normal:=FALSE]
 
 
 T2[T2_Opportunity_GDM_screening_b4_24==TRUE & 

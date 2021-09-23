@@ -66,7 +66,20 @@ xtabs(~T2$T2_bpontime_15_17)
 ################
 #15-17 weeks
 ################
+
 #management
+#needs to be done week by week
+
+#T2_Oppt
+T2[,T2_manchronichtn_15_15:=as.logical(NA)]
+T2[T2_Oppt_bp_15_17==T & (T2_anbpdiast_mildHTN_15_15==T|
+                            T2_anbpsyst_mildHTN_15_15==T),T2_manchronichtn_15_15:=F]
+
+T2[T2_manchronichtn_15_15==F & (T2_refHR_15_15==T|
+                                T2_refHosp_15_15==T|
+                                T2_refSpec_15_15==T),T2_manchronichtn_15_15:=T]
+
+
 #T2_Oppt
 T2[,T2_manchronichtn_15_17:=as.logical(NA)]
 T2[T2_Oppt_bp_15_17==T & (T2_anbpdiast_mildHTN_15_17==T|
@@ -75,6 +88,8 @@ T2[T2_Oppt_bp_15_17==T & (T2_anbpdiast_mildHTN_15_17==T|
                           T2_anbpdiast_modSevHTN_15_17==T),T2_manchronichtn_15_17:=F]
 
 xtabs(~T2$T2_manchronichtn_15_17, addNA=T)
+
+
 
 
 T2[T2_manchronichtn_15_17==F & (T2_refHR_15_15==T|
@@ -165,6 +180,8 @@ T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_mildHTN_24_28==T|
 
 xtabs(~T2$T2_manmildhtn_24_28, addNA=T)
 
+T2[,T2_manmildhtn_24_24:=as.logical(NA)]
+
 
 T2[T2_manmildhtn_24_28==F &
      ((T2_anbpsyst_present_25_25==T & T2_anbpdiast_present_25_25==T)|
@@ -176,7 +193,7 @@ T2[T2_manmildhtn_24_28==F &
 xtabs(~T2$T2_manmildhtn_24_28, addNA=T)
 
 
-# 24-28 weeks severe anemia
+# 24-28 weeks severe htn
 T2[,T2_manmodsevhtn_24_28:=as.logical(NA)]
 T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_modSevHTN_24_28==T|
                           T2_anbpsyst_modSevHTN_24_28==T),T2_manmodsevhtn_24_28:=F]

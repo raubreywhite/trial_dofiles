@@ -260,6 +260,7 @@ T2[T2_screeniningontime_anemia_29_34==T, T2_screeniningontime_no_anemia_29_34:=F
 T2[T2_screeniningontime_no_anemia_29_34==F & booklabhb>10.9, T2_screeniningontime_no_anemia_29_34:=TRUE]
 
 
+
 # 29_34 weeks severe anemia
 T2[,T2_mansevanemia_29_34:=as.logical(NA)]
 T2[T2_Oppt_anemia_29_34==T & booklabhb<7 & booklabhb>0,T2_mansevanemia_29_34:=F]
@@ -307,7 +308,8 @@ xtabs(~T2$T2_manmilmodane_29_34, addNA=T)
 #35-37 weeks
 T2[,T2_Oppt_anemia_35_37:=as.logical(NA)]
 T2[T2_anvisitnew_35_37==T, T2_Oppt_anemia_35_37:=F]
-T2[T2_anvisitnew_35_37==T & (T2_screeniningontime_no_anemia_24_28==T | T2_screeniningontime_no_anemia_29_34==T), T2_Oppt_anemia_35_37:=TRUE ]
+T2[T2_anvisitnew_35_37==T & (T2_screeniningontime_no_anemia_24_28==T |
+                               T2_screeniningontime_no_anemia_29_34==T), T2_Oppt_anemia_35_37:=TRUE ]
 
 xtabs(~T2$T2_Oppt_anemia_35_37)
 
@@ -318,6 +320,21 @@ T2[T2_screeniningontime_anemia_35_37==F &
      T2_labhb_exists_35_37==T,T2_screeniningontime_anemia_35_37:=TRUE]
 
 xtabs(~T2$T2_screeniningontime_anemia_35_37, addNA=T)
+
+
+# mild/mod anemia
+
+T2[,T2_manmildmodanemia_35_37:=as.logical(NA)]
+T2[T2_Oppt_anemia_35_37==T & T2_riskMildModAne_35_37==T,T2_manmildmodanemia_35_37:=F]
+xtabs(~T2$T2_manmildmodanemia_35_37, addNA=T)
+
+T2[T2_manmildmodanemia_35_37==F &
+     (T2_manhb_mildmodhbret_38_38==T|
+        T2_manhb_mildmodhbret_39_39==T|
+        T2_manhb_mildmodhbret_40_40==T|
+        T2_manhb_mildmodhbret_41_41==T),T2_manmildmodanemia_35_37:=T]
+xtabs(~T2$T2_manmildmodanemia_35_37, addNA=T)
+
 
 
 ##########
@@ -353,10 +370,11 @@ vars <- c("T2_Oppt_anemia_00_23",
           "T2_Oppt_anemia_29_34",
           "T2_screeniningontime_anemia_29_34",
           "T2_screeniningontime_no_anemia_29_34",
+          "T2_manmildmodanemia_29_34",
           "T2_mansevanemia_29_34",
-          "T2_manmilmodane_29_34",
           "T2_Oppt_anemia_35_37",
           "T2_screeniningontime_anemia_35_37",
+           "T2_manmilmodane_35_37",
           "T2_mansevanemia_35_37")
 
 
