@@ -780,22 +780,3 @@ if(IS_GAZA==F){
                                          CLINIC_INTERVENTION_DATE)))
 }
 
-
-# 
-# 
-# 
-# 
-# 
-# FOLDER_DATA_RAW <<- file.path(getwd(),"../data_raw")
-# 
-# labandus <- data.table(readxl::read_excel(file.path(
-#   FOLDER_DATA_RAW,
-#   "structural_data",
-#   "clinics_for_randomization_100718.xlsx")))
-# 
-# 
-# gazamerged <- merge(TT2,
-#                     labandus,
-#                     by="str_TRIAL_2_Cluster",
-#                     all.x=T)
-# nrow(gazamerged[is.na(labavailability)])

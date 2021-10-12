@@ -210,4 +210,33 @@ DataCompletion <- function(){
                                  ))
   
   
+  
+  
+  
+  avgRes <- res[!is.na(bookyear) & 
+                  ident_gaza==FALSE & 
+                  bookyear>2016,
+                .(MeanPerc=mean(percComplete, na.rm=T),
+                  maxXp100=max(xp100,na.rm=T)),
+                keyby=.(key,var)]
+  
+  # ranges
+  avgRes[,range:=as.character(NA)]
+  avgRes[MeanPerc<30,range:="<30%"]
+  avgRes[MeanPerc<60 &
+           MeanPerc>=30,range:="30%-69%"]
+  avgRes[MeanPerc<=89.9 &
+           MeanPerc>=60,range:="70%-89%"]
+  
+  avgRes[MeanPerc>=90,range:=">=90%"]
+  
+  openxlsx::write.xlsx(avgRes,
+                       file.path(FOLDER_DROPBOX_RESULTS_PAL,
+                                 "data_quality",
+                                 "data_completenessAVGs.xlsx"
+                       ))
+  
+  
+  
+  
 }

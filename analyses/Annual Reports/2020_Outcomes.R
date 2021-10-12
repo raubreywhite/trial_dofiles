@@ -939,6 +939,33 @@ openxlsx::write.xlsx(complete, file.path(FOLDER_DATA_RESULTS,
                                      "VisitsbymonthandYear.xlsx"))
 
 
+
+
+
+
+# cpo and # ppc per year
+d[,ppcyear_1:=as.numeric(stringr::str_extract(ppcdate_1,"^[0-9][0-9][0-9][0-9]"))]
+d[,cpoyear_1:=as.numeric(stringr::str_extract(cpodate_1,"^[0-9][0-9][0-9][0-9]"))]
+
+xtabs(~cpoyear_1+ppcyear_1, data=d)
+
+tab <- d[,.(N=.N,
+            PPCNoCPO=sum(ident_dhis2_ppc==T &
+                           is.na(ident_dhis2_cpo)),
+            PPCCPO=sum(ident_dhis2_ppc==T &
+                         ident_dhis2_cpo==T, na.rm=T),
+            CPOnoPPC=sum(ident_dhis2_cpo==T &
+                           is.na(ident_dhis2_ppc))),
+         keyby=.(ppcyear_1)]
+
+
+openxlsx::write.xlsx(tab,
+                     file.path(
+                     FOLDER_DATA_RESULTS,
+                     "annual reports",
+                     "2020",
+                     "ppccpo_women.xlsx"))
+
 #################################  Attendance ################################
 
 ################################  Attendance ################################

@@ -127,6 +127,26 @@ sum(d[ident_dhis2_control==F]$allbpdiast_x,na.rm=T)
 # 
 # sum(d[ident_dhis2_control==F]$ppcbpsyst_x,na.rm=T)
 
+
+
+
+#making variable for ultrasound
+vars <- names(d)[stringr::str_detect(names(d),"^labevent_[0-9]+")]
+d[,labevent_x:=0]
+
+print(vars)
+
+for(i in vars){
+  d[!is.na(get(i)), labevent_x:=labevent_x + 1]
+}
+
+sum(d[ident_dhis2_control==F]$labevent_x,na.rm=T)
+
+sum(d[ident_dhis2_control==F & bookyear==2019]$labevent_x,na.rm=T)
+
+
+
+
 ##LAB FBS(Check variables)
 vars <- names(d)[stringr::str_detect(names(d),"^labfastbloodglu_[0-9]+")]
 

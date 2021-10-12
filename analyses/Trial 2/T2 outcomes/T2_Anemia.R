@@ -53,16 +53,8 @@ if(IS_GAZA==F){
 
 
 ################
-# 15-17 weeks
-
-# anyone booked before 23 weeks
+#<23 weeks
 ################
-
-
-
-
-#T2 <- smallD
-
 
 # only those booked at this category, so add an and statements that does this
 
@@ -77,23 +69,32 @@ T2[bookgestagedays_cats %in% c("(0,104]",
 
 
 xtabs(~TrialArm+T2_Oppt_anemia_00_23, data=T2,addNA=T)
+xtabs(~T2$T2_Oppt_anemia_00_23, addNA=T)
 
 # 00_23
 T2[,T2_screeniningontime_anemia_00_23:=as.logical(NA)]
 T2[T2_Oppt_anemia_00_23==T,T2_screeniningontime_anemia_00_23:=FALSE]
-T2[T2_screeniningontime_anemia_00_23==F & !is.na(booklabhb),T2_screeniningontime_anemia_00_23:=TRUE]
+T2[T2_screeniningontime_anemia_00_23==F & 
+     !is.na(booklabhb) & 
+     booklabhb>0,T2_screeniningontime_anemia_00_23:=TRUE]
 
 xtabs(~TrialArm+T2_screeniningontime_anemia_00_23, data=T2, addNA=T)
+xtabs(~T2$T2_screeniningontime_anemia_00_23, addNA=T)
+
 
 # no anemia
 T2[,T2_screeniningontime_no_anemia_00_23:=as.logical(NA)]
 T2[T2_screeniningontime_anemia_00_23==T, T2_screeniningontime_no_anemia_00_23:=FALSE]
-T2[T2_screeniningontime_no_anemia_00_23==F & booklabhb>10.9, T2_screeniningontime_no_anemia_00_23:=TRUE]
+T2[T2_screeniningontime_no_anemia_00_23==F & 
+     booklabhb>10.9 , T2_screeniningontime_no_anemia_00_23:=TRUE]
+
 xtabs(~T2$T2_screeniningontime_no_anemia_00_23, addNA=T)
 
 # 00-23 weeks severe anemia
 T2[,T2_mansevanemia_00_23:=as.logical(NA)]
-T2[T2_Oppt_anemia_00_23==T & booklabhb<7 & booklabhb>0,T2_mansevanemia_00_23:=F]
+T2[T2_screeniningontime_no_anemia_00_23==F & 
+          booklabhb<7 &
+          booklabhb>0, T2_mansevanemia_00_23:=F]
 xtabs(~T2$T2_mansevanemia_00_23, addNA=T)
 
 # should probably use manhb variable here
@@ -131,9 +132,10 @@ xtabs(~TrialArm+T2_mansevanemia_00_23, data=T2, addNA=T)
 
 # 00-23 weeks moderate anemia
 T2[,T2_manmilmodane_00_23:=as.logical(NA)]
-T2[T2_Oppt_anemia_00_23==T & 
+T2[T2_screeniningontime_no_anemia_00_23==F & 
      booklabhb>=7 & booklabhb<=10.9,T2_manmilmodane_00_23:=F]
 xtabs(~T2$T2_manmilmodane_00_23, addNA=T)
+
 T2[T2_manmilmodane_00_23==F &
      (T2_manhb_mildmodhbret_03_03==T|
         T2_manhb_mildmodhbret_04_04==T|
@@ -172,7 +174,8 @@ xtabs(~T2$T2_manmilmodane_00_23, addNA=T)
 # 24-28 weeks
 T2[,T2_Oppt_anemia_24_28:=as.logical(NA)]
 T2[T2_anvisitnew_24_28==T, T2_Oppt_anemia_24_28:=F]
-T2[T2_anvisitnew_24_28==T & T2_screeniningontime_no_anemia_00_23==T, T2_Oppt_anemia_24_28:=TRUE ]
+T2[T2_anvisitnew_24_28==T & 
+     T2_screeniningontime_no_anemia_00_23==T, T2_Oppt_anemia_24_28:=TRUE ]
 
 xtabs(~T2$T2_Oppt_anemia_24_28)
 
@@ -200,7 +203,8 @@ xtabs(~T2$T2_screeniningontime_no_anemia_24_28, addNA=T)
 ##########
 
 T2[,T2_manmildmodanemia_24_28:=as.logical(NA)]
-T2[T2_Oppt_anemia_24_28==T & T2_riskMildModAne_24_28==T,T2_manmildmodanemia_24_28:=F]
+T2[T2_screeniningontime_no_anemia_24_28==F & 
+     T2_labhb_anemia_mild_mod_24_28==T,T2_manmildmodanemia_24_28:=F]
 xtabs(~T2$T2_manmildmodanemia_24_28, addNA=T)
 
 T2[T2_manmildmodanemia_24_28==F &
@@ -215,8 +219,8 @@ xtabs(~T2$T2_manmildmodanemia_24_28, addNA=T)
 
 # 24-28 weeks severe anemia
 T2[,T2_mansevanemia_24_28:=as.logical(NA)]
-T2[T2_Oppt_anemia_24_28==T & 
-     T2_riskSevAne_24_28==T,T2_mansevanemia_24_28:=F]
+T2[T2_screeniningontime_no_anemia_24_28==F & 
+     T2_labhb_anemia_sev_24_28==T,T2_mansevanemia_24_28:=F]
 xtabs(~T2$T2_mansevanemia_24_28, addNA=T)
 
 # should probably use manhb variable here
@@ -249,7 +253,7 @@ xtabs(~T2$T2_Oppt_anemia_29_34, addNA=T)
 # 29-34 screening
 T2[,T2_screeniningontime_anemia_29_34:=as.logical(NA)]
 T2[T2_Oppt_anemia_29_34==T,T2_screeniningontime_anemia_29_34:=FALSE]
-T2[T2_screeniningontime_anemia_29_34==F & !is.na(booklabhb),
+T2[T2_screeniningontime_anemia_29_34==F & !is.na(booklabhb) & booklabhb>0,
       T2_screeniningontime_anemia_29_34:=TRUE]
 
 xtabs(~T2$T2_screeniningontime_anemia_29_34, addNA=T)
@@ -259,11 +263,13 @@ T2[,T2_screeniningontime_no_anemia_29_34:=as.logical(NA)]
 T2[T2_screeniningontime_anemia_29_34==T, T2_screeniningontime_no_anemia_29_34:=FALSE]
 T2[T2_screeniningontime_no_anemia_29_34==F & booklabhb>10.9, T2_screeniningontime_no_anemia_29_34:=TRUE]
 
+xtabs(~T2$T2_screeniningontime_no_anemia_29_34, addNA=T)
 
 
 # 29_34 weeks severe anemia
 T2[,T2_mansevanemia_29_34:=as.logical(NA)]
-T2[T2_Oppt_anemia_29_34==T & booklabhb<7 & booklabhb>0,T2_mansevanemia_29_34:=F]
+T2[T2_screeniningontime_no_anemia_29_34==F & 
+     booklabhb<7 & booklabhb>0,T2_mansevanemia_29_34:=F]
 xtabs(~T2$T2_mansevanemia_29_34, addNA=T)
 
 # should probably use manhb variable here
@@ -283,22 +289,23 @@ xtabs(~T2$T2_Oppt_anemia_29_34)
 
 
 ##########
-#management
+# mild/mod
 ##########
 
 
 # 29-34 weeks severe anemia
-T2[,T2_manmilmodane_29_34:=as.logical(NA)]
-T2[T2_Oppt_anemia_29_34==T & 
-     booklabhb>=7 & booklabhb<=10.9,T2_manmilmodane_29_34:=F]
-xtabs(~T2$T2_manmilmodane_29_34, addNA=T)
-T2[T2_manmilmodane_29_34==F &
+T2[,T2_manmildmodanemia_29_34:=as.logical(NA)]
+T2[T2_screeniningontime_no_anemia_29_34==F & 
+     booklabhb>=7 & booklabhb<=10.9,T2_manmildmodanemia_29_34:=F]
+xtabs(~T2$T2_manmildmodanemia_29_34, addNA=T)
+
+T2[T2_manmildmodanemia_29_34==F &
      (T2_manhb_mildmodhbret_32_32==T|
         T2_manhb_mildmodhbret_33_33==T|
         T2_manhb_mildmodhbret_34_34==T|
         T2_manhb_mildmodhbret_35_35==T|
-        T2_manhb_mildmodhbret_36_36==T),T2_manmilmodane_29_34:=T]
-xtabs(~T2$T2_manmilmodane_29_34, addNA=T)
+        T2_manhb_mildmodhbret_36_36==T),T2_manmildmodanemia_29_34:=T]
+xtabs(~T2$T2_manmildmodanemia_29_34, addNA=T)
 
 
 ################
@@ -321,13 +328,22 @@ T2[T2_screeniningontime_anemia_35_37==F &
 
 xtabs(~T2$T2_screeniningontime_anemia_35_37, addNA=T)
 
+# no anemia
+T2[,T2_screeniningontime_no_anemia_35_37:=as.logical(NA)]
+T2[T2_screeniningontime_anemia_35_37==T,T2_screeniningontime_no_anemia_35_37:=FALSE]
+T2[T2_screeniningontime_anemia_35_37==T &
+     T2_labhb_normal_35_37==T, T2_screeniningontime_no_anemia_35_37:=TRUE]
+xtabs(~T2$T2_screeniningontime_no_anemia_35_37, addNA=T)
 
 # mild/mod anemia
 
 T2[,T2_manmildmodanemia_35_37:=as.logical(NA)]
-T2[T2_Oppt_anemia_35_37==T & T2_riskMildModAne_35_37==T,T2_manmildmodanemia_35_37:=F]
+T2[T2_screeniningontime_no_anemia_35_37==F & 
+      T2_labhb_anemia_mild_mod_35_37==T,T2_manmildmodanemia_35_37:=F]
 xtabs(~T2$T2_manmildmodanemia_35_37, addNA=T)
 
+# keep them even if they give a false value
+# maximum weeks for this in processing code is 37 weeks
 T2[T2_manmildmodanemia_35_37==F &
      (T2_manhb_mildmodhbret_38_38==T|
         T2_manhb_mildmodhbret_39_39==T|
@@ -338,13 +354,13 @@ xtabs(~T2$T2_manmildmodanemia_35_37, addNA=T)
 
 
 ##########
-#management
+# severe
 ##########
 
 # 35_37 weeks severe anemia
 T2[,T2_mansevanemia_35_37:=as.logical(NA)]
-T2[T2_Oppt_anemia_35_37==T & 
-     T2_riskSevAne_35_37==T,T2_mansevanemia_35_37:=F]
+T2[T2_screeniningontime_no_anemia_35_37==F & 
+     T2_labhb_anemia_sev_35_37==T,T2_mansevanemia_35_37:=F]
 xtabs(~T2$T2_mansevanemia_35_37, addNA=T)
 
 T2[T2_mansevanemia_35_37==F &
@@ -374,7 +390,7 @@ vars <- c("T2_Oppt_anemia_00_23",
           "T2_mansevanemia_29_34",
           "T2_Oppt_anemia_35_37",
           "T2_screeniningontime_anemia_35_37",
-           "T2_manmilmodane_35_37",
+           "T2_manmildmodanemia_35_37",
           "T2_mansevanemia_35_37")
 
 
