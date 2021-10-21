@@ -228,7 +228,20 @@ nrow(d)
        ident_TRIAL_3==T,TrialArm:="SMS and QID"]
 
 
+###############
+# hr at booking
+###############
+d[,bookhrhighsug:=as.logical(NA)]
 
+d[(mandate_1-bookdate)<=7,bookhrhighsug:=FALSE] 
+d[(mandate_1-bookdate)<=7 &
+    manperf_1==1 &
+    mantypex_1 %in% c("RefHighRisk","RefDiabetes","RefSpec"),bookhrhighsug:=TRUE] 
+
+xtabs(~d$bookhrhighsug, addNA=T)
+
+# book hr and refspec, refDiab  add this var ^^ to list below and other data sets
+  
 # defining dataset
 smallD  <- d[(ident_dhis2_booking==T | ident_dhis2_an==T) &
                !is.na(TrialArm),]
@@ -298,7 +311,6 @@ smallD[!is.na(booklabfastbloodglu) &
 
 smallD[booklabfastbloodglu>=95 & booklabfastbloodglu<126 ,booklabfastbloodglu_intmd:=TRUE]
 xtabs(~smallD$booklabfastbloodglu_intmd, addNA=T)
-
 
 
 
@@ -421,6 +433,10 @@ days <- list(
   "42_42"=42*7+c(0:6)
   
 )
+
+
+
+
 
 
 ######################### ATTENDANCE ######################### 
@@ -914,6 +930,9 @@ xtabs(~smallD$T2_labfastbloodglu_high_24_28)
 # Referral variables
 
 ####Referrals####
+
+
+
 # Ref to HR
 smallD <- VisitVariables(
   smallD=smallD,
@@ -1741,6 +1760,11 @@ xtabs(~smallD$T2_repeatFBS_24_24, addNA=T)
 
 
 
+###### referral with in booking done here because we have those who have manperf and refHR true
+# difference in days from booking and hr
+# first find all cases were manperf and refhr
+# then for those cases, see how many of them are with in 7 days of booking
+
 
 
 
@@ -1895,6 +1919,7 @@ varsKeep <- c(
   "bookbpsyst",
   "bookbpdiast",
   "bookhighrisk",
+  "bookhrhighsug",
   "booklaburglu",
   "booklabbloodglu",
   "booklabbloodglu_high",

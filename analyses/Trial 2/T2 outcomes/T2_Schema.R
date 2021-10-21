@@ -48,6 +48,7 @@ WB <- readRDS(file.path(FOLDER_DATA_CLEAN,
 nrow(WB)
 
 
+
 FOLDER_DATA_CLEAN_GAZA <<- file.path(getwd(),"../gaza_data_clean")
 
 
@@ -63,6 +64,8 @@ nrow(Gaza)
 fullT2data <-rbind(WB,
                    Gaza,
                    fill=T)
+
+nrow(fullT2data)==nrow(Gaza)+nrow(WB)
 
 # remove variables from event data that we dont want
 
@@ -89,97 +92,16 @@ vars <- names(fullT2data)[stringr::str_detect(names(fullT2data),"^evs_orgunitcod
 fullT2data[,(vars):=NULL]
 
 
-
-
 nrow(WB)+nrow(Gaza)==nrow(fullT2data)
 
 xtabs(~fullT2data$TrialArm, addNA=T)
 
 
-#################################################
-# save data set
-#################################################
-# these are the variables we have in the data set
-
-
-## here we delete the sensitive variables
-fullT2data[,trackedentity:=NULL]
-fullT2data[,dummy:=NULL]
-fullT2data[,idtype:=NULL]
-fullT2data[,motheridno:=NULL]
-fullT2data[,firstname:=NULL]
-fullT2data[,datecreated:=NULL]
-fullT2data[,fathersname:=NULL]
-fullT2data[,middlename:=NULL]
-fullT2data[,familyname1:=NULL]
-fullT2data[,familyname2:=NULL]
-fullT2data[,husbandsname:=NULL]
-fullT2data[,street:=NULL]
-fullT2data[,village:=NULL]
-fullT2data[,city:=NULL]
-fullT2data[,camp:=NULL]
-fullT2data[,mobile:=NULL]
-fullT2data[,phone:=NULL]
-fullT2data[,email:=NULL]
-fullT2data[,cosang:=NULL]
-fullT2data[,dob:=NULL]
-fullT2data[,income:=NULL]
-fullT2data[,education:=NULL]
-fullT2data[,agemarriage:=NULL]
-fullT2data[,agepregnancy:=NULL]
-fullT2data[,members:=NULL]
-fullT2data[,age:=NULL]
-
-# this is what i do if i know the entire name of the variable
-fullT2data[,bookdate:=NULL]
-fullT2data[,booklong:=NULL]
-fullT2data[,booklat:=NULL]
-fullT2data[,bookorgname:=NULL]
-#fullT2data[,bookorgcode:=NULL]
-#fullT2data[,bookorgunit:=NULL]
-fullT2data[,bookidnumber:=NULL]
-fullT2data[,demoorgname:=NULL]
-fullT2data[,demoorgunit:=NULL]
-fullT2data[,bookorgdistrict:=NULL]
-
-# this is what i do if i know part of the variable name
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"latitude")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"organisationunit")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"womanfirst")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"womanfamily")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"husbandname")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"address")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"dataextractor")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"alternateidentificationnum")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"firstname")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"fathersname")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"husbandsfamilyname")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"husbandsname")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"middlename")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"village")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"city")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"dateofbirth")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"mobile")]:=NULL]
-#fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"education")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"ageatmarriage")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"ageatfirstpreg")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"monthlyhouseholdincome")]:=NULL]
-fullT2data[,names(fullT2data)[stringr::str_detect(names(fullT2data),"numberofmembers")]:=NULL]
-
-badNames <- names(fullT2data)[stringr::str_detect(names(fullT2data),"name")]
-goodNames <- badNames[stringr::str_detect(badNames,"labtestname")]
-badNames <- badNames[!badNames %in% goodNames]
-fullT2data[,(badNames):=NULL]
-
-fullT2data[,booklmp:=NULL]
-fullT2data[,bookdatelastbirth:=NULL]
-fullT2data[,dateupdated:=NULL]
-fullT2data[,expecteddateofdelivery:=NULL]
-fullT2data[,calc_expected_due_delivery:=NULL]
-fullT2data[,avgincome:=NULL]
-
-
-
+###############################
+# lab stuff
+###############################
+# copied original sheet and changed names to match the ones in our structural data
+# will prevent duplicates from coming up
 # merge data for US and lab availability
 
 labandus <- data.table(readxl::read_excel(file.path(
@@ -189,6 +111,9 @@ labandus <- data.table(readxl::read_excel(file.path(
 
 length(unique(labandus$clustername))
 
+#make clinic names lower case
+labandus[,clustername:=ExtractOnlyEnglishLetters(clustername)]
+xtabs(~labandus$clustername,addNA=T)
 
 
 labandus[,lab:=as.numeric(NA)]
@@ -216,6 +141,89 @@ nrow(merged[is.na(clustername)])
 #unique(merged[is.na(clustername)]$bookorgname)
 
 
+#################################################
+# save data set
+#################################################
+# these are the variables we have in the data set
+
+
+## here we delete the sensitive variables
+merged[,trackedentity:=NULL]
+merged[,dummy:=NULL]
+merged[,idtype:=NULL]
+merged[,motheridno:=NULL]
+merged[,firstname:=NULL]
+merged[,datecreated:=NULL]
+merged[,fathersname:=NULL]
+merged[,middlename:=NULL]
+merged[,familyname1:=NULL]
+merged[,familyname2:=NULL]
+merged[,husbandsname:=NULL]
+merged[,street:=NULL]
+merged[,village:=NULL]
+merged[,city:=NULL]
+merged[,camp:=NULL]
+merged[,mobile:=NULL]
+merged[,phone:=NULL]
+merged[,email:=NULL]
+merged[,cosang:=NULL]
+merged[,dob:=NULL]
+merged[,income:=NULL]
+merged[,education:=NULL]
+merged[,agemarriage:=NULL]
+merged[,agepregnancy:=NULL]
+merged[,members:=NULL]
+merged[,age:=NULL]
+
+# this is what i do if i know the entire name of the variable
+merged[,bookdate:=NULL]
+merged[,booklong:=NULL]
+merged[,booklat:=NULL]
+merged[,bookorgname:=NULL]
+#merged[,bookorgcode:=NULL]
+#merged[,bookorgunit:=NULL]
+merged[,bookidnumber:=NULL]
+merged[,demoorgname:=NULL]
+merged[,demoorgunit:=NULL]
+merged[,bookorgdistrict:=NULL]
+
+# this is what i do if i know part of the variable name
+merged[,names(merged)[stringr::str_detect(names(merged),"latitude")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"organisationunit")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"womanfirst")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"womanfamily")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"husbandname")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"address")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"dataextractor")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"alternateidentificationnum")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"firstname")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"fathersname")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"husbandsfamilyname")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"husbandsname")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"middlename")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"village")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"city")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"dateofbirth")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"mobile")]:=NULL]
+#merged[,names(merged)[stringr::str_detect(names(merged),"education")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"ageatmarriage")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"ageatfirstpreg")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"monthlyhouseholdincome")]:=NULL]
+merged[,names(merged)[stringr::str_detect(names(merged),"numberofmembers")]:=NULL]
+
+badNames <- names(merged)[stringr::str_detect(names(merged),"name")]
+goodNames <- badNames[stringr::str_detect(badNames,"labtestname")]
+badNames <- badNames[!badNames %in% goodNames]
+merged[,(badNames):=NULL]
+
+merged[,booklmp:=NULL]
+merged[,bookdatelastbirth:=NULL]
+merged[,dateupdated:=NULL]
+merged[,expecteddateofdelivery:=NULL]
+merged[,calc_expected_due_delivery:=NULL]
+merged[,avgincome:=NULL]
+
+
 merged[,districts:=NULL]
 merged[,clustername:=NULL]
 
@@ -238,13 +246,11 @@ merged[,str_TRIAL_2_ClusSize:=clussize]
 # save data set with vars we want
 #################################################
 # these are the variables we have in the data set
-
-outcomes <- fullT2data[,
-                       c(
-                         "uniqueid",
+# add vars we merged in from sheet above
+outcomes <- merged[, c(  "uniqueid",
                          "bookevent",
                          "booknum",
-                        "bookorgdistricthashed",
+                         "bookorgdistricthashed",
                          "bookorgunit",
                          "bookgestage",
                          "bookgestagedays_cats",
@@ -253,7 +259,7 @@ outcomes <- fullT2data[,
                          "agepregnancycat",
                          "avgincomecat",
                          "educationcat",
-                        "bookbmicat",
+                         "bookbmicat",
                          "para",
                          "gravida",
                          "bookhistdm", 
@@ -272,12 +278,14 @@ outcomes <- fullT2data[,
                          "bookbpsyst",
                          "bookbpdiast",
                          "bookhighrisk",
+                         "bookhrhighsug",
                          "booklaburglu",
                          "booklabbloodglu",
                          "booklabbloodglu_high",
                          "booklabbloodglu_intmd",
                          
                          "ident_dhis2_booking",
+                         "ident_WB",
                          "TrialArm",
                          "str_TRIAL_2_Cluster",
                          "str_TRIAL_2_ClusSize",
@@ -378,25 +386,33 @@ outcomes <- fullT2data[,
                         "T2_manmildchronichtn_35_37",
                         "T2_manmodsevchronichtn_35_37",
                         
-                         "T2_Opportunity_GDM_screening_b4_24",
-                         "T2_Opportunity_GDM_screening_24_28",
-                         "T2_Opportunity_GDM_screening_after_28",
-                         "T2_Opportunity_GDM_screening_high",
-                         "T2_RefHr",
-                         "T2_RefHr_2",
-                         "screenb424",
-                         "T2_GDMscreeningontime_b4_24_normal",
-                         "T2_GDMscreeningontime_b4_24_posurglu",
-                         "T2_GDMscreeningontime_b4_24",
-                         "T2_GDMscreeningontime_24_28",
-                         "T2_GDMscreeningontime_24_28_normal",
-                         "T2_GDMscreeningontime_24_28_highrbg",
-                         "T2_GDMscreeningontime_24_28_intmbg",
-                         "screenafter28",
-                         "T2_GDMscreeningontime_after_28",
-                         "T2_GDMscreeningontime_after_28_normal",
-                         "T2_GDMscreeningontime_after_28_high",
-                         "T2_GDMscreeningontime_4",
+                        "T2_Opportunity_GDM_screening_b4_24",
+                        "T2_GDMscreeningontime_b4_24_bookurglu_normal",
+                        "T2_GDMscreeningontime_b4_24_bookfastbloodglu_normal",
+                        "T2_GDMscreeningontime_b4_24_bookbloodglu_normal",
+                        "T2_GDMscreeningontime_b4_24_manposurglu",
+                        "T2_GDMscreeningontime_b4_24_manhighrbs",
+                        "T2_Opportunity_GDM_screening_24_28", 
+                        "T2_GDMscreeningontime_24_28",
+                        "T2_GDMscreeningontime_24_28_normal",
+                        "T2_GDMscreeningontime_24_24_manhighrbg",
+                        "T2_GDMscreeningontime_25_25_manhighrbg",
+                        "T2_GDMscreeningontime_26_26_manhighrbg",
+                        "T2_GDMscreeningontime_27_27_manhighrbg",
+                        "T2_GDMscreeningontime_28_28_manhighrbg",
+                        "T2_GDMscreeningontime_24_28_manhighrbg",
+                        "T2_GDMscreeningontime_24_28_intmbg",
+                        "T2_GDMscreeningontime_24_24_manintmbg",
+                        "T2_GDMscreeningontime_25_25_manintmbg",
+                        "T2_GDMscreeningontime_26_26_manintmbg",
+                        "T2_GDMscreeningontime_27_27_manintmbg",
+                        "T2_GDMscreeningontime_28_28_manintmbg",
+                        "T2_GDMscreeningontime_24_28_manintmbg",
+                        "T2_Opportunity_GDM_screening_after_28",
+                        "T2_GDMscreeningontime_after_28",
+                        "T2_GDMscreeningontime_after_28_normal",
+                        "T2_GDMscreeningontime_after_28_high", 
+                        
                          "denom_15_17",
                          "denom_18_22",
                          "denom_24_28",
@@ -438,10 +454,17 @@ outcomes <- fullT2data[,
                          "T2_qidsms_GDMscreeningontime_24_28",             
                          "T2_qidsms_GDMscreeningontime_24_28_normal",            
                          "T2_qidsms_GDMscreeningontime_24_28_high",             
-                         "T2_qidsms_GDMscreeningontime_24_28_intmd")]
+                         "T2_qidsms_GDMscreeningontime_24_28_intmd",
+                         "phase",
+                         "districts",
+                         "clussize",
+                         "labavailability",
+                         "usavailability",
+                        "lab",
+                        "us")]
 
 
-
+# need to merge with two things so we dont get the duplicate rows
 mergedoutcomes <- merge(outcomes,
                 labandus,
                 by="str_TRIAL_2_Cluster",
