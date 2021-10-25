@@ -130,148 +130,9 @@ T2[T2_Opportunity_GDM_screening_24_28==TRUE &
 
 
 xtabs(~T2$T2_Opportunity_GDM_screening_24_28, addNA=T)
-
-if(IS_GAZA==F){
-
-T2[,T2_GDMscreeningontime_24_28:=as.logical(NA)]
-T2[T2_Opportunity_GDM_screening_24_28==TRUE, T2_GDMscreeningontime_24_28:=FALSE]
-T2[T2_Opportunity_GDM_screening_24_28==TRUE &
-            ((T2_labbloodglu_exists_24_28==TRUE|
-                T2_labfastbloodglu_exists_24_28==T)), T2_GDMscreeningontime_24_28:=T]
-xtabs(~T2$T2_GDMscreeningontime_24_28, addNA=T)
-
-
-# normal values
-T2[,T2_GDMscreeningontime_24_28_normal:=as.logical(NA)]
-T2[T2_GDMscreeningontime_24_28==T,T2_GDMscreeningontime_24_28_normal:=F]
-
-T2[T2_GDMscreeningontime_24_28==T &
-            (T2_labbloodglu_normal_24_28==T|
-               T2_labfastbloodglu_normal_24_28==T),T2_GDMscreeningontime_24_28_normal:=TRUE]
-
-xtabs(~T2$T2_GDMscreeningontime_24_28_normal, addNA=T)
-
 ###################
-# management 24-28
+# screening 24-28
 ###################
-
-# highrbg 24 weeks
-T2[,T2_GDMscreeningontime_24_24_manhighrbg:=as.logical(NA)]
-T2[T2_GDMscreeningontime_24_28==T &
-     T2_GDMscreeningontime_24_28_normal==FALSE &
-     T2_labbloodglu_high_24_24==T,T2_GDMscreeningontime_24_24_manhighrbg:=F]
-
-
-T2[T2_GDMscreeningontime_24_24_manhighrbg==F &
-       T2_manRBGHigh_Diab_24_24==T|
-        T2_manRef_HR_24_24==T|
-        T2_manRef_spec_24_24==T, T2_GDMscreeningontime_24_24_manhighrbg:=T]
-
-
-# highrbg 25 weeks
-T2[,T2_GDMscreeningontime_25_25_manhighrbg:=as.logical(NA)]
-T2[T2_GDMscreeningontime_24_28==T &
-     T2_GDMscreeningontime_24_28_normal==FALSE &
-     T2_labbloodglu_high_25_25==T,T2_GDMscreeningontime_25_25_manhighrbg:=F]
-
-
-T2[T2_GDMscreeningontime_25_25_manhighrbg==F &
-     T2_manRBGHigh_Diab_25_25==T|
-     T2_manRef_HR_25_25==T|
-     T2_manRef_spec_25_25==T, T2_GDMscreeningontime_25_25_manhighrbg:=T]
-
-
-
-# highrbg 26 weeks
-T2[,T2_GDMscreeningontime_26_26_manhighrbg:=as.logical(NA)]
-T2[T2_GDMscreeningontime_24_28==T &
-     T2_GDMscreeningontime_24_28_normal==FALSE &
-     T2_labbloodglu_high_26_26==T,T2_GDMscreeningontime_26_26_manhighrbg:=F]
-
-
-T2[T2_GDMscreeningontime_26_26_manhighrbg==F &
-     (T2_manRBGHigh_Diab_26_26==T|
-     T2_manRef_HR_26_26==T|
-     T2_manRef_spec_26_26==T), T2_GDMscreeningontime_26_26_manhighrbg:=T]
-
-
-# highrbg 27 weeks
-T2[,T2_GDMscreeningontime_27_27_manhighrbg:=as.logical(NA)]
-T2[T2_GDMscreeningontime_24_28==T &
-     T2_GDMscreeningontime_24_28_normal==FALSE &
-     T2_labbloodglu_high_27_27==T,T2_GDMscreeningontime_27_27_manhighrbg:=F]
-
-
-T2[T2_GDMscreeningontime_27_27_manhighrbg==F &
-     (T2_manRBGHigh_Diab_27_27==T|
-     T2_manRef_HR_27_27==T|
-     T2_manRef_spec_27_27==T), T2_GDMscreeningontime_27_27_manhighrbg:=T]
-
-
-# highrbg 28 weeks
-T2[,T2_GDMscreeningontime_28_28_manhighrbg:=as.logical(NA)]
-T2[T2_GDMscreeningontime_24_28==T &
-     T2_GDMscreeningontime_24_28_normal==FALSE &
-     T2_labbloodglu_high_28_28==T,T2_GDMscreeningontime_28_28_manhighrbg:=F]
-
-
-T2[T2_GDMscreeningontime_28_28_manhighrbg==F &
-     (T2_manRBGHigh_Diab_28_28==T|
-     T2_manRef_HR_28_28==T|
-     T2_manRef_spec_28_28==T), T2_GDMscreeningontime_28_28_manhighrbg:=T]
-
-
-# combined group
-
-T2[,T2_GDMscreeningontime_24_28_manhighrbg:=as.logical(NA)]
-T2[T2_GDMscreeningontime_24_28==T &
-     T2_GDMscreeningontime_24_28_normal==FALSE &
-                            (!is.na(T2_GDMscreeningontime_24_24_manhighrbg)|
-                            !is.na(T2_GDMscreeningontime_25_25_manhighrbg)|
-                            !is.na(T2_GDMscreeningontime_26_26_manhighrbg)|
-                            !is.na(T2_GDMscreeningontime_27_27_manhighrbg)|
-                            !is.na(T2_GDMscreeningontime_28_28_manhighrbg)),
-                                    T2_GDMscreeningontime_24_28_manhighrbg:=F]
-
-xtabs(~T2$T2_GDMscreeningontime_24_28_manhighrbg, addNA=T)
-
-
-T2[T2_GDMscreeningontime_24_28_manhighrbg==F & 
-                                (T2_GDMscreeningontime_24_24_manhighrbg==T|
-                                   T2_GDMscreeningontime_25_25_manhighrbg==T|
-                                   T2_GDMscreeningontime_26_26_manhighrbg==T|
-                                   T2_GDMscreeningontime_27_27_manhighrbg==T|
-                                   T2_GDMscreeningontime_28_28_manhighrbg==T),
-                        T2_GDMscreeningontime_24_28_manhighrbg:=T]
-
-xtabs(~T2$T2_GDMscreeningontime_24_28_manhighrbg, addNA=T)
-
-
- # add fbs man vars here to create
-
-# intermediate values,  but dont want them for WB because management is in free text
-    T2[,T2_GDMscreeningontime_24_28_intmbg:=as.logical(NA)]
-    T2[T2_GDMscreeningontime_24_28==T &
-         T2_GDMscreeningontime_24_28_normal==FALSE &
-         is.na(T2_GDMscreeningontime_24_28_manhighrbg) &
-         (T2_labbloodglu_likelyGDM_24_28==T),T2_GDMscreeningontime_24_28_intmbg:=TRUE]
-
-    xtabs(~T2$T2_GDMscreeningontime_24_28_intmbg, addNA=T)
-    
-    
-    
-    T2[,T2_GDMscreeningontime_24_28_intmbg:=as.logical(NA)]
-    T2[,T2_GDMscreeningontime_24_24_manintmbg:=as.logical(NA)]
-    T2[,T2_GDMscreeningontime_25_25_manintmbg:=as.logical(NA)]
-    T2[,T2_GDMscreeningontime_26_26_manintmbg:=as.logical(NA)]
-    T2[,T2_GDMscreeningontime_27_27_manintmbg:=as.logical(NA)]
-    T2[,T2_GDMscreeningontime_28_28_manintmbg:=as.logical(NA)]
-    T2[,T2_GDMscreeningontime_24_28_manintmbg:=as.logical(NA)]
-    
-    
-  # add intmg man vars to create
-
-} else {
   
   
   T2[,T2_GDMscreeningontime_24_28:=as.logical(NA)]
@@ -398,7 +259,7 @@ xtabs(~T2$T2_GDMscreeningontime_24_28_manhighrbg, addNA=T)
   
   xtabs(~T2$T2_GDMscreeningontime_24_28_manhighrbg, addNA=T)
   
- 
+ if(IS_GAZA){
   
   # intermediate values
 
@@ -489,6 +350,27 @@ xtabs(~T2$T2_GDMscreeningontime_24_28_manhighrbg, addNA=T)
   
   xtabs(~T2$T2_GDMscreeningontime_24_28_manintmbg, addNA=T)
   
+ }else{
+  
+   # intermediate values,  but dont want them for WB because management is in free text
+   T2[,T2_GDMscreeningontime_24_28_intmbg:=as.logical(NA)]
+   T2[T2_GDMscreeningontime_24_28==T &
+        T2_GDMscreeningontime_24_28_normal==FALSE &
+        is.na(T2_GDMscreeningontime_24_28_manhighrbg) &
+        (T2_labbloodglu_likelyGDM_24_28==T),T2_GDMscreeningontime_24_28_intmbg:=TRUE]
+   
+   xtabs(~T2$T2_GDMscreeningontime_24_28_intmbg, addNA=T)
+   
+   
+   
+   T2[,T2_GDMscreeningontime_24_28_intmbg:=as.logical(NA)]
+   T2[,T2_GDMscreeningontime_24_24_manintmbg:=as.logical(NA)]
+   T2[,T2_GDMscreeningontime_25_25_manintmbg:=as.logical(NA)]
+   T2[,T2_GDMscreeningontime_26_26_manintmbg:=as.logical(NA)]
+   T2[,T2_GDMscreeningontime_27_27_manintmbg:=as.logical(NA)]
+   T2[,T2_GDMscreeningontime_28_28_manintmbg:=as.logical(NA)]
+   T2[,T2_GDMscreeningontime_24_28_manintmbg:=as.logical(NA)]
+   
 }
 
 xtabs(~T2$T2_GDMscreeningontime_24_28, addNA = T)

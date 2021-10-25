@@ -1350,507 +1350,337 @@ openxlsx::write.xlsx(prelimAtt,file.path(FOLDER_DATA_RESULTS,
 ##########
 
 
+#Oppt
+ar[,Oppt_anemia_00_23:=as.logical(NA)]
 
-
-
-########## Anemia ########## 
-# Define opportunities at 3 different cut off points
-
-## booked before 24
-ar[,Opportunity_anemia_screening_1:=as.numeric(NA)]
 ar[bookgestagedays_cats %in% c("(0,104]",
-                                   "(104,125]",
-                                   "(125,160]",
-                                   "(160,167]"),
-       Opportunity_anemia_screening_1:=1]
+                               "(104,125]",
+                               "(125,160]",
+                               "(160,167]"), Oppt_anemia_00_23:=T]
 
-xtabs(~ar$Opportunity_anemia_screening_1, addNA=T)
+xtabs(~ar$Oppt_anemia_00_23, addNA=T)
+
+# 00_23
+ar[,screeniningontime_anemia_00_23:=as.logical(NA)]
+ar[Oppt_anemia_00_23==T,screeniningontime_anemia_00_23:=FALSE]
+ar[screeniningontime_anemia_00_23==F & 
+     !is.na(booklabhb) & 
+     booklabhb>0,screeniningontime_anemia_00_23:=TRUE]
+
+xtabs(~ar$screeniningontime_anemia_00_23, addNA=T)
 
 
-## booked 24 or has visit 
-ar[,Opportunity_anemia_screening_2:=as.numeric(NA)]
-ar[bookgestagedays_cats %in% c("(167,202]")| 
-         TrialOne_anvisitnew_24_28==T,
-       Opportunity_anemia_screening_2:=1]
+# no anemia
+ar[,screeniningontime_no_anemia_00_23:=as.logical(NA)]
+ar[screeniningontime_anemia_00_23==T, screeniningontime_no_anemia_00_23:=FALSE]
+ar[screeniningontime_no_anemia_00_23==F & 
+     booklabhb>10.9 , screeniningontime_no_anemia_00_23:=TRUE]
 
-xtabs(~ar$Opportunity_anemia_screening_2, addNA=T)
+xtabs(~ar$screeniningontime_no_anemia_00_23, addNA=T)
 
-# booked 29-34 weeks or has visit
-ar[,Opportunity_anemia_screening_3:=as.numeric(NA)]
+# 00-23 weeks severe anemia
+ar[,mansevanemia_00_23:=as.logical(NA)]
+ar[screeniningontime_no_anemia_00_23==F & 
+     booklabhb<7 &
+     booklabhb>0, mansevanemia_00_23:=F]
+xtabs(~ar$mansevanemia_00_23, addNA=T)
+
+# should probably use manhb variable here
+ar[mansevanemia_00_23==F &
+     (TrialOne_manhb_01_01==T |
+        TrialOne_manhb_02_02==T |
+        TrialOne_manhb_03_03==T |
+        TrialOne_manhb_04_04==T |
+        TrialOne_manhb_05_05==T |
+        TrialOne_manhb_06_06==T |
+        TrialOne_manhb_07_07==T |
+        TrialOne_manhb_08_08==T |
+        TrialOne_manhb_09_09==T |
+        TrialOne_manhb_10_10==T |
+        TrialOne_manhb_11_11==T |
+        TrialOne_manhb_12_12==T |
+        TrialOne_manhb_13_13==T |
+        TrialOne_manhb_14_14==T |
+        TrialOne_manhb_15_15==T |
+        TrialOne_manhb_16_16==T |
+        TrialOne_manhb_17_17==T |
+        TrialOne_manhb_18_18==T |
+        TrialOne_manhb_19_19==T |
+        TrialOne_manhb_20_20==T |
+        TrialOne_manhb_21_21==T |
+        TrialOne_manhb_22_22==T |
+        TrialOne_manhb_23_23==T),mansevanemia_00_23:=T]
+
+xtabs(~ar$mansevanemia_00_23, addNA=T)
+
+##########
+#management
+##########
+
+
+# 00-23 weeks moderate anemia
+ar[,manmilmodane_00_23:=as.logical(NA)]
+ar[screeniningontime_no_anemia_00_23==F & 
+     booklabhb>=7 & booklabhb<=10.9,manmilmodane_00_23:=F]
+xtabs(~ar$manmilmodane_00_23, addNA=T)
+
+ar[manmilmodane_00_23==F &
+     (TrialOne_manhb_mildmodhbret_03_03==T|
+        TrialOne_manhb_mildmodhbret_04_04==T|
+        TrialOne_manhb_mildmodhbret_05_05==T|
+        TrialOne_manhb_mildmodhbret_06_06==T|
+        TrialOne_manhb_mildmodhbret_07_07==T|
+        TrialOne_manhb_mildmodhbret_08_08==T|
+        TrialOne_manhb_mildmodhbret_09_09==T|
+        TrialOne_manhb_mildmodhbret_10_10==T|
+        TrialOne_manhb_mildmodhbret_11_11==T|
+        TrialOne_manhb_mildmodhbret_12_12==T|
+        TrialOne_manhb_mildmodhbret_13_13==T|
+        TrialOne_manhb_mildmodhbret_14_14==T|
+        TrialOne_manhb_mildmodhbret_15_15==T|
+        TrialOne_manhb_mildmodhbret_16_16==T|
+        TrialOne_manhb_mildmodhbret_17_17==T|
+        TrialOne_manhb_mildmodhbret_18_18==T|
+        TrialOne_manhb_mildmodhbret_19_19==T|
+        TrialOne_manhb_mildmodhbret_20_20==T|
+        TrialOne_manhb_mildmodhbret_21_21==T|
+        TrialOne_manhb_mildmodhbret_22_22==T|
+        TrialOne_manhb_mildmodhbret_23_23==T|
+        TrialOne_manhb_mildmodhbret_24_24==T|
+        TrialOne_manhb_mildmodhbret_25_25==T|
+        TrialOne_manhb_mildmodhbret_26_26==T),manmilmodane_00_23:=T]
+
+xtabs(~ar$manmilmodane_00_23, addNA=T)
+
+# screeniningontime_no_anemia_29_34 create this variable and at 24_28
+
+
+################
+#24-28 weeks
+################
+
+# 24-28 weeks
+ar[,Oppt_anemia_24_28:=as.logical(NA)]
+ar[TrialOne_anvisitnew_24_28==T, Oppt_anemia_24_28:=F]
+ar[TrialOne_anvisitnew_24_28==T & 
+     screeniningontime_no_anemia_00_23==T, Oppt_anemia_24_28:=TRUE ]
+
+xtabs(~ar$Oppt_anemia_24_28)
+
+# 24-28
+ar[,screeniningontime_anemia_24_28:=as.logical(NA)]
+ar[Oppt_anemia_24_28==T,screeniningontime_anemia_24_28:=FALSE]
+ar[screeniningontime_anemia_24_28==F &
+     TrialOne_labhb_exists_24_28==T,screeniningontime_anemia_24_28:=TRUE]
+
+xtabs(~ar$screeniningontime_anemia_24_28, addNA=T)
+
+
+# no anemia 24- 28 weeks
+
+ar[,screeniningontime_no_anemia_24_28:=as.logical(NA)]
+ar[screeniningontime_anemia_24_28==TRUE, screeniningontime_no_anemia_24_28:=FALSE]
+ar[screeniningontime_no_anemia_24_28==F & TrialOne_labhb_normal_24_28==T, 
+   screeniningontime_no_anemia_24_28:=TRUE]
+
+xtabs(~ar$screeniningontime_no_anemia_24_28, addNA=T)
+
+
+##########
+#management
+##########
+
+ar[,manmildmodanemia_24_28:=as.logical(NA)]
+ar[screeniningontime_no_anemia_24_28==F & 
+     TrialOne_labhb_anemia_mild_mod_24_28==T,manmildmodanemia_24_28:=F]
+xtabs(~ar$manmildmodanemia_24_28, addNA=T)
+
+ar[manmildmodanemia_24_28==F &
+     (TrialOne_manhb_mildmodhbret_27_27==T|
+        TrialOne_manhb_mildmodhbret_28_28==T|
+        TrialOne_manhb_mildmodhbret_29_29==T|
+        TrialOne_manhb_mildmodhbret_30_30==T|
+        TrialOne_manhb_mildmodhbret_31_31==T),manmildmodanemia_24_28:=T]
+
+xtabs(~ar$manmildmodanemia_24_28, addNA=T)
+
+
+# 24-28 weeks severe anemia
+ar[,mansevanemia_24_28:=as.logical(NA)]
+ar[screeniningontime_no_anemia_24_28==F & 
+     TrialOne_labhb_anemia_sev_24_28==T,mansevanemia_24_28:=F]
+xtabs(~ar$mansevanemia_24_28, addNA=T)
+
+# should probably use manhb variable here
+ar[mansevanemia_24_28==F &
+     (TrialOne_manhb_24_24==T |
+        TrialOne_manhb_25_25==T |
+        TrialOne_manhb_26_26==T |
+        TrialOne_manhb_27_27==T |
+        TrialOne_manhb_28_28==T),mansevanemia_24_28:=T]
+# manhb_sev==T or riskMildModAne
+
+xtabs(~ar$mansevanemia_24_28)
+
+
+################
+#29-34 weeks
+################
+
+# only those booked at this category, so add an and statements that does this
+
+#Oppt
+ar[,Oppt_anemia_29_34:=as.logical(NA)]
+
 ar[bookgestagedays_cats %in% c("(202,216]",
-                                   "(216,237]",
-                                   "(237,244]"),
-       Opportunity_anemia_screening_3:=1]
+                               "(216,237]",
+                               "(237,244]"), Oppt_anemia_29_34:=TRUE ]
 
-xtabs(~ar$Opportunity_anemia_screening_3, addNA=T)
+xtabs(~ar$Oppt_anemia_29_34, addNA=T)
+
+# 29-34 screening
+ar[,screeniningontime_anemia_29_34:=as.logical(NA)]
+ar[Oppt_anemia_29_34==T,screeniningontime_anemia_29_34:=FALSE]
+ar[screeniningontime_anemia_29_34==F & !is.na(booklabhb) & booklabhb>0,
+   screeniningontime_anemia_29_34:=TRUE]
+
+xtabs(~ar$screeniningontime_anemia_29_34, addNA=T)
+
+# no anemia
+ar[,screeniningontime_no_anemia_29_34:=as.logical(NA)]
+ar[screeniningontime_anemia_29_34==T, screeniningontime_no_anemia_29_34:=FALSE]
+ar[screeniningontime_no_anemia_29_34==F & booklabhb>10.9, screeniningontime_no_anemia_29_34:=TRUE]
+
+xtabs(~ar$screeniningontime_no_anemia_29_34, addNA=T)
 
 
-## booked or visit at 35-37 weeks
-ar[,Opportunity_anemia_screening_4:=as.numeric(NA)]
-ar[bookgestagedays_cats %in% c("(244,265]") |
-         TrialOne_anvisitnew_35_37==T, 
-       Opportunity_anemia_screening_4:=1]
+# 29_34 weeks severe anemia
+ar[,mansevanemia_29_34:=as.logical(NA)]
+ar[screeniningontime_no_anemia_29_34==F & 
+     booklabhb<7 & booklabhb>0,mansevanemia_29_34:=F]
+xtabs(~ar$mansevanemia_29_34, addNA=T)
 
-xtabs(~ar$Opportunity_anemia_screening_4, addNA=T)
+# should probably use manhb variable here
+ar[mansevanemia_29_34==F &
+     (TrialOne_manhb_29_29==T |
+        TrialOne_manhb_30_30==T |
+        TrialOne_manhb_31_31==T |
+        TrialOne_manhb_32_32==T |
+        TrialOne_manhb_33_33==T |
+        TrialOne_manhb_34_34==T ),mansevanemia_29_34:=T]
 
-
-
-## severe anemia at booking and at any other visit after that
-ar[,Opportunity_anemia_screening_5:=as.numeric(NA)]
-ar[TrialOne_labhb_anemia_sev_00_14==T|
-         TrialOne_labhb_anemia_sev_15_17==T|
-         TrialOne_labhb_anemia_sev_18_22==T|
-         TrialOne_labhb_anemia_sev_23_23==T,Opportunity_anemia_screening_5:=1]
-
-xtabs(~ar$Opportunity_anemia_screening_5, addNA=T)
-
-ar[,Opportunity_anemia_screening_6:=as.logical(FALSE)]
-ar[(TrialOne_labhb_anemia_mild_mod_00_14==T|
-          TrialOne_labhb_anemia_mild_mod_15_17==T|
-          TrialOne_labhb_anemia_mild_mod_18_22==T|
-          TrialOne_labhb_anemia_mild_mod_23_23==T|
-          TrialOne_labhb_anemia_mild_mod_29_30==T|
-          TrialOne_labhb_anemia_mild_mod_34_34==T) &
-         (HbonTime_1a==F &
-            HbonTime_1b==F &
-            HbonTime_1c==F &
-            HbonTime_2a==F &
-            HbonTime_2b==F &
-            HbonTime_2c==F &
-            HbonTime_3a==F &
-            HbonTime_3b==F &
-            HbonTime_3c==F &
-            HbonTime_4a==F &
-            HbonTime_4b==F &
-            HbonTime_4c==F &
-            HbonTime_5==F),
-       Opportunity_anemia_screening_6:=TRUE]
-
-xtabs(~ar$Opportunity_anemia_screening_6, addNA=T)
+xtabs(~ar$mansevanemia_29_34, addNA=T)
+xtabs(~ar$Oppt_anemia_29_34)
+# manhb_sev==T or riskMildModAne
 
 
 
-# ADJUSTING OPPORTUNITIES FOR THOSE WHO HAVE BEEN REFERRED
-## Before 24 weeks
 
-#variable for man sev anemia anytime before 24 weeks
-ar[,manhbsev:=(TrialOne_manhb_00_00 |
-                     TrialOne_manhb_01_01 |
-                     TrialOne_manhb_02_02 |
-                     TrialOne_manhb_03_03 |
-                     TrialOne_manhb_04_04 |
-                     TrialOne_manhb_05_05 |
-                     TrialOne_manhb_06_06 |
-                     TrialOne_manhb_07_07 |
-                     TrialOne_manhb_08_08 |
-                     TrialOne_manhb_09_09 |
-                     TrialOne_manhb_10_10 |
-                     TrialOne_manhb_11_11 |
-                     TrialOne_manhb_12_12 |
-                     TrialOne_manhb_13_13 |
-                     TrialOne_manhb_14_14 |
-                     TrialOne_manhb_15_15 |
-                     TrialOne_manhb_16_16 |
-                     TrialOne_manhb_17_17 |
-                     TrialOne_manhb_18_18 |
-                     TrialOne_manhb_19_19 |
-                     TrialOne_manhb_20_20 |
-                     TrialOne_manhb_21_21 |
-                     TrialOne_manhb_22_22 |
-                     TrialOne_manhb_23_23)]
-xtabs(~ar$manhbsev, addNA=T)
+##########
+# mild/mod
+##########
 
 
-ar[,RefHr:=as.logical(NA)]
-ar[Opportunity_anemia_screening_1==1, RefHr:=FALSE]
-ar[(TrialOne_manRef_HR_00_00==T|
-          TrialOne_manRef_HR_01_01==T|
-          TrialOne_manRef_HR_02_02==T|
-          TrialOne_manRef_HR_03_03==T|
-          TrialOne_manRef_HR_04_04==T|
-          TrialOne_manRef_HR_05_05==T|
-          TrialOne_manRef_HR_06_06==T|
-          TrialOne_manRef_HR_07_07==T|
-          TrialOne_manRef_HR_08_08==T|
-          TrialOne_manRef_HR_09_09==T|
-          TrialOne_manRef_HR_10_10==T|
-          TrialOne_manRef_HR_11_11==T|
-          TrialOne_manRef_HR_12_12==T|
-          TrialOne_manRef_HR_13_13==T|
-          TrialOne_manRef_HR_14_14==T|
-          TrialOne_manRef_HR_15_15==T|
-          TrialOne_manRef_HR_16_16==T|
-          TrialOne_manRef_HR_17_17==T|
-          TrialOne_manRef_HR_18_18==T|
-          TrialOne_manRef_HR_19_19==T|
-          TrialOne_manRef_HR_20_20==T|
-          TrialOne_manRef_HR_21_21==T|
-          TrialOne_manRef_HR_22_22==T|
-          TrialOne_manRef_HR_23_23==T),
-       RefHr:=TRUE]
-xtabs(~ar$RefHr, addNA=T)
+# 29-34 weeks severe anemia
+ar[,manmildmodanemia_29_34:=as.logical(NA)]
+ar[screeniningontime_no_anemia_29_34==F & 
+     booklabhb>=7 & booklabhb<=10.9,manmildmodanemia_29_34:=F]
+xtabs(~ar$manmildmodanemia_29_34, addNA=T)
 
-## At 24-28 weeks
-ar[Opportunity_anemia_screening_2==1 &
-         (TrialOne_anvisitnew_24_24==T & 
-            (RefHr==T))|
-         (TrialOne_anvisitnew_25_25==T & 
-            (RefHr==T|TrialOne_manRef_HR_24_24==T))|
-         (TrialOne_anvisitnew_26_26==T & 
-            (RefHr==T|TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T))|
-         (TrialOne_anvisitnew_27_27==T & 
-            (RefHr==T|TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T|
-               TrialOne_manRef_HR_26_26==T))|
-         (TrialOne_anvisitnew_28_28==T & 
-            (RefHr==T|
-               TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T|
-               TrialOne_manRef_HR_26_26==T|
-               TrialOne_manRef_HR_27_27==T)), 
-       Opportunity_anemia_screening_2:=Opportunity_anemia_screening_2-1]
-
-xtabs(~ar$Opportunity_anemia_screening_2, addNA=T)
-
-# 35-37 weeks
-ar[Opportunity_anemia_screening_4==1 &
-         (TrialOne_anvisitnew_35_35==T & 
-            (RefHr==T|
-               TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T|
-               TrialOne_manRef_HR_26_26==T|
-               TrialOne_manRef_HR_27_27==T|
-               TrialOne_manRef_HR_28_28==T|
-               TrialOne_manRef_HR_29_29==T|
-               TrialOne_manRef_HR_30_30==T|
-               TrialOne_manRef_HR_31_31==T|
-               TrialOne_manRef_HR_32_32==T|
-               TrialOne_manRef_HR_33_33==T|
-               TrialOne_manRef_HR_34_34==T))|
-         (TrialOne_anvisitnew_36_36==T & 
-            (RefHr==T|
-               TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T|
-               TrialOne_manRef_HR_26_26==T|
-               TrialOne_manRef_HR_27_27==T|
-               TrialOne_manRef_HR_28_28==T|
-               TrialOne_manRef_HR_29_29==T|
-               TrialOne_manRef_HR_30_30==T|
-               TrialOne_manRef_HR_31_31==T|
-               TrialOne_manRef_HR_32_32==T|
-               TrialOne_manRef_HR_33_33==T|
-               TrialOne_manRef_HR_34_34==T|
-               TrialOne_manRef_HR_35_35==T))|
-         (TrialOne_anvisitnew_37_37==T & 
-            (RefHr==T|
-               TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T|
-               TrialOne_manRef_HR_26_26==T|
-               TrialOne_manRef_HR_27_27==T|
-               TrialOne_manRef_HR_28_28==T|
-               TrialOne_manRef_HR_29_29==T|
-               TrialOne_manRef_HR_30_30==T|
-               TrialOne_manRef_HR_31_31==T|
-               TrialOne_manRef_HR_32_32==T|
-               TrialOne_manRef_HR_33_33==T|
-               TrialOne_manRef_HR_34_34==T|
-               TrialOne_manRef_HR_35_35==T|
-               TrialOne_manRef_HR_36_36==T)), 
-       Opportunity_anemia_screening_4:=Opportunity_anemia_screening_4-1]
-xtabs(~ar$Opportunity_anemia_screening_4, addNA=T)
-
-#define different time cats for success
-ar[, HbonTime_1a:= as.logical(NA)]
-ar[Opportunity_anemia_screening_1==1, HbonTime_1a:=FALSE]
-
-ar[, HbonTime_1b:= as.logical(NA)]
-ar[Opportunity_anemia_screening_1==1 & 
-         booklabhb<7 & booklabhb>=2,HbonTime_1b:=FALSE]
+ar[manmildmodanemia_29_34==F &
+     (TrialOne_manhb_mildmodhbret_32_32==T|
+        TrialOne_manhb_mildmodhbret_33_33==T|
+        TrialOne_manhb_mildmodhbret_34_34==T|
+        TrialOne_manhb_mildmodhbret_35_35==T|
+        TrialOne_manhb_mildmodhbret_36_36==T),manmildmodanemia_29_34:=T]
+xtabs(~ar$manmildmodanemia_29_34, addNA=T)
 
 
-ar[, HbonTime_1c:= as.logical(NA)]
-ar[Opportunity_anemia_screening_1==1 &
-         booklabhb>=7 & booklabhb<11,HbonTime_1c:=FALSE ]
+################
+#35-37 weeks
+################
+
+#35-37 weeks
+ar[,Oppt_anemia_35_37:=as.logical(NA)]
+ar[TrialOne_anvisitnew_35_37==T, Oppt_anemia_35_37:=F]
+ar[TrialOne_anvisitnew_35_37==T & (screeniningontime_no_anemia_24_28==T |
+                               screeniningontime_no_anemia_29_34==T), Oppt_anemia_35_37:=TRUE ]
+
+xtabs(~ar$Oppt_anemia_35_37)
+
+# 35_37 screening on time
+ar[,screeniningontime_anemia_35_37:=as.logical(NA)]
+ar[Oppt_anemia_35_37==T,screeniningontime_anemia_35_37:=FALSE]
+ar[screeniningontime_anemia_35_37==F &
+     TrialOne_labhb_exists_35_37==T,screeniningontime_anemia_35_37:=TRUE]
+
+xtabs(~ar$screeniningontime_anemia_35_37, addNA=T)
+
+# no anemia
+ar[,screeniningontime_no_anemia_35_37:=as.logical(NA)]
+ar[screeniningontime_anemia_35_37==T,screeniningontime_no_anemia_35_37:=FALSE]
+ar[screeniningontime_anemia_35_37==T &
+     TrialOne_labhb_normal_35_37==T, screeniningontime_no_anemia_35_37:=TRUE]
+xtabs(~ar$screeniningontime_no_anemia_35_37, addNA=T)
+
+# mild/mod anemia
+
+ar[,manmildmodanemia_35_37:=as.logical(NA)]
+ar[screeniningontime_no_anemia_35_37==F & 
+     TrialOne_labhb_anemia_mild_mod_35_37==T,manmildmodanemia_35_37:=F]
+xtabs(~ar$manmildmodanemia_35_37, addNA=T)
+
+# keep them even if they give a false value
+# maximum weeks for this in processing code is 37 weeks
+ar[manmildmodanemia_35_37==F &
+     (TrialOne_manhb_mildmodhbret_36_36==T|
+        TrialOne_manhb_mildmodhbret_37_37==T|
+        TrialOne_manhb_mildmodhbret_38_38==T),manmildmodanemia_35_37:=T]
+xtabs(~ar$manmildmodanemia_35_37, addNA=T)
 
 
 
-# Hbontime_2
-ar[,HbonTime_2a:= as.logical(NA)]
-ar[Opportunity_anemia_screening_2==1, HbonTime_2a:=FALSE]
+##########
+# severe
+##########
 
-ar[, HbonTime_2b:= as.logical(NA)]
-ar[Opportunity_anemia_screening_2==1 & 
-         TrialOne_labhb_anemia_sev_24_28==T, HbonTime_2b:=FALSE]
+# 35_37 weeks severe anemia
+ar[,mansevanemia_35_37:=as.logical(NA)]
+ar[screeniningontime_no_anemia_35_37==F & 
+     TrialOne_labhb_anemia_sev_35_37==T,mansevanemia_35_37:=F]
+xtabs(~ar$mansevanemia_35_37, addNA=T)
 
-ar[,HbonTime_2c:= as.logical(NA)]
-ar[Opportunity_anemia_screening_2==1 & 
-         TrialOne_labhb_anemia_mild_mod_24_28==T, HbonTime_2c:=FALSE]
+ar[mansevanemia_35_37==F &
+     (TrialOne_manhb_35_35==T |
+        TrialOne_manhb_36_36==T |
+        TrialOne_manhb_37_37==T),mansevanemia_35_37:=T]
+# manhb_sev==T or riskMildModAne
 
-# 29-34 weeks
-# Hbontime_3
-ar[, HbonTime_3a:= as.logical(NA)]
-ar[Opportunity_anemia_screening_3==1 & 
-         (!is.na(booklabhb)), HbonTime_3a:=FALSE]
-
-ar[, HbonTime_3b:= as.logical(NA)]
-ar[Opportunity_anemia_screening_3==1 &
-         (booklabhb<7 & booklabhb>2), HbonTime_3b:=FALSE]
-
-ar[, HbonTime_3c:= as.logical(NA)]
-ar[Opportunity_anemia_screening_3==1 &
-         (booklabhb<11 & booklabhb>=7), HbonTime_3c:=FALSE]
-
-ar[, HbonTime_4a:= as.logical(NA)]
-ar[Opportunity_anemia_screening_4==1, HbonTime_4a:=FALSE]
-
-ar[, HbonTime_4b:= as.logical(NA)]
-ar[Opportunity_anemia_screening_4==1 &
-         TrialOne_labhb_anemia_sev_35_37==T,HbonTime_4b:=FALSE]
-
-ar[, HbonTime_4c:= as.logical(NA)]
-ar[Opportunity_anemia_screening_4==1 &
-         TrialOne_labhb_anemia_mild_mod_35_37==T, HbonTime_4c:=FALSE]
-
-ar[, HbonTime_5:= as.logical(NA)]
-ar[Opportunity_anemia_screening_5==1, HbonTime_5:=FALSE]
-
-ar[, HbonTime_6:= as.logical(NA)]
-ar[Opportunity_anemia_screening_6==1, HbonTime_6:=FALSE]
+xtabs(~ar$mansevanemia_35_37, addNA=T)
 
 
-
-#hb on time 1, 2, 3, vars
-#Screen at bookings before 24 weeks??
-#check booklabhb values if normal etc
-
-# booked before 24 weeks
-ar[HbonTime_1a==F & booklabhb>=11 & 
-         booklabhb<=18, HbonTime_1a:=TRUE]
-xtabs(~ar$HbonTime_1a, addNA=T)
-
-ar[HbonTime_1b==F & 
-         manhbsev==T,HbonTime_1b:=TRUE]
-xtabs(~ar$HbonTime_1b, addNA=T)
-
-
-ar[HbonTime_1c==F & 
-         (TrialOne_manhb_mildmodhbret_00_00==T|
-            TrialOne_manhb_mildmodhbret_01_01==T|
-            TrialOne_manhb_mildmodhbret_02_02==T|
-            TrialOne_manhb_mildmodhbret_03_03==T|
-            TrialOne_manhb_mildmodhbret_04_04==T|
-            TrialOne_manhb_mildmodhbret_05_05==T|
-            TrialOne_manhb_mildmodhbret_06_06==T|
-            TrialOne_manhb_mildmodhbret_07_07==T|
-            TrialOne_manhb_mildmodhbret_08_08==T|
-            TrialOne_manhb_mildmodhbret_09_09==T|
-            TrialOne_manhb_mildmodhbret_10_10==T|
-            TrialOne_manhb_mildmodhbret_11_11==T|
-            TrialOne_manhb_mildmodhbret_12_12==T|
-            TrialOne_manhb_mildmodhbret_13_13==T|
-            TrialOne_manhb_mildmodhbret_14_14==T|
-            TrialOne_manhb_mildmodhbret_15_15==T|
-            TrialOne_manhb_mildmodhbret_16_16==T|
-            TrialOne_manhb_mildmodhbret_17_17==T|
-            TrialOne_manhb_mildmodhbret_18_18==T|
-            TrialOne_manhb_mildmodhbret_19_19==T|
-            TrialOne_manhb_mildmodhbret_20_20==T|
-            TrialOne_manhb_mildmodhbret_21_21==T|
-            TrialOne_manhb_mildmodhbret_22_22==T|
-            TrialOne_manhb_mildmodhbret_23_23==T),HbonTime_1c:=TRUE]
-
-xtabs(~ar$HbonTime_1c, addNA=T)
-
-#24-28 screenings
-ar[HbonTime_2a==F & 
-         TrialOne_labhb_normal_24_28==T, HbonTime_2a:=TRUE]
-
-ar[HbonTime_2b==F & 
-         TrialOne_manhb_24_24==T|
-         TrialOne_manhb_25_25==T|
-         TrialOne_manhb_26_26==T|
-         TrialOne_manhb_27_27==T|
-         TrialOne_manhb_28_28==T, HbonTime_2b:=TRUE]
-
-ar[HbonTime_2c==F & 
-         TrialOne_manhb_mildmodhbret_24_24==T|
-         TrialOne_manhb_mildmodhbret_25_25==T|
-         TrialOne_manhb_mildmodhbret_26_26==T|
-         TrialOne_manhb_mildmodhbret_27_27==T|
-         TrialOne_manhb_mildmodhbret_28_28==T, HbonTime_2c:=TRUE]
-
-#booked 29-30, 31-33, 34
-ar[HbonTime_3a==F & Opportunity_anemia_screening_3==1 &
-         (booklabhb<=18 & booklabhb>11), HbonTime_3a:=TRUE]
-
-
-ar[HbonTime_3c==FALSE & 
-         (TrialOne_manhb_mildmodhbret_29_29==TRUE|
-            TrialOne_manhb_mildmodhbret_30_30==TRUE|
-            TrialOne_manhb_mildmodhbret_31_31==TRUE|
-            TrialOne_manhb_mildmodhbret_32_32==TRUE|
-            TrialOne_manhb_mildmodhbret_33_33==TRUE|
-            TrialOne_manhb_mildmodhbret_34_34==TRUE), 
-       HbonTime_3c:=TRUE]
-
-xtabs(~ar$HbonTime_3c, addNA=T)
-
-ar[HbonTime_3b==F & 
-         (TrialOne_manhb_29_29==T|
-            TrialOne_manhb_30_30==T|
-            TrialOne_manhb_31_31==T|
-            TrialOne_manhb_32_32==T|
-            TrialOne_manhb_33_33==T|
-            TrialOne_manhb_34_34==T), 
-       HbonTime_3b:=TRUE]
-
-
-# 35-37 screenings
-ar[HbonTime_4a==F & 
-         TrialOne_labhb_normal_35_37==T, HbonTime_4a:=TRUE]
-
-ar[HbonTime_4b==F & 
-         TrialOne_manhb_35_35==T|
-         TrialOne_manhb_36_36==T|
-         TrialOne_manhb_37_37==T, HbonTime_4b:=TRUE]
-
-ar[HbonTime_4c==F &
-         TrialOne_manhb_mildmodhbret_35_35==T|
-         TrialOne_manhb_mildmodhbret_36_36==T|
-         TrialOne_manhb_mildmodhbret_37_37==T, HbonTime_4c:=TRUE]
-
-# severe anemia outside of time windows
-ar[HbonTime_5==F & 
-         (TrialOne_manhb_00_00==T|
-            TrialOne_manhb_01_01==T|
-            TrialOne_manhb_02_02==T|
-            TrialOne_manhb_03_03==T|
-            TrialOne_manhb_04_04==T|
-            TrialOne_manhb_05_05==T|
-            TrialOne_manhb_06_06==T|
-            TrialOne_manhb_07_07==T|
-            TrialOne_manhb_08_08==T|
-            TrialOne_manhb_09_09==T|
-            TrialOne_manhb_10_10==T|
-            TrialOne_manhb_11_11==T|
-            TrialOne_manhb_12_12==T|
-            TrialOne_manhb_13_13==T|
-            TrialOne_manhb_14_14==T|
-            TrialOne_manhb_15_15==T|
-            TrialOne_manhb_16_16==T|
-            TrialOne_manhb_17_17==T|
-            TrialOne_manhb_18_18==T|
-            TrialOne_manhb_19_19==T|
-            TrialOne_manhb_20_20==T|
-            TrialOne_manhb_21_21==T|
-            TrialOne_manhb_22_22==T|
-            TrialOne_manhb_23_23==T|
-            TrialOne_manhb_29_29==T|
-            TrialOne_manhb_30_30==T|
-            TrialOne_manhb_31_31==T|
-            TrialOne_manhb_32_32==T|
-            TrialOne_manhb_33_33==T|
-            TrialOne_manhb_34_34==T),HbonTime_5:=TRUE]
-
-## mild mod anemia
-# if all of this is true and none of the other succcess (HBontime is true), then this #should be true. need to run all of the other success to get to that point first and #then calculate this
-ar[,Opportunity_anemia_screening_6:=as.logical(FALSE)]
-ar[(TrialOne_labhb_anemia_mild_mod_00_14==T|
-          TrialOne_labhb_anemia_mild_mod_15_17==T|
-          TrialOne_labhb_anemia_mild_mod_18_22==T|
-          TrialOne_labhb_anemia_mild_mod_23_23==T|
-          TrialOne_labhb_anemia_mild_mod_29_30==T|
-          TrialOne_labhb_anemia_mild_mod_34_34==T) &
-         (HbonTime_1a==F &
-            HbonTime_1b==F &
-            HbonTime_1c==F &
-            HbonTime_2a==F &
-            HbonTime_2b==F &
-            HbonTime_2c==F &
-            HbonTime_3a==F &
-            HbonTime_3b==F &
-            HbonTime_3c==F &
-            HbonTime_4a==F &
-            HbonTime_4b==F &
-            HbonTime_4c==F &
-            HbonTime_5==F),
-       Opportunity_anemia_screening_6:=TRUE]
-
-xtabs(~ar$Opportunity_anemia_screening_6, addNA=T)
-
-
-#mild/mod anem retest
-ar[HbonTime_6==F &
-         (TrialOne_manhb_mildmodhbret_00_00==T|
-            TrialOne_manhb_mildmodhbret_01_01==T|
-            TrialOne_manhb_mildmodhbret_02_02==T|
-            TrialOne_manhb_mildmodhbret_03_03==T|
-            TrialOne_manhb_mildmodhbret_04_04==T|
-            TrialOne_manhb_mildmodhbret_05_05==T|
-            TrialOne_manhb_mildmodhbret_06_06==T|
-            TrialOne_manhb_mildmodhbret_07_07==T|
-            TrialOne_manhb_mildmodhbret_08_08==T|
-            TrialOne_manhb_mildmodhbret_09_09==T|
-            TrialOne_manhb_mildmodhbret_10_10==T|
-            TrialOne_manhb_mildmodhbret_11_11==T|
-            TrialOne_manhb_mildmodhbret_12_12==T|
-            TrialOne_manhb_mildmodhbret_13_13==T|
-            TrialOne_manhb_mildmodhbret_14_14==T|
-            TrialOne_manhb_mildmodhbret_15_15==T|
-            TrialOne_manhb_mildmodhbret_16_16==T|
-            TrialOne_manhb_mildmodhbret_17_17==T|
-            TrialOne_manhb_mildmodhbret_18_18==T|
-            TrialOne_manhb_mildmodhbret_19_19==T|
-            TrialOne_manhb_mildmodhbret_20_20==T|
-            TrialOne_manhb_mildmodhbret_20_20==T|
-            TrialOne_manhb_mildmodhbret_21_21==T|
-            TrialOne_manhb_mildmodhbret_22_22==T|
-            TrialOne_manhb_mildmodhbret_23_23==T|
-            TrialOne_manhb_mildmodhbret_29_29==T|
-            TrialOne_manhb_mildmodhbret_30_30==T|
-            TrialOne_manhb_mildmodhbret_31_31==T|
-            TrialOne_manhb_mildmodhbret_32_32==T|
-            TrialOne_manhb_mildmodhbret_33_33==T|
-            TrialOne_manhb_mildmodhbret_34_34==T),
-       HbonTime_6:=TRUE]
 
 
 prelimHB <- ar[ident_dhis2_booking==1,.(N=.N,
-                      Opportun_1=sum(Opportunity_anemia_screening_1, na.rm=T),
-                      Success_1a=sum(HbonTime_1a, na.rm=T),
-                      Success_1aFalse=sum(HbonTime_1a==FALSE, na.rm=T),
-                      Success_1b=sum(HbonTime_1b, na.rm=T),
-                      Success_1bFalse=sum(HbonTime_1b==FALSE, na.rm=T),
-                      Success_1c=sum(HbonTime_1c, na.rm=T),
-                      Success_1cFalse=sum(HbonTime_1c==FALSE, na.rm=T),
-                      Opportun_2=sum(Opportunity_anemia_screening_2, na.rm=T),
-                      Success_2a=sum(HbonTime_2a, na.rm=T),
-                      Opportun_2=sum(Opportunity_anemia_screening_2, na.rm=T),
-                      Success_2b=sum(HbonTime_2b, na.rm=T),
-                      Success_2bFalse=sum(HbonTime_2b==F, na.rm=T),
-                      Opportun_2=sum(Opportunity_anemia_screening_2, na.rm=T),
-                      Success_2c=sum(HbonTime_2c, na.rm=T),
-                      Success_2cFalse=sum(HbonTime_2c==F, na.rm=T),
-                      Opportun_3=sum(Opportunity_anemia_screening_3, na.rm=T),
-                      Success_3a=sum(HbonTime_3a, na.rm=T),
-                      Success_3b=sum(HbonTime_3b, na.rm=T),
-                      Success_3bFales=sum(HbonTime_3b==FALSE, na.rm=T),
-                      Success_3c=sum(HbonTime_3c, na.rm=T),
-                      Sucess_3cFalse=sum(HbonTime_3c==F, na.rm=T),
-                      Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),
-                      Success_4a=sum(HbonTime_4a, na.rm=T),
-                      Opportun_4=sum(Opportunity_anemia_screening_4, na.rm=T),
-                      Success_4b=sum(HbonTime_4b, na.rm=T),
-                      Screening4bF=sum(HbonTime_4b==F, na.rm=T),
-                      Success_4c=sum(HbonTime_4c, na.rm=T),
-                      Screening4cF=sum(HbonTime_4c==F, na.rm=T),
-                      Opportun_5=sum(Opportunity_anemia_screening_5, na.rm=T),
-                      Success_5=sum(HbonTime_5, na.rm=T),
-                      success_5F=sum(HbonTime_5==FALSE, na.rm=T),
-                      Opportun_6=sum(Opportunity_anemia_screening_6, na.rm=T),
-                      Success_6=sum(HbonTime_6, na.rm=T),
-                      success_6F=sum(HbonTime_6==F, na.rm=T)),
+                      Opptb424=sum(Oppt_anemia_00_23, na.rm=T),
+                      screenb424=sum(screeniningontime_anemia_00_23, na.rm=T),
+                      notscreenb424=sum(screeniningontime_anemia_00_23==FALSE, na.rm=T),
+                      manmildmodaneb424=sum(manmilmodane_00_23, na.rm=T),
+                      notmanmildmodeaneb424=sum(manmilmodane_00_23==FALSE, na.rm=T),
+                      mansevanemiab424=sum(mansevanemia_00_23, na.rm=T),
+                      notmansevaneb424=sum(mansevanemia_00_23==FALSE, na.rm=T),
+                      Oppt2428weeks=sum(Oppt_anemia_24_28, na.rm=T),
+                      Screen2428weeks=sum(screeniningontime_anemia_24_28, na.rm=T),
+                      manmilmodane2428=sum(manmildmodanemia_24_28, na.rm=T),
+                      notmanmilmod2428=sum(manmildmodanemia_24_28==F, na.rm=T),
+                      mansevane2428=sum(mansevanemia_24_28, na.rm=T),
+                      notmansevane2428=sum(mansevanemia_24_28==F, na.rm=T),
+                      Opportun3537weeks=sum(Oppt_anemia_35_37, na.rm=T),
+                      screen3537weeks=sum(screeniningontime_anemia_35_37, na.rm=T),
+                      manmildmodane3537=sum(manmildmodanemia_35_37, na.rm=T),
+                      notmanmildmodane3537=sum(manmildmodanemia_35_37==FALSE, na.rm=T),
+                      mansevane3537=sum(mansevanemia_35_37, na.rm=T),
+                      notmansevane3537=sum(mansevanemia_35_37==F, na.rm=T)),
                    keyby=.(bookyear)]
 
 openxlsx::write.xlsx(prelimHB,file.path(FOLDER_DATA_RESULTS,
