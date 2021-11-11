@@ -1901,7 +1901,6 @@ varsKeep <- c(
   "bookgestage", 
   "bookbmicat",
   "para", 
-  "paracat",
   "gravida",
   "bookhistdm", 
   "bookhistcs", 
@@ -2004,6 +2003,8 @@ nrow(T2)
 # create directory  per date ran for folder and save in that folder with the dates to load in outcomes
 
 if(IS_GAZA==F){
+  
+  fileTag <- "WB"
  saveRDS(smallD,file.path(FOLDER_DATA_CLEAN,
                           "T2_clean",
                           "WB",
@@ -2021,6 +2022,8 @@ fwrite(smallD,file.path(FOLDER_DATA_CLEAN,
 
 
 } else{
+  
+  fileTag <- "Gaza"
   saveRDS(smallD,file.path(FOLDER_DATA_CLEAN_GAZA,
                            "T2_clean",
                            sprintf("T2_dataset_%s_%s.rds",

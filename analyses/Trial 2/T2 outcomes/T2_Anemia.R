@@ -123,6 +123,8 @@ T2[T2_mansevanemia_00_23==F &
         T2_manhb_23_23==T),T2_mansevanemia_00_23:=T]
 
 xtabs(~TrialArm+T2_mansevanemia_00_23, data=T2, addNA=T)
+xtabs(~T2$T2_mansevanemia_00_23, data=T2, addNA=T)
+
 
 ##########
 #management
@@ -292,7 +294,7 @@ xtabs(~T2$T2_Oppt_anemia_29_34)
 ##########
 
 
-# 29-34 weeks severe anemia
+# 29-34 weeks manmild anemia
 T2[,T2_manmildmodanemia_29_34:=as.logical(NA)]
 T2[T2_screeniningontime_no_anemia_29_34==F & 
      booklabhb>=7 & booklabhb<=10.9,T2_manmildmodanemia_29_34:=F]

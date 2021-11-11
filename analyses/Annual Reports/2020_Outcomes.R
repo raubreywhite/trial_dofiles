@@ -86,7 +86,7 @@ openxlsx::write.xlsx(tab,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookBmiCats.xlsx"))
+                       "BookBmiCats_.xlsx"))
 
 
 
@@ -105,7 +105,7 @@ openxlsx::write.xlsx(tab,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookBmiCatsBookPrimi.xlsx"))
+                       "BookBmiCatsBookPrimi_.xlsx"))
 
 
 
@@ -133,7 +133,7 @@ openxlsx::write.xlsx(tab,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "ageatmarriagecat.xlsx"))
+                       "ageatmarriagecat_.xlsx"))
 
 
 # find women who were booked the previous year
@@ -170,7 +170,7 @@ openxlsx::write.xlsx(tab,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "ageatmarriagecat_perwoman.xlsx"))
+                       "ageatmarriagecat_perwoman_.xlsx"))
 
 
 
@@ -246,7 +246,7 @@ openxlsx::write.xlsx(demoage,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookPrimi.xlsx"))
+                       "BookPrimi_.xlsx"))
 
 
 
@@ -263,7 +263,7 @@ openxlsx::write.xlsx(demoage,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookPrimivAgecat.xlsx"))
+                       "BookPrimivAgecat_.xlsx"))
 
 
 
@@ -280,7 +280,7 @@ openxlsx::write.xlsx(demoagemarriage,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookPrimivAgemarriagecat.xlsx"))
+                       "BookPrimivAgemarriagecat_.xlsx"))
 
 
 demoagepreg <- ar[ident_dhis2_booking==T,.(
@@ -293,7 +293,7 @@ openxlsx::write.xlsx(demoagepreg,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookPrimivAgepregcat.xlsx"))
+                       "BookPrimivAgepregcat_.xlsx"))
 
 
 
@@ -316,7 +316,7 @@ openxlsx::write.xlsx(bookgA,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BooTrimester.xlsx"))
+                       "BooTrimester_.xlsx"))
 
 
 
@@ -345,7 +345,7 @@ openxlsx::write.xlsx(bookgAHR,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookTrimester_HR.xlsx"))
+                       "BookTrimester_HR_.xlsx"))
 
 
 
@@ -358,7 +358,7 @@ openxlsx::write.xlsx(bookgAprimi,
                        FOLDER_DATA_RESULTS,
                        "annual reports",
                        "2020",
-                       "BookTM_bookprimi.xlsx"))
+                       "BookTM_bookprimi_.xlsx"))
 
 
 
@@ -763,7 +763,8 @@ for(i in vars){
   varsdate <- names(ar)[stringr::str_detect(names(ar),"andate")]
   
   ar[!is.na(get(i)) &
-       get(varsdate)>="2020-01-01", anevent_x:=anevent_x + 1]
+       get(varsdate)>="2020-01-01" &
+       get(varsdate)<="2020-12-31", anevent_x:=anevent_x + 1]
   
   
   ar[!is.na(get(i)) &
@@ -851,7 +852,7 @@ tab <- ar[bookyear>=2019 & ident_dhis2_control==F,.(
 openxlsx::write.xlsx(tab, file.path(FOLDER_DATA_RESULTS,
                                     "annual reports",
                                     "2020",
-                                    "VisitsTotal.xlsx"))
+                                    "VisitsTotal_.xlsx"))
 
 
 
@@ -1132,38 +1133,1480 @@ xtabs(~ar$Succ_5, addNA=T)
 # Hypertension
 ####################
 
-prelimHTN <- ar[ident_dhis2_booking==T,
-                .(N=.N,
-                  "16 Week Visit"=sum(Succ_1==T, na.rm=T),
-                  "BP_16"=sum(Succ_1==T &
-                                 TrialOne_anbpsyst_present_15_17==T &
-                                 TrialOne_anbpdiast_present_15_17==T, na.rm=T),
-                  "20 Week Visit"=sum(Succ_2==T, na.rm=T),
-                  "BP_20"=sum(Succ_2==T &
-                                   TrialOne_anbpsyst_present_18_22==T &
-                                   TrialOne_anbpdiast_present_18_22==T, na.rm=T),
-                  "24_28 Week Visit"=sum(Succ_3==T, na.rm=T),
-                  "BP_24_28"=sum(Succ_3==T &
-                                 TrialOne_anbpsyst_present_24_28==T &
-                                   TrialOne_anbpdiast_present_24_28==T,na.rm=T),
-                  "32 Week Visit"=sum(Succ_4==T, na.rm=T),
-                  "BP_32"=sum(Succ_4==T &
-                              TrialOne_anbpsyst_present_31_33==T &
-                              TrialOne_anbpdiast_present_31_33==T, na.rm=T),
-                  
-                  "36 Week Visit"=sum(Succ_5==T, na.rm=T),
-                  "Bp_36 weeks"=sum(Succ_5 &
-                                      TrialOne_anbpsyst_present_35_37==T &
-                                      TrialOne_anbpdiast_present_35_37==T, na.rm=T)
-                  ),
-                
-                keyby=.(bookyear)]
+##########################################################################
+# HTN
+##########################################################################
 
-openxlsx::write.xlsx(prelimHTN,file.path(FOLDER_DATA_RESULTS,
-                                         "annual reports",
-                                         "2020",
-                                         sprintf("%s_BpOntime.xlsx",
-                                                 lubridate::today()))) 
+########## Hypertension ########## 
+#define chronic?
+# high blood pressure before or on 22 weeks
+
+################
+#00-14 weeks
+################
+
+#screening
+ar[,Oppt_bp_00_14:=as.logical(NA)]
+ar[TrialOne_anvisitnew_00_14==T,Oppt_bp_00_14:=TRUE]
+xtabs(~ar$Oppt_bp_00_14,addNA=T)
+
+# numerator
+ar[,bpontime_00_14:=as.logical(NA)]
+ar[Oppt_bp_00_14==TRUE,bpontime_00_14:=FALSE]
+ar[TrialOne_anbpsyst_present_00_14==T &
+     TrialOne_anbpdiast_present_00_14==T &
+     bpontime_00_14==F,bpontime_00_14:=TRUE]
+
+xtabs(~ar$bpontime_00_14)
+
+
+
+#management
+#Oppt
+ar[,manchronichtn_00_14:=as.logical(NA)]
+ar[Oppt_bp_00_14==T & (TrialOne_anbpdiast_mildHTN_00_14==T|
+                         TrialOne_anbpsyst_mildHTN_00_14==T|
+                         TrialOne_anbpsyst_modSevHTN_00_14==T|
+                         TrialOne_anbpdiast_modSevHTN_00_14==T),manchronichtn_00_14:=F]
+
+
+
+ar[manchronichtn_00_14==F & (TrialOne_refHR_00_14==T|
+                               TrialOne_refHosp_00_14==T|
+                               TrialOne_refSpec_00_14==T),manchronichtn_00_14:=T]
+
+xtabs(~ar$manchronichtn_00_14, addNA=T)
+
+
+
+################
+#15-17 weeks
+################
+
+#screening
+ar[,Oppt_bp_15_17:=as.logical(NA)]
+ar[TrialOne_anvisitnew_15_17==T &
+     is.na(manchronichtn_00_14),Oppt_bp_15_17:=TRUE]
+xtabs(~ar$Oppt_bp_15_17,addNA=T)
+
+# numerator
+ar[,bpontime_15_17:=as.logical(NA)]
+ar[Oppt_bp_15_17==TRUE,bpontime_15_17:=FALSE]
+ar[TrialOne_anbpsyst_present_15_17==T &
+     TrialOne_anbpdiast_present_15_17==T &
+     bpontime_15_17==F,bpontime_15_17:=TRUE]
+
+xtabs(~ar$bpontime_15_17)
+
+
+################
+#15-17 weeks
+################
+
+#management
+#needs to be done week by week
+
+# mild 15 weeks
+ar[,manmildchronichtn_15_15:=as.logical(NA)]
+ar[Oppt_bp_15_17==T & (TrialOne_anbpdiast_mildHTN_15_15==T|
+                         TrialOne_anbpsyst_mildHTN_15_15==T),manmildchronichtn_15_15:=F]
+
+ar[manmildchronichtn_15_15==F & (TrialOne_refHR_15_15==T|
+                                   TrialOne_refHosp_15_15==T|
+                                   TrialOne_refSpec_15_15==T),manmildchronichtn_15_15:=T]
+
+xtabs(~ar$manmildchronichtn_15_15, addNA=T)
+
+# mod/sev 15 weeks
+ar[,manmodsevchronichtn_15_15:=as.logical(NA)]
+ar[Oppt_bp_15_17==T & (TrialOne_anbpdiast_modSevHTN_15_15==T|
+                         TrialOne_anbpsyst_modSevHTN_15_15==T),manmodsevchronichtn_15_15:=F]
+
+ar[manmodsevchronichtn_15_15==F & (TrialOne_refHR_15_15==T|
+                                     TrialOne_refHosp_15_15==T|
+                                     TrialOne_refSpec_15_15==T),manmodsevchronichtn_15_15:=T]
+
+xtabs(~ar$manmodsevchronichtn_15_15, addNA=T)
+
+# mild/mod/sev 16 weeks
+ar[,manmildchronichtn_16_16:=as.logical(NA)]
+ar[Oppt_bp_15_17==T & (TrialOne_anbpdiast_mildHTN_16_16==T|
+                         TrialOne_anbpsyst_mildHTN_16_16==T),manmildchronichtn_16_16:=F]
+
+ar[manmildchronichtn_16_16==F & (TrialOne_refHR_16_16==T|
+                                   TrialOne_refHosp_16_16==T|
+                                   TrialOne_refSpec_16_16==T),manmildchronichtn_16_16:=T]
+xtabs(~ar$manmildchronichtn_16_16, addNA=T)
+
+# mod/sev 15 weeks
+ar[,manmodsevchronichtn_16_16:=as.logical(NA)]
+ar[Oppt_bp_15_17==T & (TrialOne_anbpdiast_modSevHTN_16_16==T|
+                         TrialOne_anbpsyst_modSevHTN_16_16==T),manmodsevchronichtn_16_16:=F]
+
+ar[manmodsevchronichtn_16_16==F & (TrialOne_refHR_16_16==T|
+                                     TrialOne_refHosp_16_16==T|
+                                     TrialOne_refSpec_16_16==T),manmodsevchronichtn_16_16:=T]
+
+xtabs(~ar$manmodsevchronichtn_16_16, addNA=T)
+
+# mild/mod/sev 17 weeks
+ar[,manmildchronichtn_17_17:=as.logical(NA)]
+ar[Oppt_bp_15_17==T & (TrialOne_anbpdiast_mildHTN_17_17==T|
+                         TrialOne_anbpsyst_mildHTN_17_17==T),manmildchronichtn_17_17:=F]
+
+ar[manmildchronichtn_17_17==F & (TrialOne_refHR_17_17==T|
+                                   TrialOne_refHosp_17_17==T|
+                                   TrialOne_refSpec_17_17==T),manmildchronichtn_17_17:=T]
+
+xtabs(~ar$manmildchronichtn_17_17, addNA=T)
+
+# mod/sev 17 weeks
+ar[,manmodsevchronichtn_17_17:=as.logical(NA)]
+ar[Oppt_bp_15_17==T & (TrialOne_anbpdiast_modSevHTN_17_17==T|
+                         TrialOne_anbpsyst_modSevHTN_17_17==T),manmodsevchronichtn_17_17:=F]
+
+ar[manmodsevchronichtn_17_17==F & (TrialOne_refHR_17_17==T|
+                                     TrialOne_refHosp_17_17==T|
+                                     TrialOne_refSpec_17_17==T),manmodsevchronichtn_17_17:=T]
+
+xtabs(~ar$manmodsevchronichtn_17_17, addNA=T)
+
+
+################
+# combined
+################
+
+
+#manmildchronichtn 15-17 weeks combo variable
+ar[,manmildchronichtn_15_17:=as.logical(NA)]
+ar[Oppt_bp_15_17==T & (!is.na(manmildchronichtn_15_15)|
+                         !is.na(manmildchronichtn_16_16)|
+                         !is.na(manmildchronichtn_17_17)),manmildchronichtn_15_17:=F]
+
+xtabs(~ar$manmildchronichtn_15_17, addNA=T)
+
+
+ar[manmildchronichtn_15_17==F & (manmildchronichtn_15_15==T|
+                                   manmildchronichtn_16_16==T|
+                                   manmildchronichtn_17_17==T),manmildchronichtn_17_17:=T]
+
+xtabs(~ar$manmildchronichtn_15_17, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#manmodsevchronichtn 15-17 weeks combo variable
+ar[,manmodsevchronichtn_15_17:=as.logical(NA)]
+ar[Oppt_bp_15_17==T & (!is.na(manmodsevchronichtn_15_15)|
+                         !is.na(manmodsevchronichtn_16_16)|
+                         !is.na(manmodsevchronichtn_17_17)),manmodsevchronichtn_15_17:=F]
+
+xtabs(~ar$manmodsevchronichtn_15_17, addNA=T)
+
+
+ar[manmodsevchronichtn_15_17==F & (manmodsevchronichtn_15_15==T|
+                                     manmodsevchronichtn_16_16==T|
+                                     manmodsevchronichtn_17_17==T),manmodsevchronichtn_15_17:=T]
+
+xtabs(~ar$manmodsevchronichtn_15_17, addNA=T)
+
+################
+#18-22 weeks
+################
+
+#screening
+ar[,Oppt_bp_18_22:=as.logical(NA)]
+ar[TrialOne_anvisitnew_18_22==T &
+     is.na(manmildchronichtn_15_17) &
+     is.na(manmodsevchronichtn_15_17),Oppt_bp_18_22:=TRUE]
+xtabs(~ar$Oppt_bp_18_22,addNA=T)
+
+# numerator
+ar[,bpontime_18_22:=as.logical(NA)]
+ar[Oppt_bp_18_22==TRUE,bpontime_18_22:=FALSE]
+ar[TrialOne_anbpsyst_present_18_22==T &
+     TrialOne_anbpdiast_present_18_22==T &
+     bpontime_18_22==F,bpontime_18_22:=TRUE]
+
+xtabs(~ar$bpontime_18_22)
+
+
+################
+#18-22 weeks
+################
+
+#management
+
+# mild 18 weeks
+ar[,manmildchronichtn_18_18:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_mildHTN_18_18==T|
+                         TrialOne_anbpsyst_mildHTN_18_18==T),manmildchronichtn_18_18:=F]
+
+ar[manmildchronichtn_18_18==F & (TrialOne_anbpsyst_present_19_19==T &
+                                   TrialOne_anbpdiast_present_19_19==T),manmildchronichtn_18_18:=T]
+
+xtabs(~ar$manmildchronichtn_18_18, addNA=T)
+
+# mod/sev 18 weeks
+ar[,manmodsevchronichtn_18_18:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_modSevHTN_18_18==T|
+                         TrialOne_anbpsyst_modSevHTN_18_18==T),manmodsevchronichtn_18_18:=F]
+
+ar[manmodsevchronichtn_18_18==F & (TrialOne_refHR_18_18==T|
+                                     TrialOne_refHosp_18_18==T|
+                                     TrialOne_refSpec_18_18==T),manmodsevchronichtn_18_18:=T]
+
+xtabs(~ar$manmodsevchronichtn_18_18, addNA=T)
+
+# man 19 weeks
+#mild 
+ar[,manmildchronichtn_19_19:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_mildHTN_19_19==T|
+                         TrialOne_anbpsyst_mildHTN_19_19==T),manmildchronichtn_19_19:=F]
+
+ar[manmildchronichtn_19_19==F & (TrialOne_anbpsyst_present_20_20==T &
+                                   TrialOne_anbpdiast_present_20_20==T),manmildchronichtn_19_19:=T]
+
+xtabs(~ar$manmildchronichtn_19_19, addNA=T)
+
+# mod/sev 19 weeks
+ar[,manmodsevchronichtn_19_19:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_modSevHTN_19_19==T|
+                         TrialOne_anbpsyst_modSevHTN_19_19==T),manmodsevchronichtn_19_19:=F]
+
+ar[manmodsevchronichtn_19_19==F & (TrialOne_refHR_19_19==T|
+                                     TrialOne_refHosp_19_19==T|
+                                     TrialOne_refSpec_19_19==T),manmodsevchronichtn_19_19:=T]
+
+xtabs(~ar$manmodsevchronichtn_19_19, addNA=T)
+
+# man 20 weeks
+#mild 20 weeks
+ar[,manmildchronichtn_20_20:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_mildHTN_20_20==T|
+                         TrialOne_anbpsyst_mildHTN_20_20==T),manmildchronichtn_20_20:=F]
+
+ar[manmildchronichtn_20_20==F & (TrialOne_anbpsyst_present_21_21==T &
+                                   TrialOne_anbpdiast_present_21_21==T),manmildchronichtn_20_20:=T]
+
+xtabs(~ar$manmildchronichtn_20_20, addNA=T)
+
+# mod/sev 20 weeks
+ar[,manmodsevchronichtn_20_20:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_modSevHTN_20_20==T|
+                         TrialOne_anbpsyst_modSevHTN_20_20==T),manmodsevchronichtn_20_20:=F]
+
+ar[manmodsevchronichtn_20_20==F & (TrialOne_refHR_20_20==T|
+                                     TrialOne_refHosp_20_20==T|
+                                     TrialOne_refSpec_20_20==T),manmodsevchronichtn_20_20:=T]
+
+xtabs(~ar$manmodsevchronichtn_20_20, addNA=T)
+
+# man 21 weeks
+#mild 21 weeks
+ar[,manmildchronichtn_21_21:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_mildHTN_21_21==T|
+                         TrialOne_anbpsyst_mildHTN_21_21==T),manmildchronichtn_21_21:=F]
+
+ar[manmildchronichtn_21_21==F & (TrialOne_anbpsyst_present_22_22==T &
+                                   TrialOne_anbpdiast_present_22_22==T),manmildchronichtn_21_21:=T]
+
+xtabs(~ar$manmildchronichtn_21_21, addNA=T)
+
+
+# mod/sev 21 weeks
+ar[,manmodsevchronichtn_21_21:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_modSevHTN_21_21==T|
+                         TrialOne_anbpsyst_modSevHTN_21_21==T),manmodsevchronichtn_21_21:=F]
+
+ar[manmodsevchronichtn_21_21==F & (TrialOne_refHR_21_21==T|
+                                     TrialOne_refHosp_21_21==T|
+                                     TrialOne_refSpec_21_21==T),manmodsevchronichtn_21_21:=T]
+
+xtabs(~ar$manmodsevchronichtn_21_21, addNA=T)
+
+# man 22 weeks
+#mild 22 weeks
+ar[,manmildchronichtn_22_22:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_mildHTN_22_22==T|
+                         TrialOne_anbpsyst_mildHTN_22_22==T),manmildchronichtn_22_22:=F]
+
+ar[manmildchronichtn_22_22==F & (TrialOne_anbpsyst_present_23_23==T &
+                                   TrialOne_anbpdiast_present_23_23==T),manmildchronichtn_22_22:=T]
+
+xtabs(~ar$manmildchronichtn_22_22, addNA=T)
+
+#
+ar[,manmodsevchronichtn_22_22:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (TrialOne_anbpdiast_modSevHTN_22_22==T|
+                         TrialOne_anbpsyst_modSevHTN_22_22==T),manmodsevchronichtn_22_22:=F]
+
+ar[manmodsevchronichtn_22_22==F & (TrialOne_refHR_22_22==T|
+                                     TrialOne_refHosp_22_22==T|
+                                     TrialOne_refSpec_22_22==T),manmodsevchronichtn_22_22:=T]
+
+xtabs(~ar$manmodsevchronichtn_22_22, addNA=T)
+
+
+
+################
+# combined 18-22
+################
+
+
+#manmildchronichtn 15-17 weeks combo variable
+ar[,manmildchronichtn_18_22:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (!is.na(manmildchronichtn_18_18)|
+                         !is.na(manmildchronichtn_19_19)|
+                         !is.na(manmildchronichtn_20_20)|
+                         !is.na(manmildchronichtn_21_21)|
+                         !is.na(manmildchronichtn_22_22)),manmildchronichtn_18_22:=F]
+
+xtabs(~ar$manmildchronichtn_18_22, addNA=T)
+
+
+ar[manmildchronichtn_18_22==F & (manmildchronichtn_18_18==T|
+                                   manmildchronichtn_19_19==T|
+                                   manmildchronichtn_20_20==T|
+                                   manmildchronichtn_21_21==T|
+                                   manmildchronichtn_22_22==T),manmildchronichtn_18_22:=T]
+
+xtabs(~ar$manmildchronichtn_18_22, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#manmodsevchronichtn 15-17 weeks combo variable
+ar[,manmodsevchronichtn_18_22:=as.logical(NA)]
+ar[Oppt_bp_18_22==T & (!is.na(manmodsevchronichtn_18_18)|
+                         !is.na(manmodsevchronichtn_19_19)|
+                         !is.na(manmodsevchronichtn_20_20)|
+                         !is.na(manmodsevchronichtn_21_21)|
+                         !is.na(manmodsevchronichtn_22_22)),manmodsevchronichtn_18_22:=F]
+
+xtabs(~ar$manmodsevchronichtn_18_22, addNA=T)
+
+
+ar[manmodsevchronichtn_18_22==F & (manmodsevchronichtn_18_18==T|
+                                     manmodsevchronichtn_19_19==T|
+                                     manmodsevchronichtn_20_20==T|
+                                     manmodsevchronichtn_21_21==T|
+                                     manmodsevchronichtn_22_22==T),manmodsevchronichtn_18_22:=T]
+
+xtabs(~ar$manmodsevchronichtn_18_22, addNA=T)
+
+
+
+################
+# 18-18 weeks
+################
+
+
+#screening
+ar[,Oppt_bp_18_18:=as.logical(NA)]
+ar[TrialOne_anvisitnew_18_18==T &
+     is.na(manmildchronichtn_15_17) &
+     is.na(manmodsevchronichtn_15_17),Oppt_bp_18_18:=TRUE]
+xtabs(~ar$Oppt_bp_18_18,addNA=T)
+
+# numerator
+ar[,bpontime_18_18:=as.logical(NA)]
+ar[Oppt_bp_18_18==TRUE,bpontime_18_18:=FALSE]
+ar[TrialOne_anbpsyst_present_18_18==T &
+     TrialOne_anbpdiast_present_18_18==T &
+     bpontime_18_18==F,bpontime_18_18:=TRUE]
+
+xtabs(~ar$bpontime_18_18)
+
+
+#management
+
+# mild 18 weeks
+ar[,manmildchronichtn_18_18_new:=as.logical(NA)]
+ar[Oppt_bp_18_18==T & (TrialOne_anbpdiast_mildHTN_18_18==T|
+                         TrialOne_anbpsyst_mildHTN_18_18==T),manmildchronichtn_18_18_new:=F]
+
+ar[manmildchronichtn_18_18_new==F & (TrialOne_anbpsyst_present_19_19==T &
+                                   TrialOne_anbpdiast_present_19_19==T) ,manmildchronichtn_18_18_new:=T]
+
+xtabs(~ar$manmildchronichtn_18_18_new, addNA=T)
+
+
+# mod/sev 18-18 weeks
+ar[,manmodsevchronichtn_18_18_new:=as.logical(NA)]
+ar[Oppt_bp_18_18==T & (TrialOne_anbpdiast_modSevHTN_19_19==T|
+                            TrialOne_anbpsyst_modSevHTN_19_19==T),manmodsevchronichtn_18_18_new:=F]
+
+
+ar[manmodsevchronichtn_18_18_new==F &
+     (TrialOne_refHR_18_18==T|
+        TrialOne_refHosp_18_18==T|
+        TrialOne_refSpec_18_18==T),manmodsevchronichtn_18_18_new:=T]
+
+xtabs(~ar$manmodsevchronichtn_18_18_new, addNA=T)
+
+
+
+################
+# 19-19 weeks
+################
+
+
+#screening
+ar[,Oppt_bp_19_19:=as.logical(NA)]
+ar[TrialOne_anvisitnew_19_19==T &
+     is.na(manmildchronichtn_18_18_new) &
+     is.na(manmodsevchronichtn_18_18_new),Oppt_bp_19_19:=TRUE]
+xtabs(~ar$Oppt_bp_19_19,addNA=T)
+
+# numerator
+ar[,bpontime_19_19:=as.logical(NA)]
+ar[Oppt_bp_19_19==TRUE,bpontime_19_19:=FALSE]
+ar[TrialOne_anbpsyst_present_19_19==T &
+     TrialOne_anbpdiast_present_19_19==T &
+     bpontime_19_19==F,bpontime_19_19:=TRUE]
+
+xtabs(~ar$bpontime_19_19)
+
+
+#management
+
+# mild 19 weeks
+ar[,manmildchronichtn_19_19_new:=as.logical(NA)]
+ar[Oppt_bp_19_19==T & (TrialOne_anbpdiast_mildHTN_19_19==T|
+                         TrialOne_anbpsyst_mildHTN_19_19==T),manmildchronichtn_19_19_new:=F]
+
+ar[manmildchronichtn_19_19_new==F & (TrialOne_anbpsyst_present_20_20==T &
+                                   TrialOne_anbpdiast_present_20_20==T) ,manmildchronichtn_19_19_new:=T]
+
+xtabs(~ar$manmildchronichtn_19_19_new, addNA=T)
+
+
+# mod/sev 19-19 weeks
+ar[,manmodsevchronichtn_19_19_new:=as.logical(NA)]
+ar[Oppt_bp_19_19==T & (TrialOne_anbpdiast_modSevHTN_19_19==T|
+                         TrialOne_anbpsyst_modSevHTN_19_19==T),manmodsevchronichtn_19_19_new:=F]
+
+
+ar[manmodsevchronichtn_19_19_new==F &
+     (TrialOne_refHR_19_19==T|
+        TrialOne_refHosp_19_19==T| 
+        TrialOne_refSpec_19_19),manmodsevchronichtn_19_19_new:=T]
+
+xtabs(~ar$manmodsevchronichtn_19_19_new, addNA=T)
+
+
+
+################
+# combined 18-19
+################
+
+
+#manmildchronichtn 15-17 weeks combo variable
+ar[,manmildchronichtn_18_19:=as.logical(NA)]
+ar[(Oppt_bp_18_18==T & !is.na(manmildchronichtn_18_18_new))|
+     (Oppt_bp_19_19==T & !is.na(manmildchronichtn_19_19_new)),manmildchronichtn_18_19:=F]
+
+xtabs(~ar$manmildchronichtn_18_19, addNA=T)
+
+
+ar[manmildchronichtn_18_19==F & (manmildchronichtn_18_18_new==T|
+                                       manmildchronichtn_19_19_new==T),manmildchronichtn_18_19:=T]
+
+xtabs(~ar$manmildchronichtn_18_19, addNA=T)
+
+
+
+
+
+# severe chronic htn
+ar[,manmodsevchronichtn_18_19:=as.logical(NA)]
+ar[(Oppt_bp_18_18==T & !is.na(manmodsevchronichtn_18_18_new))|
+     (Oppt_bp_19_19==T & !is.na(manmodsevchronichtn_19_19_new)),manmodsevchronichtn_18_19:=F]
+
+xtabs(~ar$manmodsevchronichtn_18_19, addNA=T)
+
+
+ar[manmodsevchronichtn_18_19==F & (manmodsevchronichtn_18_18_new==T|
+                                     manmodsevchronichtn_19_19_new==T),manmodsevchronichtn_18_19:=T]
+
+xtabs(~ar$manmodsevchronichtn_18_19, addNA=T)
+
+
+
+################
+# 20 weeks only
+################
+
+#screening
+ar[,Oppt_bp_20_20:=as.logical(NA)]
+ar[(TrialOne_anvisitnew_20_20==T) &
+     is.na(manmodsevchronichtn_18_19) &
+     is.na(manmildchronichtn_18_19),Oppt_bp_20_20:=TRUE]
+xtabs(~ar$Oppt_bp_20_20,addNA=T)
+
+# numerator
+ar[,bpontime_20_20:=as.logical(NA)]
+ar[Oppt_bp_20_20==TRUE,bpontime_20_20:=FALSE]
+ar[TrialOne_anbpsyst_present_20_20==T &
+     TrialOne_anbpdiast_present_20_20==T &
+     bpontime_20_20==F,bpontime_20_20:=TRUE]
+
+xtabs(~ar$bpontime_20_20)
+
+
+#management
+
+# mild 20 weeks only
+ar[,manmildchronichtn_20_20_new:=as.logical(NA)]
+ar[Oppt_bp_20_20==T & (TrialOne_anbpdiast_mildHTN_20_20==T|
+                         TrialOne_anbpsyst_mildHTN_20_20==T),manmildchronichtn_20_20_new:=F]
+
+ar[manmildchronichtn_20_20_new==F & (TrialOne_anbpsyst_present_21_21==T &
+                                   TrialOne_anbpdiast_present_21_21==T),manmildchronichtn_20_20_new:=T]
+
+xtabs(~ar$manmildchronichtn_20_20_new, addNA=T)
+
+# mod/sev 23 weeks
+ar[,manmodsevchronichtn_20_20_new:=as.logical(NA)]
+ar[Oppt_bp_20_20==T & (TrialOne_anbpdiast_modSevHTN_20_20==T|
+                         TrialOne_anbpsyst_modSevHTN_20_20==T),manmodsevchronichtn_20_20_new:=F]
+
+ar[manmodsevchronichtn_20_20_new==F & (TrialOne_refHR_20_20==T|
+                                     TrialOne_refHosp_20_20==T|
+                                     TrialOne_refSpec_20_20==T),manmildchronichtn_20_20_new:=T]
+
+xtabs(~ar$manmodsevchronichtn_20_20_new, addNA=T)
+
+
+
+
+################
+# 21 weeks only
+################
+
+#screening
+ar[,Oppt_bp_21_21:=as.logical(NA)]
+ar[(TrialOne_anvisitnew_21_21==T) &
+     is.na(manmodsevchronichtn_20_20_new) &
+     is.na(manmildchronichtn_20_20_new),Oppt_bp_21_21:=TRUE]
+xtabs(~ar$Oppt_bp_21_21,addNA=T)
+
+# numerator
+ar[,bpontime_21_21:=as.logical(NA)]
+ar[Oppt_bp_21_21==TRUE,bpontime_21_21:=FALSE]
+ar[TrialOne_anbpsyst_present_21_21==T &
+     TrialOne_anbpdiast_present_21_21==T &
+     bpontime_21_21==F,bpontime_21_21:=TRUE]
+
+xtabs(~ar$bpontime_21_21)
+
+
+#management
+
+# mild 21 weeks
+ar[,manmildhtn_21_21_new:=as.logical(NA)]
+ar[Oppt_bp_21_21==T & (TrialOne_anbpdiast_mildHTN_21_21==T|
+                         TrialOne_anbpsyst_mildHTN_21_21==T),manmildhtn_21_21:=F]
+
+ar[manmildhtn_21_21==F & (TrialOne_anbpsyst_present_22_22==T &
+                                   TrialOne_anbpdiast_present_22_22==T),manmildhtn_21_21:=T]
+
+xtabs(~ar$manmildhtn_21_21, addNA=T)
+
+# mod/sev 21 weeks only
+ar[,manmodsevhtn_21_21:=as.logical(NA)]
+ar[Oppt_bp_21_21==T & (TrialOne_anbpdiast_modSevHTN_21_21==T|
+                         TrialOne_anbpsyst_modSevHTN_21_21==T),manmodsevhtn_21_21:=F]
+
+ar[manmodsevhtn_21_21==F & (TrialOne_refHR_21_21==T|
+                                     TrialOne_refHosp_21_21==T),manmodsevhtn_21_21:=T]
+
+xtabs(~ar$manmodsevhtn_21_21, addNA=T)
+
+
+
+
+
+################
+# 22 weeks only
+################
+
+#screening
+ar[,Oppt_bp_22_22:=as.logical(NA)]
+ar[(TrialOne_anvisitnew_22_22==T) &
+     is.na(manmodsevhtn_21_21) &
+     is.na(manmildhtn_21_21),Oppt_bp_22_22:=TRUE]
+xtabs(~ar$Oppt_bp_22_22,addNA=T)
+
+# numerator
+ar[,bpontime_22_22:=as.logical(NA)]
+ar[Oppt_bp_22_22==TRUE,bpontime_22_22:=FALSE]
+ar[TrialOne_anbpsyst_present_22_22==T &
+     TrialOne_anbpdiast_present_22_22==T &
+     bpontime_22_22==F,bpontime_22_22:=TRUE]
+
+xtabs(~ar$bpontime_22_22)
+
+
+#management
+
+# mild 22 weeks
+ar[,manmildhtn_22_22:=as.logical(NA)]
+ar[Oppt_bp_22_22==T & (TrialOne_anbpdiast_mildHTN_22_22==T|
+                         TrialOne_anbpsyst_mildHTN_22_22==T),manmildhtn_22_22:=F]
+
+ar[manmildhtn_22_22==F & (TrialOne_anbpsyst_present_23_23==T &
+                                   TrialOne_anbpdiast_present_23_23==T),manmildhtn_22_22:=T]
+
+xtabs(~ar$manmildhtn_22_22, addNA=T)
+
+# mod/sev 22 weeks
+ar[,manmodsevhtn_22_22:=as.logical(NA)]
+ar[Oppt_bp_22_22==T & (TrialOne_anbpdiast_modSevHTN_22_22==T|
+                         TrialOne_anbpsyst_modSevHTN_22_22==T),manmodsevhtn_22_22:=F]
+
+ar[manmodsevhtn_22_22==F & (TrialOne_refHR_22_22==T|
+                                     TrialOne_refHosp_22_22==T),manmodsevhtn_22_22:=T]
+
+xtabs(~ar$manmodsevhtn_22_22, addNA=T)
+
+
+
+
+################
+# combined 20-22
+################
+
+
+#manmildchronichtn 15-17 weeks combo variable
+ar[,manmildhtn_20_22:=as.logical(NA)]
+ar[(Oppt_bp_20_20==T & (!is.na(manmildchronichtn_20_20_new)))|
+     (Oppt_bp_21_21==T & (!is.na(manmildhtn_21_21)))|
+     (Oppt_bp_22_22==T & !is.na(manmildhtn_22_22)),manmildhtn_20_22:=F]
+
+xtabs(~ar$manmildhtn_20_22, addNA=T)
+
+
+ar[manmildhtn_20_22==F & (manmildchronichtn_20_20_new==T|
+                          manmildhtn_21_21==T|
+                          manmildhtn_22_22==T),manmildhtn_20_22:=T]
+
+xtabs(~ar$manmildhtn_20_22, addNA=T)
+
+
+
+
+
+# severe chronic htn
+ar[,manmodsevhtn_20_22:=as.logical(NA)]
+ar[(Oppt_bp_20_20==T & (!is.na(manmodsevchronichtn_20_20_new)))|
+     (Oppt_bp_21_21==T & (!is.na(manmodsevhtn_21_21)))|
+     (Oppt_bp_22_22==T & !is.na(manmodsevhtn_22_22)),manmodsevhtn_20_22:=F]
+
+xtabs(~ar$manmodsevhtn_20_22, addNA=T)
+
+
+ar[manmodsevhtn_20_22==F & (manmodsevchronichtn_20_20_new==T|
+                                     manmodsevhtn_21_21==T|
+                                     manmodsevhtn_22_22==T),manmodsevhtn_20_22:=T]
+
+xtabs(~ar$manmodsevhtn_20_22, addNA=T)
+
+
+
+
+################
+# 23 weeks
+################
+
+#screening
+ar[,Oppt_bp_23_23:=as.logical(NA)]
+ar[TrialOne_anvisitnew_23_23==T &
+     is.na(manmildhtn_20_22) &
+     is.na(manmodsevhtn_20_22),Oppt_bp_23_23:=TRUE]
+xtabs(~ar$Oppt_bp_23_23,addNA=T)
+
+# numerator
+ar[,bpontime_23_23:=as.logical(NA)]
+ar[Oppt_bp_23_23==TRUE,bpontime_23_23:=FALSE]
+ar[TrialOne_anbpsyst_present_23_23==T &
+     TrialOne_anbpdiast_present_23_23==T &
+     bpontime_23_23==F,bpontime_23_23:=TRUE]
+
+xtabs(~ar$bpontime_23_23)
+
+
+#management
+
+# mild 23 weeks
+ar[,manmildchronichtn_23_23:=as.logical(NA)]
+ar[Oppt_bp_23_23==T & (TrialOne_anbpdiast_mildHTN_23_23==T|
+                         TrialOne_anbpsyst_mildHTN_23_23==T),manmildchronichtn_23_23:=F]
+
+ar[manmildchronichtn_23_23==F & (TrialOne_anbpsyst_present_24_24==T &
+                                   TrialOne_anbpdiast_present_24_24==T),manmildchronichtn_23_23:=T]
+
+xtabs(~ar$manmildchronichtn_23_23, addNA=T)
+
+# mod/sev 23 weeks
+ar[,manmodsevchronichtn_23_23:=as.logical(NA)]
+ar[Oppt_bp_23_23==T & (TrialOne_anbpdiast_modSevHTN_23_23==T|
+                         TrialOne_anbpsyst_modSevHTN_23_23==T),manmodsevchronichtn_23_23:=F]
+
+ar[manmodsevchronichtn_23_23==F & (TrialOne_refHR_23_23==T|
+                                     TrialOne_refHosp_23_23==T|
+                                     TrialOne_refSpec_23_23==T),manmodsevchronichtn_23_23:=T]
+
+xtabs(~ar$manmodsevchronichtn_23_23, addNA=T)
+
+
+################
+#24-28 weeks
+################
+
+#screening
+ar[,Oppt_bp_24_28:=as.logical(NA)]
+ar[TrialOne_anvisitnew_24_28==T &
+     is.na(manmildchronichtn_23_23) &
+     is.na(manmildchronichtn_23_23),Oppt_bp_24_28:=TRUE]
+xtabs(~ar$Oppt_bp_24_28,addNA=T)
+
+# numerator
+ar[,bpontime_24_28:=as.logical(NA)]
+ar[Oppt_bp_24_28==TRUE,bpontime_24_28:=FALSE]
+ar[TrialOne_anbpsyst_present_24_28==T &
+     TrialOne_anbpdiast_present_24_28==T &
+     bpontime_24_28==F,bpontime_24_28:=TRUE]
+
+xtabs(~ar$bpontime_24_28)
+
+
+################
+#24-28 weeks
+################
+
+#management
+# 24 weeks
+#mild 
+ar[,manmildhtn_24_24:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_mildHTN_24_24==T|
+                         TrialOne_anbpsyst_mildHTN_24_24==T),manmildhtn_24_24:=F]
+
+ar[manmildhtn_24_24==F & (TrialOne_anbpsyst_present_25_25==T &
+                            TrialOne_anbpdiast_present_25_25==T),manmildhtn_24_24:=T]
+
+xtabs(~ar$manmildhtn_24_24, addNA=T)
+
+# mod/sev  weeks
+ar[,manmodsevhtn_24_24:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_modSevHTN_24_24==T|
+                         TrialOne_anbpsyst_modSevHTN_24_24==T),manmodsevhtn_24_24:=F]
+
+ar[manmodsevhtn_24_24==F & (TrialOne_refHR_24_24==T|
+                              TrialOne_refHosp_24_24==T|
+                              TrialOne_refSpec_24_24==T),manmodsevhtn_24_24:=T]
+
+xtabs(~ar$manmodsevhtn_24_24, addNA=T)
+
+# 25 weeks
+#mild 
+ar[,manmildhtn_25_25:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_mildHTN_25_25==T|
+                         TrialOne_anbpsyst_mildHTN_25_25==T),manmildhtn_25_25:=F]
+
+ar[manmildhtn_25_25==F & (TrialOne_anbpsyst_present_26_26==T &
+                            TrialOne_anbpdiast_present_26_26==T),manmildhtn_25_25:=T]
+
+xtabs(~ar$manmildhtn_25_25, addNA=T)
+
+# mod/sev weeks
+ar[,manmodsevhtn_25_25:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_modSevHTN_25_25==T|
+                         TrialOne_anbpsyst_modSevHTN_25_25==T),manmodsevhtn_25_25:=F]
+
+ar[manmodsevhtn_25_25==F & (TrialOne_refHR_25_25==T|
+                              TrialOne_refHosp_25_25==T|
+                              TrialOne_refSpec_25_25==T),manmodsevhtn_25_25:=T]
+
+xtabs(~ar$manmodsevhtn_25_25, addNA=T)
+
+# 26 weeks
+#mild 
+ar[,manmildhtn_26_26:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_mildHTN_26_26==T|
+                         TrialOne_anbpsyst_mildHTN_26_26==T),manmildhtn_26_26:=F]
+
+ar[manmildhtn_26_26==F & (!is.na(TrialOne_anbpsyst_present_27_27) &
+                            !is.na(TrialOne_anbpdiast_present_27_27)),manmildhtn_26_26:=T]
+
+xtabs(~ar$manmildhtn_26_26, addNA=T)
+
+
+# mod/sev 
+ar[,manmodsevhtn_26_26:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_modSevHTN_26_26==T|
+                         TrialOne_anbpsyst_modSevHTN_26_26==T),manmodsevhtn_26_26:=F]
+
+ar[manmodsevhtn_26_26==F & (TrialOne_refHR_26_26==T|
+                              TrialOne_refHosp_26_26==T|
+                              TrialOne_refSpec_26_26==T),manmodsevhtn_26_26:=T]
+
+xtabs(~ar$manmodsevhtn_26_26, addNA=T)
+
+# 27 weeks
+#mild 
+ar[,manmildhtn_27_27:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_mildHTN_27_27==T|
+                         TrialOne_anbpsyst_mildHTN_27_27==T),manmildhtn_27_27:=F]
+
+ar[manmildhtn_27_27==F & (TrialOne_anbpsyst_present_28_28==T &
+                            TrialOne_anbpdiast_present_28_28==T),manmildhtn_27_27:=T]
+
+
+xtabs(~ar$manmildhtn_27_27, addNA=T)
+
+# mod/sev 19 weeks
+ar[,manmodsevhtn_27_27:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_modSevHTN_27_27==T|
+                         TrialOne_anbpsyst_modSevHTN_27_27==T),manmodsevhtn_27_27:=F]
+
+ar[manmodsevhtn_27_27==F & (TrialOne_refHR_27_27==T|
+                              TrialOne_refHosp_27_27==T|
+                              TrialOne_refSpec_27_27==T),manmodsevhtn_27_27:=T]
+
+xtabs(~ar$manmodsevhtn_27_27, addNA=T)
+
+
+# 28 weeks
+#mild 
+ar[,manmildhtn_28_28:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_mildHTN_28_28==T|
+                         TrialOne_anbpsyst_mildHTN_28_28==T),manmildhtn_28_28:=F]
+
+ar[manmildhtn_28_28==F & (TrialOne_anbpsyst_present_29_29==T &
+                            TrialOne_anbpdiast_present_29_29==T),manmildhtn_28_28:=T]
+
+xtabs(~ar$manmildhtn_28_28, addNA=T)
+
+
+# mod/sev 
+ar[,manmodsevhtn_28_28:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (TrialOne_anbpdiast_modSevHTN_28_28==T|
+                         TrialOne_anbpsyst_modSevHTN_28_28==T),manmodsevhtn_28_28:=F]
+
+ar[manmodsevhtn_28_28==F & (TrialOne_refHR_28_28==T|
+                              TrialOne_refHosp_28_28==T|
+                              TrialOne_refSpec_28_28==T),manmodsevhtn_28_28:=T]
+
+xtabs(~ar$manmodsevhtn_28_28, addNA=T)
+
+# combine man var for 24-28 weeks
+ar[,manmildhtn_24_28:=as.logical(NA)]
+ar[manmildhtn_28_28==T|
+     manmildhtn_27_27==T,manmildhtn_24_28:=T]
+ar[,manmodsevhtn_24_28:=as.logical(NA)]
+
+
+
+################
+# combined 24-28
+################
+
+
+#manmildchronichtn 15-17 weeks combo variable
+ar[,manmildhtn_24_28:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (!is.na(manmildhtn_24_24)|
+                         !is.na(manmildhtn_25_25)|
+                         !is.na(manmildhtn_26_26)|
+                         !is.na(manmildhtn_27_27)|
+                         !is.na(manmildhtn_28_28)),manmildhtn_24_28:=F]
+
+xtabs(~ar$manmildhtn_24_28, addNA=T)
+
+
+ar[manmildhtn_24_28==F & (manmildhtn_24_24==T|
+                            manmildhtn_25_25==T|
+                            manmildhtn_26_26==T|
+                            manmildhtn_27_27==T|
+                            manmildhtn_28_28==T),manmildhtn_24_28:=T]
+
+xtabs(~ar$manmildhtn_24_28, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#manmodsevchronichtn 15-17 weeks combo variable
+ar[,manmodsevhtn_24_28:=as.logical(NA)]
+ar[Oppt_bp_24_28==T & (!is.na(manmodsevhtn_24_24)|
+                         !is.na(manmodsevhtn_25_25)|
+                         !is.na(manmodsevhtn_26_26)|
+                         !is.na(manmodsevhtn_27_27)|
+                         !is.na(manmodsevhtn_28_28)),manmodsevhtn_24_28:=F]
+
+xtabs(~ar$manmodsevhtn_24_28, addNA=T)
+
+
+ar[manmodsevhtn_24_28==F & (manmodsevhtn_24_24==T|
+                              manmodsevhtn_25_25==T|
+                              manmodsevhtn_26_26==T|
+                              manmodsevhtn_27_27==T|
+                              manmodsevhtn_28_28==T),manmodsevhtn_24_28:=T]
+
+xtabs(~ar$manmodsevhtn_24_28, addNA=T)
+
+
+################
+# 29-30 weeks
+################
+
+#screening
+ar[,Oppt_bp_29_30:=as.logical(NA)]
+ar[TrialOne_anvisitnew_29_30==T &
+     is.na(manmildhtn_24_28) &
+     is.na(manmodsevhtn_24_28),Oppt_bp_29_30:=TRUE]
+xtabs(~ar$Oppt_bp_29_30,addNA=T)
+
+# numerator
+ar[,bpontime_29_30:=as.logical(NA)]
+ar[Oppt_bp_29_30==TRUE,bpontime_29_30:=FALSE]
+ar[TrialOne_anbpsyst_present_29_30==T &
+     TrialOne_anbpdiast_present_29_30==T &
+     bpontime_29_30==F,bpontime_29_30:=TRUE]
+
+xtabs(~ar$bpontime_29_30)
+
+
+#management
+#29 weeks
+#mild 
+ar[,manmildhtn_29_29:=as.logical(NA)]
+ar[Oppt_bp_29_30==T & (TrialOne_anbpdiast_mildHTN_29_29==T|
+                         TrialOne_anbpsyst_mildHTN_29_29==T),manmildhtn_29_29:=F]
+
+ar[manmildhtn_29_29==F & (TrialOne_anbpsyst_present_30_30==T &
+                            TrialOne_anbpdiast_present_30_30==T),manmildhtn_29_29:=T]
+
+# mod/sev 
+ar[,manmodsevhtn_29_29:=as.logical(NA)]
+ar[Oppt_bp_29_30==T & (TrialOne_anbpdiast_modSevHTN_29_29==T|
+                         TrialOne_anbpsyst_modSevHTN_29_29==T),manmodsevhtn_29_29:=F]
+
+ar[manmodsevhtn_29_29==F & (TrialOne_refHR_29_29==T|
+                              TrialOne_refHosp_29_29==T|
+                              TrialOne_refSpec_29_29==T),manmodsevhtn_29_29:=T]
+
+xtabs(~ar$manmodsevhtn_29_29, addNA=T)
+
+#30 weeks
+#mild 
+ar[,manmildhtn_30_30:=as.logical(NA)]
+ar[Oppt_bp_29_30==T & (TrialOne_anbpdiast_mildHTN_30_30==T|
+                         TrialOne_anbpsyst_mildHTN_30_30==T),manmildhtn_30_30:=F]
+
+ar[manmildhtn_30_30==F & (TrialOne_anbpsyst_present_31_31==T &
+                            TrialOne_anbpdiast_present_31_31==T),manmildhtn_30_30:=T]
+
+# mod/sev 
+ar[,manmodsevhtn_30_30:=as.logical(NA)]
+ar[Oppt_bp_29_30==T & (TrialOne_anbpdiast_modSevHTN_30_30==T|
+                         TrialOne_anbpsyst_modSevHTN_30_30==T),manmodsevhtn_30_30:=F]
+
+ar[manmodsevhtn_30_30==F & (TrialOne_refHR_30_30==T|
+                              TrialOne_refHosp_30_30==T|
+                              TrialOne_refSpec_30_30==T),manmodsevhtn_30_30:=T]
+
+xtabs(~ar$manmodsevhtn_30_30, addNA=T)
+
+
+
+
+################
+# combined 29-30
+################
+
+
+#manmildchronichtn 15-17 weeks combo variable
+ar[,manmildhtn_29_30:=as.logical(NA)]
+ar[Oppt_bp_29_30==T & (!is.na(manmildhtn_29_29)|
+                         !is.na(manmildhtn_30_30)),manmildhtn_29_30:=F]
+
+xtabs(~ar$manmildhtn_29_30, addNA=T)
+
+
+ar[manmildhtn_29_30==F & (manmildhtn_29_29==T|
+                            manmildhtn_30_30==T),manmildhtn_29_30:=T]
+
+xtabs(~ar$manmildhtn_29_30, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#manmodsevchronichtn 15-17 weeks combo variable
+ar[,manmodsevhtn_29_30:=as.logical(NA)]
+ar[Oppt_bp_29_30==T & (!is.na(manmodsevhtn_29_29)|
+                         !is.na(manmodsevhtn_30_30)),manmodsevhtn_29_30:=F]
+
+xtabs(~ar$manmodsevhtn_29_30, addNA=T)
+
+
+ar[manmodsevhtn_29_30==F & (manmodsevhtn_29_29==T|
+                              manmodsevhtn_30_30==T),manmodsevhtn_29_30:=T]
+
+xtabs(~ar$manmodsevhtn_29_30, addNA=T)
+
+
+
+################
+#31-33 weeks
+################
+
+#screening
+ar[,Oppt_bp_31_33:=as.logical(NA)]
+ar[TrialOne_anvisitnew_31_33==T &
+     is.na(manmodsevhtn_29_30) & 
+     is.na(manmildhtn_29_30),Oppt_bp_31_33:=TRUE]
+xtabs(~ar$Oppt_bp_31_33,addNA=T)
+
+# numerator
+ar[,bpontime_31_33:=as.logical(NA)]
+ar[Oppt_bp_31_33==TRUE,bpontime_31_33:=FALSE]
+ar[TrialOne_anbpsyst_present_31_33==T &
+     TrialOne_anbpdiast_present_31_33==T &
+     bpontime_31_33==F,bpontime_31_33:=TRUE]
+
+xtabs(~ar$bpontime_31_33)
+
+
+################
+#31-33 weeks
+################
+
+#management
+
+#management
+#31 weeks
+#mild 
+ar[,manmildhtn_31_31:=as.logical(NA)]
+ar[Oppt_bp_31_33==T & (TrialOne_anbpdiast_mildHTN_31_31==T|
+                         TrialOne_anbpsyst_mildHTN_31_31==T),manmildhtn_31_31:=F]
+
+ar[manmildhtn_31_31==F & (TrialOne_anbpsyst_present_32_32==T &
+                            TrialOne_anbpdiast_present_32_32==T),manmildhtn_31_31:=T]
+
+# mod/sev 
+ar[,manmodsevhtn_31_31:=as.logical(NA)]
+ar[Oppt_bp_31_33==T & (TrialOne_anbpdiast_modSevHTN_31_31==T|
+                         TrialOne_anbpsyst_modSevHTN_31_31==T),manmodsevhtn_31_31:=F]
+
+ar[manmodsevhtn_31_31==F & (TrialOne_refHR_31_31==T|
+                              TrialOne_refHosp_31_31==T|
+                              TrialOne_refSpec_31_31==T),manmodsevhtn_31_31:=T]
+
+xtabs(~ar$manmodsevhtn_31_31, addNA=T)
+
+# 32 weeks
+#mild 
+ar[,manmildhtn_32_32:=as.logical(NA)]
+ar[Oppt_bp_31_33==T & (TrialOne_anbpdiast_mildHTN_32_32==T|
+                         TrialOne_anbpsyst_mildHTN_32_32==T),manmildhtn_32_32:=F]
+
+ar[manmildhtn_32_32==F & (TrialOne_anbpsyst_present_33_33==T &
+                            TrialOne_anbpdiast_present_33_33==T),manmildhtn_32_32:=T]
+
+# mod/sev 
+ar[,manmodsevhtn_32_32:=as.logical(NA)]
+ar[Oppt_bp_31_33==T & (TrialOne_anbpdiast_modSevHTN_32_32==T|
+                         TrialOne_anbpsyst_modSevHTN_32_32==T),manmodsevhtn_32_32:=F]
+
+ar[manmodsevhtn_32_32==F & (TrialOne_refHR_32_32==T|
+                              TrialOne_refHosp_32_32==T|
+                              TrialOne_refSpec_32_32==T),manmodsevhtn_32_32:=T]
+
+xtabs(~ar$manmodsevhtn_32_32, addNA=T)
+
+# 33 weeks
+#mild 
+ar[,manmildhtn_33_33:=as.logical(NA)]
+ar[Oppt_bp_31_33==T & (TrialOne_anbpdiast_mildHTN_33_33==T|
+                         TrialOne_anbpsyst_mildHTN_33_33==T),manmildhtn_33_33:=F]
+
+ar[manmildhtn_33_33==F & (TrialOne_anbpsyst_present_34_34==T &
+                            TrialOne_anbpdiast_present_34_34==T),manmildhtn_33_33:=T]
+
+# mod/sev 
+ar[,manmodsevhtn_33_33:=as.logical(NA)]
+ar[Oppt_bp_31_33==T & (TrialOne_anbpdiast_modSevHTN_33_33==T|
+                         TrialOne_anbpsyst_modSevHTN_33_33==T),manmodsevhtn_33_33:=F]
+
+ar[manmodsevhtn_33_33==F & (TrialOne_refHR_33_33==T|
+                              TrialOne_refHosp_33_33==T|
+                              TrialOne_refSpec_33_33==T),manmodsevhtn_33_33:=T]
+
+xtabs(~ar$manmodsevhtn_33_33, addNA=T)
+
+
+################
+# combined 31-33
+################
+
+
+#manmildchronichtn 15-17 weeks combo variable
+ar[,manmildhtn_31_33:=as.logical(NA)]
+ar[Oppt_bp_31_33==T & (!is.na(manmildhtn_31_31)|
+                         !is.na(manmildhtn_32_32)|
+                         !is.na(manmildhtn_33_33)),manmildhtn_31_33:=F]
+
+xtabs(~ar$manmildhtn_31_33, addNA=T)
+
+
+ar[manmildhtn_31_33==F & (manmildhtn_31_31==T|
+                            manmildhtn_32_32==T|
+                            manmildhtn_33_33==T),manmildhtn_31_33:=T]
+
+xtabs(~ar$manmildhtn_31_33, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#manmodsevchronichtn 15-17 weeks combo variable
+ar[,manmodsevhtn_31_33:=as.logical(NA)]
+ar[Oppt_bp_31_33==T & (!is.na(manmodsevhtn_31_31)|
+                         !is.na(manmodsevhtn_32_32)|
+                         !is.na(manmodsevhtn_33_33)),manmodsevhtn_31_33:=F]
+
+xtabs(~ar$manmodsevhtn_31_33, addNA=T)
+
+
+ar[manmodsevhtn_31_33==F & (manmodsevhtn_31_31==T|
+                              manmodsevhtn_32_32==T|
+                              manmodsevhtn_33_33==T),manmodsevhtn_31_33:=T]
+
+xtabs(~ar$manmodsevhtn_31_33, addNA=T)
+
+################
+# 34 weeks
+################
+
+#screening
+ar[,Oppt_bp_34_34:=as.logical(NA)]
+ar[TrialOne_anvisitnew_34_34==T &
+     is.na(manmodsevhtn_31_33) & 
+     is.na(manmildhtn_31_33),Oppt_bp_34_34:=TRUE]
+xtabs(~ar$Oppt_bp_34_34,addNA=T)
+
+# numerator
+ar[,bpontime_34_34:=as.logical(NA)]
+ar[Oppt_bp_34_34==TRUE,bpontime_34_34:=FALSE]
+ar[TrialOne_anbpsyst_present_34_34==T &
+     TrialOne_anbpdiast_present_34_34==T &
+     bpontime_34_34==F,bpontime_34_34:=TRUE]
+
+xtabs(~ar$bpontime_34_34)
+
+#management
+#34 weeks
+#mild 
+ar[,manmildhtn_34_34:=as.logical(NA)]
+ar[bpontime_34_34==T & (TrialOne_anbpdiast_mildHTN_34_34==T|
+                          TrialOne_anbpsyst_mildHTN_34_34==T),manmildhtn_34_34:=F]
+
+ar[manmildhtn_34_34==F & (TrialOne_anbpsyst_present_35_35==T &
+                            TrialOne_anbpdiast_present_35_35==T),manmildhtn_34_34:=T]
+
+# mod/sev 
+ar[,manmodsevhtn_34_34:=as.logical(NA)]
+ar[Oppt_bp_34_34==T & (TrialOne_anbpdiast_modSevHTN_34_34==T|
+                         TrialOne_anbpsyst_modSevHTN_34_34==T),manmodsevhtn_34_34:=F]
+
+ar[manmodsevhtn_34_34==F & (TrialOne_refHR_34_34==T|
+                              TrialOne_refHosp_34_34==T|
+                              TrialOne_refSpec_34_34==T),manmodsevhtn_34_34:=T]
+
+xtabs(~ar$manmodsevhtn_34_34, addNA=T)
+
+
+################
+#35-37 weeks
+################
+
+#screening
+ar[,Oppt_bp_35_37:=as.logical(NA)]
+ar[TrialOne_anvisitnew_35_37==T &
+     is.na(manmildhtn_34_34) &
+     is.na(manmodsevhtn_34_34),Oppt_bp_35_37:=TRUE]
+xtabs(~ar$Oppt_bp_35_37,addNA=T)
+
+# numerator
+ar[,bpontime_35_37:=as.logical(NA)]
+ar[Oppt_bp_35_37==TRUE,bpontime_35_37:=FALSE]
+ar[TrialOne_anbpsyst_present_35_37==T &
+     TrialOne_anbpdiast_present_35_37==T &
+     bpontime_35_37==F,bpontime_35_37:=TRUE]
+
+xtabs(~ar$bpontime_35_37)
+
+
+################
+#35-37 weeks
+################
+#management
+#35-37 weeks
+#mild 
+ar[,manmildhtn_35_35:=as.logical(NA)]
+ar[bpontime_35_37==T & (TrialOne_anbpdiast_mildHTN_35_35==T|
+                          TrialOne_anbpsyst_mildHTN_35_35==T),manmildhtn_35_35:=F]
+
+ar[manmildhtn_35_35==F & (TrialOne_anbpsyst_present_36_36==T &
+                            TrialOne_anbpdiast_present_36_36==T),manmildhtn_35_35:=T]
+
+xtabs(~ar$manmildhtn_35_35, addNA=T)
+
+# mod/sev 
+ar[,manmodsevhtn_35_35:=as.logical(NA)]
+ar[Oppt_bp_35_37==T & (TrialOne_anbpdiast_modSevHTN_35_35==T|
+                         TrialOne_anbpsyst_modSevHTN_35_35==T),manmodsevhtn_35_35:=F]
+
+ar[manmodsevhtn_35_35==F & (TrialOne_refHR_35_35==T|
+                              TrialOne_refHosp_35_35==T|
+                              TrialOne_refSpec_35_35==T),manmodsevhtn_35_35:=T]
+
+xtabs(~ar$manmodsevhtn_35_35, addNA=T)
+
+# 36
+#mild 
+ar[,manmildhtn_36_36:=as.logical(NA)]
+ar[Oppt_bp_35_37==T & (TrialOne_anbpdiast_mildHTN_36_36==T|
+                         TrialOne_anbpsyst_mildHTN_36_36==T),manmildhtn_36_36:=F]
+
+ar[manmildhtn_36_36==F & (TrialOne_anbpsyst_present_37_37==T &
+                            TrialOne_anbpdiast_present_37_37==T),manmildhtn_36_36:=T]
+
+xtabs(~ar$manmildhtn_36_36, addNA=T)
+
+
+# mod/sev 
+ar[,manmodsevhtn_36_36:=as.logical(NA)]
+ar[Oppt_bp_35_37==T & (TrialOne_anbpdiast_modSevHTN_36_36==T|
+                         TrialOne_anbpsyst_modSevHTN_36_36==T),manmodsevhtn_36_36:=F]
+
+ar[manmodsevhtn_36_36==F & (TrialOne_refHR_36_36==T|
+                              TrialOne_refHosp_36_36==T|
+                              TrialOne_refSpec_36_36==T),manmodsevhtn_36_36:=T]
+
+xtabs(~ar$manmodsevhtn_36_36, addNA=T)
+
+
+
+# 37
+#mild 
+ar[,manmildhtn_37_37:=as.logical(NA)]
+ar[Oppt_bp_35_37==T & (TrialOne_anbpdiast_mildHTN_37_37==T|
+                         TrialOne_anbpsyst_mildHTN_37_37==T),manmildhtn_37_37:=F]
+
+ar[manmildhtn_37_37==F & (TrialOne_anbpsyst_present_38_38==T &
+                            TrialOne_anbpdiast_present_38_38==T),manmildhtn_37_37:=T]
+
+xtabs(~ar$manmildhtn_37_37, addNA=T)
+
+# mod/sev 
+ar[,manmodsevhtn_37_37:=as.logical(NA)]
+ar[Oppt_bp_35_37==T & (TrialOne_anbpdiast_modSevHTN_37_37==T|
+                         TrialOne_anbpsyst_modSevHTN_37_37==T),manmodsevhtn_37_37:=F]
+
+ar[manmodsevhtn_37_37==F & (TrialOne_refHR_37_37==T|
+                              TrialOne_refHosp_37_37==T|
+                              TrialOne_refSpec_37_37==T),manmodsevhtn_37_37:=T]
+
+xtabs(~ar$manmodsevhtn_37_37, addNA=T)
+
+
+
+
+################
+# combined 35-37
+################
+
+
+#manmildchronichtn 15-17 weeks combo variable
+ar[,manmildhtn_35_37:=as.logical(NA)]
+ar[Oppt_bp_35_37==T & (!is.na(manmildhtn_35_35)|
+                         !is.na(manmildhtn_36_36)|
+                         !is.na(manmildhtn_37_37)),manmildhtn_35_37:=F]
+
+xtabs(~ar$manmildhtn_35_37, addNA=T)
+
+
+ar[manmildhtn_35_37==F & (manmildhtn_35_35==T|
+                            manmildhtn_36_36==T|
+                            manmildhtn_37_37==T),manmildhtn_35_37:=T]
+
+xtabs(~ar$manmildhtn_35_37, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#manmodsevchronichtn 15-17 weeks combo variable
+ar[,manmodsevhtn_35_37:=as.logical(NA)]
+ar[Oppt_bp_35_37==T & (!is.na(manmodsevhtn_35_35)|
+                         !is.na(manmodsevhtn_36_36)|
+                         !is.na(manmodsevhtn_37_37)),manmodsevhtn_35_37:=F]
+
+xtabs(~ar$manmodsevhtn_35_37, addNA=T)
+
+
+ar[manmodsevhtn_35_37==F & (manmodsevhtn_35_35==T|
+                              manmodsevhtn_36_36==T|
+                              manmodsevhtn_37_37==T),manmodsevhtn_35_37:=T]
+
+xtabs(~ar$manmodsevhtn_35_37, addNA=T)
+
+
+
+
+
+# we will only look at women who booked 22 weeks and before since that is the cut off for chronichtn
+
+ar[,bookedbefore20:=as.logical(NA)]
+ar[ident_dhis2_booking==T & bookgestage<20 & bookgestage>0,
+   bookedbefore20:=TRUE]
+
+ar[ident_dhis2_booking==T & bookgestage >=20,bookedbefore20:=FALSE]
+
+xtabs(~ar$bookedbefore20, addNA=T)
+
+
+
+
+ar[,bookedbefore22:=as.logical(NA)]
+ar[ident_dhis2_booking==T & bookgestage<23 & bookgestage>0,
+   bookedbefore22:=TRUE]
+
+ar[ident_dhis2_booking==T & bookgestage >=22,bookedbefore22:=FALSE]
+
+xtabs(~ar$bookedbefore22, addNA=T)
+
+HTN <- ar[!is.na(bookedbefore20),.(N=.N,
+                                   "chronichtn"=sum(!is.na(manmildchronichtn_15_17)|
+                                                      !is.na(manmodsevchronichtn_15_17)|
+                                                      !is.na(manchronichtn_00_14)|
+                                                      !is.na(manmildchronichtn_18_19)|
+                                                      !is.na(manmodsevchronichtn_18_19)),
+                                   "gestational htn"=sum(!is.na(manmildhtn_24_28)|
+                                                            !is.na(manmodsevhtn_24_28)|
+                                                            !is.na(manmildhtn_29_30)|
+                                                           !is.na(manmildchronichtn_23_23)|
+                                                            !is.na(manmodsevchronichtn_23_23)|
+                                                            !is.na(manmodsevhtn_29_30)|
+                                                            !is.na(manmildhtn_31_33)|
+                                                            !is.na(manmildhtn_34_34)|
+                                                            !is.na(manmildhtn_35_37)|
+                                                            !is.na(manmodsevhtn_31_33)|
+                                                            !is.na(manmodsevhtn_34_34)|
+                                                            !is.na(manmodsevhtn_35_37)|
+                                                           !is.na(manmildhtn_20_22)|
+                                                           !is.na(manmodsevhtn_20_22))),
+                                   keyby=.(bookyear,
+                                           bookedbefore20)]
+
+
+setorder(HTN,bookedbefore20)
+
+openxlsx::write.xlsx(HTN, 
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               sprintf("%s_HTN_updated.xlsx",CLINIC_INTERVENTION_DATE)))
+
+
+HTN <- ar[!is.na(bookedbefore20),.(N=.N,
+                                   "chronichtn"=sum(!is.na(manmildchronichtn_15_17)|
+                                                      !is.na(manmodsevchronichtn_15_17)|
+                                                      !is.na(manchronichtn_00_14)|
+                                                      !is.na(manmildchronichtn_18_19)|
+                                                      !is.na(manmodsevchronichtn_18_19)),
+                                   "gestational htn"=sum(!is.na(manmildhtn_24_28)|
+                                                           !is.na(manmodsevhtn_24_28)|
+                                                           !is.na(manmildhtn_29_30)|
+                                                           !is.na(manmildchronichtn_23_23)|
+                                                           !is.na(manmodsevchronichtn_23_23)|
+                                                           !is.na(manmodsevhtn_29_30)|
+                                                           !is.na(manmildhtn_31_33)|
+                                                           !is.na(manmildhtn_34_34)|
+                                                           !is.na(manmildhtn_35_37)|
+                                                           !is.na(manmodsevhtn_31_33)|
+                                                           !is.na(manmodsevhtn_34_34)|
+                                                           !is.na(manmodsevhtn_35_37)|
+                                                           !is.na(manmildhtn_20_22)|
+                                                           !is.na(manmodsevhtn_20_22))),
+          keyby=.(bookyear,
+                  bookedbefore20,
+                  agecat)]
+
+
+setorder(HTN,bookedbefore20)
+
+openxlsx::write.xlsx(HTN, 
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               sprintf("%s_HTNbyAgecat_updated.xlsx",CLINIC_INTERVENTION_DATE)))
+
+
+
+
+
+
+##############################
+# screening htn
+##############################
+
+ghtnsc <- ar[ident_dhis2_booking==T,.(N=.N,
+                Oppt_b4_14=sum(Oppt_bp_00_14==T, na.rm=T),
+                Screened_b4_14=sum(bpontime_00_14,na.rm=T),
+                
+                Oppt_15_17=sum(Oppt_bp_15_17==T, na.rm=T),
+                Screened_15_17=sum(bpontime_15_17,na.rm=T),
+                
+                Oppt_18_22=sum(Oppt_bp_18_22==T, na.rm=T),
+                Screened_18_22=sum(bpontime_18_22,na.rm=T),
+                
+                Oppt_24_28=sum(Oppt_bp_24_28==T, na.rm=T),
+                Screened_24_28=sum(bpontime_24_28,na.rm=T),
+                
+                Oppt_31_33=sum(Oppt_bp_31_33==T, na.rm=T),
+                Screened_31_33=sum(bpontime_31_33,na.rm=T),
+                
+                Oppt_35_37=sum(Oppt_bp_35_37==T, na.rm=T),
+                Screened_35_37=sum(bpontime_35_37,na.rm=T)),
+             keyby=.(bookyear)]
+
+
+
+openxlsx::write.xlsx(ghtnsc, 
+                     file.path(FOLDER_DATA_RESULTS,
+                               "annual reports",
+                               "2020",
+                               sprintf("%s_HTN_screening.xlsx",CLINIC_INTERVENTION_DATE)))
+
 
 ###################
 # Attendance
@@ -1696,234 +3139,403 @@ openxlsx::write.xlsx(prelimHB,file.path(FOLDER_DATA_RESULTS,
 # GDM
 ###########
 
-
 ###Redefining opportinites
-ar[,Opportunity_GDM_screening_1:=as.numeric(NA)]
-ar[,Opportunity_GDM_screening_2:=as.numeric(NA)]
-ar[,Opportunity_GDM_screening_3:=as.numeric(NA)]
-ar[,Opportunity_GDM_screening_4:=as.numeric(NA)]
-#ar[,Opportunity_GDM_Screening_5:=as.numeric(NA)]
+
+
+################
+# B4 24 weeks
+################
+ar[,Opportunity_GDM_screening_b4_24:=as.logical(NA)] 
 
 # before 24
 ar[bookgestagedays_cats %in% c("(0,104]",
-                                   "(104,125]", 
-                                   "(125,160]",
-                                   "(160,167]"),Opportunity_GDM_screening_1:=1]
-#24-28
-ar[bookgestagedays_cats %in% c("(167,202]")|
-         TrialOne_anvisitnew_24_28==T,Opportunity_GDM_screening_2:=1]
-# after 28
-ar[bookgestagedays_cats %in% c("(202,216]",
-                                   "(216,237]", 
-                                   "(237,244]",
-                                   "(244,265]"), Opportunity_GDM_screening_3:=1]
+                               "(104,125]",
+                               "(125,160]",
+                               "(160,167]"),Opportunity_GDM_screening_b4_24:=TRUE]
 
-# high rbs anywhere outside of the 24-28
-ar[(TrialOne_labbloodglu_high_00_14==T|
-          TrialOne_labbloodglu_high_15_17==T|
-          TrialOne_labbloodglu_high_18_22==T|
-          TrialOne_labbloodglu_high_23_23==T|
-          TrialOne_labbloodglu_high_29_30==T|
-          TrialOne_labbloodglu_high_31_33==T|
-          TrialOne_labbloodglu_high_34_34==T|
-          TrialOne_labbloodglu_high_35_37==T), Opportunity_GDM_screening_4:=1]
+xtabs(~ar$Opportunity_GDM_screening_b4_24, addNA=T)
 
-xtabs(~ar$Opportunity_GDM_screening_1, addNA=T)
-xtabs(~ar$Opportunity_GDM_screening_2, addNA=T)
-xtabs(~ar$Opportunity_GDM_screening_3, addNA=T)
-xtabs(~ar$Opportunity_GDM_screening_4, addNA=T)
+# high sugar at booking
+ar[,bookhrhighsug:=as.logical(NA)]
 
+ar[(mandate_1-bookdate)<=7,bookhrhighsug:=FALSE] 
+ar[(mandate_1-bookdate)<=7 &
+    manperf_1==1 &
+    mantypex_1 %in% c("RefHighRisk","RefDiabetes","RefSpec"),bookhrhighsug:=TRUE] 
 
+xtabs(~ar$bookhrhighsug, addNA=T)
 
-
-## Remove opportunities for people who were referred to HR or Hosp
-#refHRHospmanRBG_1 rename to RefHr
-ar[,RefHr:=as.logical(NA)]
-ar[Opportunity_GDM_screening_1==1, RefHr:=FALSE]
-ar[(TrialOne_manRef_HR_00_00==T|
-          TrialOne_manRef_HR_01_01==T|
-          TrialOne_manRef_HR_02_02==T|
-          TrialOne_manRef_HR_03_03==T|
-          TrialOne_manRef_HR_04_04==T|
-          TrialOne_manRef_HR_05_05==T|
-          TrialOne_manRef_HR_06_06==T|
-          TrialOne_manRef_HR_07_07==T|
-          TrialOne_manRef_HR_08_08==T|
-          TrialOne_manRef_HR_09_09==T|
-          TrialOne_manRef_HR_10_10==T|
-          TrialOne_manRef_HR_11_11==T|
-          TrialOne_manRef_HR_12_12==T|
-          TrialOne_manRef_HR_13_13==T|
-          TrialOne_manRef_HR_14_14==T|
-          TrialOne_manRef_HR_15_15==T|
-          TrialOne_manRef_HR_16_16==T|
-          TrialOne_manRef_HR_17_17==T|
-          TrialOne_manRef_HR_18_18==T|
-          TrialOne_manRef_HR_19_19==T|
-          TrialOne_manRef_HR_20_20==T|
-          TrialOne_manRef_HR_21_21==T|
-          TrialOne_manRef_HR_22_22==T|
-          TrialOne_manRef_HR_23_23==T),
-       RefHr:=TRUE]
-xtabs(~ar$RefHr, addNA=T)
-
-#refHrHosp_2 rename to refHr_2
-ar[,refHr_2:=(
-  TrialOne_refHR_29_29==T|
-    TrialOne_refHR_30_30==T|
-    TrialOne_refHR_31_31==T|
-    TrialOne_refHR_32_32==T|
-    TrialOne_refHR_33_33==T|
-    TrialOne_refHR_34_34==T|
-    TrialOne_refHR_35_35==T|
-    TrialOne_refHR_36_36==T|
-    TrialOne_refHR_35_37==T)]
-
-
-ar[Opportunity_GDM_screening_2==1 &
-         (TrialOne_anvisitnew_24_24==T & 
-            (RefHr==T))|
-         (TrialOne_anvisitnew_25_25==T & 
-            (RefHr==T|TrialOne_manRef_HR_24_24==T))|
-         (TrialOne_anvisitnew_26_26==T & 
-            (RefHr==T|TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T))|
-         (TrialOne_anvisitnew_27_27==T & 
-            (RefHr==T|TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T|
-               TrialOne_manRef_HR_26_26==T))|
-         (TrialOne_anvisitnew_28_28==T & 
-            (RefHr==T|
-               TrialOne_manRef_HR_24_24==T|
-               TrialOne_manRef_HR_25_25==T|
-               TrialOne_manRef_HR_26_26==T|
-               TrialOne_manRef_HR_27_27==T)), 
-       Opportunity_GDM_screening_2:=Opportunity_GDM_screening_2-1]
-
-# checks
-xtabs(~ar$Opportunity_GDM_screening_2, addNA=T)
+################
+# opportunities
+################
 
 #Screening before 24 weeks: Creating one var for 3 possibilities
-ar[,screenb424:=as.logical(NA)]
-ar[bookgestagedays_cats %in% c("(0,104]","(104,125]","(125,160]","(160,167]"),
-       screenb424:=F]
-ar[screenb424==F &
-         (booklabbloodglu_high==F | is.na(booklabbloodglu_high)) &
-         (!is.na(booklaburglu) | !is.na(booklabbloodglu)|!is.na(booklabfastbloodglu)),
-       screenb424:=T]
-xtabs(~ar$screenb424, addNA=T)
+#laburglu
 
-scrb424 <- ar[,.(A=sum(ident_dhis2_control==T),
-                     B=sum(ident_dhis2_control==F)),
-                  keyby=.(screenb424)]
+ar[,GDMscreeningontime_b4_24_bookurglu_normal:=as.logical(NA)]
 
-##Defining Successes 
-ar[,GDMscreeningontime_1A:=as.logical(NA)]
-ar[,GDMscreeningontime_1B:=as.logical(NA)]
-ar[,GDMscreeningontime_1C:=as.logical(NA)]
-ar[screenb424==F, 
-       GDMscreeningontime_1:=FALSE]
-ar[screenb424==T, 
-       GDMscreeningontime_1:=TRUE]
-
-xtabs(~ar$GDMscreeningontime_1, addNA=T)
+ar[Opportunity_GDM_screening_b4_24==TRUE & 
+     (!is.na(booklaburglu)), GDMscreeningontime_b4_24_bookurglu_normal:=FALSE]
 
 
-ar[,GDMscreeningontime_1A:=as.logical(NA)]
-ar[Opportunity_GDM_screening_1==1 & 
-         booklaburglu=="NEG", 
-       GDMscreeningontime_1A:=TRUE]
+ar[Opportunity_GDM_screening_b4_24==TRUE & 
+     GDMscreeningontime_b4_24_bookurglu_normal==FALSE &
+     (booklaburglu=="NEG"), 
+   GDMscreeningontime_b4_24_bookurglu_normal:=TRUE]
 
-ar[,GDMscreeningontime_1B:=as.logical(NA)]
-ar[Opportunity_GDM_screening_1==1 &
-         booklaburglu=="POS" & 
-         !is.na(booklabbloodglu), GDMscreeningontime_1B:=TRUE]
-
-ar[,GDMscreeningontime_1C:=as.logical(NA)]
-ar[booklabbloodglu_high==T &
-         !is.na(booklabbloodglu) &
-         RefHr==T, GDMscreeningontime_1C:=TRUE]
+xtabs(~ar$GDMscreeningontime_b4_24_bookurglu_normal,addNA=T)
 
 
 
-#24-28 weeks
-ar[,GDMscreeningontime_2:=as.logical(NA)]
-ar[Opportunity_GDM_screening_2==1 &
-         (TrialOne_labbloodglu_exists_24_24==F &
-            TrialOne_labbloodglu_exists_25_25==F &
-            TrialOne_labbloodglu_exists_26_26==F &
-            TrialOne_labbloodglu_exists_27_27==F &
-            TrialOne_labbloodglu_exists_28_28==F) &
-         (TrialOne_labfastbloodglu_exists_24_24==F &
-            TrialOne_labfastbloodglu_exists_25_25==F &
-            TrialOne_labfastbloodglu_exists_26_26==F &
-            TrialOne_labfastbloodglu_exists_27_27==F &
-            TrialOne_labfastbloodglu_exists_28_28==F), GDMscreeningontime_2:=F]
-ar[Opportunity_GDM_screening_2==1 & 
-         (TrialOne_labbloodglu_exists_24_24==T|
-            TrialOne_labbloodglu_exists_25_25==T|
-            TrialOne_labbloodglu_exists_26_26==T|
-            TrialOne_labbloodglu_exists_27_27==T|
-            TrialOne_labbloodglu_exists_28_28==T) &
-         (TrialOne_labbloodglu_high_24_24==F|
-            TrialOne_labbloodglu_high_25_25==F|
-            TrialOne_labbloodglu_high_26_26==F|
-            TrialOne_labbloodglu_high_27_27==F|
-            TrialOne_labbloodglu_high_28_28==F)|
-         (TrialOne_labfastbloodglu_exists_24_24==T|
-            TrialOne_labfastbloodglu_exists_25_25==T|
-            TrialOne_labfastbloodglu_exists_26_26==T|
-            TrialOne_labfastbloodglu_exists_27_27==T|
-            TrialOne_labfastbloodglu_exists_28_28==T),GDMscreeningontime_2:=TRUE]
-xtabs(~ar$GDMscreeningontime_2, addNA=T)
+# fastbloodglu
+ar[,GDMscreeningontime_b4_24_bookfastbloodglu_normal:=as.logical(NA)]
+
+ar[Opportunity_GDM_screening_b4_24==TRUE & 
+     (!is.na(booklabfastbloodglu)), GDMscreeningontime_b4_24_bookfastbloodglu_normal:=FALSE]
 
 
-#Screening after 28 weeks: Creating one var for 3 possibilities
-ar[,screenafter28:=as.logical(NA)]
-ar[bookgestagedays_cats %in% c("(202,216]","(216,237]","(237,244]","(244,265]"),
-       screenafter28:=F]
-ar[screenafter28==F &
-         (booklabbloodglu_high==F | is.na(booklabbloodglu_high)) &
-         (!is.na(booklabbloodglu)|!is.na(booklabfastbloodglu)),
-       screenafter28:=T]
-xtabs(~ar$screenafter28, addNA=T)
+ar[Opportunity_GDM_screening_b4_24==TRUE & 
+     GDMscreeningontime_b4_24_bookfastbloodglu_normal==FALSE &
+     (booklabfastbloodglu_high=="FALSE"), 
+   GDMscreeningontime_b4_24_bookfastbloodglu_normal:=TRUE]
 
-##Defining Success
-ar[,GDMscreeningontime_3:=as.logical(NA)]
-ar[screenafter28==F, 
-       GDMscreeningontime_3:=FALSE]
-ar[screenafter28==T,GDMscreeningontime_3:=TRUE]
-xtabs(~ar$GDMscreeningontime_3, addNA=T)
-
-#management fo high RBG outside of time windows
-ar[, GDMscreeningontime_4:=as.logical(NA)]
-ar[Opportunity_GDM_screening_4==1, GDMscreeningontime_4:= FALSE]
-ar[GDMscreeningontime_4==F & 
-         (RefHr==T|refHr_2==T),GDMscreeningontime_4:=TRUE]
+xtabs(~ar$GDMscreeningontime_b4_24_bookfastbloodglu_normal,addNA=T)
 
 
-prelimGDM <- ar[ident_dhis2_booking==1,.(N=.N,
-                       Opportun_1=sum(Opportunity_GDM_screening_1==T, na.rm=T),
-                       Success_1A=sum(GDMscreeningontime_1A==T, na.rm=T),
-                       Success_1B=sum(GDMscreeningontime_1B==T, na.rm=T),
-                       Success_1C=sum(GDMscreeningontime_1C==T, na.rm=T),
-                       Screenb424=sum(screenb424==T, na.rm=T),
-                       Screenb424False=sum(screenb424==F, na.rm=T),
-                       Opportun_2=sum(Opportunity_GDM_screening_2==T, na.rm=T),
-                       Success_2=sum(GDMscreeningontime_2==T, na.rm=T),
-                       Opportun_3=sum(Opportunity_GDM_screening_3==T, na.rm=T),
-                       Success_3=sum(GDMscreeningontime_3==T, na.rm=T),
-                       screenafter28=sum(screenafter28==T, na.rm=T),
-                       screenafter28False=sum(screenafter28==F, na.rm=T),
-                       screenbtwn=sum(GDMscreeningontime_4==T, na.rm=T),
-                       screenbtwnFalse=sum(GDMscreeningontime_4==F, na.rm=T),
-                       Opportun_4=sum(Opportunity_GDM_screening_4==T, na.rm=T),
-                       Succ_4=sum(GDMscreeningontime_4, na.rm=T)),
-                    keyby=.(bookyear)]
+# booklabbloodglu
+ar[,GDMscreeningontime_b4_24_bookbloodglu_normal:=as.logical(NA)]
+
+ar[Opportunity_GDM_screening_b4_24==TRUE & 
+     (!is.na(booklabbloodglu)), GDMscreeningontime_b4_24_bookbloodglu_normal:=FALSE]
+
+
+ar[Opportunity_GDM_screening_b4_24==TRUE & 
+     GDMscreeningontime_b4_24_bookbloodglu_normal==FALSE &
+     (booklabbloodglu_high=="FALSE"), 
+   GDMscreeningontime_b4_24_bookbloodglu_normal:=TRUE]
+
+
+xtabs(~ar$GDMscreeningontime_b4_24_bookbloodglu_normal,addNA=T)
+
+# managements
+##################################### QUESTION ##################################### 
+### question: are we keeping the rbs and fbs at booking as well? 
+### or would it be at any time point?####
+###################################################################################
+
+# do this week by week, because management has to be up to one week later
+# gdm screening if have pos urglu and have h
+ar[,GDMscreeningontime_b4_24_manposurglu:=as.logical(NA)]
+ar[GDMscreeningontime_b4_24_bookurglu_normal==FALSE &
+     booklaburglu=="POS",GDMscreeningontime_b4_24_manposurglu:=FALSE]
+
+ar[GDMscreeningontime_b4_24_manposurglu==F &
+     (!is.na(booklabbloodglu)|
+        !is.na(booklabfastbloodglu)), GDMscreeningontime_b4_24_manposurglu:=TRUE]
+
+xtabs(~ar$GDMscreeningontime_b4_24_manposurglu, addNA=T)
+
+
+# management of high rbg and fbs
+ar[,GDMscreeningontime_b4_24_manhighrbs:=as.logical(NA)]
+ar[GDMscreeningontime_b4_24_bookbloodglu_normal==FALSE &
+     is.na(GDMscreeningontime_b4_24_manposurglu) &
+     (booklabbloodglu_high==T|booklabfastbloodglu_high==T),GDMscreeningontime_b4_24_manhighrbs:=FALSE]
+
+ar[GDMscreeningontime_b4_24_manhighrbs==F &
+     (bookhrhighsug==T), GDMscreeningontime_b4_24_manhighrbs:=TRUE]
+
+xtabs(~ar$GDMscreeningontime_b4_24_manhighrbs, addNA=T)
 
 
 
-openxlsx::write.xlsx(prelimGDM,file.path(FOLDER_DATA_RESULTS,
+################################
+## 24-28 weeks
+################################
+
+
+
+###################
+#  opportunity
+###################
+ar[,Opportunity_GDM_screening_24_28:=as.logical(NA)]
+
+
+#24-28
+ar[TrialOne_anvisitnew_24_28==T |
+     bookgestagedays_cats %in% c("(167,202]"),Opportunity_GDM_screening_24_28:=TRUE]
+
+## Remove opportunities for people who had high blood glu
+ar[Opportunity_GDM_screening_24_28==TRUE &
+     (TrialOne_labbloodglu_high_00_14==T|
+        TrialOne_labbloodglu_high_15_17==T|
+        TrialOne_labbloodglu_high_18_22==T|
+        TrialOne_labbloodglu_high_23_23==T|
+        TrialOne_labfastbloodglu_high_00_14==T|
+        TrialOne_labfastbloodglu_high_15_17==T|
+        TrialOne_labfastbloodglu_high_18_22==T|
+        TrialOne_labfastbloodglu_high_23_23==T),
+   Opportunity_GDM_screening_24_28:=FALSE]
+
+
+xtabs(~ar$Opportunity_GDM_screening_24_28, addNA=T)
+
+###################
+# screening 24-28
+###################
+
+
+ar[,GDMscreeningontime_24_28:=as.logical(NA)]
+ar[Opportunity_GDM_screening_24_28==TRUE &
+     (TrialOne_labfastbloodglu_exists_24_28==T|
+        TrialOne_labbloodglu_exists_24_28==T), GDMscreeningontime_24_28:=T]
+
+xtabs(~ar$GDMscreeningontime_24_28, addNA=T)
+# normal values
+ar[,GDMscreeningontime_24_28_normal:=as.logical(NA)]
+
+
+ar[GDMscreeningontime_24_28==T, GDMscreeningontime_24_28_normal:=F]
+
+ar[Opportunity_GDM_screening_24_28==TRUE & 
+     GDMscreeningontime_24_28_normal==F &
+     (TrialOne_labfastbloodglu_normal_24_28==T),GDMscreeningontime_24_28_normal:=TRUE]
+
+xtabs(~ar$GDMscreeningontime_24_28_normal, addNA=T)
+
+###################
+# management 24-28
+###################
+
+
+# highrbg 24 weeks
+ar[,GDMscreeningontime_24_24_manhighrbg:=as.logical(NA)]
+ar[GDMscreeningontime_24_28==T &
+     GDMscreeningontime_24_28_normal==FALSE &
+     (TrialOne_labbloodglu_high_24_24==T |
+        TrialOne_labfastbloodglu_high_24_24==T),GDMscreeningontime_24_24_manhighrbg:=F]
+
+
+ar[GDMscreeningontime_24_24_manhighrbg==F &
+     (TrialOne_manRBGHigh_Diab_24_24==T|
+        TrialOne_manRef_HR_24_24==T), GDMscreeningontime_24_24_manhighrbg:=T]
+
+
+# highrbg 25 weeks
+ar[,GDMscreeningontime_25_25_manhighrbg:=as.logical(NA)]
+ar[GDMscreeningontime_24_28==T &
+     GDMscreeningontime_24_28_normal==FALSE &
+     (TrialOne_labbloodglu_high_25_25==T |
+        TrialOne_labfastbloodglu_high_25_25==T),GDMscreeningontime_25_25_manhighrbg:=F]
+
+
+ar[GDMscreeningontime_25_25_manhighrbg==F &
+     (TrialOne_manRBGHigh_Diab_25_25==T|
+        TrialOne_manRef_HR_25_25==T), GDMscreeningontime_25_25_manhighrbg:=T]
+
+
+
+# highrbg 26 weeks
+ar[,GDMscreeningontime_26_26_manhighrbg:=as.logical(NA)]
+ar[GDMscreeningontime_24_28==T &
+     GDMscreeningontime_24_28_normal==FALSE &
+     (TrialOne_labbloodglu_high_26_26==T |
+        TrialOne_labfastbloodglu_high_26_26==T),GDMscreeningontime_26_26_manhighrbg:=F]
+
+
+ar[GDMscreeningontime_26_26_manhighrbg==F &
+     (TrialOne_manRBGHigh_Diab_26_26==T|
+        TrialOne_manRef_HR_26_26==T), GDMscreeningontime_26_26_manhighrbg:=T]
+
+
+# highrbg 27 weeks
+ar[,GDMscreeningontime_27_27_manhighrbg:=as.logical(NA)]
+ar[GDMscreeningontime_24_28==T &
+     GDMscreeningontime_24_28_normal==FALSE &
+     (TrialOne_labbloodglu_high_27_27==T |
+        TrialOne_labfastbloodglu_high_27_27==T),GDMscreeningontime_27_27_manhighrbg:=F]
+
+
+ar[GDMscreeningontime_27_27_manhighrbg==F &
+     (TrialOne_manRBGHigh_Diab_27_27==T|
+        TrialOne_manRef_HR_27_27==T), GDMscreeningontime_27_27_manhighrbg:=T]
+
+
+# highrbg 28 weeks
+ar[,GDMscreeningontime_28_28_manhighrbg:=as.logical(NA)]
+ar[GDMscreeningontime_24_28==T &
+     GDMscreeningontime_24_28_normal==FALSE &
+     (TrialOne_labbloodglu_high_28_28==T |
+        TrialOne_labfastbloodglu_high_28_28==T),GDMscreeningontime_28_28_manhighrbg:=F]
+
+
+ar[GDMscreeningontime_28_28_manhighrbg==F &
+     (TrialOne_manRBGHigh_Diab_28_28==T|
+        TrialOne_manRef_HR_28_28==T), GDMscreeningontime_28_28_manhighrbg:=T]
+
+
+# combined group
+
+ar[,GDMscreeningontime_24_28_manhighrbg:=as.logical(NA)]
+ar[GDMscreeningontime_24_28==T &
+     GDMscreeningontime_24_28_normal==FALSE &
+     (!is.na(GDMscreeningontime_24_24_manhighrbg)|
+        !is.na(GDMscreeningontime_25_25_manhighrbg)|
+        !is.na(GDMscreeningontime_26_26_manhighrbg)|
+        !is.na(GDMscreeningontime_27_27_manhighrbg)|
+        !is.na(GDMscreeningontime_28_28_manhighrbg)),
+   GDMscreeningontime_24_28_manhighrbg:=F]
+
+xtabs(~ar$GDMscreeningontime_24_28_manhighrbg, addNA=T)
+
+
+ar[GDMscreeningontime_24_28_manhighrbg==F & 
+     (GDMscreeningontime_24_24_manhighrbg==T|
+        GDMscreeningontime_25_25_manhighrbg==T|
+        GDMscreeningontime_26_26_manhighrbg==T|
+        GDMscreeningontime_27_27_manhighrbg==T|
+        GDMscreeningontime_28_28_manhighrbg==T),
+   GDMscreeningontime_24_28_manhighrbg:=T]
+
+xtabs(~ar$GDMscreeningontime_24_28_manhighrbg, addNA=T)
+
+########################
+# intermediate values
+########################
+
+# intermediate values,  but dont want them for WB because management is in free text
+ar[,GDMscreeningontime_24_28_intmbg:=as.logical(NA)]
+ar[GDMscreeningontime_24_28==T &
+     GDMscreeningontime_24_28_normal==FALSE &
+     is.na(GDMscreeningontime_24_28_manhighrbg) &
+     (TrialOne_labbloodglu_likelyGDM_24_28==T),GDMscreeningontime_24_28_intmbg:=TRUE]
+
+xtabs(~ar$GDMscreeningontime_24_28_intmbg, addNA=T)
+
+
+
+ar[,GDMscreeningontime_24_28_intmbg:=as.logical(NA)]
+ar[,GDMscreeningontime_24_24_manintmbg:=as.logical(NA)]
+ar[,GDMscreeningontime_25_25_manintmbg:=as.logical(NA)]
+ar[,GDMscreeningontime_26_26_manintmbg:=as.logical(NA)]
+ar[,GDMscreeningontime_27_27_manintmbg:=as.logical(NA)]
+ar[,GDMscreeningontime_28_28_manintmbg:=as.logical(NA)]
+ar[,GDMscreeningontime_24_28_manintmbg:=as.logical(NA)]
+
+
+
+xtabs(~ar$GDMscreeningontime_24_28, addNA = T)
+xtabs(~ar$GDMscreeningontime_24_28_normal, addNA = T)
+#xtabs(~ar$GDMscreeningontime_24_28_highrbg, addNA = T)
+xtabs(~ar$GDMscreeningontime_24_28_intmbg, addNA = T)
+
+
+################
+# > 28 weeks
+################
+ar[,Opportunity_GDM_screening_after_28:=as.logical(NA)]
+
+
+# checks
+xtabs(~ar$Opportunity_GDM_screening_24_28, addNA=T)
+
+
+##############
+# after 28
+##############
+## defining opportunities
+# after 28
+ar[bookgestagedays_cats %in% c("(202,216]",
+                               "(216,237]",
+                               "(237,244]",
+                               "(244,265]"), Opportunity_GDM_screening_after_28:=TRUE]
+xtabs(~ar$Opportunity_GDM_screening_after_28, addNA=T)
+
+## defining successes
+ar[,GDMscreeningontime_after_28:=as.logical(NA)]
+ar[,GDMscreeningontime_after_28_normal:=as.logical(NA)]
+ar[,GDMscreeningontime_after_28_high:=as.logical(NA)]
+ar[,GDMscreeningontime_after_28_intmd:=as.logical(NA)]
+
+
+# anyone who has a fasting or blood glu value and booked after 28 weeks
+ar[Opportunity_GDM_screening_after_28==TRUE, 
+   GDMscreeningontime_after_28:=FALSE]
+
+ar[GDMscreeningontime_after_28==F &
+     (!is.na(booklabbloodglu)|
+        !is.na(booklabfastbloodglu)), 
+   GDMscreeningontime_after_28:=TRUE]
+
+#xtabs(~ar$screenafter28, addNA=T)
+xtabs(~ar$GDMscreeningontime_after_28, addNA=T)
+
+#normal Values/ negative values
+ar[,GDMscreeningontime_after_28_normal:=as.logical(NA)]
+
+ar[Opportunity_GDM_screening_after_28==TRUE & 
+     GDMscreeningontime_after_28==T,
+   GDMscreeningontime_after_28_normal:=FALSE]
+
+ar[GDMscreeningontime_after_28_normal==FALSE &
+     ((booklabbloodglu_high==FALSE &
+         !is.na(booklabbloodglu))|
+        (booklabfastbloodglu_high==F &
+           !is.na(booklabfastbloodglu))),GDMscreeningontime_after_28_normal:=T ]
+
+xtabs(~ar$GDMscreeningontime_after_28_normal, addNA=T)
+
+
+# high values
+ar[,GDMscreeningontime_after_28_high:=as.logical(NA)]
+ar[GDMscreeningontime_after_28_normal==FALSE,GDMscreeningontime_after_28_high:=FALSE]
+
+
+# management
+ar[GDMscreeningontime_after_28_high==FALSE &
+     bookhrhighsug==T,
+   GDMscreeningontime_after_28_high:=TRUE]
+xtabs(~ar$GDMscreeningontime_after_28_high, addNA=T)
+
+
+xtabs(~ar$GDMscreeningontime_after_28, addNA=T)
+xtabs(~ar$GDMscreeningontime_after_28_normal, addNA=T)
+xtabs(~ar$GDMscreeningontime_after_28_high, addNA=T)
+
+
+# only look at those who booked before 24 weeks and after
+ar[,bookedb424:=as.logical(NA)]
+ar[ident_dhis2_booking==T & bookgestagedays_cats %in% c("(0,104]",
+                                                        "(104,125]",
+                                                        "(125,160]",
+                                                        "(160,167]"), bookedb424:=TRUE]
+
+ar[ident_dhis2_booking==T & bookgestagedays_cats %in% c("(202,216]",
+                                                        "(216,237]",
+                                                        "(237,244]",
+                                                        "(244,265]",
+                                                        "(265,293]"), bookedb424:=FALSE]
+xtabs(~ar$bookedb424, addNA=T)
+
+GDM <- ar[!is.na(bookedb424),.(N=.N,
+                               oppt_b4_24=sum(Opportunity_GDM_screening_b4_24==T, na.rm=T),
+                               screenedb424=sum(!is.na(GDMscreeningontime_b4_24_bookurglu_normal)),
+                               posurglub424=sum(GDMscreeningontime_b4_24_bookurglu_normal==FALSE, na.rm=T),
+                               Oppt_24_28_sc=sum(Opportunity_GDM_screening_24_28==T, na.rm=T),
+                               Screen2428=sum(GDMscreeningontime_24_28==T,na.rm=T),
+                              
+                               DM=sum(!is.na(GDMscreeningontime_b4_24_manhighrbs)),
+                               Oppt_after_28=sum(Opportunity_GDM_screening_after_28==T, na.rm=T),
+                               screened28andafter=sum(GDMscreeningontime_after_28==T, na.rm=T),
+                               
+                               GDMDiabetes=sum(!is.na(GDMscreeningontime_24_28_manhighrbg)|
+                                                 !is.na(GDMscreeningontime_after_28_high))),
+          
+          keyby=.(bookyear)]
+
+setorder(GDM,bookedb424)
+
+openxlsx::write.xlsx(GDM,file.path(FOLDER_DATA_RESULTS,
                                          "annual reports",
                                          "2020",
                                          sprintf("%s_GDM.xlsx",
@@ -2024,7 +3636,7 @@ openxlsx::write.xlsx(usontime,
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
                                "2020",
-                               "usOntime.xlsx"))
+                               "usOntime_.xlsx"))
 
 
 

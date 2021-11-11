@@ -13,7 +13,7 @@ Setup <- function(IS_GAZA=FALSE){
 
   
   #since we are finished with control data for trial 1, we can use the export below.
-  WB_CLINIC_INTERVENTION_DATE <- "2021-05-21"
+  WB_CLINIC_INTERVENTION_DATE <- "2021-08-12"
   WB_CLINIC_CONTROL_DATE <- "2019-07-07"
   
   FOLDER_DATA_CLEAN_GAZA <<- file.path(getwd(),"../gaza_data_clean")

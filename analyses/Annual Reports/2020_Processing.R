@@ -69,6 +69,19 @@ smallD[!is.na(booklabfastbloodglu),booklabfastbloodglu_high:=FALSE]
 smallD[booklabfastbloodglu>126 ,booklabfastbloodglu_high:=TRUE]
 xtabs(~smallD$booklabfastbloodglu_high, addNA=T)
 
+
+# high sugar at booking
+d[,bookhrhighsug:=as.logical(NA)]
+
+d[(mandate_1-bookdate)<=7,bookhrhighsug:=FALSE] 
+d[(mandate_1-bookdate)<=7 &
+    manperf_1==1 &
+    mantypex_1 %in% c("RefHighRisk","RefDiabetes","RefSpec"),bookhrhighsug:=TRUE] 
+
+xtabs(~d$bookhrhighsug, addNA=T)
+
+
+
 # Discrepancy Variable anexamsfh variable
 smallD[,anexamsfh_0:=bookexamsfh]
 smallD[,angestage_0:=bookgestage]
@@ -562,10 +575,27 @@ nrow(smallD[labgestage_1<=15 & labgestage_1<=17 & labhb_1>7 & labhb_1<11])
 xtabs(~smallD$TrialOne_labhb_anemia_mild_mod_15_17, addNA=T)
 
 
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="refSpec",
+  variableOfInterestPattern="mantypex",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete ="RefSpec",
+  gestagedaysVariable = "manT1gestagedays")
+nrow(smallD[mantypex_1=="RefSpec" & manT1gestagedays_1>=15 & manT1gestagedays_1<=17])
+nrow(smallD[mantypex_1=="RefSpec" & mangestage_1>=0 & mangestage_1<=14])
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_refHR_00_14)
+xtabs(~smallD[ident_dhis2_control==F]$TrialOne_refHR_00_14)
+xtabs(~smallD$TrialOne_refSpec_35_37)
 
 ### Lab RBS Normal ####
 smallD[,labT1gestagedays_0:=bookgestagedays]
 smallD[,laburglu_0:=booklaburglu]
+
+
+
 # normal urine glucose
 smallD <- VisitVariables(
   smallD=smallD,
@@ -630,6 +660,23 @@ smallD[,labT1gestagedays_0:=NULL]
 smallD[,labbloodglu_0:=NULL]
 xtabs(~smallD$TrialOne_labbloodglu_high_00_14)
 xtabs(~smallD$TrialOne_labbloodglu_high_18_22)
+
+
+# Lab FBS likely GDM
+smallD[,labT1gestagedays_0:=bookgestagedays]
+smallD[,labfastbloodglu_0:=booklabbloodglu]
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="labbloodglu_likelyGDM",
+  variableOfInterestPattern="labbloodglu",
+  TruevaluesMin=92,
+  TruevaluesMax=125,
+  TruevaluesDiscrete = NULL,
+  gestagedaysVariable = "labT1gestagedays")
+smallD[,labT1gestagedays_0:=NULL]
+smallD[,labfastbloodglu_0:=NULL]
+xtabs(~smallD$TrialOne_labbloodglu_likelyGDM_24_28)
 
 
 # Lab FBS exists

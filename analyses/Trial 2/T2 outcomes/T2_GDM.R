@@ -48,13 +48,13 @@ T2[T2_Opportunity_GDM_screening_b4_24==TRUE &
 T2[T2_Opportunity_GDM_screening_b4_24==TRUE & 
      T2_GDMscreeningontime_b4_24_bookfastbloodglu_normal==FALSE &
      (booklabfastbloodglu_high=="FALSE"), 
-   T2_GDMscreeningontime_b4_24_bookurglu_normal:=TRUE]
+   T2_GDMscreeningontime_b4_24_bookfastbloodglu_normal:=TRUE]
 
-xtabs(~T2$T2_GDMscreeningontime_b4_24_bookbloodglu_normal,addNA=T)
+xtabs(~T2$T2_GDMscreeningontime_b4_24_bookfastbloodglu_normal,addNA=T)
 
 
 # booklabbloodglu
-T2[,T2_GDMscreeningontime_b4_24_bookurglu_normal:=as.logical(NA)]
+T2[,T2_GDMscreeningontime_b4_24_bookbloodglu_normal:=as.logical(NA)]
 
 T2[T2_Opportunity_GDM_screening_b4_24==TRUE & 
      (!is.na(booklabbloodglu)), T2_GDMscreeningontime_b4_24_bookbloodglu_normal:=FALSE]
@@ -94,7 +94,7 @@ T2[T2_GDMscreeningontime_b4_24_bookbloodglu_normal==FALSE &
      (booklabbloodglu_high==T|booklabfastbloodglu_high==T),T2_GDMscreeningontime_b4_24_manhighrbs:=FALSE]
 
 T2[T2_GDMscreeningontime_b4_24_manhighrbs==F &
-     (bookhr==T), T2_GDMscreeningontime_b4_24_manhighrbs:=TRUE]
+     (bookhrhighsug==T), T2_GDMscreeningontime_b4_24_manhighrbs:=TRUE]
 
 xtabs(~T2$T2_GDMscreeningontime_b4_24_manhighrbs, addNA=T)
 
@@ -130,6 +130,7 @@ T2[T2_Opportunity_GDM_screening_24_28==TRUE &
 
 
 xtabs(~T2$T2_Opportunity_GDM_screening_24_28, addNA=T)
+
 ###################
 # screening 24-28
 ###################
@@ -137,15 +138,15 @@ xtabs(~T2$T2_Opportunity_GDM_screening_24_28, addNA=T)
   
   T2[,T2_GDMscreeningontime_24_28:=as.logical(NA)]
   T2[T2_Opportunity_GDM_screening_24_28==TRUE &
-          (T2_labfastbloodglu_exists_24_28==T), T2_GDMscreeningontime_24_28:=T]
+          (T2_labfastbloodglu_exists_24_28==T|
+             T2_labbloodglu_exists_24_28==T), T2_GDMscreeningontime_24_28:=T]
   
   
   # normal values
   T2[,T2_GDMscreeningontime_24_28_normal:=as.logical(NA)]
 
   
-  T2[T2_GDMscreeningontime_24_28==T &
-        (T2_labfastbloodglu_exists_24_28==T), T2_GDMscreeningontime_24_28_normal:=F]
+  T2[T2_GDMscreeningontime_24_28==T, T2_GDMscreeningontime_24_28_normal:=F]
   
   T2[T2_Opportunity_GDM_screening_24_28==TRUE & 
            T2_GDMscreeningontime_24_28_normal==F &
@@ -268,7 +269,6 @@ xtabs(~T2$T2_Opportunity_GDM_screening_24_28, addNA=T)
   T2[T2_GDMscreeningontime_24_28==T &
        T2_GDMscreeningontime_24_28_normal==FALSE &
        is.na(T2_GDMscreeningontime_24_28_manhighrbg) &
-       is.na(T2_GDMscreeningontime_24_28_manhighfbs) &
        (T2_labbloodglu_likelyGDM_24_28==T|
           T2_labfastbloodglu_likelyGDM_24_28==T),T2_GDMscreeningontime_24_28_intmbg:=TRUE]
   
@@ -279,54 +279,45 @@ xtabs(~T2$T2_Opportunity_GDM_screening_24_28, addNA=T)
   
   # 24 weeks
   T2[T2_GDMscreeningontime_24_28_intmbg==T &
-       T2_labfastbloodglu_likelyGDM_24_24==T|
-       T2_labbloodglu_likelyGDM_24_24==T,T2_GDMscreeningontime_24_24_manintmbg:=FALSE]
+       (T2_labfastbloodglu_likelyGDM_24_24==T|
+       T2_labbloodglu_likelyGDM_24_24==T),T2_GDMscreeningontime_24_24_manintmbg:=FALSE]
   
   T2[T2_GDMscreeningontime_24_24_manintmbg==F &
-       (T2_labfastbloodglu_likelyGDM_24_24==T|
-       T2_labbloodglu_likelyGDM_24_24==T) &
        T2_repeatFBS_27_27==T,T2_GDMscreeningontime_24_24_manintmbg:=T]
   
    
    # 25 weeks
   T2[T2_GDMscreeningontime_24_28_intmbg==T &
-       T2_labfastbloodglu_likelyGDM_25_25==T,T2_GDMscreeningontime_25_25_manintmbg:=FALSE]
+       (T2_labfastbloodglu_likelyGDM_25_25==T|
+          T2_labbloodglu_likelyGDM_25_25==T),T2_GDMscreeningontime_25_25_manintmbg:=FALSE]
   
   T2[T2_GDMscreeningontime_25_25_manintmbg==F &
-       (T2_labfastbloodglu_likelyGDM_25_25==T|
-       T2_labbloodglu_likelyGDM_25_25==T) &
        T2_repeatFBS_28_28==T,T2_GDMscreeningontime_25_25_manintmbg:=T]
   
   
   # 26 weeks
   T2[T2_GDMscreeningontime_24_28_intmbg==T &
-       T2_labfastbloodglu_likelyGDM_26_26==T|
-       T2_labbloodglu_likelyGDM_26_26==T,T2_GDMscreeningontime_26_26_manintmbg:=FALSE]
+       (T2_labfastbloodglu_likelyGDM_26_26==T|
+       T2_labbloodglu_likelyGDM_26_26),T2_GDMscreeningontime_26_26_manintmbg:=FALSE]
   
   T2[T2_GDMscreeningontime_26_26_manintmbg==F &
-       (T2_labfastbloodglu_likelyGDM_26_26==T |
-        T2_labbloodglu_likelyGDM_26_26==T) &
-                                 T2_repeatFBS_29_29==T,T2_GDMscreeningontime_26_26_manintmbg:=T]
+       T2_repeatFBS_29_29==T,T2_GDMscreeningontime_26_26_manintmbg:=T]
   
   # 27 weeks
   T2[T2_GDMscreeningontime_24_28_intmbg==T &
        (T2_labfastbloodglu_likelyGDM_27_27==T |
-          T2_labbloodglu_likely_GDM_27_27==T),T2_GDMscreeningontime_27_27_manintmbg:=FALSE]
+          T2_labbloodglu_likelyGDM_27_27==T),T2_GDMscreeningontime_27_27_manintmbg:=FALSE]
   
   T2[T2_GDMscreeningontime_27_27_manintmbg==F &
-       (T2_labfastbloodglu_likelyGDM_27_27==T |
-          T2_labbloodglu_likely_GDM_27_27==T) &
        T2_repeatFBS_30_30==T,T2_GDMscreeningontime_27_27_manintmbg:=T]
   
   
   # 28 weeks
   T2[T2_GDMscreeningontime_24_28_intmbg==T &
        (T2_labfastbloodglu_likelyGDM_28_28==T |
-          T2_labbloodglu_likely_GDM_28_28==T),T2_GDMscreeningontime_28_28_manintmbg:=FALSE]
+          T2_labbloodglu_likelyGDM_28_28==T),T2_GDMscreeningontime_28_28_manintmbg:=FALSE]
   
   T2[T2_GDMscreeningontime_28_28_manintmbg==F &
-       (T2_labfastbloodglu_likelyGDM_28_28==T |
-          T2_labbloodglu_likely_GDM_28_28==T) &
        T2_repeatFBS_31_31==T,T2_GDMscreeningontime_28_28_manintmbg:=T]
 
   
@@ -375,7 +366,7 @@ xtabs(~T2$T2_Opportunity_GDM_screening_24_28, addNA=T)
 
 xtabs(~T2$T2_GDMscreeningontime_24_28, addNA = T)
 xtabs(~T2$T2_GDMscreeningontime_24_28_normal, addNA = T)
-xtabs(~T2$T2_GDMscreeningontime_24_28_highrbg, addNA = T)
+#xtabs(~T2$T2_GDMscreeningontime_24_28_highrbg, addNA = T)
 xtabs(~T2$T2_GDMscreeningontime_24_28_intmbg, addNA = T)
 
 
@@ -451,6 +442,32 @@ xtabs(~T2$T2_GDMscreeningontime_after_28, addNA=T)
 xtabs(~T2$T2_GDMscreeningontime_after_28_normal, addNA=T)
 xtabs(~T2$T2_GDMscreeningontime_after_28_high, addNA=T)
 
+
+
+
+
+
+tab <- T2[,.(N=.N,
+                 Opport_screen_b424=sum(T2_Opportunity_GDM_screening_b4_24==T, na.rm=T),
+                 Screen_b4_24_normal=sum(T2_GDMscreeningontime_b4_24_bookurglu_normal==T,na.rm=T),
+                 Posurglu_b4_24=sum(is.na(T2_GDMscreeningontime_b4_24_manposurglu)),
+                 manposurglu_b4_24=sum(T2_GDMscreeningontime_b4_24_manposurglu==T,na.rm=T),
+                 Oppt_screen_24_28=sum(T2_Opportunity_GDM_screening_24_28==T,na.rm=T),
+                 Screen24to28=sum(T2_GDMscreeningontime_24_28==T, na.rm=T),
+                 Screen_24_28_normal=sum(T2_GDMscreeningontime_24_28_normal==T,na.rm=T),
+                 High_24_28=sum(T2_GDMscreeningontime_24_28_normal==F,na.rm=T),
+                 High_24_28_highrbg=sum(!is.na(T2_GDMscreeningontime_24_28_manhighrbg)),
+                 Man_high_24_28=sum(T2_GDMscreeningontime_24_28_manhighrbg==T,na.rm=T),
+                 Oppt_screen_after_28=sum(T2_Opportunity_GDM_screening_after_28==T,na.rm=T),
+                 Screen_after_28=sum(T2_GDMscreeningontime_after_28==T,na.rm=T),
+                 High_after_28=sum(!is.na(T2_GDMscreeningontime_after_28_high)),
+                 manhighrbg_after_28=sum(T2_GDMscreeningontime_after_28_high==T, na.rm=T))]
+
+
+openxlsx::write.xlsx(tab,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "gdmguidelines",
+                               "gdmscreening.xlsx"))
 
 
 

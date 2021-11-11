@@ -13,6 +13,7 @@ Setup(IS_GAZA=FALSE)
 #Load data in
 d <- LoadDataFileFromNetwork()
 
+
 # renaming arms
 d[ident_dhis2_control==F, prettyExposure:="Trial Arm B"]
 d[ident_dhis2_control==T, prettyExposure:="Trial Arm A"]
@@ -72,6 +73,17 @@ smallD[,booklabfastbloodglu_high:=as.logical(NA)]
 smallD[!is.na(booklabfastbloodglu),booklabfastbloodglu_high:=FALSE]
 smallD[booklabfastbloodglu>126 ,booklabfastbloodglu_high:=TRUE]
 xtabs(~smallD$booklabfastbloodglu_high, addNA=T)
+
+
+# high sugar at booking
+d[,bookhrhighsug:=as.logical(NA)]
+
+d[(mandate_1-bookdate)<=7,bookhrhighsug:=FALSE] 
+d[(mandate_1-bookdate)<=7 &
+    manperf_1==1 &
+    mantypex_1 %in% c("RefHighRisk","RefDiabetes","RefSpec"),bookhrhighsug:=TRUE] 
+
+xtabs(~d$bookhrhighsug, addNA=T)
 
 # Discrepancy Variable anexamsfh variable
 smallD[,anexamsfh_0:=bookexamsfh]
@@ -926,6 +938,23 @@ smallD <- VisitVariables(
   gestagedaysVariable = "manT1gestagedays")
 xtabs(~smallD$TrialOne_manperf_18_22)
 
+
+
+# Ref to spec
+smallD <- VisitVariables(
+  smallD=smallD,
+  days=days,
+  variableOfInterestName="refSpec",
+  variableOfInterestPattern="mantypex",
+  TruevaluesMin=NULL,
+  TruevaluesMax=NULL,
+  TruevaluesDiscrete ="RefSpec",
+  gestagedaysVariable = "manT1gestagedays")
+nrow(smallD[mantypex_1=="RefSpec" & manT1gestagedays_1>=15 & manT1gestagedays_1<=17])
+nrow(smallD[mantypex_1=="RefSpec" & mangestage_1>=0 & mangestage_1<=14])
+xtabs(~smallD[ident_dhis2_control==T]$TrialOne_refHR_00_14)
+xtabs(~smallD[ident_dhis2_control==F]$TrialOne_refHR_00_14)
+xtabs(~smallD$TrialOne_refSpec_35_37)
 
 
 ######### Managements ############

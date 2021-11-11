@@ -79,6 +79,8 @@ T2[T2_manmildchronichtn_15_15==F & (T2_refHR_15_15==T|
                                 T2_refHosp_15_15==T|
                                 T2_refSpec_15_15==T),T2_manmildchronichtn_15_15:=T]
 
+xtabs(~T2$T2_manmildchronichtn_15_15, addNA=T)
+
 # mod/sev 15 weeks
 T2[,T2_manmodsevchronichtn_15_15:=as.logical(NA)]
 T2[T2_Oppt_bp_15_17==T & (T2_anbpdiast_modSevHTN_15_15==T|
@@ -120,6 +122,17 @@ T2[T2_manmildchronichtn_17_17==F & (T2_refHR_17_17==T|
                                   T2_refHosp_17_17==T|
                                   T2_refSpec_17_17==T),T2_manmildchronichtn_17_17:=T]
 
+xtabs(~T2$T2_manmildchronichtn_17_17, addNA=T)
+
+# mod/sev 17 weeks
+T2[,T2_manmodsevchronichtn_17_17:=as.logical(NA)]
+T2[T2_Oppt_bp_15_17==T & (T2_anbpdiast_modSevHTN_17_17==T|
+                            T2_anbpsyst_modSevHTN_17_17==T),T2_manmodsevchronichtn_17_17:=F]
+
+T2[T2_manmodsevchronichtn_17_17==F & (T2_refHR_17_17==T|
+                                        T2_refHosp_17_17==T|
+                                        T2_refSpec_17_17==T),T2_manmodsevchronichtn_17_17:=T]
+
 xtabs(~T2$T2_manmodsevchronichtn_17_17, addNA=T)
 
 
@@ -137,12 +150,32 @@ T2[T2_Oppt_bp_15_17==T & (!is.na(T2_manmildchronichtn_15_15)|
 xtabs(~T2$T2_manmildchronichtn_15_17, addNA=T)
 
 
-T2[T2_manchronichtn_15_17==F & (T2_manmildchronichtn_15_15==T|
+T2[T2_manmildchronichtn_15_17==F & (T2_manmildchronichtn_15_15==T|
                                   T2_manmildchronichtn_16_16==T|
                                   T2_manmildchronichtn_17_17==T),T2_manmildchronichtn_17_17:=T]
 
-xtabs(~T2$T2_manchronichtn_15_17, addNA=T)
+xtabs(~T2$T2_manmildchronichtn_15_17, addNA=T)
 
+
+
+
+
+# severe chronic htn
+
+#T2_manmodsevchronichtn 15-17 weeks combo variable
+T2[,T2_manmodsevchronichtn_15_17:=as.logical(NA)]
+T2[T2_Oppt_bp_15_17==T & (!is.na(T2_manmodsevchronichtn_15_15)|
+                            !is.na(T2_manmodsevchronichtn_16_16)|
+                            !is.na(T2_manmodsevchronichtn_17_17)),T2_manmodsevchronichtn_15_17:=F]
+
+xtabs(~T2$T2_manmodsevchronichtn_15_17, addNA=T)
+
+
+T2[T2_manmodsevchronichtn_15_17==F & (T2_manmodsevchronichtn_15_15==T|
+                                        T2_manmodsevchronichtn_16_16==T|
+                                        T2_manmodsevchronichtn_17_17==T),T2_manmodsevchronichtn_15_17:=T]
+
+xtabs(~T2$T2_manmodsevchronichtn_15_17, addNA=T)
 
 ################
 #18-22 weeks
@@ -151,7 +184,8 @@ xtabs(~T2$T2_manchronichtn_15_17, addNA=T)
 #screening
 T2[,T2_Oppt_bp_18_22:=as.logical(NA)]
 T2[T2_anvisitnew_18_22==T &
-     is.na(T2_manchronichtn_15_17),T2_Oppt_bp_18_22:=TRUE]
+     is.na(T2_manmildchronichtn_15_17) &
+     is.na(T2_manmodsevchronichtn_15_17),T2_Oppt_bp_18_22:=TRUE]
 xtabs(~T2$T2_Oppt_bp_18_22,addNA=T)
 
 # numerator
@@ -178,6 +212,8 @@ T2[T2_Oppt_bp_18_22==T & (T2_anbpdiast_mildHTN_18_18==T|
 T2[T2_manmildchronichtn_18_18==F & (T2_anbpsyst_present_19_19==T &
                                     T2_anbpdiast_present_19_19==T),T2_manmildchronichtn_18_18:=T]
 
+xtabs(~T2$T2_manmildchronichtn_18_18, addNA=T)
+
 # mod/sev 18 weeks
 T2[,T2_manmodsevchronichtn_18_18:=as.logical(NA)]
 T2[T2_Oppt_bp_18_22==T & (T2_anbpdiast_modSevHTN_18_18==T|
@@ -197,6 +233,8 @@ T2[T2_Oppt_bp_18_22==T & (T2_anbpdiast_mildHTN_19_19==T|
 
 T2[T2_manmildchronichtn_19_19==F & (T2_anbpsyst_present_20_20==T &
                                       T2_anbpdiast_present_20_20==T),T2_manmildchronichtn_19_19:=T]
+
+xtabs(~T2$T2_manmildchronichtn_19_19, addNA=T)
 
 # mod/sev 19 weeks
 T2[,T2_manmodsevchronichtn_19_19:=as.logical(NA)]
@@ -218,6 +256,8 @@ T2[T2_Oppt_bp_18_22==T & (T2_anbpdiast_mildHTN_20_20==T|
 T2[T2_manmildchronichtn_20_20==F & (T2_anbpsyst_present_21_21==T &
                                       T2_anbpdiast_present_21_21==T),T2_manmildchronichtn_20_20:=T]
 
+xtabs(~T2$T2_manmildchronichtn_20_20, addNA=T)
+
 # mod/sev 20 weeks
 T2[,T2_manmodsevchronichtn_20_20:=as.logical(NA)]
 T2[T2_Oppt_bp_18_22==T & (T2_anbpdiast_modSevHTN_20_20==T|
@@ -237,6 +277,9 @@ T2[T2_Oppt_bp_18_22==T & (T2_anbpdiast_mildHTN_21_21==T|
 
 T2[T2_manmildchronichtn_21_21==F & (T2_anbpsyst_present_22_22==T &
                                       T2_anbpdiast_present_22_22==T),T2_manmildchronichtn_21_21:=T]
+
+xtabs(~T2$T2_manmildchronichtn_21_21, addNA=T)
+
 
 # mod/sev 21 weeks
 T2[,T2_manmodsevchronichtn_21_21:=as.logical(NA)]
@@ -258,7 +301,9 @@ T2[T2_Oppt_bp_18_22==T & (T2_anbpdiast_mildHTN_22_22==T|
 T2[T2_manmildchronichtn_22_22==F & (T2_anbpsyst_present_23_23==T &
                                       T2_anbpdiast_present_23_23==T),T2_manmildchronichtn_22_22:=T]
 
-# mod/sev 15 weeks
+xtabs(~T2$T2_manmildchronichtn_22_22, addNA=T)
+
+#
 T2[,T2_manmodsevchronichtn_22_22:=as.logical(NA)]
 T2[T2_Oppt_bp_18_22==T & (T2_anbpdiast_modSevHTN_22_22==T|
                             T2_anbpsyst_modSevHTN_22_22==T),T2_manmodsevchronichtn_22_22:=F]
@@ -270,14 +315,67 @@ T2[T2_manmodsevchronichtn_22_22==F & (T2_refHR_22_22==T|
 xtabs(~T2$T2_manmodsevchronichtn_22_22, addNA=T)
 
 
+
 ################
-#18-22 weeks
+# combined 18-22
+################
+
+
+#T2_manmildchronichtn 15-17 weeks combo variable
+T2[,T2_manmildchronichtn_18_22:=as.logical(NA)]
+T2[T2_Oppt_bp_18_22==T & (!is.na(T2_manmildchronichtn_18_18)|
+                            !is.na(T2_manmildchronichtn_19_19)|
+                            !is.na(T2_manmildchronichtn_20_20)|
+                            !is.na(T2_manmildchronichtn_21_21)|
+                            !is.na(T2_manmildchronichtn_22_22)),T2_manmildchronichtn_18_22:=F]
+
+xtabs(~T2$T2_manmildchronichtn_18_22, addNA=T)
+
+
+T2[T2_manmildchronichtn_18_22==F & (T2_manmildchronichtn_18_18==T|
+                                      T2_manmildchronichtn_19_19==T|
+                                      T2_manmildchronichtn_20_20==T|
+                                      T2_manmildchronichtn_21_21==T|
+                                      T2_manmildchronichtn_22_22==T),T2_manmildchronichtn_18_22:=T]
+
+xtabs(~T2$T2_manmildchronichtn_18_22, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#T2_manmodsevchronichtn 15-17 weeks combo variable
+T2[,T2_manmodsevchronichtn_18_22:=as.logical(NA)]
+T2[T2_Oppt_bp_18_22==T & (!is.na(T2_manmodsevchronichtn_18_18)|
+                            !is.na(T2_manmodsevchronichtn_19_19)|
+                            !is.na(T2_manmodsevchronichtn_20_20)|
+                            !is.na(T2_manmodsevchronichtn_21_21)|
+                            !is.na(T2_manmodsevchronichtn_22_22)),T2_manmodsevchronichtn_18_22:=F]
+
+xtabs(~T2$T2_manmodsevchronichtn_18_22, addNA=T)
+
+
+T2[T2_manmodsevchronichtn_18_22==F & (T2_manmodsevchronichtn_18_18==T|
+                                        T2_manmodsevchronichtn_19_19==T|
+                                        T2_manmodsevchronichtn_20_20==T|
+                                        T2_manmodsevchronichtn_21_21==T|
+                                        T2_manmodsevchronichtn_22_22==T),T2_manmodsevchronichtn_18_22:=T]
+
+xtabs(~T2$T2_manmodsevchronichtn_18_22, addNA=T)
+
+
+
+################
+# 23 weeks
 ################
 
 #screening
 T2[,T2_Oppt_bp_23_23:=as.logical(NA)]
 T2[T2_anvisitnew_23_23==T &
-     is.na(T2_manchronichtn_18_22),T2_Oppt_bp_23_23:=TRUE]
+     is.na(T2_manmodsevchronichtn_18_22) &
+     is.na(T2_manmildchronichtn_18_22),T2_Oppt_bp_23_23:=TRUE]
 xtabs(~T2$T2_Oppt_bp_23_23,addNA=T)
 
 # numerator
@@ -300,6 +398,8 @@ T2[T2_Oppt_bp_23_23==T & (T2_anbpdiast_mildHTN_23_23==T|
 T2[T2_manmildchronichtn_23_23==F & (T2_anbpsyst_present_24_24==T &
                                       T2_anbpdiast_present_24_24==T),T2_manmildchronichtn_23_23:=T]
 
+xtabs(~T2$T2_manmildchronichtn_23_23, addNA=T)
+
 # mod/sev 23 weeks
 T2[,T2_manmodsevchronichtn_23_23:=as.logical(NA)]
 T2[T2_Oppt_bp_23_23==T & (T2_anbpdiast_modSevHTN_23_23==T|
@@ -319,7 +419,8 @@ xtabs(~T2$T2_manmodsevchronichtn_23_23, addNA=T)
 #screening
 T2[,T2_Oppt_bp_24_28:=as.logical(NA)]
 T2[T2_anvisitnew_24_28==T &
-     is.na(T2_manchronichtn_18_22),T2_Oppt_bp_24_28:=TRUE]
+     is.na(T2_manmildchronichtn_23_23) &
+     is.na(T2_manmildchronichtn_23_23),T2_Oppt_bp_24_28:=TRUE]
 xtabs(~T2$T2_Oppt_bp_24_28,addNA=T)
 
 # numerator
@@ -346,6 +447,8 @@ T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_mildHTN_24_24==T|
 T2[T2_manmildhtn_24_24==F & (T2_anbpsyst_present_25_25==T &
                                T2_anbpdiast_present_25_25==T),T2_manmildhtn_24_24:=T]
 
+xtabs(~T2$T2_manmildhtn_24_24, addNA=T)
+
 # mod/sev  weeks
 T2[,T2_manmodsevhtn_24_24:=as.logical(NA)]
 T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_modSevHTN_24_24==T|
@@ -366,6 +469,8 @@ T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_mildHTN_25_25==T|
 T2[T2_manmildhtn_25_25==F & (T2_anbpsyst_present_26_26==T &
                                T2_anbpdiast_present_26_26==T),T2_manmildhtn_25_25:=T]
 
+xtabs(~T2$T2_manmildhtn_25_25, addNA=T)
+
 # mod/sev weeks
 T2[,T2_manmodsevhtn_25_25:=as.logical(NA)]
 T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_modSevHTN_25_25==T|
@@ -380,11 +485,14 @@ xtabs(~T2$T2_manmodsevhtn_25_25, addNA=T)
 # 26 weeks
 #mild 
 T2[,T2_manmildhtn_26_26:=as.logical(NA)]
-T2[T2_Oppt_bp_24_28==T & (T2_anbpsyst_present_27_27==T &
-                            T2_anbpdiast_present_27_27==T),T2_manmildhtn_26_26:=F]
+T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_mildHTN_26_26==T|
+                            T2_anbpsyst_mildHTN_26_26==T),T2_manmildhtn_26_26:=F]
 
 T2[T2_manmildhtn_26_26==F & (!is.na(T2_anbpsyst_present_27_27) &
                                !is.na(T2_anbpdiast_present_27_27)),T2_manmildhtn_26_26:=T]
+
+xtabs(~T2$T2_manmildhtn_26_26, addNA=T)
+
 
 # mod/sev 
 T2[,T2_manmodsevhtn_26_26:=as.logical(NA)]
@@ -405,6 +513,9 @@ T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_mildHTN_27_27==T|
 
 T2[T2_manmildhtn_27_27==F & (T2_anbpsyst_present_28_28==T &
                               T2_anbpdiast_present_28_28==T),T2_manmildhtn_27_27:=T]
+
+
+xtabs(~T2$T2_manmildhtn_27_27, addNA=T)
 
 # mod/sev 19 weeks
 T2[,T2_manmodsevhtn_27_27:=as.logical(NA)]
@@ -427,6 +538,9 @@ T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_mildHTN_28_28==T|
 T2[T2_manmildhtn_28_28==F & (T2_anbpsyst_present_29_29==T &
                                T2_anbpdiast_present_29_29==T),T2_manmildhtn_28_28:=T]
 
+xtabs(~T2$T2_manmildhtn_28_28, addNA=T)
+
+
 # mod/sev 
 T2[,T2_manmodsevhtn_28_28:=as.logical(NA)]
 T2[T2_Oppt_bp_24_28==T & (T2_anbpdiast_modSevHTN_28_28==T|
@@ -443,6 +557,57 @@ T2[,manmildhtn_24_28:=as.logical(NA)]
 T2[T2_manmildhtn_28_28==T|
      T2_manmildhtn_27_27==T,manmildhtn_24_28:=T]
 T2[,manmodsevhtn_24_28:=as.logical(NA)]
+
+
+
+################
+# combined 24-28
+################
+
+
+#T2_manmildchronichtn 15-17 weeks combo variable
+T2[,T2_manmildhtn_24_28:=as.logical(NA)]
+T2[T2_Oppt_bp_24_28==T & (!is.na(T2_manmildhtn_24_24)|
+                            !is.na(T2_manmildhtn_25_25)|
+                            !is.na(T2_manmildhtn_26_26)|
+                            !is.na(T2_manmildhtn_27_27)|
+                            !is.na(T2_manmildhtn_28_28)),T2_manmildhtn_24_28:=F]
+
+xtabs(~T2$T2_manmildhtn_24_28, addNA=T)
+
+
+T2[T2_manmildhtn_24_28==F & (T2_manmildhtn_24_24==T|
+                               T2_manmildhtn_25_25==T|
+                               T2_manmildhtn_26_26==T|
+                               T2_manmildhtn_27_27==T|
+                               T2_manmildhtn_28_28==T),T2_manmildhtn_24_28:=T]
+
+xtabs(~T2$T2_manmildhtn_24_28, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#T2_manmodsevchronichtn 15-17 weeks combo variable
+T2[,T2_manmodsevhtn_24_28:=as.logical(NA)]
+T2[T2_Oppt_bp_24_28==T & (!is.na(T2_manmodsevhtn_24_24)|
+                            !is.na(T2_manmodsevhtn_25_25)|
+                            !is.na(T2_manmodsevhtn_26_26)|
+                            !is.na(T2_manmodsevhtn_27_27)|
+                            !is.na(T2_manmodsevhtn_28_28)),T2_manmodsevhtn_24_28:=F]
+
+xtabs(~T2$T2_manmodsevhtn_24_28, addNA=T)
+
+
+T2[T2_manmodsevhtn_24_28==F & (T2_manmodsevhtn_24_24==T|
+                                 T2_manmodsevhtn_25_25==T|
+                                 T2_manmodsevhtn_26_26==T|
+                                 T2_manmodsevhtn_27_27==T|
+                                 T2_manmodsevhtn_28_28==T),T2_manmodsevhtn_24_28:=T]
+
+xtabs(~T2$T2_manmodsevhtn_24_28, addNA=T)
 
 
 ################
@@ -509,6 +674,46 @@ xtabs(~T2$T2_manmodsevhtn_30_30, addNA=T)
 
 
 
+
+################
+# combined 29-30
+################
+
+
+#T2_manmildchronichtn 15-17 weeks combo variable
+T2[,T2_manmildhtn_29_30:=as.logical(NA)]
+T2[T2_Oppt_bp_29_30==T & (!is.na(T2_manmildhtn_29_29)|
+                            !is.na(T2_manmildhtn_30_30)),T2_manmildhtn_29_30:=F]
+
+xtabs(~T2$T2_manmildhtn_29_30, addNA=T)
+
+
+T2[T2_manmildhtn_29_30==F & (T2_manmildhtn_29_29==T|
+                               T2_manmildhtn_30_30==T),T2_manmildhtn_29_30:=T]
+
+xtabs(~T2$T2_manmildhtn_29_30, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#T2_manmodsevchronichtn 15-17 weeks combo variable
+T2[,T2_manmodsevhtn_29_30:=as.logical(NA)]
+T2[T2_Oppt_bp_29_30==T & (!is.na(T2_manmodsevhtn_29_29)|
+                            !is.na(T2_manmodsevhtn_30_30)),T2_manmodsevhtn_29_30:=F]
+
+xtabs(~T2$T2_manmodsevhtn_29_30, addNA=T)
+
+
+T2[T2_manmodsevhtn_29_30==F & (T2_manmodsevhtn_29_29==T|
+                                 T2_manmodsevhtn_30_30==T),T2_manmodsevhtn_29_30:=T]
+
+xtabs(~T2$T2_manmodsevhtn_29_30, addNA=T)
+
+
+
 ################
 #31-33 weeks
 ################
@@ -548,7 +753,7 @@ T2[T2_manmildhtn_31_31==F & (T2_anbpsyst_present_32_32==T &
 
 # mod/sev 
 T2[,T2_manmodsevhtn_31_31:=as.logical(NA)]
-T2[T2_Oppt_bp_29_30==T & (T2_anbpdiast_modSevHTN_31_31==T|
+T2[T2_Oppt_bp_31_33==T & (T2_anbpdiast_modSevHTN_31_31==T|
                             T2_anbpsyst_modSevHTN_31_31==T),T2_manmodsevhtn_31_31:=F]
 
 T2[T2_manmodsevhtn_31_31==F & (T2_refHR_31_31==T|
@@ -568,7 +773,7 @@ T2[T2_manmildhtn_32_32==F & (T2_anbpsyst_present_33_33==T &
 
 # mod/sev 
 T2[,T2_manmodsevhtn_32_32:=as.logical(NA)]
-T2[T2_Oppt_bp_29_30==T & (T2_anbpdiast_modSevHTN_32_32==T|
+T2[T2_Oppt_bp_31_33==T & (T2_anbpdiast_modSevHTN_32_32==T|
                             T2_anbpsyst_modSevHTN_32_32==T),T2_manmodsevhtn_32_32:=F]
 
 T2[T2_manmodsevhtn_32_32==F & (T2_refHR_32_32==T|
@@ -588,7 +793,7 @@ T2[T2_manmildhtn_33_33==F & (T2_anbpsyst_present_34_34==T &
 
 # mod/sev 
 T2[,T2_manmodsevhtn_33_33:=as.logical(NA)]
-T2[T2_Oppt_bp_29_30==T & (T2_anbpdiast_modSevHTN_33_33==T|
+T2[T2_Oppt_bp_31_33==T & (T2_anbpdiast_modSevHTN_33_33==T|
                             T2_anbpsyst_modSevHTN_33_33==T),T2_manmodsevhtn_33_33:=F]
 
 T2[T2_manmodsevhtn_33_33==F & (T2_refHR_33_33==T|
@@ -598,6 +803,46 @@ T2[T2_manmodsevhtn_33_33==F & (T2_refHR_33_33==T|
 xtabs(~T2$T2_manmodsevhtn_33_33, addNA=T)
 
 
+################
+# combined 31-33
+################
+
+
+#T2_manmildchronichtn 15-17 weeks combo variable
+T2[,T2_manmildhtn_31_33:=as.logical(NA)]
+T2[T2_Oppt_bp_31_33==T & (!is.na(T2_manmildhtn_31_31)|
+                            !is.na(T2_manmildhtn_32_32)|
+                            !is.na(T2_manmildhtn_33_33)),T2_manmildhtn_31_33:=F]
+
+xtabs(~T2$T2_manmildhtn_31_33, addNA=T)
+
+
+T2[T2_manmildhtn_31_33==F & (T2_manmildhtn_31_31==T|
+                               T2_manmildhtn_32_32==T|
+                               T2_manmildhtn_33_33==T),T2_manmildhtn_31_33:=T]
+
+xtabs(~T2$T2_manmildhtn_31_33, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#T2_manmodsevchronichtn 15-17 weeks combo variable
+T2[,T2_manmodsevhtn_31_33:=as.logical(NA)]
+T2[T2_Oppt_bp_31_33==T & (!is.na(T2_manmodsevhtn_31_31)|
+                            !is.na(T2_manmodsevhtn_32_32)|
+                            !is.na(T2_manmodsevhtn_33_33)),T2_manmodsevhtn_31_33:=F]
+
+xtabs(~T2$T2_manmodsevhtn_31_33, addNA=T)
+
+
+T2[T2_manmodsevhtn_31_33==F & (T2_manmodsevhtn_31_31==T|
+                                 T2_manmodsevhtn_32_32==T|
+                                 T2_manmodsevhtn_33_33==T),T2_manmodsevhtn_31_33:=T]
+
+xtabs(~T2$T2_manmodsevhtn_31_33, addNA=T)
 
 ################
 # 34 weeks
@@ -606,8 +851,8 @@ xtabs(~T2$T2_manmodsevhtn_33_33, addNA=T)
 #screening
 T2[,T2_Oppt_bp_34_34:=as.logical(NA)]
 T2[T2_anvisitnew_34_34==T &
-     is.na(T2_manmodsevhtn_34_34) & 
-     is.na(T2_manmildhtn_34_34),T2_Oppt_bp_34_34:=TRUE]
+     is.na(T2_manmodsevhtn_31_33) & 
+     is.na(T2_manmildhtn_31_33),T2_Oppt_bp_34_34:=TRUE]
 xtabs(~T2$T2_Oppt_bp_34_34,addNA=T)
 
 # numerator
@@ -639,7 +884,6 @@ T2[T2_manmodsevhtn_34_34==F & (T2_refHR_34_34==T|
                                  T2_refSpec_34_34==T),T2_manmodsevhtn_34_34:=T]
 
 xtabs(~T2$T2_manmodsevhtn_34_34, addNA=T)
-
 
 
 ################
@@ -676,6 +920,8 @@ T2[T2_bpontime_35_37==T & (T2_anbpdiast_mildHTN_35_35==T|
 T2[T2_manmildhtn_35_35==F & (T2_anbpsyst_present_36_36==T &
                                T2_anbpdiast_present_36_36==T),T2_manmildhtn_35_35:=T]
 
+xtabs(~T2$T2_manmildhtn_35_35, addNA=T)
+
 # mod/sev 
 T2[,T2_manmodsevhtn_35_35:=as.logical(NA)]
 T2[T2_Oppt_bp_35_37==T & (T2_anbpdiast_modSevHTN_35_35==T|
@@ -690,11 +936,14 @@ xtabs(~T2$T2_manmodsevhtn_35_35, addNA=T)
 # 36
 #mild 
 T2[,T2_manmildhtn_36_36:=as.logical(NA)]
-T2[T2_bpontime_35_37==T & (T2_anbpdiast_mildHTN_36_36==T|
+T2[T2_Oppt_bp_35_37==T & (T2_anbpdiast_mildHTN_36_36==T|
                              T2_anbpsyst_mildHTN_36_36==T),T2_manmildhtn_36_36:=F]
 
 T2[T2_manmildhtn_36_36==F & (T2_anbpsyst_present_37_37==T &
                                T2_anbpdiast_present_37_37==T),T2_manmildhtn_36_36:=T]
+
+xtabs(~T2$T2_manmildhtn_36_36, addNA=T)
+
 
 # mod/sev 
 T2[,T2_manmodsevhtn_36_36:=as.logical(NA)]
@@ -712,11 +961,13 @@ xtabs(~T2$T2_manmodsevhtn_36_36, addNA=T)
 # 37
 #mild 
 T2[,T2_manmildhtn_37_37:=as.logical(NA)]
-T2[T2_bpontime_35_37==T & (T2_anbpdiast_mildHTN_37_37==T|
+T2[T2_Oppt_bp_35_37==T & (T2_anbpdiast_mildHTN_37_37==T|
                              T2_anbpsyst_mildHTN_37_37==T),T2_manmildhtn_37_37:=F]
 
 T2[T2_manmildhtn_37_37==F & (T2_anbpsyst_present_38_38==T &
                                T2_anbpdiast_present_38_38==T),T2_manmildhtn_37_37:=T]
+
+xtabs(~T2$T2_manmildhtn_37_37, addNA=T)
 
 # mod/sev 
 T2[,T2_manmodsevhtn_37_37:=as.logical(NA)]
@@ -728,6 +979,50 @@ T2[T2_manmodsevhtn_37_37==F & (T2_refHR_37_37==T|
                                  T2_refSpec_37_37==T),T2_manmodsevhtn_37_37:=T]
 
 xtabs(~T2$T2_manmodsevhtn_37_37, addNA=T)
+
+
+
+
+################
+# combined 35-37
+################
+
+
+#T2_manmildchronichtn 15-17 weeks combo variable
+T2[,T2_manmildhtn_35_37:=as.logical(NA)]
+T2[T2_Oppt_bp_35_37==T & (!is.na(T2_manmildhtn_35_35)|
+                            !is.na(T2_manmildhtn_36_36)|
+                            !is.na(T2_manmildhtn_37_37)),T2_manmildhtn_35_37:=F]
+
+xtabs(~T2$T2_manmildhtn_35_37, addNA=T)
+
+
+T2[T2_manmildhtn_35_37==F & (T2_manmildhtn_35_35==T|
+                               T2_manmildhtn_36_36==T|
+                               T2_manmildhtn_37_37==T),T2_manmildhtn_35_37:=T]
+
+xtabs(~T2$T2_manmildhtn_35_37, addNA=T)
+
+
+
+
+
+# severe chronic htn
+
+#T2_manmodsevchronichtn 15-17 weeks combo variable
+T2[,T2_manmodsevhtn_35_37:=as.logical(NA)]
+T2[T2_Oppt_bp_35_37==T & (!is.na(T2_manmodsevhtn_35_35)|
+                            !is.na(T2_manmodsevhtn_36_36)|
+                            !is.na(T2_manmodsevhtn_37_37)),T2_manmodsevhtn_35_37:=F]
+
+xtabs(~T2$T2_manmodsevhtn_35_37, addNA=T)
+
+
+T2[T2_manmodsevhtn_35_37==F & (T2_manmodsevhtn_35_35==T|
+                                 T2_manmodsevhtn_36_36==T|
+                                 T2_manmodsevhtn_37_37==T),T2_manmodsevhtn_35_37:=T]
+
+xtabs(~T2$T2_manmodsevhtn_35_37, addNA=T)
 
 
 # change variable types
@@ -771,42 +1066,42 @@ varshtn <- c("T2_Oppt_bp_00_14",
              "T2_manmodsevchronichtn_18_22",
              "T2_manmildchronichtn_23_23",
              "T2_manmodsevchronichtn_23_23",
-             "T2_manmildchronichtn_24_24",
-             "T2_manmodsevchronichtn_24_24",
-             "T2_manmildchronichtn_25_25",
-             "T2_manmodsevchronichtn_25_25",
-             "T2_manmildchronichtn_26_26",
-             "T2_manmodsevchronichtn_26_26",
-             "T2_manmildchronichtn_27_27",
-             "T2_manmodsevchronichtn_27_27",
-             "T2_manmildchronichtn_28_28",
-             "T2_manmodsevchronichtn_28_28",
-             "T2_manmildchronichtn_24_28",
-             "T2_manmodsevchronichtn_24_28",
-             "T2_manmildchronichtn_29_29",
-             "T2_manmodsevchronichtn_29_29",
-             "T2_manmildchronichtn_30_30",
-             "T2_manmodsevchronichtn_30_30",
-             "T2_manmildchronichtn_29_30",
-             "T2_manmodsevchronichtn_29_30",
-             "T2_manmildchronichtn_31_31",
-             "T2_manmodsevchronichtn_31_31",
-             "T2_manmildchronichtn_32_32",
-             "T2_manmodsevchronichtn_32_32",
-             "T2_manmildchronichtn_33_33",
-             "T2_manmodsevchronichtn_33_33",
-             "T2_manmildchronichtn_31_33",
-             "T2_manmodsevchronichtn_31_33",
-             "T2_manmildchronichtn_34_34",
-             "T2_manmodsevchronichtn_34_34",
-             "T2_manmildchronichtn_35_35",
-             "T2_manmodsevchronichtn_35_35",
-             "T2_manmildchronichtn_36_36",
-             "T2_manmodsevchronichtn_36_36",
-             "T2_manmildchronichtn_37_37",
-             "T2_manmodsevchronichtn_37_37",
-             "T2_manmildchronichtn_35_37",
-             "T2_manmodsevchronichtn_35_37"
+             "T2_manmildhtn_24_24",
+             "T2_manmodsevhtn_24_24",
+             "T2_manmildhtn_25_25",
+             "T2_manmodsevhtn_25_25",
+             "T2_manmildhtn_26_26",
+             "T2_manmodsevhtn_26_26",
+             "T2_manmildhtn_27_27",
+             "T2_manmodsevhtn_27_27",
+             "T2_manmildhtn_28_28",
+             "T2_manmodsevhtn_28_28",
+             "T2_manmildhtn_24_28",
+             "T2_manmodsevhtn_24_28",
+             "T2_manmildhtn_29_29",
+             "T2_manmodsevhtn_29_29",
+             "T2_manmildhtn_30_30",
+             "T2_manmodsevhtn_30_30",
+             "T2_manmildhtn_29_30",
+             "T2_manmodsevhtn_29_30",
+             "T2_manmildhtn_31_31",
+             "T2_manmodsevhtn_31_31",
+             "T2_manmildhtn_32_32",
+             "T2_manmodsevhtn_32_32",
+             "T2_manmildhtn_33_33",
+             "T2_manmodsevhtn_33_33",
+             "T2_manmildhtn_31_33",
+             "T2_manmodsevhtn_31_33",
+             "T2_manmildhtn_34_34",
+             "T2_manmodsevhtn_34_34",
+             "T2_manmildhtn_35_35",
+             "T2_manmodsevhtn_35_35",
+             "T2_manmildhtn_36_36",
+             "T2_manmodsevhtn_36_36",
+             "T2_manmildhtn_37_37",
+             "T2_manmodsevhtn_37_37",
+             "T2_manmildhtn_35_37",
+             "T2_manmodsevhtn_35_37"
              
               )
 
