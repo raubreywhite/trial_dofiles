@@ -15,9 +15,21 @@ Setup(IS_GAZA=FALSE)
 ####LOAD d from Network####
 
 d <- LoadDataFileFromNetwork()
+d[,ident_WB:=TRUE]
 
 ###### SETUP ENDS ######
-smallD <- d[bookyear>=2017]
+
+# add gaza data here as well
+g <-readRDS(file.path(FOLDER_DATA_CLEAN_GAZA,
+                         "full_data_from_r.rds"))
+g[,ident_WB:=FALSE]
+
+smallD <- rbind(d,
+                g,
+                fill=T)
+
+
+
 
 
 
@@ -39,24 +51,27 @@ glucose <- smallD[ident_dhis2_booking==T,
                   c("bookevent",
                      "motheridno",
                      "bookyear",
+                     "ident_WB",
                      labdate,
                      labgestage,
                      labgluc,
                      labogct,
-                     labfastglu), with=F]
+                     labfastglu,
+                    labanpp), with=F]
 
 
 nrow(glucose)
 
 long <- melt(glucose,
-     id.vars = c("bookyear","motheridno","bookevent"),
+     id.vars = c("ident_WB","bookyear","motheridno","bookevent"),
      measure.vars = patterns("^labdate",
                              "^labgestage",
                              "labbloodglu",
                               "labogct",
+                             "^labanpp",
                              "labfastbloodglu"),
      variable.name = "visitnum",
-     value.name = c("labdate","labgestage", "labbloodglu","labocgt","labfastbloodglu"))
+     value.name = c("labdate","labgestage", "labgluc","labocgt","labanpp","labfastbloodglu"))
 
 as.data.table(long)
 
@@ -65,19 +80,21 @@ as.data.table(long)
 long[,year:=as.factor(lubridate::year(labdate))]
 xtabs(~long$year)
 
-toplot <-long[labgestage>=24 &
+toplot <-long[ident_WB==T &
+                labgestage>=24 &
                 labgestage<=28 &
-                labbloodglu>0 &
-                !is.na(labbloodglu) &
+                labgluc>0 &
+                !is.na(labgluc) &
                 labanpp=="ANC"]
 
-toplot <- toplot[,.(numpervalue=.N),
-                 keyby=.(year,labbloodglu)]
+toplot <- toplot[ident_WB==T,.(numpervalue=.N),
+                 keyby=.(year,labgluc)]
 
+# export table with percentages of these values that have one reading 
 
 
 p <- ggplot(toplot, 
-            aes(x=labbloodglu, y=numpervalue, shape=year, color=year))
+            aes(x=labgluc, y=numpervalue, shape=year, color=year))
 
 p <- p + geom_point()
 
@@ -92,6 +109,14 @@ p <- p + theme(axis.title.x =element_text("Random Blood Glucose Values"),
                  axis.title.y = element_blank())
 
 p
+
+
+
+# add cut off points for 5.1, 5.3, and 5.6 mmol/L
+# calculator: https://www.omnicalculator.com/health/blood-sugar
+
+# 5.1 mmol/L=91.8 g/dL
+# 5.3 mmol/L=
 
 ggsave(file.path(
   FOLDER_DATA_RESULTS,
@@ -112,13 +137,12 @@ ggsave(file.path(
 
 toplot <-long[labgestage>=29 &
                 labgestage<=37 &
-                labbloodglu>0 &
-                !is.na(labbloodglu) &
-                labbloodglu>0 &
+                labgluc>0 &
+                !is.na(labgluc) &
                 labanpp=="ANC"]
 
 toplot <- toplot[,.(numpervalue=.N),
-                 keyby=.(year,labbloodglu)]
+                 keyby=.(ident_WB,year,labbloodglu)]
 
 
 
@@ -154,10 +178,10 @@ ggsave(file.path(
 
 toplot <-long[labgestage>=24 &
                 labgestage<=28 &
-                labbloodglu>0 &
-                !is.na(labfastbloodglu) &
                 labfastbloodglu>0 &
-                labanpp=="ANC"]
+                !is.na(labfastbloodglu) &
+                labanpp=="ANC" &
+                ident_WB==FALSE]
 
 toplot <- toplot[,.(numpervalue=.N),
                  keyby=.(year,labfastbloodglu)]
@@ -181,10 +205,70 @@ p <- p + theme(axis.title.x =element_text("Fasting Blood Glucose Values"),
 
 p
 
+p <- p + geom_vline(xintercept = 92, color="red", linetype="solid")
+p <- p + geom_vline(xintercept = 95, color="red", linetype="solid")
+p <- p + geom_vline(xintercept = 101, color="red", linetype="solid")
+
+
+
+p
+
 ggsave(file.path(
   FOLDER_DATA_RESULTS,
   "gdmguidelines",
   sprintf("fbs_24_28_distribution_%s.png",lubridate::today())), 
+  plot = p, width = 297, height = 210, units = "mm")
+
+
+
+
+##############
+# fastbloodglu >28
+##############
+
+toplot <-long[labgestage>=29 &
+                labgestage<=38 &
+                labbloodglu>0 &
+                !is.na(labfastbloodglu) &
+                labfastbloodglu>0 &
+                labanpp=="ANC" &
+                ident_WB==FALSE]
+
+toplot <- toplot[,.(numpervalue=.N),
+                 keyby=.(year,labfastbloodglu)]
+
+
+p <- ggplot(toplot, 
+            aes(x=labfastbloodglu, y=numpervalue, shape=year, color=year))
+
+p <- p + geom_point()
+
+p <- p + scale_x_continuous("Fasting Blood Glucose Values", lim=c(25,200))
+p <- p + scale_y_continuous("", lim=c(0,4))
+
+
+
+p <- p + labs(title="Screening:Fasting Blood Glucose",
+              subtitle = ">28 Weeks",
+              xlab="Fasting Blood Glucose Values")
+
+p <- p + theme(axis.title.x =element_text("Fasting Blood Glucose Values"),
+               axis.title.y = element_blank())
+
+p
+
+p <- p + geom_vline(xintercept = 92, color="red", linetype="solid")
+p <- p + geom_vline(xintercept = 95, color="red", linetype="solid")
+p <- p + geom_vline(xintercept = 101, color="red", linetype="solid")
+
+
+
+p
+
+ggsave(file.path(
+  FOLDER_DATA_RESULTS,
+  "gdmguidelines",
+  sprintf("fbs_after_28_distribution_%s.png",lubridate::today())), 
   plot = p, width = 297, height = 210, units = "mm")
 
 
@@ -1112,7 +1196,7 @@ for(i in 0:37){
   var_temp_mangdm <- "temp_mangdm"
   
   #id source
-  var_badgdm <- sprintf("T2_labfastbloodglu_high_%s_%s", week_current, week_current)
+  var_badgdm <- sprintf("TrialOne_labfastbloodglu_high_%s_%s", week_current, week_current)
   
   # no one has anything
   smallD[,(var_temp_manperf):=as.logical(NA)]
@@ -1665,7 +1749,7 @@ smallD[GDMscreeningontime_24_28_manhighrbg==F &
 
 xtabs(~smallD$GDMscreeningontime_24_28_manhighrbg, addNA=T)
 
-if(IS_GAZA){
+if(smallD[ident_WB==T]){
   
   # intermediate values
   
@@ -1867,7 +1951,7 @@ tab <- smallD[,.(N=.N,
                  Screen_after_28=sum(GDMscreeningontime_after_28==T,na.rm=T),
                  High_after_28=sum(!is.na(GDMscreeningontime_after_28_high)),
                  manhighrbg_after_28=sum(GDMscreeningontime_after_28_high==T, na.rm=T)),
-              keyby=.(bookyear)]
+              keyby=.(bookyear,ident_gaza)]
 
 
 

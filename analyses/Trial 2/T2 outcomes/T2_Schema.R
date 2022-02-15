@@ -44,7 +44,7 @@ FOLDER_DATA_CLEAN <<- file.path(getwd(),"../data_clean")
  
 WB <- readRDS(file.path(FOLDER_DATA_CLEAN,
                                       "T2_clean",
-                                      sprintf("T2_FINAL_dataset_%s_WB.rds",CLINIC_INTERVENTION_DATE)))
+                                      "T2_FINAL_dataset_2021-08-12_WB.rds")))
 nrow(WB)
 
 

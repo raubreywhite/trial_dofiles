@@ -38,8 +38,10 @@ xtabs(~d$ident_bad_all)
 #NOW run HBO stuff##
 
 SaveAllDataFiles(d)
+nrow(d)
 
 WBAnalyses(d=LoadDataFileFromNetwork())
+nrow(d)
 
 ##################
 ##################
@@ -55,7 +57,7 @@ WBAnalyses(d=LoadDataFileFromNetwork())
 
 ####LOAD d from Network####
 d <- LoadDataFileFromNetwork()
-    
+nrow(d)    
 
 # in theory, this should give an avicenna dataset:
 d[ident_abb==TRUE,stringr::str_subset(names(d),"^a"),with=F]
