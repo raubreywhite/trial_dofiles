@@ -38,7 +38,6 @@ xtabs(~d$ident_bad_all)
 #NOW run HBO stuff##
 
 SaveAllDataFiles(d)
-nrow(d)
 
 WBAnalyses(d=LoadDataFileFromNetwork())
 nrow(d)

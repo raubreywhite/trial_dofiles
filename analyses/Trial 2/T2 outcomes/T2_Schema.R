@@ -1,4 +1,25 @@
+###### SETUP STARTS ######
 
+setwd("C:/data processing/trial_dofiles")
+
+fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
+
+fileSources=file.path(getwd(),fileSources)
+sapply(fileSources, debugSource)
+
+Setup(IS_GAZA=FALSE)
+
+#CheckFilesAndVariables(folder="e.reg-intervention")
+#CheckFilesAndVariables(folder="e.reg-control")
+CheckFilesAndVariables(folder="e.reg-intervention", 
+                       REF_DATE = REF_CLINIC_INTERVENTION_DATE, 
+                       CHECK_DATE = CLINIC_INTERVENTION_DATE)
+CheckFilesAndVariables(folder="e.reg-control", 
+                       REF_DATE = REF_CLINIC_CONTROL_DATE, 
+                       CHECK_DATE = CLINIC_CONTROL_DATE)
+
+
+###### SETUP ENDS ######
 
 # how trial 2 data works 
 
@@ -44,7 +65,7 @@ FOLDER_DATA_CLEAN <<- file.path(getwd(),"../data_clean")
  
 WB <- readRDS(file.path(FOLDER_DATA_CLEAN,
                                       "T2_clean",
-                                      "T2_FINAL_dataset_2021-08-12_WB.rds")))
+                                      "T2_FINAL_dataset_2021-08-12_WB.rds"))
 nrow(WB)
 
 
@@ -66,6 +87,19 @@ fullT2data <-rbind(WB,
                    fill=T)
 
 nrow(fullT2data)==nrow(Gaza)+nrow(WB)
+
+
+
+# check the trial codes
+# GP019999-MCH	335
+# GP543127-MCH	177
+# GP010520-MCH	216
+# GP532815-MCH	193
+# GP100645-MCH	366
+# GP523245-MCH	281
+# GP150922-MCH	227
+# GP502655-MCH	193
+
 
 # remove variables from event data that we dont want
 
@@ -112,8 +146,8 @@ labandus <- data.table(readxl::read_excel(file.path(
 length(unique(labandus$clustername))
 
 #make clinic names lower case
-labandus[,clustername:=ExtractOnlyEnglishLetters(clustername)]
-xtabs(~labandus$clustername,addNA=T)
+#labandus[,clustername:=ExtractOnlyEnglishLetters(clustername)]
+#xtabs(~labandus$clustername,addNA=T)
 
 
 labandus[,lab:=as.numeric(NA)]
@@ -137,6 +171,10 @@ nrow(labandus)
 
 nrow(merged[is.na(str_TRIAL_2_Cluster)])
 nrow(merged[is.na(clustername)])
+nrow(merged[is.na(phase)])
+
+xtabs(~merged$phase, addNA=T)
+
 
 #unique(merged[is.na(clustername)]$bookorgname)
 
@@ -241,6 +279,9 @@ write.csv(merged,file.path(
 merged[,str_TRIAL_2_ClusSize:=NULL]
 
 merged[,str_TRIAL_2_ClusSize:=clussize]
+
+merged[,phase.x:=NULL]
+setnames(merged, "phase.y","phase")
 
 #################################################
 # save data set with vars we want
@@ -445,12 +486,12 @@ mergedoutcomes <- merge(outcomes,
 nrow(mergedoutcomes)
 nrow(outcomes)
 
-saveRDS(mergedoutcomes,
+saveRDS(outcomes,
         file.path(FOLDER_DATA_CLEAN,
                   "T2_clean",
                   sprintf("T2_FINAL_dataset_outcomes_%s.rds", CLINIC_INTERVENTION_DATE)))
 
-write.csv(mergedoutcomes,file.path(
+write.csv(outcomes,file.path(
                             FOLDER_DATA_CLEAN,
                             "T2_clean",
                             sprintf("T2_FINAL_dataset_outcomes_%s.csv", CLINIC_INTERVENTION_DATE)))

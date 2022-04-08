@@ -40,6 +40,8 @@ if(IS_GAZA==F){
   ###### Load in Data Set ###### 
   #d <- LoadDataFileFromNetwork()
   
+  #CLINIC_INTERVENTION_DATEold <- "2021-08-12"
+  
   tt2 <-  readRDS(file.path(FOLDER_DATA_CLEAN,
                            "T2_clean",
                            sprintf("T2_outcomes_dataset_%s_%s.rds", 
@@ -78,7 +80,8 @@ if(IS_GAZA==F){
   
   tt2 <- readRDS(file.path(FOLDER_DATA_CLEAN_GAZA,
                     "T2_clean",
-                    sprintf("T2_outcomes_dataset_%s_%s.rds", CLINIC_INTERVENTION_DATE,
+                    sprintf("T2_outcomes_dataset_%s_%s.rds", 
+                            CLINIC_INTERVENTION_DATE,
                             fileTag)))
   
   tt2[,ident_WB:=F]

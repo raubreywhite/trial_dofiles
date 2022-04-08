@@ -53,6 +53,8 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
     d[,doyouwanttoreceivesms:=""]
     d[,alternateidentificationnumber:=""]
     
+   
+    
   } else {
     setnames(d,"instance","uniqueid")
     setnames(d,"created","datecreated")
@@ -105,6 +107,14 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
       setnames(d,"streetname","street")
       setnames(d,"camp","camp")
       setnames(d,"telephonenumber","phone")
+      
+      
+      
+      
+      # because we changed the idno from character to numeric on the system, we have to
+      # account for this here so it will merge with our avicenna data
+      
+
   
     }
 
@@ -122,6 +132,7 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
     #setnames(d,"areyouwillingtoreceivesmstextmessagesandremindersaboutyourvisits", "doyouwanttoreceivesms")
     
   }
+  
   
   d[is.na(demoidnumber), demoidnumber:=c(1:.N)]
   d[,demoorgname:=ExtractOnlyEnglishLetters(stringr::str_to_lower(demoorgname))]
@@ -145,6 +156,14 @@ DHIS2_Demographics <- function(isControl, IS_GAZA=F){
  
  #d[rownum==1,]
  #d[rownum>1,]
+ 
+ if(IS_GAZA==FALSE){
+   
+   # set demoidno to character
+   
+   d[,demoidnumber:=as.numeric(demoidnumber)]
+   
+ }
  
   return(d)
 }
