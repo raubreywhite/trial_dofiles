@@ -16,6 +16,11 @@ Setup(IS_GAZA=FALSE)
 
 ar <- readRDS(file.path(FOLDER_DATA_CLEAN,"annual reports","annualreportdata.RDS"))
 
+# when data is rerun
+
+ar <- smallD
+
+
 ########## 
 # demo
 ########## 
@@ -68,7 +73,7 @@ openxlsx::write.xlsx(tab,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BackgroundAndHistory.xlsx"))
 
 # bookbmicat
@@ -85,7 +90,7 @@ openxlsx::write.xlsx(tab,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookBmiCats_.xlsx"))
 
 
@@ -95,7 +100,8 @@ openxlsx::write.xlsx(tab,
 tab <- ar[ident_dhis2_booking==T &
             bookgestage<15 & bookgestage>0,.(N=.N,
                                              "2019"=sum(bookyear==2019, na.rm=T),
-                                             "2020"=sum(bookyear==2020, na.rm=T)),
+                                             "2020"=sum(bookyear==2020, na.rm=T),
+                                             "2021"=sum(bookyear==2021, na.rm=T)),
           keyby=.(bookbmicat,bookprimi)]
 
 
@@ -104,7 +110,7 @@ openxlsx::write.xlsx(tab,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookBmiCatsBookPrimi_.xlsx"))
 
 
@@ -123,7 +129,8 @@ xtabs(~bookyear+agemarriagecat_ar, data=ar[booknum==1 & ident_dhis2_booking==1],
 
 tab <- ar[ident_dhis2_booking==T,.(N=.N,
                                    "2019"=sum(bookyear==2019, na.rm=T),
-                                   "2020"=sum(bookyear==2020, na.rm=T)),
+                                   "2020"=sum(bookyear==2020, na.rm=T),
+                                   "2021"=sum(bookyear==2021, na.rm=T)),
           keyby=.(agemarriagecat_ar)]
 
 
@@ -132,7 +139,7 @@ openxlsx::write.xlsx(tab,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "ageatmarriagecat_.xlsx"))
 
 
@@ -159,7 +166,8 @@ nrow(ar[minbookyear<bookyear])
 tab <- ar[ident_dhis2_booking==T & 
             minbookyear==bookyear,.(N=.N,
                                    "2019"=sum(bookyear==2019, na.rm=T),
-                                   "2020"=sum(bookyear==2020, na.rm=T)),
+                                   "2020"=sum(bookyear==2020, na.rm=T),
+                                   "2021"=sum(bookyear==2021,na.rm=T)),
           keyby=.(agemarriagecat_ar)]
 
 
@@ -169,7 +177,7 @@ openxlsx::write.xlsx(tab,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "ageatmarriagecat_perwoman_.xlsx"))
 
 
@@ -245,7 +253,7 @@ openxlsx::write.xlsx(demoage,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookPrimi_.xlsx"))
 
 
@@ -262,7 +270,7 @@ openxlsx::write.xlsx(demoage,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookPrimivAgecat_.xlsx"))
 
 
@@ -279,7 +287,7 @@ openxlsx::write.xlsx(demoagemarriage,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookPrimivAgemarriagecat_.xlsx"))
 
 
@@ -292,7 +300,7 @@ openxlsx::write.xlsx(demoagepreg,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookPrimivAgepregcat_.xlsx"))
 
 
@@ -315,7 +323,7 @@ openxlsx::write.xlsx(bookgA,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BooTrimester_.xlsx"))
 
 
@@ -329,7 +337,7 @@ openxlsx::write.xlsx(bookgA,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BooTrimesterbyBF.xlsx"))
 
 
@@ -344,7 +352,7 @@ openxlsx::write.xlsx(bookgAHR,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookTrimester_HR_.xlsx"))
 
 
@@ -357,7 +365,7 @@ openxlsx::write.xlsx(bookgAprimi,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookTM_bookprimi_.xlsx"))
 
 
@@ -387,7 +395,7 @@ openxlsx::write.xlsx(bptab,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookBPbyBookTM.xlsx"))
 
 
@@ -440,7 +448,7 @@ openxlsx::write.xlsx(bptab,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookBPbyHTNcutoff.xlsx"))
 
 
@@ -491,7 +499,7 @@ openxlsx::write.xlsx(bptab,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookBPbyHTNcutoffwithAge.xlsx"))
 
 
@@ -517,7 +525,7 @@ openxlsx::write.xlsx(bookbpsystdiast,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "BookBPCatsbybookTM.xlsx"))
 
 
@@ -544,7 +552,7 @@ openxlsx::write.xlsx(screenings,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "FHandSFHscreenings.xlsx"))
 
 # CPO
@@ -725,7 +733,7 @@ openxlsx::write.xlsx(robsongrps,
                      file.path(
                        FOLDER_DATA_RESULTS,
                        "annual reports",
-                       "2020",
+                       "2021",
                        "Robsongps.xlsx"))
 
 ####################
@@ -738,7 +746,7 @@ tab <- ar[ident_dhis2_booking==T,.(N=.N),
 openxlsx::write.xlsx(tab,
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
-                               "2020",
+                               "2021",
                                "bookingspermonth.xlsx"))
 
 
@@ -756,11 +764,17 @@ ar[,anevent_x:=0]
 
 ar[,anevent_x_1:=0]
 
+ar[,anevent_x2:=0]
+
 print(vars)
 
 for(i in vars){
   
   varsdate <- names(ar)[stringr::str_detect(names(ar),"andate")]
+  
+  ar[!is.na(get(i)) &
+       get(varsdate)>="2021-01-01" &
+       get(varsdate)<="2021-12-31", anevent_x2:=anevent_x2 + 1]
   
   ar[!is.na(get(i)) &
        get(varsdate)>="2020-01-01" &
@@ -783,6 +797,7 @@ sum(ar[ident_dhis2_control==F]$anevent_x_1,na.rm=T)
 # total ppc events per woman
 vars <- names(ar)[stringr::str_detect(names(ar),"^ppcevent_[0-9]+")]
 ar[,ppcevent_x:=0]
+ar[,ppcevent_x2:=0]
 ar[,ppcevent_x_1:=0]
 
 print(vars)
@@ -790,6 +805,11 @@ print(vars)
 for(i in vars){
   
   ppcdate <- names(ar)[stringr::str_detect(names(ar),"ppcdate")]
+  
+  ar[!is.na(get(i)) & 
+       get(ppcdate)>="2021-01-01" &
+       get(ppcdate)<="2021-12-31", ppcevent_x2:=ppcevent_x2 + 1]
+  
   ar[!is.na(get(i)) & 
        get(ppcdate)>="2020-01-01" &
        get(ppcdate)<="2020-12-31", ppcevent_x:=ppcevent_x + 1]
@@ -803,12 +823,15 @@ for(i in vars){
 
 sum(ar[ident_dhis2_control==F]$ppcevent_x,na.rm=T)
 sum(ar[ident_dhis2_control==F]$ppcevent_x_1,na.rm=T)
+sum(ar[ident_dhis2_control==F]$ppcevent_x2,na.rm=T)
+
 
 # total nbc events per woman
 #making variable for total nbc visits
 vars <- names(ar)[stringr::str_detect(names(ar),"^nbcevent_[0-9]+")]
 ar[,nbcevent_x:=0]
 ar[,nbcevent_x_1:=0]
+ar[,nbcevent_x2:=0]
 
 print(vars)
 
@@ -816,6 +839,9 @@ for(i in vars){
   
   nbcdate <- names(ar)[stringr::str_detect(names(ar),"^nbcdate")]
   
+  ar[!is.na(get(i)) &
+       get(nbcdate)>="2021-01-01" &
+       get(nbcdate)<="2021-12-31", nbcevent_x2:=nbcevent_x2 + 1]
   
   ar[!is.na(get(i)) &
        get(nbcdate)>="2020-01-01" &
@@ -828,7 +854,7 @@ for(i in vars){
   
 }
 
-sum(ar[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
+sum(ar[ident_dhis2_control==F]$nbcevent_x2,na.rm=T)
 
 
 
@@ -844,14 +870,17 @@ tab <- ar[bookyear>=2019 & ident_dhis2_control==F,.(
  # TotalNBCvisits=sum(nbcevent_x, na.rm=T),
   ANCvisits2019=sum(anevent_x_1, na.rm=T),
   ANCvisits2020=sum(anevent_x, na.rm=T),
+  ANCvisits2021=sum(anevent_x2, na.rm=T),
   PPCvisits2019=sum(ppcevent_x_1,na.rm=T),
   PPCvisits2020=sum(ppcevent_x, na.rm=T),
+  PPCvisits2021=sum(ppcevent_x2, na.rm=T),
   NBCvisits2019=sum(nbcevent_x, na.rm = T),
-  NBCvisits2020=sum(nbcevent_x_1,na.rm=T))]
+  NBCvisits2020=sum(nbcevent_x_1,na.rm=T),
+  NBCvisits2021=sum(nbcevent_x2,na.rm=T))]
 
 openxlsx::write.xlsx(tab, file.path(FOLDER_DATA_RESULTS,
                                     "annual reports",
-                                    "2020",
+                                    "2021",
                                     "VisitsTotal_.xlsx"))
 
 
@@ -936,7 +965,7 @@ setnames(complete,c("anyear","anmonth"),
 
 openxlsx::write.xlsx(complete, file.path(FOLDER_DATA_RESULTS,
                                      "annual reports",
-                                     "2020",
+                                     "2021",
                                      "VisitsbymonthandYear.xlsx"))
 
 
@@ -964,7 +993,7 @@ openxlsx::write.xlsx(tab,
                      file.path(
                      FOLDER_DATA_RESULTS,
                      "annual reports",
-                     "2020",
+                     "2021",
                      "ppccpo_women.xlsx"))
 
 #################################  Attendance ################################
@@ -2533,7 +2562,7 @@ setorder(HTN,bookedbefore20)
 openxlsx::write.xlsx(HTN, 
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
-                               "2020",
+                               "2021",
                                sprintf("%s_HTN_updated.xlsx",CLINIC_INTERVENTION_DATE)))
 
 
@@ -2567,7 +2596,7 @@ setorder(HTN,bookedbefore20)
 openxlsx::write.xlsx(HTN, 
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
-                               "2020",
+                               "2021",
                                sprintf("%s_HTNbyAgecat_updated.xlsx",CLINIC_INTERVENTION_DATE)))
 
 
@@ -2604,7 +2633,7 @@ ghtnsc <- ar[ident_dhis2_booking==T,.(N=.N,
 openxlsx::write.xlsx(ghtnsc, 
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
-                               "2020",
+                               "2021",
                                sprintf("%s_HTN_screening.xlsx",CLINIC_INTERVENTION_DATE)))
 
 
@@ -2770,7 +2799,7 @@ prelimAtt <- ar[ident_dhis2_booking==1,.(
 
 openxlsx::write.xlsx(prelimAtt,file.path(FOLDER_DATA_RESULTS,
                                          "annual reports",
-                                         "2020",
+                                         "2021",
                                          sprintf("%s_Attendance.xlsx",
                                                  lubridate::today()))) 
 
@@ -3128,7 +3157,7 @@ prelimHB <- ar[ident_dhis2_booking==1,.(N=.N,
 
 openxlsx::write.xlsx(prelimHB,file.path(FOLDER_DATA_RESULTS,
                                         "annual reports",
-                                        "2020",
+                                        "2021",
                                         sprintf("%s_Hb.xlsx",
                                                 lubridate::today()))) 
 
@@ -3531,13 +3560,13 @@ GDM <- ar[!is.na(bookedb424),.(N=.N,
                                GDMDiabetes=sum(!is.na(GDMscreeningontime_24_28_manhighrbg)|
                                                  !is.na(GDMscreeningontime_after_28_high))),
           
-          keyby=.(bookyear)]
+          keyby=.(bookyear,bookedb424)]
 
 setorder(GDM,bookedb424)
 
 openxlsx::write.xlsx(GDM,file.path(FOLDER_DATA_RESULTS,
                                          "annual reports",
-                                         "2020",
+                                         "2021",
                                          sprintf("%s_GDM.xlsx",
                                                  lubridate::today()))) 
 
@@ -3566,7 +3595,7 @@ Usnums <- ar[ident_dhis2_booking==T,
 openxlsx::write.xlsx(Usnums,
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
-                               "2020",
+                               "2021",
                                "usnums.xlsx"))
 
 
@@ -3583,7 +3612,7 @@ UsnumsbookgA <- ar[ident_dhis2_booking==T,
 openxlsx::write.xlsx(UsnumsbookgA,
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
-                               "2020",
+                               "2021",
                                "usnumsbyGA.xlsx"))
 
 
@@ -3635,7 +3664,7 @@ usontime <-ar[ident_dhis2_booking==1,.(N=.N,
 openxlsx::write.xlsx(usontime,
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
-                               "2020",
+                               "2021",
                                "usOntime_.xlsx"))
 
 
@@ -3661,7 +3690,8 @@ usontimeGAcats <-ar[ident_dhis2_booking==1,.(N=.N,
                                                                         TrialOne_us_exists_23_23==T|
                                                                         TrialOne_us_exists_24_24==T|
                                                                         TrialOne_us_exists_25_25==T|
-                                                                        TrialOne_us_exists_26_26==T), na.rm=T),
+                                                                        TrialOne_us_exists_26_26==T),
+                                                                   na.rm=T),
                                              ThirdTrimester=sum(TrialOne_us_exists_27_27==T|
                                                                   TrialOne_us_exists_28_28==T|
                                                                   TrialOne_us_exists_29_30==T|
@@ -3687,7 +3717,7 @@ usontimeGAcats <-ar[ident_dhis2_booking==1,.(N=.N,
 openxlsx::write.xlsx(usontimeGAcats,
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
-                               "2020",
+                               "2021",
                                "usOntimeBookGAcats.xlsx"))
 
 
@@ -3714,7 +3744,7 @@ nums <- ar[,.("Total Number of women"=.N,
 openxlsx::write.xlsx(nums,
                      file.path(FOLDER_DATA_RESULTS,
                                "annual reports",
-                               "2020",
+                               "2021",
                                "NumVisits.xlsx"))
 
 

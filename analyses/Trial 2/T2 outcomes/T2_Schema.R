@@ -496,5 +496,48 @@ write.csv(outcomes,file.path(
                             "T2_clean",
                             sprintf("T2_FINAL_dataset_outcomes_%s.csv", CLINIC_INTERVENTION_DATE)))
 
+#########################################################################################################
 
+
+
+attcheck <- readRDS(file.path(FOLDER_DATA_CLEAN,
+                              "T2_clean",
+                              "T2_FINAL_dataset_outcomes_2021-08-12.rds"))
+
+
+outcomes <- attcheck[,.(
+  "15-17 week numeratorT"=sum(num_15_17==T, na.rm=T),
+  "15-17 week numeratorF"=sum(num_15_17==F, na.rm=T),
+  "15-17 Denom"=sum(denom_15_17==T, na.rm=T),
+  "18-22 week numeratorT"=sum(num_18_22==T, na.rm=T),
+  "18-22 week numeratorF"=sum(num_18_22==F, na.rm=T),
+  "18-22 Denom"=sum(denom_18_22==T, na.rm=T),
+  
+  "24-28 week numeratorT"=sum(num_24_28==T, na.rm=T),
+  "24-28 week numeratorF"=sum(num_24_28==F, na.rm=T),
+  "24-28 Denom"=sum(denom_24_28==T, na.rm=T),
+  "31-33 week numeratorT"=sum(num_31_33==T, na.rm=T),
+  "31-33 week numeratorF"=sum(num_31_33==F, na.rm=T),
+  "31-33 Denom"=sum(denom_31_33==T, na.rm=T),
+  "35-37 week numeratorT"=sum(num_35_37==T, na.rm=T),
+  "35-37 week numeratorF"=sum(num_35_37==F, na.rm=T),
+  "35-37 Denom"=sum(num_35_37==T |
+                      num_35_37==F, na.rm=T)),
+  keyby=.(TrialArm,phase)]
+
+outcomes[,prop_15_17_attend:=round(`15-17 week numeratorT`/`15-17 Denom`, digits=3)]
+
+outcomes[,prop_18_22_attend:=round(`18-22 week numeratorT`/`18-22 Denom`, digits=3)]
+
+outcomes[,prop_24_28_attend:=round(`24-28 week numeratorT`/`24-28 Denom`, digits=3)]
+
+outcomes[,prop_31_33_attend:=round(`31-33 week numeratorT`/`31-33 Denom`, digits=3)]
+
+outcomes[,prop_35_37_attend:=round(`35-37 week numeratorT`/`35-37 Denom`, digits=3)]
+
+
+openxlsx::write.xlsx(outcomes,
+                     file.path(FOLDER_DATA_CLEAN,
+                               "T2_clean",
+                               sprintf("%s_attendance_check_wide_data.xlsx",lubridate::today())))
 

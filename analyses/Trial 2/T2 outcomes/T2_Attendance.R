@@ -1,11 +1,11 @@
 ###### SETUP STARTS ######
 
-#setwd("C:/data processing/trial_dofiles")
+setwd("C:/data processing/trial_dofiles")
 
-#fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
-#sapply(fileSources, source, .GlobalEnv)
+fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
+sapply(fileSources, source, .GlobalEnv)
 
-#Setup(IS_GAZA=FALSE)
+Setup(IS_GAZA=FALSE)
 #Setup(IS_GAZA=TRUE)
 
 
@@ -40,12 +40,12 @@ if(IS_GAZA==F){
   ###### Load in Data Set ###### 
   #d <- LoadDataFileFromNetwork()
   
-  #CLINIC_INTERVENTION_DATEold <- "2021-08-12"
+  CLINIC_INTERVENTION_DATEold <- "2021-08-12"
   
   tt2 <-  readRDS(file.path(FOLDER_DATA_CLEAN,
                            "T2_clean",
                            sprintf("T2_outcomes_dataset_%s_%s.rds", 
-                                   CLINIC_INTERVENTION_DATE,
+                                   CLINIC_INTERVENTION_DATEold,
                                    fileTag)))
   tt2[,ident_WB:=T]
   
@@ -130,6 +130,9 @@ t2 <- t2[,c("ident_WB",
             "ident_dhis2_booking",
             "str_TRIAL_2_Cluster",
             "str_TRIAL_2_ClusSize",
+            "ident_phase1clinic",
+            "ident_phase2clinic",
+            "ident_phase3clinic",
             "TrialArm",
             "wantSMS",
             varsancevent,
@@ -157,6 +160,9 @@ longA <- melt(t2,
                                  "ident_dhis2_booking",
                                  "str_TRIAL_2_Cluster",
                                  "str_TRIAL_2_ClusSize",
+                                 "ident_phase1clinic",
+                                 "ident_phase2clinic",
+                                 "ident_phase3clinic",
                                  "TrialArm",
                                  "wantSMS" ),
             measure.vars=patterns("firstvisitinT2",
@@ -486,6 +492,17 @@ z[denom_15_17==T &
 xtabs(~z$num_15_17, addNA=T)
 
 
+# those who attended
+z[denom_15_17==T &
+    (status %in% c("ACTIVE", "COMPLETED","VISITED") & 
+       eventdate==createddate) & (gAateventdate>=105 & gAateventdate<=125) &
+    (gAatcreateddate>0 & gAatcreateddate<105) &
+    programStagename=="Antenatal care visit",num_15_17:=T]
+
+xtabs(~z$num_15_17, addNA=T)
+
+
+
 #########
 # 18-22
 #########
@@ -626,6 +643,196 @@ z[denom_35_37==T &
 xtabs(~z$num_35_37, addNA=T)
 
 
+
+
+
+
+######################
+# check denominators #
+######################
+
+#########
+# 15-17
+#########
+
+# denom
+z[(status %in% c("SCHEDULE","SKIPPED") &
+     (gAatdueDate>=105 & gAatdueDate<=125) & 
+     is.na(eventdate))|
+    (status %in% c("COMPLETED","ACTIVE","VISITED") &
+       eventdate==createddate & 
+       (gAateventdate>=105 & gAateventdate<=125)) &
+    programStagename=="Antenatal care visit", denom_15_17_check:= T]
+
+xtabs(~z$denom_15_17_check, addNA=T)
+
+# numerator
+# scheduled only
+z[denom_15_17_check==T &
+    (status %in% c("SCHEDULE","SKIPPED") & gAatdueDate>=105 & gAatdueDate<=125) & 
+    is.na(eventdate) &
+    programStagename=="Antenatal care visit",num_15_17_check:=F]
+
+
+# those who attended
+z[denom_15_17_check==T &
+    (status %in% c("ACTIVE", "COMPLETED","VISITED") & 
+       eventdate==createddate) & (gAateventdate>=105 & gAateventdate<=125) &
+    programStagename=="Antenatal care visit",num_15_17_check:=T]
+
+xtabs(~z$num_15_17_check, addNA=T)
+
+
+
+
+
+#########
+# 18-22
+#########
+
+# denom
+z[(status %in% c("SCHEDULE","SKIPPED") &
+     (gAatdueDate>=126 & gAatdueDate<=160) & 
+     is.na(eventdate)) |
+    (status %in% c("COMPLETED","ACTIVE","VISITED") &
+       eventdate==createddate & 
+       (gAateventdate>=126 & gAateventdate<=160 )) &
+    programStagename=="Antenatal care visit", denom_18_22_check:= T]
+
+xtabs(~z$denom_18_22_check, addNA=T)
+
+# numerator
+# scheduled only
+z[denom_18_22_check==T & 
+    (status %in% c("SCHEDULE","SKIPPED") & is.na(eventdate) &
+       gAatdueDate>=126 & gAatdueDate<=160) &
+    programStagename=="Antenatal care visit",num_18_22_check:=F]
+
+
+# those who attended
+z[denom_18_22_check==T &
+    (status %in% c("ACTIVE", "COMPLETED","VISITED") & 
+       eventdate==createddate) & (gAateventdate>=126 & gAateventdate<=160) & 
+    programStagename=="Antenatal care visit",num_18_22_check:=T]
+
+
+xtabs(~z$num_18_22_check, addNA=T)
+
+#########
+# 24-28
+#########
+
+# denom
+z[(status %in% c("SCHEDULE","SKIPPED") & 
+     (gAatdueDate>=168 & gAatdueDate<=202) & 
+     is.na(eventdate))|
+    ((status %in% c("ACTIVE","COMPLETED","VISITED") & 
+        eventdate==createddate & 
+        (gAateventdate>=168 & gAateventdate<=202))) & 
+    programStagename=="Antenatal care visit",denom_24_28_check:=T]
+
+xtabs(~z$denom_24_28_check, addNA=T)
+
+
+# numerator
+# scheduled only
+z[denom_24_28_check==T &
+    (status %in% c("SCHEDULE","SKIPPED") & 
+       gAatdueDate>=168 & gAatdueDate<=202) &
+    programStagename=="Antenatal care visit", num_24_28_check:=F]
+
+
+# those who attended
+z[denom_24_28_check==T &
+    (status %in% c("ACTIVE", "COMPLETED","VISITED") & 
+       eventdate==createddate) & (gAateventdate>=168 & gAateventdate<=202) & 
+    programStagename=="Antenatal care visit",num_24_28_check:=T]
+
+
+xtabs(~z$num_24_28_check, addNA=T)
+
+
+#########
+# 31-33
+#########
+# denom
+z[(status %in% c("SCHEDULE","SKIPPED") &
+     is.na(eventdate) &
+     (gAatdueDate>=217 & gAatdueDate<=237))|
+    (status %in% c("ACTIVE", "COMPLETED","VISITED") & 
+       eventdate==createddate &
+       (gAateventdate>=217 & gAateventdate<=237)) & 
+    programStagename=="Antenatal care visit",denom_31_33_check:=T]
+
+
+xtabs(~z$denom_31_33_check, addNA=T)
+
+
+
+# numerator
+# scheduled only
+z[denom_31_33_check==T &
+    (status %in% c("SCHEDULE","SKIPPED") & 
+       is.na(eventdate) &
+       gAatdueDate>=217 & gAatdueDate<=237) &
+    programStagename=="Antenatal care visit",num_31_33_check:=F]
+
+
+# those who attended
+z[denom_31_33_check==T &
+    (status %in% c("ACTIVE", "COMPLETED","VISITED") & 
+       eventdate==createddate) &
+    (gAateventdate>=217 & gAateventdate<=237) & 
+    programStagename=="Antenatal care visit",num_31_33_check:=T]
+
+xtabs(~z$num_31_33, addNA=T)
+
+
+
+#########
+# 35-37
+#########
+# denom
+z[((status%in% c("SCHEDULE","SKIPPED") & 
+     is.na(eventdate) &
+     (gAatdueDate>=245 & gAatdueDate<=265))|
+     ((status %in% c("ACTIVE", "COMPLETED","VISITED") & 
+        eventdate==createddate) & (gAateventdate>=245 & gAateventdate<=265))) & 
+    programStagename=="Antenatal care visit",denom_35_37_check:=T]
+
+
+xtabs(~z$denom_35_37_check, addNA=T)
+
+# numerator
+# scheduled only
+z[denom_35_37_check==T &
+    (status %in% c("SCHEDULE","SKIPPED") &
+       is.na(eventdate) &
+       gAatdueDate>=245 & gAatdueDate<=265) & 
+    programStagename=="Antenatal care visit",num_35_37_check:=F]
+
+
+# those who attended
+z[denom_35_37_check==T &
+    (status %in% c("ACTIVE", "COMPLETED","VISITED") & 
+       eventdate==createddate) & (gAateventdate>=245 & gAateventdate<=265) & 
+    programStagename=="Antenatal care visit",num_35_37_check:=T]
+
+xtabs(~z$num_35_37_check, addNA=T)
+
+
+
+#####################
+# # events
+#####################
+
+z[,phase:=as.character(NA)]
+z[ident_phase1clinic==T,phase:="1"]
+z[ident_phase2clinic==T,phase:="2"]
+z[ident_phase3clinic==T,phase:="3"]
+xtabs(~z$phase, addNA=T)
+
+
 #####################
 # Restrict to T2 DATA
 #####################
@@ -639,6 +846,9 @@ y <- z[!is.na(TrialArm) &
              dueDate<="2020-03-22")|
             (eventdate>="2019-12-01" &
                eventdate<="2020-03-22"))]
+
+
+
 
 
 y[,bookdate:=bookdate.x]
@@ -684,9 +894,12 @@ nrow(t2)==length(unique(y$uniqueid))
 # "evs_num_24_28"            "evs_denom_31_33"          "evs_num_31_33"           
 # "evs_denom_35_37"          "evs_num_35_37"            "evs_bookdate"            
 
+
+
+########################
 # 15_17 
-denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_15_17")]  
-nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_15_17")] 
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_15_17_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_15_17_[0-9]*$")] 
 
 for(i in denoms){
   
@@ -719,8 +932,8 @@ xtabs(~yw$num_15_17, addNA=T)
 
 
 # 18-22
-denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_18_22")]  
-nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_18_22")] 
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_18_22_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_18_22_[0-9]*$")] 
 
 for(i in denoms){
   
@@ -752,8 +965,8 @@ xtabs(~yw$num_18_22, addNA=T)
 
 
 # 24-28
-denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_24_28")]  
-nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_24_28")] 
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_24_28_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_24_28_[0-9]*$")] 
 
 for(i in denoms){
   
@@ -781,8 +994,8 @@ xtabs(~yw$num_24_28, addNA=T)
 
 
 # 31-33
-denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_31_33")]  
-nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_31_33")] 
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_31_33_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_31_33_[0-9]*$")] 
 
 for(i in denoms){
   
@@ -813,8 +1026,8 @@ xtabs(~yw$num_31_33, addNA=T)
 
 
 # 35_37
-denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_35_37")]  
-nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_35_37")] 
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_35_37_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_35_37_[0-9]*$")] 
 
 for(i in denoms){
   
@@ -844,6 +1057,174 @@ xtabs(~yw$num_35_37, addNA=T)
 
 
 
+
+
+
+########################
+# 15_17 
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_15_17_check_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_15_17_check_[0-9]*$")] 
+
+for(i in denoms){
+  
+  yw[get(i)==T, denom_15_17_check:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_15_17_check, addNA=T)
+
+for(i in nums){
+  
+  #yw[denom_15_17==T &
+  #    !is.na(get(i)), num_15_17:=get(i)]
+  
+  yw[denom_15_17_check==T &
+       get(i)==F, num_15_17_check:=FALSE]
+  
+  
+  
+  yw[denom_15_17_check==T &
+       get(i)==T, num_15_17_check:=TRUE]
+  
+  
+}
+
+xtabs(~yw$num_15_17_check, addNA=T)
+
+
+
+
+# 18-22
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_18_22_check_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_18_22_check_[0-9]*$")] 
+
+for(i in denoms){
+  
+  yw[!is.na(get(i)), denom_18_22_check:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_18_22_check, addNA=T)
+
+
+for(i in nums){
+  
+  
+  yw[denom_18_22_check==T &
+       get(i)==F, num_18_22_check:=FALSE]
+  
+  
+  
+  yw[denom_18_22_check==T &
+       get(i)==T, num_18_22_check:=TRUE]
+  
+  
+}
+
+xtabs(~yw$num_18_22_check, addNA=T)
+
+
+
+
+# 24-28
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_24_28_check_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_24_28_check_[0-9]*$")] 
+
+for(i in denoms){
+  
+  yw[!is.na(get(i)), denom_24_28_check:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_24_28_check, addNA=T)
+
+for(i in nums){
+  
+  yw[denom_24_28_check==T &
+       get(i)==F, num_24_28_check:=FALSE]
+  
+  
+  
+  yw[denom_24_28_check==T &
+       get(i)==T, num_24_28_check:=TRUE]
+  
+}
+
+xtabs(~yw$num_24_28_check, addNA=T)
+
+
+
+# 31-33
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_31_33_check_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_31_33_check_[0-9]*$")] 
+
+for(i in denoms){
+  
+  yw[!is.na(get(i)), denom_31_33_check:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_31_33_check, addNA=T)
+
+for(i in nums){
+  
+  yw[denom_31_33_check==T &
+       get(i)==F, num_31_33_check:=FALSE]
+  
+  
+  
+  yw[denom_31_33_check==T &
+       get(i)==T, num_31_33_check:=TRUE]
+  
+  
+  
+}
+
+xtabs(~yw$num_31_33_check, addNA=T)
+
+
+
+
+# 35_37
+denoms <- names(yw)[stringr::str_detect(names(yw),"evs_denom_35_37_check_[0-9]*$")]  
+nums <- names(yw)[stringr::str_detect(names(yw),"evs_num_35_37_check_[0-9]*$")] 
+
+for(i in denoms){
+  
+  yw[!is.na(get(i)), denom_35_37_check:=get(i)]
+  
+  
+}
+
+xtabs(~yw$denom_35_37_check, addNA=T)
+
+for(i in nums){
+  
+  yw[denom_35_37_check==T &
+       get(i)==F, num_35_37:=FALSE]
+  
+  
+  
+  yw[denom_35_37_check==T &
+       get(i)==T, num_35_37_check:=TRUE]
+  
+  
+  
+  
+}
+
+xtabs(~yw$num_35_37_check, addNA=T)
+
+
+###############################################
+# check numerators and denominators
+
+###############################################
+
 xtabs(~yw$ident_events, addNA=T)
 
 attendance <- z[,.(
@@ -865,7 +1246,6 @@ attendance <- z[,.(
                   "35-37 Denom"=sum(num_35_37==T |
                                       num_35_37==F, na.rm=T)),
                 keyby=.(TrialArm)]
-
 
 
 
@@ -910,7 +1290,122 @@ if(IS_GAZA==F){
 
 
 
+###############################################
+# check numerators and denominators
 
+###############################################
+
+xtabs(~yw$ident_events, addNA=T)
+
+
+yw[,phase:=as.character(NA)]
+yw[ident_phase1clinic==T, phase:="1"]
+yw[ident_phase2clinic==T, phase:="2"]
+yw[ident_phase3clinic==T, phase:="3"]
+xtabs(~yw$phase)
+
+
+attendancecheck <- yw[,.(
+  "15-17 week numeratorT"=sum(num_15_17==T, na.rm=T),
+  "15-17 week numeratorF"=sum(num_15_17==F, na.rm=T),
+  "15-17 Denom"=sum(denom_15_17==T, na.rm=T),
+  "18-22 week numeratorT"=sum(num_18_22==T, na.rm=T),
+  "18-22 week numeratorF"=sum(num_18_22==F, na.rm=T),
+  "18-22 Denom"=sum(denom_18_22==T, na.rm=T),
+  
+  "24-28 week numeratorT"=sum(num_24_28==T, na.rm=T),
+  "24-28 week numeratorF"=sum(num_24_28==F, na.rm=T),
+  "24-28 Denom"=sum(denom_24_28==T, na.rm=T),
+  "31-33 week numeratorT"=sum(num_31_33==T, na.rm=T),
+  "31-33 week numeratorF"=sum(num_31_33==F, na.rm=T),
+  "31-33 Denom"=sum(denom_31_33==T, na.rm=T),
+  "35-37 week numeratorT"=sum(num_35_37==T, na.rm=T),
+  "35-37 week numeratorF"=sum(num_35_37==F, na.rm=T),
+  "35-37 Denom"=sum(num_35_37==T |
+                      num_35_37==F, na.rm=T)),
+  keyby=.(phase, str_TRIAL_2_Cluster)]
+
+attendancecheck[,prop_15_17:=round(`15-17 week numeratorT`/`15-17 Denom`,digits=2)]
+attendancecheck[,prop_18_22:=round(`18-22 week numeratorT`/`18-22 Denom`, digits=2)]
+attendancecheck[,prop_24_28:=round(`24-28 week numeratorT`/`24-28 Denom`,digits=2)]
+attendancecheck[,prop_31_33:=round(`31-33 week numeratorT`/`31-33 Denom`,digits=2)]
+attendancecheck[,prop_35_37:=round(`35-37 week numeratorT`/`35-37 Denom`, digits=2)]
+
+
+
+attendancecheck2 <- yw[,.(
+  "15-17 week numeratorT"=sum(num_15_17_check==T, na.rm=T),
+  "15-17 week numeratorF"=sum(num_15_17_check==F, na.rm=T),
+  "15-17 Denom"=sum(denom_15_17_check==T, na.rm=T),
+  "18-22 week numeratorT"=sum(num_18_22_check==T, na.rm=T),
+  "18-22 week numeratorF"=sum(num_18_22_check==F, na.rm=T),
+  "18-22 Denom"=sum(denom_18_22_check==T, na.rm=T),
+  
+  "24-28 week numeratorT"=sum(num_24_28_check==T, na.rm=T),
+  "24-28 week numeratorF"=sum(num_24_28_check==F, na.rm=T),
+  "24-28 Denom"=sum(denom_24_28_check==T, na.rm=T),
+  "31-33 week numeratorT"=sum(num_31_33_check==T, na.rm=T),
+  "31-33 week numeratorF"=sum(num_31_33_check==F, na.rm=T),
+  "31-33 Denom"=sum(denom_31_33_check==T, na.rm=T),
+  "35-37 week numeratorT"=sum(num_35_37_check==T, na.rm=T),
+  "35-37 week numeratorF"=sum(num_35_37_check==F, na.rm=T),
+  "35-37 Denom"=sum(num_35_37_check==T |
+                      num_35_37_check==F, na.rm=T)),
+  keyby=.(phase, str_TRIAL_2_Cluster)]
+
+
+attendancecheck2[,prop_15_17:=round(`15-17 week numeratorT`/`15-17 Denom`,digits=2)]
+attendancecheck2[,prop_18_22:=round(`18-22 week numeratorT`/`18-22 Denom`, digits=2)]
+attendancecheck2[,prop_24_28:=round(`24-28 week numeratorT`/`24-28 Denom`,digits=2)]
+attendancecheck2[,prop_31_33:=round(`31-33 week numeratorT`/`31-33 Denom`,digits=2)]
+attendancecheck2[,prop_35_37:=round(`35-37 week numeratorT`/`35-37 Denom`, digits=2)]
+
+
+
+###################################
+# results workbook #
+###################################
+
+# create the workbook    
+dT <- openxlsx::createWorkbook()
+
+
+
+# add pages 
+openxlsx::addWorksheet(dT, "attendance_original")
+
+
+
+# write data
+openxlsx::writeData(
+  dT,
+  sheet = "attendance_original",
+  x = attendancecheck,
+  startCol = 1,
+  startRow = 1)
+
+
+# add pages 
+openxlsx::addWorksheet(dT, "attendance_user_check")
+
+
+
+# write data
+openxlsx::writeData(
+  dT,
+  sheet = "attendance_user_check",
+  x = attendancecheck2,
+  startCol = 1,
+  startRow = 1)
+
+
+
+
+
+openxlsx::saveWorkbook(dT,file.path(FOLDER_DATA_RESULTS,
+                                    "T2",
+                                    "outcomes",
+                                    "attendance_user_check.xlsx"), overwrite = TRUE)
 
 
 
