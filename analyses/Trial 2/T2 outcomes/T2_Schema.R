@@ -65,7 +65,7 @@ FOLDER_DATA_CLEAN <<- file.path(getwd(),"../data_clean")
  
 WB <- readRDS(file.path(FOLDER_DATA_CLEAN,
                                       "T2_clean",
-                                      "T2_FINAL_dataset_2021-08-12_WB.rds"))
+                                      "T2_FINAL_dataset_2022-03-08_WB.rds"))
 nrow(WB)
 
 
@@ -463,11 +463,21 @@ outcomes <- merged[, c(  "uniqueid",
                          "denom_24_28",
                          "denom_31_33",
                          "denom_35_37",
-                         "num_15_17",
-                         "num_18_22",
-                         "num_24_28",
-                         "num_31_33",
-                         "num_35_37",
+                         "num_15_17_check",
+                         "num_18_22_check",
+                         "num_24_28_check",
+                         "num_31_33_check",
+                         "num_35_37_check",
+                        "num_15_17_new",
+                        "num_18_22_new",
+                        "num_24_28_new",
+                        "num_31_33_new",
+                        "num_35_37_new",
+                        "num_15_17",
+                        "num_18_22",
+                        "num_24_28",
+                        "num_31_33",
+                        "num_35_37",
                         varsT2qidsms,
                          "phase",
                          "clussize",
@@ -498,11 +508,12 @@ write.csv(outcomes,file.path(
 
 #########################################################################################################
 
-
+# create the workbook    
+dT <- openxlsx::createWorkbook()
 
 attcheck <- readRDS(file.path(FOLDER_DATA_CLEAN,
                               "T2_clean",
-                              "T2_FINAL_dataset_outcomes_2021-08-12.rds"))
+                              "T2_FINAL_dataset_outcomes_2022-03-08.rds"))
 
 
 outcomes <- attcheck[,.(
@@ -536,8 +547,72 @@ outcomes[,prop_31_33_attend:=round(`31-33 week numeratorT`/`31-33 Denom`, digits
 outcomes[,prop_35_37_attend:=round(`35-37 week numeratorT`/`35-37 Denom`, digits=3)]
 
 
-openxlsx::write.xlsx(outcomes,
-                     file.path(FOLDER_DATA_CLEAN,
-                               "T2_clean",
-                               sprintf("%s_attendance_check_wide_data.xlsx",lubridate::today())))
+
+
+
+
+
+outcomes2 <- attcheck[,.(
+  "15-17 week numeratorT"=sum(num_15_17_new==T, na.rm=T),
+  "15-17 week numeratorF"=sum(num_15_17_new==F, na.rm=T),
+  "15-17 Denom"=sum(denom_15_17==T, na.rm=T),
+  "18-22 week numeratorT"=sum(num_18_22_new==T, na.rm=T),
+  "18-22 week numeratorF"=sum(num_18_22_new==F, na.rm=T),
+  "18-22 Denom"=sum(denom_18_22==T, na.rm=T),
+  
+  "24-28 week numeratorT"=sum(num_24_28_new==T, na.rm=T),
+  "24-28 week numeratorF"=sum(num_24_28_new==F, na.rm=T),
+  "24-28 Denom"=sum(denom_24_28==T, na.rm=T),
+  "31-33 week numeratorT"=sum(num_31_33_new==T, na.rm=T),
+  "31-33 week numeratorF"=sum(num_31_33_new==F, na.rm=T),
+  "31-33 Denom"=sum(denom_31_33==T, na.rm=T),
+  "35-37 week numeratorT"=sum(num_35_37_new==T, na.rm=T),
+  "35-37 week numeratorF"=sum(num_35_37_new==F, na.rm=T),
+  "35-37 Denom"=sum(num_35_37_new==T |
+                      num_35_37_new==F, na.rm=T)),
+  keyby=.(TrialArm,phase)]
+
+outcomes2[,prop_15_17_attend:=round(`15-17 week numeratorT`/`15-17 Denom`, digits=3)]
+
+outcomes2[,prop_18_22_attend:=round(`18-22 week numeratorT`/`18-22 Denom`, digits=3)]
+
+outcomes2[,prop_24_28_attend:=round(`24-28 week numeratorT`/`24-28 Denom`, digits=3)]
+
+outcomes2[,prop_31_33_attend:=round(`31-33 week numeratorT`/`31-33 Denom`, digits=3)]
+
+outcomes2[,prop_35_37_attend:=round(`35-37 week numeratorT`/`35-37 Denom`, digits=3)]
+
+
+
+# create the workbook    
+dT <- openxlsx::createWorkbook()
+
+# add pages 
+openxlsx::addWorksheet(dT, "attendance_old_num")
+
+
+
+# write data
+openxlsx::writeData(
+  dT,
+  sheet = "attendance_old_num",
+  x = outcomes,
+  startCol = 1,
+  startRow = 1)
+
+openxlsx::addWorksheet(dT, "attendance_new_num")
+
+# write data
+openxlsx::writeData(
+  dT,
+  sheet = "attendance_new_num",
+  x = outcomes2,
+  startCol = 1,
+  startRow = 1)
+
+openxlsx::saveWorkbook(dT,
+                     file.path(FOLDER_DATA_RESULTS,
+                               "T2",
+                               "outcomes",
+                               sprintf("%s_attendance_check_wide_final_data.xlsx",lubridate::today())))
 

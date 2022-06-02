@@ -18,7 +18,7 @@ ar <- readRDS(file.path(FOLDER_DATA_CLEAN,"annual reports","annualreportdata.RDS
 
 # when data is rerun
 
-ar <- smallD
+#ar <- smallD
 
 
 ########## 
@@ -81,7 +81,8 @@ openxlsx::write.xlsx(tab,
 tab <- ar[ident_dhis2_booking==T &
             bookgestage<15 & bookgestage>0,.(N=.N,
              "2019"=sum(bookyear==2019, na.rm=T),
-             "2020"=sum(bookyear==2020, na.rm=T)),
+             "2020"=sum(bookyear==2020, na.rm=T),
+             "2021"=sum(bookyear==2021, na.rm=T)),
           keyby=.(bookbmicat)]
 
 

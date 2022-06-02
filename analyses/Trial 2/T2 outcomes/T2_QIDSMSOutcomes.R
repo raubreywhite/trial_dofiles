@@ -50,7 +50,7 @@ xtabs(~TT2$T2_qidsms_Oppt_anemia_24_28,addNA=T)
 # do we need to add a statement about no anemia prior? In the other scripts, 
 #there was a statement about being screened on time from 00-23 weeks with no anemia. 
 
-TT2[num_24_28==T & 
+TT2[num_24_28_new==T & 
       T2_qidsms_Oppt_anemia_24_28==F, T2_qidsms_Oppt_anemia_24_28:=TRUE]
 
 xtabs(~TT2$T2_qidsms_Oppt_anemia_24_28)
@@ -121,7 +121,7 @@ xtabs(~TT2$T2_qidsms_mansevanemia_24_28)
 #35-37 weeks
 TT2[,T2_qidsms_Oppt_anemia_35_37:=as.logical(NA)]
 TT2[denom_35_37==T, T2_qidsms_Oppt_anemia_35_37:=F]
-TT2[num_35_37==T &
+TT2[num_35_37_new==T &
       T2_qidsms_Oppt_anemia_35_37==F,
     T2_qidsms_Oppt_anemia_35_37:=TRUE ]
 
@@ -206,7 +206,7 @@ xtabs(~TT2$T2_qidsms_Oppt_bp_15_17, addNA=T)
 
 # denominator scheduled and visited ==T
 # denominator scheduled and not visited==F
-TT2[num_15_17==T &
+TT2[num_15_17_new==T &
      T2_qidsms_Oppt_bp_15_17==F, T2_qidsms_Oppt_bp_15_17:=TRUE]
 xtabs(~TT2$T2_qidsms_Oppt_bp_15_17,addNA=T)
 
@@ -347,7 +347,7 @@ xtabs(~TT2$T2_qidsms_manmodsevchronichtn_15_17, addNA=T)
 #screening
 TT2[,T2_qidsms_Oppt_bp_18_22:=as.logical(NA)]
 TT2[denom_18_22==T,T2_qidsms_Oppt_bp_18_22:=FALSE ]
-TT2[num_18_22==T &
+TT2[num_18_22_new==T &
       T2_qidsms_Oppt_bp_18_22==F & 
      is.na(T2_qidsms_manmodsevchronichtn_15_17) &
       is.na(T2_qidsms_manmildchronichtn_15_17),T2_qidsms_Oppt_bp_18_22:=TRUE]
@@ -545,7 +545,7 @@ xtabs(~TT2$T2_qidsms_manmodsevchronichtn_18_22, addNA=T)
 TT2[,T2_qidsms_Oppt_bp_24_28:=as.logical(NA)]
 TT2[denom_24_28==T,T2_qidsms_Oppt_bp_24_28:=FALSE]
 
-TT2[num_24_28==T &
+TT2[num_24_28_new==T &
      is.na(T2_qidsms_manmildchronichtn_18_22) &
       is.na(T2_qidsms_manmodsevchronichtn_18_22),T2_qidsms_Oppt_bp_24_28:=TRUE]
 xtabs(~TT2$T2_qidsms_Oppt_bp_24_28,addNA=T)
@@ -740,7 +740,7 @@ TT2[,T2_qidsms_Oppt_bp_31_33:=as.logical(NA)]
 
 TT2[denom_31_33==T,T2_qidsms_Oppt_bp_31_33:=FALSE]
 
-TT2[num_31_33==T &
+TT2[num_31_33_new==T &
      is.na(T2_qidsms_manmodsevhtn_24_28) & 
      is.na(T2_qidsms_manmildhtn_24_28) &
       T2_qidsms_Oppt_bp_31_33==FALSE,T2_qidsms_Oppt_bp_31_33:=TRUE]
@@ -883,7 +883,7 @@ xtabs(~TT2$T2_qidsms_manmodsevhtn_31_33, addNA=T)
 #screening
 TT2[,T2_qidsms_Oppt_bp_35_37:=as.logical(NA)]
 TT2[denom_35_37==T,T2_qidsms_Oppt_bp_35_37:=FALSE]
-TT2[num_35_37==T &
+TT2[num_35_37_new==T &
      is.na(T2_qidsms_manmildhtn_31_33) &
      is.na(T2_qidsms_manmodsevhtn_31_33)&
       T2_qidsms_Oppt_bp_35_37==F,T2_qidsms_Oppt_bp_35_37:=TRUE]
@@ -1032,7 +1032,7 @@ TT2[,T2_qidsms_Opportunity_GDM_screening_24_28:=as.logical(NA)]
 
 TT2[denom_24_28==T, T2_qidsms_Opportunity_GDM_screening_24_28:=FALSE]
 
-TT2[num_24_28==T &
+TT2[num_24_28_new==T &
       T2_qidsms_Opportunity_GDM_screening_24_28==F, T2_qidsms_Opportunity_GDM_screening_24_28:=TRUE]
 
 ## Remove opportunities for people who had high blood glu

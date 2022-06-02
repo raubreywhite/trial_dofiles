@@ -492,15 +492,6 @@ z[denom_15_17==T &
 xtabs(~z$num_15_17, addNA=T)
 
 
-# those who attended
-z[denom_15_17==T &
-    (status %in% c("ACTIVE", "COMPLETED","VISITED") & 
-       eventdate==createddate) & (gAateventdate>=105 & gAateventdate<=125) &
-    (gAatcreateddate>0 & gAatcreateddate<105) &
-    programStagename=="Antenatal care visit",num_15_17:=T]
-
-xtabs(~z$num_15_17, addNA=T)
-
 
 
 #########
@@ -807,7 +798,6 @@ xtabs(~z$denom_35_37_check, addNA=T)
 # scheduled only
 z[denom_35_37_check==T &
     (status %in% c("SCHEDULE","SKIPPED") &
-       is.na(eventdate) &
        gAatdueDate>=245 & gAatdueDate<=265) & 
     programStagename=="Antenatal care visit",num_35_37_check:=F]
 
@@ -819,7 +809,7 @@ z[denom_35_37_check==T &
     programStagename=="Antenatal care visit",num_35_37_check:=T]
 
 xtabs(~z$num_35_37_check, addNA=T)
-
+xtabs(~z$denom_35_37_check, addNA=T)
 
 
 #####################
@@ -921,7 +911,7 @@ for(i in nums){
   
   
   yw[denom_15_17==T &
-       get(i)==T, num_15_17:=TRUE]
+       (get(i)==T | T2_anvisitnew_15_17==T), num_15_17:=TRUE]
 
   
 }
@@ -954,7 +944,7 @@ for(i in nums){
   
   
   yw[denom_18_22==T &
-       get(i)==T, num_18_22:=TRUE]
+       (get(i)==T | T2_anvisitnew_18_22==T), num_18_22:=TRUE]
   
   
 }
@@ -985,7 +975,7 @@ for(i in nums){
   
   
   yw[denom_24_28==T &
-       get(i)==T, num_24_28:=TRUE]
+       (get(i)==T | T2_anvisitnew_24_28==T), num_24_28:=TRUE]
   
 }
 
@@ -1014,7 +1004,7 @@ for(i in nums){
   
   
   yw[denom_31_33==T &
-       get(i)==T, num_31_33:=TRUE]
+       (get(i)==T | T2_anvisitnew_31_33==T), num_31_33:=TRUE]
   
   
   
@@ -1046,7 +1036,7 @@ for(i in nums){
   
   
   yw[denom_35_37==T &
-       get(i)==T, num_35_37:=TRUE]
+       (get(i)==T | T2_anvisitnew_35_37==T), num_35_37:=TRUE]
   
   
   
@@ -1205,7 +1195,7 @@ xtabs(~yw$denom_35_37_check, addNA=T)
 for(i in nums){
   
   yw[denom_35_37_check==T &
-       get(i)==F, num_35_37:=FALSE]
+       get(i)==F, num_35_37_check:=FALSE]
   
   
   
@@ -1218,6 +1208,82 @@ for(i in nums){
 }
 
 xtabs(~yw$num_35_37_check, addNA=T)
+
+
+####################
+# new numerators #
+####################
+# 15-17
+yw[, num_15_17_new:=as.logical(NA)]
+yw[denom_15_17==T & 
+     num_15_17==F & num_15_17_check==F, num_15_17_new:=FALSE]
+yw[denom_15_17==T & 
+     (num_15_17==T | num_15_17_check==T), num_15_17_new:=TRUE]
+
+xtabs(~yw$denom_15_17, addNA=T)
+xtabs(~yw$num_15_17, addNA=T)
+xtabs(~yw$num_15_17_check, addNA=T)
+xtabs(~yw$num_15_17_new, addNA=T)
+
+
+
+
+# 18-22
+yw[, num_18_22_new:=as.logical(NA)]
+yw[denom_18_22==T & 
+     num_18_22==F & num_18_22_check==F, num_18_22_new:=FALSE]
+yw[denom_18_22==T & 
+     (num_18_22==T | num_18_22_check==T), num_18_22_new:=TRUE]
+
+xtabs(~yw$denom_18_22, addNA=T)
+xtabs(~yw$num_18_22, addNA=T)
+xtabs(~yw$num_18_22_check, addNA=T)
+xtabs(~yw$num_18_22_new, addNA=T)
+
+
+
+# 24-28
+yw[, num_24_28_new:=as.logical(NA)]
+yw[denom_24_28==T & 
+     num_24_28==F & num_24_28_check==F, num_24_28_new:=FALSE]
+yw[denom_24_28==T & 
+     (num_24_28==T | num_24_28_check==T), num_24_28_new:=TRUE]
+
+xtabs(~yw$denom_24_28, addNA=T)
+xtabs(~yw$num_24_28, addNA=T)
+xtabs(~yw$num_24_28_check, addNA=T)
+xtabs(~yw$num_24_28_new, addNA=T)
+
+# 31-33
+yw[, num_31_33_new:=as.logical(NA)]
+yw[denom_31_33==T & 
+     num_31_33==F & num_31_33_check==F, num_31_33_new:=FALSE]
+yw[denom_31_33==T & 
+     (num_31_33==T | num_31_33_check==T), num_31_33_new:=TRUE]
+
+xtabs(~yw$denom_31_33, addNA=T)
+xtabs(~yw$num_31_33, addNA=T)
+xtabs(~yw$num_31_33_check, addNA=T)
+xtabs(~yw$num_31_33_new, addNA=T)
+
+# 35-37
+yw[, num_35_37_new:=as.logical(NA)]
+yw[denom_35_37==T & 
+     num_35_37==F & num_35_37_check==F, num_35_37_new:=FALSE]
+yw[denom_35_37==T & 
+     (num_35_37==T | num_35_37_check==T), num_35_37_new:=TRUE]
+
+xtabs(~yw$denom_35_37, addNA=T)
+xtabs(~yw$num_35_37, addNA=T)
+xtabs(~yw$num_35_37_check, addNA=T)
+xtabs(~yw$num_35_37_new, addNA=T)
+
+
+
+
+
+
+
 
 
 ###############################################
@@ -1323,7 +1389,7 @@ attendancecheck <- yw[,.(
   "35-37 week numeratorF"=sum(num_35_37==F, na.rm=T),
   "35-37 Denom"=sum(num_35_37==T |
                       num_35_37==F, na.rm=T)),
-  keyby=.(phase, str_TRIAL_2_Cluster)]
+  keyby=.(phase, TrialArm, str_TRIAL_2_Cluster)]
 
 attendancecheck[,prop_15_17:=round(`15-17 week numeratorT`/`15-17 Denom`,digits=2)]
 attendancecheck[,prop_18_22:=round(`18-22 week numeratorT`/`18-22 Denom`, digits=2)]
@@ -1349,9 +1415,8 @@ attendancecheck2 <- yw[,.(
   "31-33 Denom"=sum(denom_31_33_check==T, na.rm=T),
   "35-37 week numeratorT"=sum(num_35_37_check==T, na.rm=T),
   "35-37 week numeratorF"=sum(num_35_37_check==F, na.rm=T),
-  "35-37 Denom"=sum(num_35_37_check==T |
-                      num_35_37_check==F, na.rm=T)),
-  keyby=.(phase, str_TRIAL_2_Cluster)]
+  "35-37 Denom"=sum(denom_35_37_check==T, na.rm=T)),
+  keyby=.(phase,TrialArm, str_TRIAL_2_Cluster)]
 
 
 attendancecheck2[,prop_15_17:=round(`15-17 week numeratorT`/`15-17 Denom`,digits=2)]
@@ -1359,6 +1424,35 @@ attendancecheck2[,prop_18_22:=round(`18-22 week numeratorT`/`18-22 Denom`, digit
 attendancecheck2[,prop_24_28:=round(`24-28 week numeratorT`/`24-28 Denom`,digits=2)]
 attendancecheck2[,prop_31_33:=round(`31-33 week numeratorT`/`31-33 Denom`,digits=2)]
 attendancecheck2[,prop_35_37:=round(`35-37 week numeratorT`/`35-37 Denom`, digits=2)]
+
+
+
+
+attendancecheck3 <- yw[,.(
+  "15-17 week numeratorT"=sum(num_15_17_new==T, na.rm=T),
+  "15-17 week numeratorF"=sum(num_15_17_new==F, na.rm=T),
+  "15-17 Denom"=sum(denom_15_17==T, na.rm=T),
+  "18-22 week numeratorT"=sum(num_18_22_new==T, na.rm=T),
+  "18-22 week numeratorF"=sum(num_18_22_new==F, na.rm=T),
+  "18-22 Denom"=sum(denom_18_22==T, na.rm=T),
+  
+  "24-28 week numeratorT"=sum(num_24_28_new==T, na.rm=T),
+  "24-28 week numeratorF"=sum(num_24_28_new==F, na.rm=T),
+  "24-28 Denom"=sum(denom_24_28==T, na.rm=T),
+  "31-33 week numeratorT"=sum(num_31_33_new==T, na.rm=T),
+  "31-33 week numeratorF"=sum(num_31_33_new==F, na.rm=T),
+  "31-33 Denom"=sum(denom_31_33==T, na.rm=T),
+  "35-37 week numeratorT"=sum(num_35_37_new==T, na.rm=T),
+  "35-37 week numeratorF"=sum(num_35_37_new==F, na.rm=T),
+  "35-37 Denom"=sum(num_35_37==T |
+                      num_35_37==F, na.rm=T)),
+  keyby=.(phase, TrialArm, str_TRIAL_2_Cluster)]
+
+attendancecheck3[,prop_15_17:=round(`15-17 week numeratorT`/`15-17 Denom`,digits=2)]
+attendancecheck3[,prop_18_22:=round(`18-22 week numeratorT`/`18-22 Denom`, digits=2)]
+attendancecheck3[,prop_24_28:=round(`24-28 week numeratorT`/`24-28 Denom`,digits=2)]
+attendancecheck3[,prop_31_33:=round(`31-33 week numeratorT`/`31-33 Denom`,digits=2)]
+attendancecheck3[,prop_35_37:=round(`35-37 week numeratorT`/`35-37 Denom`, digits=2)]
 
 
 
@@ -1398,6 +1492,19 @@ openxlsx::writeData(
   startCol = 1,
   startRow = 1)
 
+
+# add pages 
+openxlsx::addWorksheet(dT, "attendance_user_check_new_num")
+
+
+
+# write data
+openxlsx::writeData(
+  dT,
+  sheet = "attendance_user_check_new_num",
+  x = attendancecheck3,
+  startCol = 1,
+  startRow = 1)
 
 
 
