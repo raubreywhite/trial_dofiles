@@ -7,7 +7,7 @@ fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 fileSources=file.path(getwd(),fileSources)
 sapply(fileSources, debugSource)
 
-Setup(IS_GAZA=FALSE)
+Setup(IS_GAZA=TRUE)
 
 #CheckFilesAndVariables(folder="e.reg-intervention")
 #CheckFilesAndVariables(folder="e.reg-control")
@@ -61,9 +61,18 @@ t <- tab[bookyear>2016, c("bookyear",
                           "denom",
                           "percRhNeg",
                           "percRhpos")]
+
+if(IS_GAZA==F){
 openxlsx::write.xlsx(t,
                      file.path(FOLDER_DATA_RESULTS,
                                "guidelines",
                                "rh_negative_proportions.xlsx"))
 
 
+} else {
+  
+  openxlsx::write.xlsx(t,
+                       file.path(FOLDER_DATA_RESULTS_GAZA,
+                                  "rh_negative_proportions.xlsx"))
+  
+}

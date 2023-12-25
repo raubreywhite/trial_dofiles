@@ -12,6 +12,10 @@ Mabstract <- d[ident_TRIAL_1==TRUE,
 ###num syst and diast
 ###num lab uti
 
+# load dara file
+d <- LoadDataFileFromNetwork()
+
+
 #making variable for ultrasound
 vars <- names(d)[stringr::str_detect(names(d),"^usevent_[0-9]+")]
 d[,usevent_x:=0]
@@ -51,6 +55,33 @@ for(i in vars){
 }
 
 sum(d[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
+
+
+# number of those who booked
+nrow(d[ident_dhis2_booking==T & bookdate<="2022-12-31"])
+
+
+#id maximum amount of things
+d[,numancvisits_x:=as.numeric(NA)]
+d[ident_dhis2_booking==T, numancvisits_x:=0]
+
+d[,andate_0:=bookdate]
+temp <- stringr::str_subset(names(d),"^andate_")
+
+# -1 because have 22 dates and have a 0 in there
+for(i in 0:(length(temp)-1)){
+  
+  datevar <- paste0("andate_",i)
+  
+  
+  d[!is.na(i) & 
+       get(datevar)<="2022-12-31",numancvisits_x:=numancvisits_x+1]
+  
+  # add other limits like in the precovid stuff
+  
+  
+}
+
 
 #Making anevents into one variable
 #the * means needs to be atleast 0 of the preceding letters
@@ -249,6 +280,81 @@ openxlsx::write.xlsx(UpdatedSystemNumbers,
 #diabetes                and urinary tract infections.
 
 # 
+nrow(d[ident_dhis2_booking==T & bookyear<=2022])
+
+
+d[,anevent_x2:=0]
+
+vars <- names(d)[stringr::str_detect(names(d),"^anevent_[0-9]+")]
+
+
+for(i in vars){
+  
+  varsdate <- names(d)[stringr::str_detect(names(d),"andate")]
+  
+  d[!is.na(get(i)) &
+       get(varsdate)>="2017-01-01" &
+       get(varsdate)<="2022-12-31", anevent_x2:=anevent_x2 + 1]
+  
+  
+  
+  
+  
+}
+
+sum(d[ident_dhis2_control==F]$anevent_x2,na.rm=T)
+
+
+# total ppc events per woman
+vars <- names(d)[stringr::str_detect(names(d),"^ppcevent_[0-9]+")]
+d[,ppcevent_x:=0]
+
+
+print(vars)
+
+for(i in vars){
+  
+  ppcdate <- names(d)[stringr::str_detect(names(d),"ppcdate")]
+  
+  
+  d[!is.na(get(i)) & 
+       get(ppcdate)>="2017-01-01" &
+       get(ppcdate)<="2022-12-31", ppcevent_x:=ppcevent_x + 1]
+  
+  
+  
+}
+
+sum(d[ident_dhis2_control==F]$ppcevent_x,na.rm=T)
+
+
+
+# total nbc events per woman
+#making variable for total nbc visits
+vars <- names(d)[stringr::str_detect(names(d),"^nbcevent_[0-9]+")]
+d[,nbcevent_x:=0]
+
+
+print(vars)
+
+for(i in vars){
+  
+  nbcdate <- names(d)[stringr::str_detect(names(d),"^nbcdate")]
+
+  
+  d[!is.na(get(i)) &
+       get(nbcdate)>="2017-01-01" &
+       get(nbcdate)<="2022-12-31", nbcevent_x:=nbcevent_x + 1]
+  
+ 
+  
+  
+}
+
+sum(d[ident_dhis2_control==F]$nbcevent_x,na.rm=T)
+
+
+
 
 ################################################################################
 #############################  ARCHIVE ########################################

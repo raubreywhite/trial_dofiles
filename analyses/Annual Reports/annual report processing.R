@@ -10,20 +10,169 @@ fileSources = file.path("r_code", list.files("r_code", pattern = "*.[rR]$"))
 sapply(fileSources, source, .GlobalEnv)
 
 Setup(IS_GAZA=FALSE)
-###### SETUP ENDS ######
+#Setup(IS_GAZA=TRUE)
 
+###### SETUP ENDS ######
+if(IS_GAZA==F){
+  
 #Load data in data from Palestine
-d <- LoadDataFileFromNetwork()
+  
+  d <- LoadDataFileFromNetwork()
+
+} else {
+  
+  d <- LoadDataFileFromNetwork()
+  
+  
+}
+
 
 # defining dataset
 smallD  <- d[bookdate >= "2019-01-01"]
-
+if(IS_GAZA==F){
 ### use gestational ages from creatin further variables
 smallD[,bookgestagedays_cats:=cut(bookgestagedays,
                                   breaks=c(-500,0,104,
                                            125,160,167,202,
                                            216,237,244,265,293),
                                   include.lowest=T)]
+  
+} else {
+  
+  
+  
+  nam <- names(smallD)[stringr::str_detect(names(smallD),"^usedd_[0-9]*$")]
+  num <- stringr::str_replace(nam,"usedd_","")
+  smallD[,first_1_21_usedd:=as.Date(NA)]
+  for(i in num ){
+    print(i)
+    
+    var_usedd <- sprintf("usedd_%s",i)
+    var_usgestage <- sprintf("usgestage_%s",1)
+    
+    smallD[!is.na(get(var_usedd)) &
+        
+        !is.na(get(var_usgestage)) &
+        get(var_usgestage) > 0 &
+        get(var_usgestage) < 23 &
+        is.na(first_1_21_usedd),
+      first_1_21_usedd:=as.Date(get(var_usedd),format="%Y-%m-%d")]
+  }
+  
+  smallD[,usedddays:=first_1_21_usedd - as.difftime(280, unit="days")]
+  smallD[,USorLMPdate:=booklmp]
+  smallD[!is.na(usedddays),USorLMPdate:=usedddays]
+  #d[is.na(USorLMPdate), USorLMPdate:=]
+  
+  smallD[,bookgestagedays:=round(as.numeric(difftime(
+    bookdate,USorLMPdate, units="days")))] 
+  
+  #gestagedaysCats
+  ### making gestational ages based on usedd=<20, then lmp, then us>20 ###
+  # + means repeat, $ means the end of the entire string
+  smallD[,lmpT1:=as.Date(NA)]
+  us_gestages <- stringr::str_subset(names(smallD), "^usgestage_[0-9]+")
+  us_date <- stringr::str_subset(names(smallD), "^usdate_[0-9]+")
+  
+  
+  #seq_along identical to 1:lenth()
+  for(i in seq_along(us_gestages)){
+    var_us_gestage <- us_gestages[i]
+    var_us_date<- us_date[i]
+    
+    smallD[is.na(lmpT1) & 
+        get(var_us_gestage)<= 20, 
+      
+      lmpT1:=get(var_us_date)-get(var_us_gestage)*7]
+    
+  }
+  
+  smallD[is.na(lmpT1) & !is.na(booklmp), lmpT1:=booklmp]
+  
+  for(i in seq_along(us_gestages)){
+    var_us_gestage <- us_gestages[i]
+    var_us_date<- us_date[i]
+    
+    smallD[is.na(lmpT1) & get(var_us_gestage)>=20 & get(var_us_gestage)<40,
+      
+      lmpT1:=get(var_us_date)-get(var_us_gestage)*7]
+    
+    
+  }
+  
+  #qc new variables
+  smallD[is.na(lmpT1), c("booklmp",us_gestages, us_date), with=F]
+  
+  
+  
+  ##looping through to make gestages for each of the program stages
+  #Us gAs
+  us_date <- stringr::str_subset(names(smallD), "^usdate_[0-9]+")
+  usT1_gA <- stringr::str_replace(us_date, "usdate","usT1gestagedays")
+  
+  for(i in seq_along(us_date)){
+    var_us_gestage <- usT1_gA[i]
+    var_us_date<- us_date[i] 
+    
+    smallD[,(var_us_gestage):=as.numeric(floor(difftime(get(var_us_date),lmpT1, units="days")))]
+    
+  }
+  
+  
+  #ANC gAs
+  an_date <- stringr::str_subset(names(smallD), "^andate_[0-9]+")
+  anT1_gA <- stringr::str_replace(an_date, "andate","anT1gestagedays")
+  
+  for(i in seq_along(an_date)){
+    var_an_gestage <- anT1_gA[i]
+    var_an_date<- an_date[i] 
+    
+    smallD[,(var_an_gestage):=as.numeric(floor(difftime(get(var_an_date),lmpT1, units="days")))]
+    
+  }
+  
+  #Lab gAs
+  ##NEED TO ROUND OR USE FLOOR
+  lab_date <- stringr::str_subset(names(smallD), "^labdate_[0-9]+")
+  labT1_gA <- stringr::str_replace(lab_date, "labdate","labT1gestagedays")
+  
+  for(i in seq_along(lab_date)){
+    var_lab_gestage <- labT1_gA[i]
+    var_lab_date<- lab_date[i] 
+    
+    smallD[,(var_lab_gestage):=as.numeric(floor(difftime(get(var_lab_date),lmpT1, units="days")))]
+    
+  }
+  
+  #Man gAs
+  man_date <- stringr::str_subset(names(smallD), "^mandate_[0-9]+")
+  manT1_gA <- stringr::str_replace(man_date, "mandate","manT1gestagedays")
+  
+  for(i in seq_along(man_date)){
+    var_man_gestage <- manT1_gA[i]
+    var_man_date<- man_date[i] 
+    
+    smallD[,(var_man_gestage):=as.numeric(floor(difftime(get(var_man_date),lmpT1, units="days")))]
+    
+  }
+  
+  ##making categories of days for booking
+  
+  smallD[,bookgestagedays_cats:=cut(bookgestagedays,
+                               breaks=c(-500,0,104,
+                                        125,160,167,202,
+                                        216,237,244,265,293),
+                               include.lowest=T)]
+  
+  
+}
+
+
+
+xtabs(~smallD$bookgestagedays_cats, addNA=T)
+
+
+
 
 # MAKE BOOK VISIT FOR ANEMIA
 smallD[,booklabhb:=as.numeric(NA)]
@@ -41,10 +190,6 @@ xtabs(~smallD$booklaburglu)
 str(smallD$booklaburglu)
 unique(smallD$booklaburglu)
 
-smallD[,booklaburglu:=NULL]
-smallD[abs(labT1gestagedays_1-bookgestagedays)<7 & laburglu_1%in%c("NEG","POS"),
-       booklaburglu:=laburglu_1]
-xtabs(~smallD$booklaburglu)
 
 
 # MAKE BOOK VISIT FOR LABBLOODGLU
@@ -71,14 +216,14 @@ xtabs(~smallD$booklabfastbloodglu_high, addNA=T)
 
 
 # high sugar at booking
-d[,bookhrhighsug:=as.logical(NA)]
+smallD[,bookhrhighsug:=as.logical(NA)]
 
-d[(mandate_1-bookdate)<=7,bookhrhighsug:=FALSE] 
-d[(mandate_1-bookdate)<=7 &
+smallD[(mandate_1-bookdate)<=7,bookhrhighsug:=FALSE] 
+smallD[(mandate_1-bookdate)<=7 &
     manperf_1==1 &
     mantypex_1 %in% c("RefHighRisk","RefDiabetes","RefSpec"),bookhrhighsug:=TRUE] 
 
-xtabs(~d$bookhrhighsug, addNA=T)
+xtabs(~smallD$bookhrhighsug, addNA=T)
 
 
 
@@ -92,6 +237,8 @@ vars <- stringr::str_remove(vars, "anexamsfh_")
 #anexamsfh stuff
 ## this is a variable that is made using a combination of anexamsfh, angestage, and ## ancongestageatvisitweeks_1. control uses that last one, if its present. If not,
 ## if uses the anexamsfh
+
+if(IS_GAZA==F){
 for(i in vars){
   print(i)
   anexamsfh <-sprintf("anexamsfh_%s",i)
@@ -107,7 +254,7 @@ for(i in vars){
   smallD[!is.na(get(conangestage)) &
            !is.na(get(anexamsfh)), (sfhDiscrep):=abs(get(anexamsfh)-get(conangestage))]
   
-}
+ }
 
 # SFH discrepancy with ancongestagesizevisitweek
 vars <- stringr::str_subset(names(smallD), "^anconancgestationaageatvisitweeks_")
@@ -127,7 +274,10 @@ for(i in vars){
            !is.na(get(anconangestageweeks)), 
          (sfhDiscrepCon):=abs(get(anconangestageweeks)-get(anexamsfh))]
   
+ }
+
 }
+
 
 # anT1 in weeks to calculate sfhDiscrep via anexamsfh and anT1gestagedays to weeks
 smallD[,anT1gestagedays_0:=bookgestagedays]
@@ -1821,9 +1971,23 @@ checkHR <- smallD[!is.na(TrialOne_manRef_HR_20_20) &
 
 
 ##### save data set for analysis of annual report ##### 
-
-saveRDS(smallD,
+if(IS_GAZA==F){
+  
+  
+ saveRDS(smallD,
         file.path(FOLDER_DATA_CLEAN,
                   "annual reports",
                   "annualreportdata.RDS"))
+  
+  
+  
+} else {
+  
+  saveRDS(smallD,
+          file.path(FOLDER_DATA_CLEAN_GAZA,
+                    "annual reports",
+                    "annualreportdata.RDS"))
+  
+  
+}
 

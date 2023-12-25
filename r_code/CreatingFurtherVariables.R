@@ -1,6 +1,15 @@
 CreatingFurtherVariablesNormal <- function(d){
-  d[,nbcdateofdelivery_1:=as.Date(nbcdateofdelivery_1)]
   
+  if(IS_GAZA==F){
+ 
+     d[,nbcdateofdelivery_1:=as.Date(nbcdateofdelivery_1)]
+    
+  } else {
+    
+    d[,nbcdateofdelivery_1:=as.Date(nbcdateofdelivery_1, format="%m/%d/%Y")]
+    xtabs(~d$nbcdateofdelivery_1, addNA=T)
+    
+  }
   #cleaning
   ##age
   #d[age<14, age:=NA]
@@ -63,7 +72,7 @@ CreatingFurtherVariablesMahima <- function(d){
     # c("hbodate_1","hbodateofdeliveryhospital_1","hboddateofbirth_1")]
   
   #### 
-  
+  if(IS_GAZA==F){
   nam <- names(d)[stringr::str_detect(names(d),"^abbdate_[0-9]*$")]
   num <- stringr::str_replace(nam,"abbdate_","")
   for(i in num){
@@ -254,6 +263,9 @@ CreatingFurtherVariablesMahima <- function(d){
   # d[usedd_1=="",usedd_1:=NA]
   # d[,usedd_1:=as.Date(usedd_1)]
   
+  
+  }
+  
   nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
   #num <- stringr::str_replace(nam,"usedd_","")
   d[,lastusedd:=as.character(NA)]
@@ -272,6 +284,8 @@ CreatingFurtherVariablesMahima <- function(d){
  as.Date(17290,origin="1970-01-01")
  #unique(d$lastusedd)
 
+ 
+ if(IS_GAZA==F){
 #using lastusedd and minus from hbodates 
 #so that we can get actual gA from usedd
 #get the diff btwn the hbodob and usedd
@@ -288,10 +302,15 @@ d[,mahima_gA_1_us:=lastuseddminusdob+40]
 #unique(d$mahima_gA_1_us)  
 class(d$mahima_gA_1_us)
  
+ }
 
 ###Making first usedd if its at <=21 gA variable
 # to mimick the  eRegistry, we have used the eReg rule
 # the rule takes an ultrasound less than 23 weeks and an lmp if no ultrasound is present
+ 
+ 
+ 
+
   nam <- names(d)[stringr::str_detect(names(d),"^usedd_[0-9]*$")]
   num <- stringr::str_replace(nam,"usedd_","")
   d[,first_1_21_usedd:=as.Date(NA)]
@@ -315,16 +334,20 @@ class(d$mahima_gA_1_us)
   
   #Making gA for first_1_21_usedd
   
+  if(IS_GAZA==F){
   d[,first_1_21_usedd_diffbtwnHBO:=round(as.numeric(
     difftime(mahima_dateofbirth_1,first_1_21_usedd, units="weeks")),digits=1)]
   
   d[,first_1_21_usedd_gA:=first_1_21_usedd_diffbtwnHBO+40]
   
   #unique(d$first_1_21_usedd_gA)
-  
+  }
   
   #TO DO: make sure we get the 87 women who are missing an lmp or bookdate
   d[,usedddays:=first_1_21_usedd - as.difftime(280, unit="days")]
+  
+  
+  
   
   d[,USorLMPdate:=booklmp]
   d[!is.na(usedddays),USorLMPdate:=usedddays]
@@ -355,7 +378,7 @@ class(d$mahima_gA_1_us)
   #d[,comboUSandLMPgA:=mahima_gestageatbirthwk_1]
   #d[!is.na(first_1_21_usedd_gA),comboUSandLMPgA:=first_1_21_usedd_gA]
   
-  
+  if(IS_GAZA==F){
   d[,comboUSandLMPgA:= round(as.numeric(difftime(
     mahima_dateofbirth_1,
     USorLMPdate,
@@ -383,7 +406,7 @@ class(d$mahima_gA_1_us)
                               breaks=c(-30,37.7,41.7,9999),
                               include.lowest=T)]
   
-  
+  }
   ###Making unified hospital birth data variables for CISMAC###
   
   #BMI
@@ -394,7 +417,8 @@ class(d$mahima_gA_1_us)
                      breaks=c(0,18.4,24.9,29.9,99999),
                      include.lowest=T)]
   
-
+ 
+  if(IS_GAZA==F){
   
   # MERVET FILL IN HERE
   
@@ -704,6 +728,10 @@ class(d$mahima_gA_1_us)
   d[matching=="Private",merged_indic_csection:=dhis2hbousrecommendcomment_1]
   d[matching=="PaperHBO",merged_indic_csection:=paperhbo_indicationforcesarian_1]
   
+  
+  
+  }
+  
   # #Indication for C-section from Nurse's notes : occyptoposterium
   # #found in usrecom/comments control hospitals
   # 
@@ -885,7 +913,7 @@ class(d$mahima_gA_1_us)
     
   }
   
-
+  if(IS_GAZA==F){
 #TO DO: make sure we get the 87 women who are missing an lmp or bookdate
   d[,usedddays:=first_1_21_usedd - as.difftime(280, unit="days")]
   
@@ -893,7 +921,7 @@ class(d$mahima_gA_1_us)
   d[!is.na(usedddays),USorLMPdate:=usedddays]
   #d[is.na(USorLMPdate), USorLMPdate:=]
   
-  
+  }
   #recalculating bookgestational age into days
   d[,bookgestagedays:=round(as.numeric(difftime(bookdate,USorLMPdate, units="days")))]
   
@@ -1018,65 +1046,6 @@ class(d$mahima_gA_1_us)
 
 }
   
-#recalculating angestational age into days as they are from the system
-# nam <- names(d)[stringr::str_detect(names(d),"^andate_[0-9]*$")]
-# num <- stringr::str_replace(nam,"andate_","")
-# for(i in num){
-#   print(i)
-#   d[,(sprintf("angestagedays_%s",i)):=round(as.numeric(difftime(
-#     get(sprintf("andate_%s", i)),
-#     USorLMPdate,
-#     units="days")),digits=1)]
-# }
-# 
-# # TO DO: get distributions of gestational ages for an, lab, us, etc.
-# 
-# #recalculating labgestational age into days
-# #floor instead of round because we want to round down
-# nam <- names(d)[stringr::str_detect(names(d),"^labdate_[0-9]*$")]
-# num <- stringr::str_replace(nam,"labdate_","")
-# for(i in num){
-#   print(i)
-#   d[,(sprintf("labgestagedays_%s",i)):=floor(as.numeric(difftime(
-#     get(sprintf("labdate_%s", i)),
-#     USorLMPdate,
-#     units="days")))]
-# }
-# 
-# #recalculating usgestational age into days
-# nam <- names(d)[stringr::str_detect(names(d),"^usdate_[0-9]*$")]
-# num <- stringr::str_replace(nam,"usdate_","")
-# for(i in num){
-#   print(i)
-#   d[,(sprintf("usgestagedays_%s",i)):=round(as.numeric(difftime(
-#     get(sprintf("usdate_%s", i)),
-#     USorLMPdate,
-#     units="days")),digits=1)]
-# }
-# 
-# 
-# #recalculating mangestational age into days
-# nam <- names(d)[stringr::str_detect(names(d),"^mandate_[0-9]*$")]
-# num <- stringr::str_replace(nam,"mandate_","")
-# for(i in num){
-#   print(i)
-#   d[,(sprintf("mangestagedays_%s",i)):=floor(as.numeric(difftime(
-#     get(sprintf("mandate_%s", i)),
-#     USorLMPdate,
-#     units="days")))]
-# }
-# 
-# 
-# #recalculating riskgestational age into days
-# nam <- names(d)[stringr::str_detect(names(d),"^riskdate_[0-9]*$")]
-# num <- stringr::str_replace(nam,"riskdate_","")
-# for(i in num){
-#   print(i)
-#   d[,(sprintf("riskgestagedays_%s",i)):=floor(as.numeric(difftime(
-#     get(sprintf("riskdate_%s", i)),
-#     USorLMPdate,
-#     units="days")))]
-# }
 
 
 

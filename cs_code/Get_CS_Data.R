@@ -1,23 +1,28 @@
-Get_AVICENNA_Data <- function(folderName,
+Get_CS_Data <- function(folderName,
                               ignoreAttributes=F,
                               takeFirstObs=FALSE,
-                              dateName=NULL
-                              ){
+                              dateName=NULL,
+                        files_to_be_read_in){
+  
+  # files_to_be_read_in_master <- list.files(file.path(FOLDER_DATA_RAW,"cs"),"^[0-9][0-9][0-9][0-9]-[0-9][0-9]")
+  # files_to_be_read_in <- files_to_be_read_in_master[files_to_be_read_in>="2018-12"]
+  # files_to_be_read_in <- files_to_be_read_in_master[files_to_be_read_in<"2018-12"]
   attributeList <- d <- vector("list",1000)
   
   i <- 1
   
   #load in the data, but we also store the kind of variables we load in
   attributeList <- NULL
-  for(yearMonth in list.files(file.path(FOLDER_DATA_RAW,"avicenna"),"^[0-9][0-9][0-9][0-9]-[0-9][0-9]")){
-    for(f in list.files(path=file.path(FOLDER_DATA_RAW,"avicenna",yearMonth,folderName))){
+  for(yearMonth in files_to_be_read_in){
+    for(f in list.files(path=file.path(FOLDER_DATA_RAW,"cs",yearMonth,folderName))){
       if(!(stringr::str_detect(f,"xlsx$") | stringr::str_detect(f,"xls$"))) next
       d[[i]] <- readxl::read_excel(
-        file.path(FOLDER_DATA_RAW,"avicenna",yearMonth,folderName,f)
+        file.path(FOLDER_DATA_RAW,"cs",yearMonth,folderName,f)
       )
       a <- c()
       for(j in 1:ncol(d[[i]])) a <- c(a,class(d[[i]][[j]])[1])
       attributeList[[i]] <- data.table(t(a))
+      namesList <- names(d[[i]])
       
       if(!ignoreAttributes){
         ## delete d[[i]] because it takes up too much space
@@ -43,19 +48,19 @@ Get_AVICENNA_Data <- function(folderName,
       i <- i + 1
     }
   }
-
+  
   # if we dont ignore the attributes
   if(!ignoreAttributes){
-    attributeList <- rbindlist(attributeList, fill=T)
+    attributeList <- rbindlist(attributeList)
     attributeList <- apply(attributeList,2,function(x){names(sort(table(x),decreasing=TRUE)[1])})
     attributeList[attributeList=="character"] <- "text"
     
     i <- 1
-    for(yearMonth in list.files(file.path(FOLDER_DATA_RAW,"avicenna"),"^[0-9][0-9][0-9][0-9]-[0-9][0-9]")){
-      for(f in list.files(file.path(FOLDER_DATA_RAW,"avicenna",yearMonth,folderName))){
+    for(yearMonth in files_to_be_read_in){
+      for(f in list.files(file.path(FOLDER_DATA_RAW,"cs",yearMonth,folderName))){
         if(!(stringr::str_detect(f,"xlsx$") | stringr::str_detect(f,"xls$"))) next
         d[[i]] <- readxl::read_excel(
-          file.path(FOLDER_DATA_RAW,"avicenna",yearMonth,folderName,f),
+          file.path(FOLDER_DATA_RAW,"cs",yearMonth,folderName,f),
           col_types=attributeList
         )
         
@@ -94,3 +99,20 @@ Get_AVICENNA_Data <- function(folderName,
   d[,motheridno:=as.numeric(motheridno)]
   return(d)
 }
+
+
+
+
+
+
+# work around
+# run these twice because different date variables and extractions
+# missing, non needed variables
+
+
+
+
+# files_to_be_read_in_master <- list.files(file.path(FOLDER_DATA_RAW,"cs"),"^[0-9][0-9][0-9][0-9]-[0-9][0-9]")
+# files_to_be_read_in <- files_to_be_read_in_master[files_to_be_read_in_master>="2018-12"]
+# files_to_be_read_in <- files_to_be_read_in_master[files_to_be_read_in_master<"2018-12"]
+
