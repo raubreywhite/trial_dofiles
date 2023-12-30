@@ -68,6 +68,7 @@ yearmonth <<- sprintf("%s-%s",
 
 
 ########################
+########################
 
 
 # load in and create our data set #
@@ -87,7 +88,24 @@ nrow(avi[is.na(abbbabybirthresult_1)])
 # 
 
 
+########################
+########################
+# merge mch data with hosp data
+mch <- CleanAllDataforCSStudy(includePPC=T, IS_GAZA=FALSE)
 
+mch[ident_mch==T]
+
+########################
+# merge mch & avicenna #
+########################
+
+a <- merge(A,
+           mch,
+           by=c("idno","abbbabybirthdate_1"),
+           all.x=TRUE)
+nrow(a)
+
+########################
 
 
 

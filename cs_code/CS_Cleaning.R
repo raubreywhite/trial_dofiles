@@ -25,11 +25,6 @@ nrow(A[is.na(abbbabybirthresult_1) & is.na(abbbabybirthresult_2) & is.na(abbbaby
 nrow(A[is.na(abbbabybirthresult_1) & is.na(abbbabybirthresult_2) & is.na(abbbabybirthresult_3) & is.na(abbbabybirthresult_4) & !is.na(abbbabybirthresult_5)])
 
 
-
-
-# clean avicenna variables 
-# drs notes
-# nurses notes
 # gestage
 A[,gestage:=as.numeric(abbbabypregnancynoofweeks_1)]
 
@@ -41,6 +36,7 @@ xtabs(~A$abbbabybirthdate_1)
 str(A$abbbabybirthdate_1)
 A[,birthyear:=lubridate::year(birthdate)]
 xtabs(~A$birthyear)
+
 # hospital name
 A[,hospname:=as.character(NA)]
 
@@ -66,15 +62,12 @@ A[stringr::str_detect(abbname_1,"الخليل"),
   hospname:="Hebron"]
 A[stringr::str_detect(abbname_1,"رام الله"),
   hospname:="PMC"]
-
 A[stringr::str_detect(abbname_1,"بيت جالا"),
   hospname:="Beit Jala"]
-
 A[stringr::str_detect(abbname_1,"أريحا"),
   hospname:="Jericho"]
 A[stringr::str_detect(abbname_1,"Rafidia"),
   hospname:="Rafidia"]
-
 A[stringr::str_detect(abbname_1,"الشيخ زايد"),
   hospname:="PMC"]
 xtabs(~A$hospname, addNA=T)
@@ -84,13 +77,11 @@ nrow(A[is.na(abbname_1)])
 A[,mode:=as.character(NA)]
 A[stringr::str_detect(abbbabybirthtype_1,"Cesarean"), mode:="CS"]
 A[stringr::str_detect(abbbabybirthtype_1,"Normal"), mode:="Normal"]
-
+xtabs(~A$abbbabybirthtype_1)
 # outcome
 A[,outcome:=abbbabybirthresult_1]
 xtabs(~A$outcome, addNA=T)
 
-# induced
-A[,induced:=as.logical(NA)]
 # define variables #
 # define a birth/delivery
 # parity nulli=0, multipara >=1
@@ -98,6 +89,8 @@ A[,induced:=as.logical(NA)]
 # singleton or multiple, refers to current preg
 # presentation Cephalic, breech, transverse
 # gest age <37, 37>=
+
+# onset
 
 # data cleaning #
 
@@ -114,7 +107,10 @@ A[stringr::str_detect(tolower(acsdatatext_1),"cs"), prevcs:=TRUE]
 # transverse, face, trasverse, breech, oblique lie
 A[,pres:=as.character(NA)]
 A[stringr::str_detect(tolower(acsdatatext_1),"breech"), pres:="breech"]
-A[stringr::str_detect(tolower(acsdatatext_1),"face"), pres:="vaginal"]
+A[stringr::str_detect(tolower(acsdatatext_1),"face"), pres:="cephalic"]
+A[stringr::str_detect(tolower(acsdatatext_1),"obl"),  pres:="oblique"]
+A[stringr::str_detect(tolower(acsdatatext_1),"tras"),  pres:="transverse"]
+A[stringr::str_detect(tolower(acsdatatext_1),"trans"),  pres:="transverse"]
 
 
 
@@ -172,24 +168,16 @@ A[,cs_parity:=parity]
 A[,cs_pres:=pres]
 A[,cs_gestage:=gestage]
 A[,cs_prevcs:=prevcs]
-A[,cs_multpreg:=multipreg]
+A[!is.na(acsdatatext_1), cs_multpreg:=FALSE]
+A[multipreg==T,cs_multpreg:=TRUE]
 
 A[,cs_onset:=as.character()]
-A[,cs_induced:=as.character()] # prelabour vs labour induced
+A[,cs_induced:=induced()] # prelabour vs labour induced
+
 A[,EDD:=as.date()] 
 A[,cs_csbirth:=FALSE] # id those who are true
-A[,hospname:=as.character()]
+A[mode=="CS",cs_birth:=TRUE]
 
-
-
-
-# clean avicenna variables 
-# drs notes
-# nurses notes
-# gestage
-# birth date
-# hospital name
-# ward?
 
 
 # define variables #
@@ -318,6 +306,7 @@ a[cs_group_5==TRUE, cs_parity=="multi" &
     cs_multipreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37,cs_group_5a:=TRUE]
+
 a[cs_group_5==TRUE, cs_parity=="multi" &
     cs_prevcs>=1 &
     cs_multipreg==FALSE &
@@ -385,7 +374,7 @@ adq[,"% presentation":= round(100*presentation/denom, digits=1)]
 adq[,"% gestage":= round(100*gestage/denom, digits=1)]
 adq[,"% onset":= round(100*onset/denom, digits=1)]
 
-
+# total number of births 
 
 # report table #
 reporttab <- a[!is.na(cs_group),
@@ -410,7 +399,8 @@ reporttabyearhosp <- a[!is.na(cs_group),
                                cs_group)]
 
 
-# chi square by year, hosp?
+# chi square by year and hosp?/ chi sq by hosp only
+
 # robson group classes and percentages overall, and then by year
 # id matched and came in for anc, ppc, anc & ppc
 
@@ -424,19 +414,9 @@ reporttabyearhosp <- a[!is.na(cs_group),
 ### match with mch data for other outcomes ####
 # ident_mch var for anyone matchin ppc or anc
 
-# load in merged mch and ereg data set #
-# run data set with avicenna data and then load the data set
-d <- LoadDataFile()
-
-# select ids in avicenna and also need to do an early to late match??
-d[motheridno==A$idno & earlyDate==A$earlyDate, tokeep:=TRUE]
-mch <- d[tokeep==T]
-
-# identify those id numbers and baby birthdates in both files#
-a <- merge(A,
-           mch,
-           by=c("idno","EDD"),
-           all.x=TRUE)
+########################
+# merged data #
+########################
 
 # tables #
 
