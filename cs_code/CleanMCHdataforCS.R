@@ -63,9 +63,9 @@ CleanAllDataforCSStudy <- function(
   
   # CREATING FURTHER VARIABLES
   print("****1")
-  CreatingFurtherVariablesNormal(d)
+  #CreatingFurtherVariablesNormal(d[IS_GAZA=F])
   print("****2")
-  CreatingFurtherVariablesMahima(d)
+  #CreatingFurtherVariablesMahima(d[IS_GAZA=F])
   print("****3")
   
   # CALC INDICATORS OLSO

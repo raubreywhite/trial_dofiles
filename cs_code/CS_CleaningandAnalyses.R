@@ -90,6 +90,12 @@ xtabs(~A$outcome, addNA=T)
 # presentation Cephalic, breech, transverse
 # gest age <37, 37>=
 
+
+# avicennapregs reg
+setorder(A,cols="motheridno","amddate_1","abbbabyrecorddatecreation_1")
+A[!is.na(abbbabyrecorddatecreation_1),numinavicenna:=.N, by=motheridno]
+xtabs(~A$numinavicenna)
+
 # onset
 
 # data cleaning #
@@ -103,14 +109,30 @@ A[stringr::str_detect(tolower(acsdatatext_1),"prev") &
 A[stringr::str_detect(tolower(acsdatatext_1),"preius"), prevcs:=TRUE]
 A[stringr::str_detect(tolower(acsdatatext_1),"cs"), prevcs:=TRUE]
 
+# assumption
+setorder(A,cols="motheridno","amddate_1","abbbabyrecorddatecreation_1")
+
+# shift prev mode of delivery down one, if prevmode=="CS", and is missing prev cs, then prevcs==T
+A[,prevmode:=shift(mode,n=1L),by=motheridno]
+A[is.na(prevcs) & prevmode=="CS", prevcs:=TRUE]
+
+
+
+# assumption
+A[is.na(prevcs), prevcs:=FALSE]
+
 
 # transverse, face, trasverse, breech, oblique lie
 A[,pres:=as.character(NA)]
 A[stringr::str_detect(tolower(acsdatatext_1),"breech"), pres:="breech"]
+A[stringr::str_detect(tolower(acsdatatext_1),"brrech"), pres:="breech"]
+
 A[stringr::str_detect(tolower(acsdatatext_1),"face"), pres:="cephalic"]
 A[stringr::str_detect(tolower(acsdatatext_1),"obl"),  pres:="oblique"]
 A[stringr::str_detect(tolower(acsdatatext_1),"tras"),  pres:="transverse"]
 A[stringr::str_detect(tolower(acsdatatext_1),"trans"),  pres:="transverse"]
+
+A[is.na(pres) & mode=="Normal", pres:="cephalic"]
 
 
 
@@ -124,6 +146,17 @@ A[stringr::str_detect(tolower(acsdatatext_1),"triplet"), multpreg:=TRUE]
 A[stringr::str_detect(tolower(acsdatatext_1),"triblet"), multpreg:=TRUE]
 A[stringr::str_detect(tolower(acsdatatext_1),"quadreplets"), multpreg:=TRUE]
 
+# assumption
+A[is.na(parity) & !is.na(abbbabyrecorddatecreation_1) & 
+      (!is.na(abbbabyrecorddatecreation_2)|
+         !is.na(abbbabyrecorddatecreation_3)|
+         !is.na(abbbabyrecorddatecreation_4)|
+         !is.na(abbbabyrecorddatecreation_5)|
+         !is.na(abbbabyrecorddatecreation_6)|
+         !is.na(abbbabyrecorddatecreation_7)), multpreg:=TRUE]
+
+xtabs(~A$multpreg)
+
 
 # parity
 A[stringr::str_detect(tolower(acsdatatext_1),"multipara"), parity:="multi"]
@@ -133,7 +166,18 @@ A[stringr::str_detect(tolower(acsdatatext_1),"multipare"), parity:="multi"]
 A[stringr::str_detect(tolower(acsdatatext_1),"primi gravida"), parity:="nulli"]
 A[stringr::str_detect(tolower(acsdatatext_1),"primigravida"), parity:="nulli"]
 A[stringr::str_detect(tolower(acsdatatext_1),"primi"), parity:="nulli"]
-A[stringr::str_detect(tolower(acsdatatext_1),"pg"), parity:="nulli"]
+A[stringr::str_detect(tolower(acsdatatext_1),"primy"), parity:="nulli"]
+
+xtabs(~A$parity, addNA=T)
+
+# assumptions
+# assumption multiparity
+A[is.na(parity) & numinavicenna>1 & ident_avic_abb==T, parity:="multi"]
+xtabs(~A$parity, addNA=T)
+# assumptions for nulliparity
+#nrow(A[is.na(parity) & numinavicenna==1])
+#A[is.na(parity) & numinavicenna==1, parity:="nulli"]
+#xtabs(~A$parity, addNA=T)
 
 
 # induction
@@ -147,6 +191,8 @@ A[stringr::str_detect(tolower(acsdatatext_1),"induce"), induced:=TRUE]
 A[stringr::str_detect(tolower(acsdatatext_1),"inductioin"), induced:=TRUE]
 A[stringr::str_detect(tolower(acsdatatext_1),"indoction"), induced:=TRUE]
 
+# if not specified that they were induced, then assuming they werent induced
+A[is.na(induced), induced:=FALSE]
 
 
 # failed induction
@@ -163,17 +209,31 @@ A[induced==T &
        stringr::str_detect(acsdatatext_1,"falire")|
        stringr::str_detect(acsdatatext_1,"falied")), failed_induction:=TRUE]
 
+# elective cs
+A[,electivecs:=FALSE]
+varsIwant <- names(A)[stringr::str_detect(names(A),"acsdatatext_")]
+
+for(i in varsIwant){
+  
+  A[stringr::str_detect(tolower(get(i)),"elective cs"), electivecs:=TRUE]
+  A[stringr::str_detect(tolower(get(i)),"elective"), electivecs:=TRUE]
+}
+xtabs(~A$electivecs, addNA=T)
+
+
 # analyses we want #
 A[,cs_parity:=parity]
 A[,cs_pres:=pres]
 A[,cs_gestage:=gestage]
 A[,cs_prevcs:=prevcs]
 A[!is.na(acsdatatext_1), cs_multpreg:=FALSE]
-A[multipreg==T,cs_multpreg:=TRUE]
+A[multpreg==T,cs_multpreg:=TRUE]
 
 A[,cs_onset:=as.character()]
-A[,cs_induced:=induced] # prelabour vs at labour induced
-
+A[mode=="Normal",cs_onset:="spontaneous"] 
+A[induced==T, cs_onset:="induced"]
+A[induced %in% c(NA,FALSE) & mode=="CS",cs_onset:="prelabour"] # prelabour vs at labour induced
+xtabs(~A$cs_onset, addNA=T)
 
 A[,cs_csbirth:=FALSE] # id those who are true
 A[mode=="CS",cs_birth:=TRUE]
@@ -190,178 +250,230 @@ A[mode=="CS",cs_birth:=TRUE]
 # birthyear
 
 
-# all data available
-a[,all_cs_data:=FALSE]
-a[!is.na(cs_parity) &
-    !is.na(cs_numfetus) &
-    !is.na(cs_pres) &
-    !is.na(cs_gestage) &
-    !is.na(cs_onset) &
-    !is.na(cs_prevcs),all_cs_data:=TRUE]
 
+# all data available
+A[,cs_data_availability:=0]
+for (i in c("cs_parity",
+            "cs_multpreg",
+            "cs_pres",
+            "cs_gestage",
+            "cs_onset",
+            "cs_prevcs")){
+  
+  
+  A[!is.na(get(i)), cs_data_availability:=cs_data_availability+1]
+  
+}
+xtabs(~A$cs_data_availability, addNA=T)
+
+
+
+
+# cs distribution among hospitals #
+births<- A[birthyear>2017 & ident_avic_abb==T,.("Total Births"=sum(ident_avic_abb==T, na.rm=T),
+              "# CS"=sum(mode=="CS")),
+           keyby=.(hospname)]
+births[,"%":=round(100*`# CS`/`Total Births`, digits=1)]
+
+
+
+birthshospyear<- A[birthyear>2017 & ident_avic_abb==T,.("Total Births"=sum(ident_avic_abb==T, na.rm=T),
+              "# CS"=sum(mode=="CS")),
+           keyby=.(hospname,birthyear)]
+birthshospyear[,"%":=round(100*`# CS`/`Total Births`, digits=1)]
 
 
 # onset of labor: Spontaneous, induced, no labor (pre labour cs)
-
+# what do we do with birthyear before 2017? use amddate_1 if abbbabybirth record is found??
 # missing data
-dataavail <- a[,.(N=.N,
+dataavail <- A[!is.na(abbbabyrecorddatecreation_1),.(N=.N,
                   "Not Missing parity"=sum(!is.na(cs_parity), na.rm=T),
                   "Missing parity"=sum(is.na(cs_parity)),
-                  "Not Missing Fetal Number"=sum(!is.na(cs_numfetus),na.rm=T),
-                  "Missing Fetal Number"=sum(is.na(cs_numfetus)),
-                  "Not Missing "=sum(!is.na(cs_pres),na.rm=T),
+                  "Not Missing Multpreg"=sum(!is.na(cs_multpreg),na.rm=T),
+                  "Missing Multpreg"=sum(is.na(cs_multpreg)),
+                  "Not Missing Presentation"=sum(!is.na(cs_pres),na.rm=T),
                   "Missing Presentation"=sum(is.na(cs_pres)),
-                  "Not Missing Presentation "=sum(!is.na(),na.rm=T),
+                  "Not Missing gestational age"=sum(!is.na(cs_gestage),na.rm=T),
                   "Missing Gestational Age"=sum(is.na(cs_gestage)),
-                  "Not Missing Gestational Age "=sum(!is.na(cs_gestage),na.rm=T),
                   "Missing Onset"=sum(is.na(cs_onset)),
                   "Not Missing Onset "=sum(!is.na(cs_onset),na.rm=T),
                   "Missing Previous CS"=sum(is.na(cs_prevcs)),
                   "Not Missing Previous CS"=sum(!is.na(cs_prevcs),na.rm=T),
                   "Missing Induced"=sum(is.na(cs_induced)),
-                  "Not Missing Induced"=sum(!is.na(cs_induced),na.rm=T),
-                  "All data available"=sum(all_cs_data==T, na.rm=T)),
+                  "Not Missing Induced"=sum(!is.na(cs_induced),na.rm=T)),
                keyby=.(birthyear)]
 
+dataavail[birthyear>2017]
+
+
+A <- A[ident_avic_abb==T]
 # definition of robson groups
-a[,cs_1:=FALSE]
-a[cs_parity=="nulli" &
-    cs_multipreg==FALSE &
+A[,cs_1:=FALSE]
+A[cs_parity=="nulli" &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37 &
     cs_onset=="spontaneous",cs_group_1:=TRUE]
+xtabs(~A$cs_group_1, addNA=T)
 
-
-a[,cs_group_2:=FALSE]
-a[cs_parity=="nulli" &
+A[,cs_group_2:=FALSE]
+A[cs_parity=="nulli" &
     cs_prevcs==T &
-    cs_multipreg==FALSE &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37 &
-    cs_onset=="induced",cs_group_2:=TRUE]
+    cs_onset %in% c("induced","prelabour"),cs_group_2:=TRUE]
+xtabs(~A$cs_group_2, addNA=T)
 
-a[cs_group_2==TRUE,cs_group_2a:=FALSE]
-a[cs_parity=="nulli" &
+A[cs_group_2==TRUE,cs_group_2a:=FALSE]
+A[cs_parity=="nulli" &
     cs_prevcs==T &
-    cs_multipreg==FALSE &
+    cs_multpreg==FALSE &
+    cs_pres=="cephalic" &
+    cs_gestage>=37 &
+    cs_onset=="prelabour" &
+    cs_induced==TRUE,cs_group_2a:=TRUE]
+xtabs(~A$cs_group_2a, addNA=T)
+
+
+A[cs_group_2==TRUE,cs_group_2b:=FALSE]
+A[cs_parity=="nulli" &
+    cs_prevcs==T &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37 &
     cs_onset=="induced" &
-    cs_induced=="labour",cs_group_2a:=TRUE]
+    cs_induced==TRUE,cs_group_2b:=TRUE]
+xtabs(~A$cs_group_2b, addNA=T)
 
-a[cs_group_2==TRUE,cs_group_2b:=FALSE]
-a[cs_parity=="nulli" &
-    cs_prevcs==T &
-    cs_multipreg==FALSE &
-    cs_pres=="cephalic" &
-    cs_gestage>=37 &
-    cs_onset=="induced" &
-    cs_induced=="prelabour",cs_group_2b:=TRUE]
 
-a[,cs_group_3:=FALSE]
-a[cs_parity=="muti" &
+A[,cs_group_3:=FALSE]
+A[cs_parity=="multi" &
     cs_prevcs==F &
-    cs_multipreg==FALSE &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37 &
     cs_onset=="spontaneous",cs_group_3:=TRUE]
+xtabs(~A$cs_group_3, addNA=T)
 
 
-a[,cs_group_4:=FALSE]
-a[cs_parity=="multi" &
+A[,cs_group_4:=FALSE]
+A[cs_parity=="multi" &
     cs_prevcs==T &
-    cs_multipreg==FALSE &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37 &
-    cs_onset=="induced",cs_group_4:=TRUE]
+    cs_onset %in% c("induced","prelabour"),cs_group_4:=TRUE]
+xtabs(~A$cs_group_4, addNA=T)
 
-a[cs_group_4==TRUE,cs_group_4a:=FALSE]
-a[cs_parity=="multi" &
+
+A[cs_group_4==TRUE,cs_group_4a:=FALSE]
+A[cs_parity=="multi" &
     cs_prevcs==T&
-    cs_multipreg==FALSE &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37 &
     cs_onset=="induced" &
-    cs_induced=="labour",cs_group_4a:=TRUE]
+    cs_induced==TRUE,cs_group_4a:=TRUE]
+xtabs(~A$cs_group_4a, addNA=T)
 
-a[cs_group_4==TRUE,cs_group_4b:=FALSE]
-a[cs_parity=="multi" &
+
+A[cs_group_4==TRUE,cs_group_4b:=FALSE]
+A[cs_parity=="multi" &
     cs_prevcs==T &
-    cs_multipreg==FALSE &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37 &
-    cs_onset=="induced" &
-    cs_induced=="prelabour",cs_group_4b:=TRUE]
+    cs_onset=="prelabour" &
+    cs_induced==TRUE,cs_group_4b:=TRUE]
+xtabs(~A$cs_group_4b, addNA=T)
 
 
-a[,cs_group_5:=FALSE]
-a[cs_parity=="multi" &
+A[,cs_group_5:=FALSE]
+A[cs_parity=="multi" &
     cs_prevcs==T &
-    cs_multipreg==FALSE &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37,cs_group_5:=TRUE]
+xtabs(~A$cs_group_5, addNA=T)
 
-a[cs_group_5==TRUE, cs_parity=="multi" &
+
+A[cs_group_5==TRUE,cs_group_5a:=FALSE]
+A[cs_parity=="multi" &
     cs_prevcs==T &
-    cs_multipreg==FALSE &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37,cs_group_5a:=TRUE]
+xtabs(~A$cs_group_5a, addNA=T)
 
-a[cs_group_5==TRUE, cs_parity=="multi" &
+A[cs_group_5==TRUE, cs_group_5b:=FALSE]
+A[cs_parity=="multi" &
     cs_prevcs==T &
-    cs_multipreg==FALSE &
+    cs_multpreg==FALSE &
     cs_pres=="cephalic" &
     cs_gestage>=37,cs_group_5b:=TRUE]
+xtabs(~A$cs_group_5b, addNA=T)
 
-a[,cs_group_6:=FALSE]
-a[cs_parity=="nulli" &
-    cs_multipreg==FALSE &
+A[,cs_group_6:=FALSE]
+A[cs_parity=="nulli" &
+    cs_multpreg==FALSE &
     cs_pres=="breech",cs_group_6:=TRUE]
+xtabs(~A$cs_group_6, addNA=T)
 
-a[,cs_group_7:=FALSE]
-a[cs_parity=="multi" &
-    cs_multipreg==FALSE &
-    cs_pres=="breech",cs_group_6:=TRUE]
+A[,cs_group_7:=FALSE]
+A[cs_parity=="multi" &
+    cs_multpreg==FALSE &
+    cs_pres=="breech",cs_group_7:=TRUE]
+xtabs(~A$cs_group_7, addNA=T)
 
-a[,cs_group_8:=FALSE]
-a[cs_numfetus>1,cs_group_8:=TRUE]
 
-a[,cs_group_9:=FALSE]
-a[cs_multipreg==FALSE &
+
+A[,cs_group_8:=FALSE]
+A[cs_multpreg==T,cs_group_8:=TRUE]
+xtabs(~A$cs_group_8, addNA=T)
+
+
+A[,cs_group_9:=FALSE]
+A[cs_multpreg==FALSE &
     cs_pres %in% c("transverse","oblique"),cs_group_9:=TRUE]
+xtabs(~A$cs_group_9, addNA=T)
 
-a[,cs_group_10:=FALSE]
-a[cs_multipreg==FALSE &
+
+A[,cs_group_10:=FALSE]
+A[cs_multpreg==FALSE &
     cs_gestage < 37 &
     cs_pres=="cephalic",cs_group_10:=TRUE]
+xtabs(~A$cs_group_10, addNA=T)
 
-a[,cs_group:=as.character(NA)]
-a[cs_group_1==TRUE,cs_group:="1"]
-a[cs_group_2==TRUE,cs_group:="2"]
-a[cs_group_2a==TRUE,cs_group:="2a"]
-a[cs_group_2b==TRUE,cs_group:="2b"]
-a[cs_group_3==TRUE,cs_group:="3"]
-a[cs_group_4==TRUE,cs_group:="4"]
-a[cs_group_4a==TRUE,cs_group:="4a"]
-a[cs_group_4b==TRUE,cs_group:="4b"]
-a[cs_group_5==TRUE,cs_group:="5"]
-a[cs_group_5a==TRUE,cs_group:="5a"]
-a[cs_group_5b==TRUE,cs_group:="5b"]
+A[,cs_group:=as.character(NA)]
+A[cs_group_1==TRUE,cs_group:="1"]
+A[cs_group_2==TRUE,cs_group:="2"]
+A[cs_group_2a==TRUE,cs_group:="2a"]
+A[cs_group_2b==TRUE,cs_group:="2b"]
+A[cs_group_3==TRUE,cs_group:="3"]
+A[cs_group_4==TRUE,cs_group:="4"]
+A[cs_group_4a==TRUE,cs_group:="4a"]
+A[cs_group_4b==TRUE,cs_group:="4b"]
+A[cs_group_5==TRUE,cs_group:="5"]
+A[cs_group_5a==TRUE,cs_group:="5a"]
+A[cs_group_5b==TRUE,cs_group:="5b"]
 
-a[cs_group_6==TRUE,cs_group:="6"]
-a[cs_group_7==TRUE,cs_group:="7"]
-a[cs_group_8==TRUE,cs_group:="8"]
-a[cs_group_9==TRUE,cs_group:="9"]
-a[cs_group_10==TRUE,cs_group:="10"]
+A[cs_group_6==TRUE,cs_group:="6"]
+A[cs_group_7==TRUE,cs_group:="7"]
+A[cs_group_8==TRUE,cs_group:="8"]
+A[cs_group_9==TRUE,cs_group:="9"]
+A[cs_group_10==TRUE,cs_group:="10"]
 
 
 # data elements
 
-adq <- a[,.("denom"=nrow(ident_avic==T, na.rm=T),
-            "Matched"=nrow(ident_avic==T & ident_mch==T, na.rm=T),
+adq <- A[,.("denom"=.N,
+            #"Matched"=nrow(ident_avic_abb==T & ident_mch==T, na.rm=T),
+            "Num births"=sum(ident_avic_abb==T, na.rm=T),
+            "Num cs"=sum(mode=="CS", na.rm=T),
             "parity"=sum(!is.na(cs_parity)),
             "prevcs"=sum(!is.na(cs_prevcs)),
-            "numfet"=sum(!is.na(cs_numfetus)),
+            "numfet"=sum(!is.na(cs_multpreg)),
             "presentation"=sum(!is.na(cs_pres)),
             "gestage"=sum(!is.na(cs_gestage)),
             "onset"=sum(!is.na(cs_onset))),
@@ -377,20 +489,20 @@ adq[,"% onset":= round(100*onset/denom, digits=1)]
 # total number of births 
 
 # report table #
-reporttab <- a[!is.na(cs_group),
+reporttab <- A[!is.na(cs_group),
                .(N=.N,
                  "CS"=sum(mode=="CS",na.rm=T),
                  "# births"=sum(birth==TRUE, na.rm=T)),
                keyby=.(cs_group)]
 
-reporttabyear <- a[!is.na(cs_group),
+reporttabyear <- A[!is.na(cs_group),
                    .(N=.N,
                      "CS"=sum(mode=="CS",na.rm=T),
                      "# births"=sum(birth==TRUE, na.rm=T)),
                    keyby=.(birthyear,
                            cs_group)]
 
-reporttabyearhosp <- a[!is.na(cs_group),
+reporttabyearhosp <- A[!is.na(cs_group),
                        .(N=.N,
                          "CS"=sum(mode=="CS",na.rm=T),
                          "# births"=sum(birth==TRUE, na.rm=T)),
@@ -399,13 +511,13 @@ reporttabyearhosp <- a[!is.na(cs_group),
                                cs_group)]
 
 # report table 1 (manual)
-tab_1 <- a[!is.na(cs_group),.(
+tab_1 <- A[!is.na(cs_group),.(
    
   "N CS in group"=sum(cs_birth==TRUE, na.rm==T),
   "Total N in group"=.N),
 keyby=.(cs_group)]
 
-total <- a[!is.na(cs_group),.(
+total <- A[!is.na(cs_group),.(
   
   "N CS in group"=sum(cs_birth==TRUE, na.rm==T),
   "Total N in group"=.N)]
@@ -453,24 +565,28 @@ tab_1agg[,c(cs_denom, denom):=NULL]
 # merged data #
 ########################
 
+nrow(a)
+nrow(A)
+
+a[ident_avic_abb.x==T | ident_avic_abb.y==T, ident_avic_abb:=T]
 # tables #
 
-tabone <- a[,.("# total births"=nrow(ident_avic==T, na.rm=T),
-               "# live births"=sum(ident_avic==T &
+tabmergeddata <- a[,.("# total births"=nrow(ident_avic_abb==T),
+               "# live births"=sum(ident_avic_abb==T &
                                      birthoutcome=="alive",na.rm=T),
                "# MCH eReg"=sum(ident_mch==T, na.rm=T),
-               "# births mch data"=sum(ident_avic==T & ident_mch==T, na.rm=T),
+               "# births mch data"=sum(ident_avic_abb==T & ident_mch==T, na.rm=T),
                "# births mch data and all cs data"=sum(all_cs_data==T &
-                                                         ident_avic==T & 
+                                                         ident_avic_abb==T & 
                                                          ident_mch==T, na.rm=T),
-               "# births with ANC data"=sum(ident_avic & 
+               "# births with ANC data"=sum(ident_avic_abb & 
                                               ident_dhis2_booking==T, na.rm=T),
-               "# births with ANC data and all RGC data"=sum(ident_avic & 
+               "# births with ANC data and all RGC data"=sum(ident_avic_abb & 
                                                                ident_dhis2_booking==T &
                                                                all_cs_data==T, na.rm=T),
                
                "# births with PPC data"=sum(all_cs_data==T & ident_dhis2_ppc==T,na.rm=T),
-               "# births with PPC data and RGC data"=sum(ident_avic & 
+               "# births with PPC data and RGC data"=sum(ident_avic_abb & 
                                                            ident_dhis2_ppc==T &
                                                            all_cs_data==T, na.rm=T)),
             keyby=.(birthyear)]
@@ -482,10 +598,40 @@ tabone <- a[,.("# total births"=nrow(ident_avic==T, na.rm=T),
 # demographics #
 
 ###########################
+# merge data #
+###########################
+
+avimch <- merge(A,
+           mch,
+           by=c("motheridno","amddate_1","abbbabybirthdate_1"),
+           all.x=T)
+
+nrow(avimch)
+nrow(A)
+nrow(avi)
+xtabs(~avimch$ident_mch)
+
+
+
+
+#saveRDS(A,  file = "cs_avi_data.RDS")
+#saveRDS(mch,  file = "cs_mch_data.RDS")
+
+
+
+#openxlsx::write.xlsx(A,file.path(FOLDER_DATA_CLEAN,
+#                               "cs_avi_data.xlsx"))
+
+#openxlsx::write.xlsx(mch,
+ #                    file.path(FOLDER_DATA_CLEAN,
+    #                           "cs_mch_data.xlsx"))
+
+
+###########################
 # background and history #
 ###########################
 
-tab <- ar[ident_avic==T & ident_mch==T,
+tab <- avimch[ident_avic_any==T & ident_mch==T,
           .(N=.N,
             "Mean Income"=mean(income, na.rm=T),
             "Mean Average Monthly Income"= mean(avgincome, na.rm=T),
@@ -523,7 +669,7 @@ tab <- ar[ident_avic==T & ident_mch==T,
 
 # mch ereg birthoutcome replace "bo" with the var
 # consistency tables #
-consisttab <- a[ident_avic==T &
+consisttab <- A[ident_avic==T &
                   ident_mch==T,.("# matched"=.N,
                                  "Not missing Birthoutcome"=sum(!is.na(bo,na.rm=T)),
                                  "CS in avicenna"=sum(mode=="CS",na.rm=T),
@@ -545,7 +691,10 @@ consisttab <- a[ident_avic==T &
 
 
 
+# distribution of births and cs
 
+
+# reason for CS on the mch ereg
 
 
 

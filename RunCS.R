@@ -98,12 +98,26 @@ mch[ident_mch==T]
 ########################
 # merge mch & avicenna #
 ########################
+# vars we want
+bookvars <- names(mch)[stringr::str_detect(names(mch),"^book")]
+anvars <- names(mch)[stringr::str_detect(names(mch),"^an")]
+labvars <- names(mch)[stringr::str_detect(names(mch),"^lab")]
+riskvars <- names(mch)[stringr::str_detect(names(mch),"^risk")]
+manvars <- names(mch)[stringr::str_detect(names(mch),"^man")]
+ppcvars <- names(mch)[stringr::str_detect(names(mch),"^ppc")]
+cpo <- names(mch)[stringr::str_detect(names(mch),"^cpo")]
+nbc <- names(mch)[stringr::str_detect(names(mch),"^nbc")]
+identvars <-names(mch)[stringr::str_detect(names(mch),"^ident")]     
 
-a <- merge(A,
-           mch,
-           by=c("idno","abbbabybirthdate_1"),
-           all.x=TRUE)
-nrow(a)
+
+mch[,ident_mch:=T]
+
+mch <- mch[,c(bookvars,
+              anvars,
+              ppcvars,
+              cpovars,
+              identvars), with=F]
+
 
 ########################
 
