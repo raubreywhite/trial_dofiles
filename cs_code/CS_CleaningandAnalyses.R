@@ -27,6 +27,8 @@ nrow(A[is.na(abbbabybirthresult_1) & is.na(abbbabybirthresult_2) & is.na(abbbaby
 
 # gestage
 A[,gestage:=as.numeric(abbbabypregnancynoofweeks_1)]
+A[is.na(abbbabypregnancynoofweeks_1) & !is.na(abbbabypregnancynoofweeks_2), 
+              gestage:=as.numeric(abbbabypregnancynoofweeks_2)]
 
 # birth date
 A[,birthdate:=substr(abbbabybirthdate_1 , start = 1 , stop = 9 )]
@@ -240,73 +242,6 @@ A[mode=="CS",cs_birth:=TRUE]
 
 
 
-# define variables #
-# define a birth/delivery
-# parity nulli=0, multipara >=1
-# previous cs none, atleast one
-# singleton or multiple, refers to current preg
-# presentation Cephalic, breech, transverse
-# gest age <37, 37>=
-# birthyear
-
-
-
-# all data available
-A[,cs_data_availability:=0]
-for (i in c("cs_parity",
-            "cs_multpreg",
-            "cs_pres",
-            "cs_gestage",
-            "cs_onset",
-            "cs_prevcs")){
-  
-  
-  A[!is.na(get(i)), cs_data_availability:=cs_data_availability+1]
-  
-}
-xtabs(~A$cs_data_availability, addNA=T)
-
-
-
-
-# cs distribution among hospitals #
-births<- A[birthyear>2017 & ident_avic_abb==T,.("Total Births"=sum(ident_avic_abb==T, na.rm=T),
-              "# CS"=sum(mode=="CS")),
-           keyby=.(hospname)]
-births[,"%":=round(100*`# CS`/`Total Births`, digits=1)]
-
-
-
-birthshospyear<- A[birthyear>2017 & ident_avic_abb==T,.("Total Births"=sum(ident_avic_abb==T, na.rm=T),
-              "# CS"=sum(mode=="CS")),
-           keyby=.(hospname,birthyear)]
-birthshospyear[,"%":=round(100*`# CS`/`Total Births`, digits=1)]
-
-
-# onset of labor: Spontaneous, induced, no labor (pre labour cs)
-# what do we do with birthyear before 2017? use amddate_1 if abbbabybirth record is found??
-# missing data
-dataavail <- A[!is.na(abbbabyrecorddatecreation_1),.(N=.N,
-                  "Not Missing parity"=sum(!is.na(cs_parity), na.rm=T),
-                  "Missing parity"=sum(is.na(cs_parity)),
-                  "Not Missing Multpreg"=sum(!is.na(cs_multpreg),na.rm=T),
-                  "Missing Multpreg"=sum(is.na(cs_multpreg)),
-                  "Not Missing Presentation"=sum(!is.na(cs_pres),na.rm=T),
-                  "Missing Presentation"=sum(is.na(cs_pres)),
-                  "Not Missing gestational age"=sum(!is.na(cs_gestage),na.rm=T),
-                  "Missing Gestational Age"=sum(is.na(cs_gestage)),
-                  "Missing Onset"=sum(is.na(cs_onset)),
-                  "Not Missing Onset "=sum(!is.na(cs_onset),na.rm=T),
-                  "Missing Previous CS"=sum(is.na(cs_prevcs)),
-                  "Not Missing Previous CS"=sum(!is.na(cs_prevcs),na.rm=T),
-                  "Missing Induced"=sum(is.na(cs_induced)),
-                  "Not Missing Induced"=sum(!is.na(cs_induced),na.rm=T)),
-               keyby=.(birthyear)]
-
-dataavail[birthyear>2017]
-
-
-A <- A[ident_avic_abb==T]
 # definition of robson groups
 A[,cs_1:=FALSE]
 A[cs_parity=="nulli" &
@@ -512,10 +447,10 @@ reporttabyearhosp <- A[!is.na(cs_group),
 
 # report table 1 (manual)
 tab_1 <- A[!is.na(cs_group),.(
-   
+  
   "N CS in group"=sum(cs_birth==TRUE, na.rm==T),
   "Total N in group"=.N),
-keyby=.(cs_group)]
+  keyby=.(cs_group)]
 
 total <- A[!is.na(cs_group),.(
   
@@ -561,14 +496,208 @@ tab_1agg[,c(cs_denom, denom):=NULL]
 ### match with mch data for other outcomes ####
 # ident_mch var for anyone matchin ppc or anc
 
-########################
-# merged data #
-########################
+# define variables #
+# define a birth/delivery
+# parity nulli=0, multipara >=1
+# previous cs none, atleast one
+# singleton or multiple, refers to current preg
+# presentation Cephalic, breech, transverse
+# gest age <37, 37>=
+# birthyear
 
-nrow(a)
+
+################################
+# merge mch data #
+################################
+
+
+avimch <- merge(a,
+                mch,
+                by=c("motheridno","amddate_1","abbbabybirthdate_1"),
+                all.x=T)
+
+nrow(avimch)
 nrow(A)
+nrow(a)
+nrow(avi)
+nrow(mch)
+xtabs(~avimch$ident_mch)
 
-a[ident_avic_abb.x==T | ident_avic_abb.y==T, ident_avic_abb:=T]
+
+
+################################
+#  hospital dE #
+################################
+
+# all data available
+avimch[,cs_data_availability:=0]
+for (i in c("cs_parity",
+            "cs_multpreg",
+            "cs_pres",
+            "cs_gestage",
+            "cs_onset",
+            "cs_prevcs")){
+  
+  
+  avimch[!is.na(get(i)), cs_data_availability:=cs_data_availability+1]
+  
+}
+xtabs(~avimch$cs_data_availability, addNA=T)
+
+
+# distributions and propotions \
+
+freqtab <- avimch[ident_avic_abb==T,c("birthyear",
+                    "hospname",
+                    "cs_parity",
+                    "cs_multpreg",
+                    "cs_pres",
+                    "cs_gestage",
+                    "cs_onset",
+                    "cs_prevcs")]
+
+freqtab <- melth.data.table(freqtab,
+                            id.vars="birthyear")
+
+# overall freq tab
+freqtaboverall <- freqtab[,.(Missing=sum(is.na(var)),
+                          "Not Missing"=sum(!is.na(var, na/rm=T)),
+                          "True"=sum(var==TRUE, na.rm=T),
+                          "False"=sum(var==F, na.rm=T)), keyby=c(var)]
+
+freqtaboverall[,"% True":=round(100*`True/`Not Missing`, digits=1)]
+freqtaboverall[,"% False":=round(100*`False`/Not Missing`, digits=1)]
+freqtaboverall[,"% Missing":=round(100*`Missing`/`Not Missing`, digits=1)]
+
+
+
+
+# freq tab birthyear
+freqtabyear <- freqtab[,.(Missing=sum(is.na(var)),
+           "Not Missing"=sum(!is.na(var, na/rm=T)),
+           "True"=sum(var==TRUE, na.rm=T),
+           "False"=sum(var==F, na.rm=T)), keyby=c(birthyear,var)]
+
+freqtabyear[,"% True":=round(100*`True/`Not Missing`, digits=1)]
+freqtabyear[,"% False":=round(100*`False`/Not Missing`, digits=1)]
+freqtabyear[,"% Missing":=round(100*`Missing`/`Not Missing`, digits=1)]
+
+
+# freq tab hosp
+freqtabhosp <- freqtab[,.(Missing=sum(is.na(var)),
+           "Not Missing"=sum(!is.na(var, na/rm=T)),
+           "True"=sum(var==TRUE, na.rm=T),
+           "False"=sum(var==F, na.rm=T)), keyby=c(hospname,var)]
+
+freqtabhosp[,"% True":=round(100*`True/`Not Missing`, digits=1)]
+freqtabhosp[,"% False":=round(100*`False`/Not Missing`, digits=1)]
+freqtabhosp[,"% Missing":=round(100*`Missing`/`Not Missing`, digits=1)]
+
+
+# freq tab year hosp
+freqtabhospyear <- freqtab[,.(Missing=sum(is.na(var)),
+                          "Not Missing"=sum(!is.na(var, na/rm=T)),
+                          "True"=sum(var==TRUE, na.rm=T),
+                          "False"=sum(var==F, na.rm=T)), keyby=c(birthyear, hospname,var)]
+
+freqtabhospyear[,"% True":=round(100*`True/`Not Missing`, digits=1)]
+freqtabhospyear[,"% False":=round(100*`False`/Not Missing`, digits=1)]
+freqtabhospyear[,"% Missing":=round(100*`Missing`/`Not Missing`, digits=1)]
+
+
+
+
+################################
+#  birth distributions #
+################################
+# cs distribution among hospitals #
+
+
+# clean birth year?
+# per hosp
+births<- avimch[ident_avic_abb==T & birthyear>2017 & ident_avic_abb==T,
+           .("Total Births"=sum(ident_avic_abb==T, na.rm=T),
+              "# CS"=sum(mode=="CS")),
+           keyby=.(hospname)]
+
+births[,"%":=round(100*`# CS`/`Total Births`, digits=1)]
+
+
+# per hosp per year
+
+ #check to add ident_avic_abb data
+birthshospyear<- A[birthyear>2017 & ident_avic_abb==T,
+                   .("Total Births"=sum(ident_avic_abb==T, na.rm=T),
+              "# CS"=sum(mode=="CS")),
+           keyby=.(hospname,birthyear)]
+
+birthshospyear[,"%":=round(100*`# CS`/`Total Births`, digits=1)]
+
+# per year
+birthshospyear<- A[birthyear>2017 & ident_avic_abb==T,
+                   .("Total Births"=sum(ident_avic_abb==T , na.rm=T),
+                     "# CS"=sum(mode=="CS")),
+                   keyby=.(birthyear)]
+
+birthshospyear[,"%":=round(100*`# CS`/`Total Births`, digits=1)]
+
+
+
+
+# onset of labor: Spontaneous, induced, no labor (pre labour cs)
+# what do we do with birthyear before 2017? use amddate_1 if abbbabybirth record is found??
+# missing data
+dataavail <- A[!is.na(abbbabyrecorddatecreation_1),.(N=.N,
+                  "Not Missing mode of delivery"=sum(!is.na(cs_mode, na.rm=T)),
+                  "Missing mode of delivery"=sum(is.na(cs_mode)),
+                  "Not Missing parity"=sum(!is.na(cs_parity), na.rm=T),
+                  "Missing parity"=sum(is.na(cs_parity)),
+                  "Not Missing Multpreg"=sum(!is.na(cs_multpreg),na.rm=T),
+                  "Missing Multpreg"=sum(is.na(cs_multpreg)),
+                  "Not Missing Presentation"=sum(!is.na(cs_pres),na.rm=T),
+                  "Missing Presentation"=sum(is.na(cs_pres)),
+                  "Not Missing gestational age"=sum(!is.na(cs_gestage),na.rm=T),
+                  "Missing Gestational Age"=sum(is.na(cs_gestage)),
+                  "Missing Onset"=sum(is.na(cs_onset)),
+                  "Not Missing Onset "=sum(!is.na(cs_onset),na.rm=T),
+                  "Missing Previous CS"=sum(is.na(cs_prevcs)),
+                  "Not Missing Previous CS"=sum(!is.na(cs_prevcs),na.rm=T),
+                  "Missing Induced"=sum(is.na(cs_induced)),
+                  "Not Missing Induced"=sum(!is.na(cs_induced),na.rm=T)),
+               keyby=.(birthyear)]
+
+dataavail[birthyear>2017]
+
+
+
+
+
+
+
+
+
+
+
+
+
+########################
+# data avail mch #
+########################
+# tab 1 # 
+
+
+datavail <- avimch[,.("# births"=sum(ident_avic_abb==T, na.rm=T),
+                      "# matched"=sum(ident_mch==T, na.rm=T),
+                      "nullipara"=sum(cs_para=="", na.rm=T),
+                      "multipara"=sum(cs_para=="", na.rm=T),
+                      "has prevcs"=sum(cs_prevcs==T, na.rm=T),
+                      "has gestage"=sum(gestage>0, na.rm=T),
+                      "has pres"=sum(!is.na(cs_pres, na.rm=T)),
+                      "has onset"=sum(!is.na(cs_onset, na.rm=T))),
+                   keyby=c(birthyear,
+                           ident_mch)]
+
+avimch[ident_avic_abb==T]
 # tables #
 
 tabmergeddata <- a[,.("# total births"=nrow(ident_avic_abb==T),
@@ -597,34 +726,7 @@ tabmergeddata <- a[,.("# total births"=nrow(ident_avic_abb==T),
 
 # demographics #
 
-###########################
-# merge data #
-###########################
 
-avimch <- merge(A,
-           mch,
-           by=c("motheridno","amddate_1","abbbabybirthdate_1"),
-           all.x=T)
-
-nrow(avimch)
-nrow(A)
-nrow(avi)
-xtabs(~avimch$ident_mch)
-
-
-
-
-#saveRDS(A,  file = "cs_avi_data.RDS")
-#saveRDS(mch,  file = "cs_mch_data.RDS")
-
-
-
-#openxlsx::write.xlsx(A,file.path(FOLDER_DATA_CLEAN,
-#                               "cs_avi_data.xlsx"))
-
-#openxlsx::write.xlsx(mch,
- #                    file.path(FOLDER_DATA_CLEAN,
-    #                           "cs_mch_data.xlsx"))
 
 
 ###########################

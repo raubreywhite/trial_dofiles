@@ -82,6 +82,13 @@ avi[motheridno %in% c(401403936,
 
 nrow(avi[is.na(abbbabybirthresult_1)])
 
+
+saveRDS(avi, file.path(FOLDER_DATA_CLEAN,
+                       "avi_data_for_cs.RDS"))
+
+avi <- readRDS(file.path(FOLDER_DATA_CLEAN,"avi_data_for_cs.RDS"))
+
+
 # problems
 # lab (b) is missing an id number
 # set up is incorrect, problem when read files from the cs folder
@@ -95,28 +102,44 @@ mch <- CleanAllDataforCSStudy(includePPC=T, IS_GAZA=FALSE)
 
 mch[ident_mch==T]
 
+saveRDS(mch, file.path(FOLDER_DATA_CLEAN,
+                       "mch_data_for_cs.RDS"))
+
 ########################
 # merge mch & avicenna #
 ########################
 # vars we want
 bookvars <- names(mch)[stringr::str_detect(names(mch),"^book")]
 anvars <- names(mch)[stringr::str_detect(names(mch),"^an")]
-labvars <- names(mch)[stringr::str_detect(names(mch),"^lab")]
+#labvars <- names(mch)[stringr::str_detect(names(mch),"^lab")]
 riskvars <- names(mch)[stringr::str_detect(names(mch),"^risk")]
 manvars <- names(mch)[stringr::str_detect(names(mch),"^man")]
 ppcvars <- names(mch)[stringr::str_detect(names(mch),"^ppc")]
 cpo <- names(mch)[stringr::str_detect(names(mch),"^cpo")]
 nbc <- names(mch)[stringr::str_detect(names(mch),"^nbc")]
-identvars <-names(mch)[stringr::str_detect(names(mch),"^ident")]     
-
+identvars <-names(mch)[stringr::str_detect(names(mch),"^ident_dhis2")]     
 
 mch[,ident_mch:=T]
 
-mch <- mch[,c(bookvars,
+# keep everyone to compare
+mch <- mch[,c("motheridno",
+              "amddate_1",
+             "abbbabybirthdate_1",
+              bookvars,
               anvars,
               ppcvars,
-              cpovars,
-              identvars), with=F]
+              cpovars), with=F]
+
+
+saveRDS(object=mch,
+        file.path(FOLDER_DATA_CLEAN,
+                  "mch_data_for_cs_shortened.rds"))
+
+
+mch <- readRDS(file.path(FOLDER_DATA_CLEAN,"mch_data_for_cs.rds"))
+
+
+
 
 
 ########################
